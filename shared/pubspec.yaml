@@ -1,0 +1,16 @@
+name: shared
+description: Shared Component with Code for both Server and App
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=2.18.6 <3.0.0'
+
+
+dependencies:
+  equatable: ^2.0.5 # comparing objects
+
+dev_dependencies:
+  flutter_lints: ^2.0.1  # linter rules
+  test: ^1.16.0 # dart test package

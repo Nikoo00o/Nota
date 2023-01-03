@@ -1,0 +1,16 @@
+name: server
+description: The Server part of Nota
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=2.18.6 <3.0.0'
+
+dependencies:
+  shared: # shared code
+    path: ../shared
+
+dev_dependencies:
+  flutter_lints: ^2.0.1 # linter rules
+  test: ^1.16.0 # dart test package
