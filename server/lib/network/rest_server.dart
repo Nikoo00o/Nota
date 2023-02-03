@@ -109,13 +109,15 @@ class RestServer {
 
   Future<RestCallbackResult> _handleCallback(HttpRequest request, String fullApiPath, Map<String, String> queryParams,
       Map<String, dynamic>? jsonBody, String clientIp) async {
-    final Iterable<RestCallback> iterator =
-        _restCallbacks.where((RestCallback element) => fullApiPath.endsWith(element.endpoint.apiPath));
-    if (iterator.isNotEmpty) {
-      assert(iterator.length == 1, "Error, two Endpoints got matched for a request ${request.requestedUri}");
+    final Iterable<RestCallback> matchingRestCallbackIt = _restCallbacks.where((RestCallback element) =>
+        fullApiPath.endsWith(element.endpoint.apiPath) &&
+        HttpMethod.fromString(request.method) == element.endpoint.httpMethod);
+
+    if (matchingRestCallbackIt.isNotEmpty) {
+      assert(matchingRestCallbackIt.length == 1, "Error, two Endpoints got matched for a request ${request.requestedUri}");
       Account? authenticatedAccount;
 
-      if (iterator.first.endpoint.needsSessionToken) {
+      if (matchingRestCallbackIt.first.endpoint.needsSessionToken) {
         final String sessionToken = queryParams[RestJsonParameter.SESSION_TOKEN] ?? "";
         authenticatedAccount = await _authenticationCallback?.call(sessionToken);
         if (authenticatedAccount == null) {
@@ -125,7 +127,7 @@ class RestServer {
         }
       }
 
-      return iterator.first.callback.call(RestCallbackParams(
+      return matchingRestCallbackIt.first.callback.call(RestCallbackParams(
         httpMethod: HttpMethod.fromString(request.method),
         queryParams: queryParams,
         data: jsonBody,

@@ -25,6 +25,8 @@ class Endpoint {
   });
 
   /// Returns the base api path combined with the api path of the endpoint
+  ///
+  /// [baseApiPath] should be [SharedConfig.getServerUrl]
   String getFullApiPath(String baseApiPath) {
     if (baseApiPath.endsWith(apiPath)) {
       return baseApiPath;
@@ -52,18 +54,23 @@ class Endpoint {
 ///
 /// Important: the api Path must a valid url encoded path that will be added to the base server url!
 class Endpoints {
+  /// Example Endpoint which can also be used inside of a web browser for information about this server
+  static const Endpoint ABOUT = Endpoint(
+    apiPath: "/api/about",
+    httpMethod: HttpMethod.GET,
+  );
   static const Endpoint ACCOUNT_CREATE = Endpoint(
-    apiPath: "/account/create",
+    apiPath: "/api/account/create",
     httpMethod: HttpMethod.POST,
   );
 
   static const Endpoint ACCOUNT_LOGIN = Endpoint(
-    apiPath: "/account/login",
+    apiPath: "/api/account/login",
     httpMethod: HttpMethod.POST,
   );
 
   static const Endpoint ACCOUNT_CHANGE_PASSWORD = Endpoint(
-    apiPath: "/account/change",
+    apiPath: "/api/account/change",
     httpMethod: HttpMethod.POST,
     needsSessionToken: true,
   );

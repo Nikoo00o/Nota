@@ -1,5 +1,5 @@
 import 'package:server/config/server_config.dart';
-import 'package:server/network/nota_server.dart';
+import 'package:server/data/repositories/server_repository.dart';
 import 'package:server/network/rest_server.dart';
 import 'package:shared/core/network/endpoints.dart';
 import 'package:shared/core/network/rest_client.dart';
@@ -11,7 +11,7 @@ import 'mocks/server_session_service_mock.dart';
 void main() {
   late ServerConfig serverConfig;
   late RestServer restServer;
-  late NotaServer notaServer;
+  late ServerRepository notaServer;
   late ServerSessionServiceMock serverSessionServiceMock;
   late RestClient restClient;
   Logger.initLogger(Logger());
@@ -19,7 +19,7 @@ void main() {
   setUp(() {
     serverConfig = ServerConfig();
     restServer = RestServer();
-    notaServer = NotaServer(restServer: restServer, serverConfig: serverConfig);
+    notaServer = ServerRepository(restServer: restServer, serverConfig: serverConfig);
     serverSessionServiceMock = ServerSessionServiceMock();
     restClient = RestClient(config: serverConfig, sessionService: serverSessionServiceMock);
   });

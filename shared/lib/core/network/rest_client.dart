@@ -10,14 +10,14 @@ import 'package:shared/core/network/error_codes.dart';
 import 'package:shared/core/network/http_method.dart';
 import 'package:shared/core/network/rest_json_parameter.dart';
 import 'package:shared/core/utils/logger/logger.dart';
-import 'package:shared/services/abstract_session_service.dart';
+import 'package:shared/services/shared_session_service.dart';
 
 /// Wrapper around a http client to connect to the REST API web server.
 ///
 /// Will retrieve the server url from the [config] and the session token from the [sessionService]
 class RestClient {
   final SharedConfig config;
-  final AbstractSessionService sessionService;
+  final SharedSessionService sessionService;
   late final IOClient client;
 
   /// successful http responses
