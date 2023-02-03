@@ -11,6 +11,9 @@ dependencies:
   shared: # shared code
     path: ../shared
 
+  get_it: ^7.2.0 # service locator
+  args: ^2.3.2 # command line arguments
+
 dev_dependencies:
   flutter_lints: ^2.0.1 # linter rules
   test: ^1.16.0 # dart test package

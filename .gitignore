@@ -1,3 +1,7 @@
+# Sensitive Data Files
+shared/lib/core/config/sensitive_data.dart
+server/lib/config/sensitive_data.dart
+
 # Miscellaneous
 *.class
 *.log

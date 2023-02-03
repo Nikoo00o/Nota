@@ -1,0 +1,6 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Create New Keys" type="DartCommandLineRunConfigurationType" factoryName="Dart Command Line Application">
+    <option name="filePath" value="$PROJECT_DIR$/shared/lib/keygen/file_key_gen.dart" />
+    <method v="2" />
+  </configuration>
+</component>
