@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
 Future<void> main(List<String> arguments) async {
+  WidgetsFlutterBinding.ensureInitialized();
   Logger.initLogger(AppLogger());
   await initializeGetIt();
   runApp(

@@ -49,7 +49,7 @@ class ServerRepository {
 
   Future<Account?> _sessionTokenAuthentication(String sessionToken) async {
     if (sessionToken.isNotEmpty) {
-      return Account(userName: "test", passwordHash: "test");
+      return Account(userName: "test", passwordHash: "test", sessionToken: null);
     }
     return null;
     // todo: here check and remove session token if no longer valid. in the callbacks only use the session token to access
