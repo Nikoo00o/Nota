@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:server/config/server_config.dart';
 import 'package:server/data/repositories/account_repository.dart';
@@ -19,7 +20,9 @@ class ServerRepository {
 
   /// runs the nota server and will not return if [autoRestart] is set to true!
   /// Otherwise it returns if the server was started!
-  /// Will also add the callbacks for the clients http requests
+  /// Will also add the callbacks for the clients http requests.
+  ///
+  /// Also starts a periodic timer which calls [accountRepository.clearOldSessions].
   Future<bool> runNota({String? rsaPassword, required bool autoRestart}) async {
     await _addCallbacks();
 
@@ -30,10 +33,17 @@ class ServerRepository {
       port: serverConfig.serverPort,
       authenticationCallback: accountRepository.getAccountBySessionToken,
     );
+
     if (serverStarted) {
       Logger.debug("Clients should be able to connect to ${Endpoints.ABOUT.getFullApiPath(serverConfig.getServerUrl())}");
     }
+
+    Timer.periodic(serverConfig.clearOldSessionsAfter, (Timer timer) {
+      accountRepository.clearOldSessions();
+    });
+
     if (serverStarted && autoRestart) {
+      // will not return
       await restServer.restartAfterDone(
         certificateFilePath: serverConfig.certificatePath,
         privateKeyFilePath: serverConfig.privateKeyPath,

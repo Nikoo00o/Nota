@@ -87,4 +87,10 @@ class AccountRepository {
   Future<void> resetAllSessionTokens() async {
     return _lock.synchronized(accountDataSource.resetAllSessionTokens);
   }
+
+  /// Removes the cached accounts which no longer have a valid session token and also update THOSE accounts in the local
+  /// storage
+  Future<void> clearOldSessions() async {
+    return _lock.synchronized(accountDataSource.clearOldSessions);
+  }
 }

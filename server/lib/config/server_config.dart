@@ -30,4 +30,8 @@ class ServerConfig extends SharedConfig {
   @override
   Duration get sessionTokenRefreshAfterRemainingTime =>
       super.sessionTokenRefreshAfterRemainingTime + const Duration(minutes: 1);
+
+  /// The timer delay for which the account repository cleans up the old sessions periodically
+  Duration get clearOldSessionsAfter => const Duration(hours: 2);
+
 }

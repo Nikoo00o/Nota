@@ -39,8 +39,8 @@ void main() {
   });
 
   group("account repository tests: ", () {
-    group("Create Accounts", _testCreateAccounts);
-    group("Login to Accounts", _testLoginToAccounts);
+    group("Create Accounts: ", _testCreateAccounts);
+    group("Login to Accounts: ", _testLoginToAccounts);
   });
 }
 
@@ -181,6 +181,10 @@ void _testLoginToAccounts() {
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_ACCOUNT_WRONG_PASSWORD));
   });
 
+  group("Session Token: ", _testSessionTokens);
+}
+
+void _testSessionTokens() {
   test("a valid login request should return a login response with the correct session token", () async {
     ServerAccountModel? account = await localDataSource.loadAccount(_getTestAccount(0).userName);
     expect(account, isNot(null));
@@ -197,4 +201,6 @@ void _testLoginToAccounts() {
     final AccountLoginResponse response2 = await _loginToTestAccount(0);
     expect(response1.sessionToken, response2.sessionToken);
   });
+
+  // todo: test changing session token, test session token cleanup, etc
 }

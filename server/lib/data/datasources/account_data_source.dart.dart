@@ -194,6 +194,22 @@ class AccountDataSource {
     }
   }
 
+  /// Removes the cached accounts which no longer have a valid session token and also update THOSE accounts in the local
+  /// storage
+  Future<void> clearOldSessions() async {
+    final List<ServerAccountModel> accountsToUpdate = <ServerAccountModel>[];
+    _cachedSessionTokenAccounts.removeWhere((String sessionToken, ServerAccountModel account) {
+      final bool remove = account.isSessionTokenValidFor(const Duration(milliseconds: 1));
+      if (remove) {
+        accountsToUpdate.add(account);
+      }
+      return remove;
+    });
+    for (final ServerAccountModel account in accountsToUpdate) {
+      await localDataSource.saveAccount(account.copyWith(newSessionToken: const Nullable<SessionToken>(null)));
+    }
+  }
+
   /// refreshes the session token with a new lifetime if its life time is about to expire in the next few minutes.
   /// also updates the stored and cached account if the session token was updated!
   Future<ServerAccountModel> _refreshSessionToken(ServerAccountModel oldAccount) async {
