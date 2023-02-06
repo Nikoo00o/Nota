@@ -70,7 +70,7 @@ class AccountDataSource {
         account = account.copyWith(newSessionToken: const Nullable<SessionToken>(null));
         await localDataSource.saveAccount(account);
       } else if (wasLoadedFromStorage) {
-        // if the account contains a valid session token and was loaded from storage, then cache it
+        // but if the account contains a valid session token and was loaded from storage, then cache it
         _cachedSessionTokenAccounts[sessionToken] = account;
       }
     }
@@ -111,15 +111,91 @@ class AccountDataSource {
     return RestCallbackResult(statusCode: HttpStatus.ok);
   }
 
+  /// Returns [ErrorCodes.SERVER_UNKNOWN_ACCOUNT] if the username was not found.
+  /// Returns [ErrorCodes.SERVER_ACCOUNT_WRONG_PASSWORD] if the password hash was invalid.
+  Future<RestCallbackResult> handleLoginToAccountRequest(RestCallbackParams params) async {
+    final AccountLoginRequest request = AccountLoginRequest.fromJson(params.data!);
+    if (request.userName.isEmpty || request.passwordHash.isEmpty) {
+      Logger.error("Error logging in to account, because the request is empty: ${request.userName}");
+      return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_EMPTY_REQUEST_VALUES);
+    }
+
+    ServerAccountModel? account = await _loadAccountByUserName(request.userName); // get account
+
+    if (account == null) {
+      Logger.error("Error logging in to account, because the userName was not found: ${request.userName}");
+      return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_UNKNOWN_ACCOUNT);
+    } else if (account.passwordHash != request.passwordHash) {
+      Logger.error("Error logging in to account, because the password was incorrect: ${request.userName}");
+      return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_ACCOUNT_WRONG_PASSWORD);
+    }
+
+    account = await _refreshSessionToken(account); // make sure session token is updated
+
+    final AccountLoginResponse response = AccountLoginResponse(
+      sessionToken: SessionTokenModel.fromSessionToken(account.sessionToken!),
+      encryptedDataKey: account.encryptedDataKey,
+    );
+
+    Logger.info("Logged into account: ${request.userName} with the session token: ${account.sessionToken}");
+    return RestCallbackResult.withResponse(response);
+  }
+
+  Future<RestCallbackResult> handleChangeAccountPasswordRequest(RestCallbackParams params) async {
+    //todo: implement
+    throw UnimplementedError();
+  }
+
+  /// Creates a new random session token that is valid for [serverConfig.sessionTokenMaxLifetime] from now on.
+  ///
+  /// Also makes sure that the base64 encoded session token is not already contained in the cached accounts
+  SessionTokenModel createNewSessionToken() {
+    late String sessionToken;
+    do {
+      sessionToken = getRandomBytesAsBase64String(SharedConfig.keyBytes);
+    } while (_cachedSessionTokenAccounts.containsKey(sessionToken)); // chance is almost non existent, but create new
+    // session tokens as long as it is already contained in the cached accounts
+
+    return SessionTokenModel(
+      token: sessionToken,
+      validTo: DateTime.now().add(serverConfig.sessionTokenMaxLifetime),
+    );
+  }
+
+  /// resets all sessions for all accounts. modifies the local stored accounts and clears the cached accounts.
+  ///
+  /// can take a bit of time
+  Future<void> resetAllSessionTokens() async {
+    _cachedSessionTokenAccounts.clear();
+    final List<String> userNames = await localDataSource.getAllAccountUserNames();
+    for (final String userName in userNames) {
+      ServerAccountModel? account = await localDataSource.loadAccount(userName);
+      if (account != null && account.sessionToken != null) {
+        account = account.copyWith(newSessionToken: const Nullable<SessionToken>(null));
+        await localDataSource.saveAccount(account);
+      }
+    }
+  }
+
+  /// Returns cached, or stored account.
+  ///
+  /// Also makes sure that the base64 encoded session token is not already contained in the cached accounts.
   Future<ServerAccountModel?> _loadAccountByUserName(String userName) async {
     for (final ServerAccountModel account in _cachedSessionTokenAccounts.values) {
       if (account.userName == userName) {
-        return account;
+        return account; // return cached account
       }
     }
-    final ServerAccountModel? account = await localDataSource.loadAccount(userName);
+    final ServerAccountModel? account = await localDataSource.loadAccount(userName); // return stored account
     if (account != null && account.isSessionTokenValidFor(const Duration(milliseconds: 1))) {
-      _cachedSessionTokenAccounts[account.sessionToken!.token] = account;
+      final String sessionToken = account.sessionToken!.token;
+      if (_cachedSessionTokenAccounts.containsKey(sessionToken)) {
+        return account.copyWith(newSessionToken: const Nullable<SessionToken>(null)); // chance is almost non existent,
+        // but if the session token is already contained in a different account, then make sure this account will have its
+        // own deleted when loading it from storage
+      } else {
+        _cachedSessionTokenAccounts[sessionToken] = account;
+      }
     }
     return account;
   }
@@ -130,12 +206,7 @@ class AccountDataSource {
     ServerAccountModel newAccount = oldAccount;
     if (oldAccount.isSessionTokenValidFor(serverConfig.sessionTokenRefreshAfterRemainingTime) == false) {
       // create new account with new session token
-      final SessionTokenModel newSessionToken = SessionTokenModel(
-        token: getRandomBytesAsBase64String(SharedConfig.keyBytes),
-        validTo: DateTime.now().add(serverConfig.sessionTokenMaxLifetime),
-      );
-
-      newAccount = oldAccount.copyWith(newSessionToken: Nullable<SessionTokenModel>(newSessionToken));
+      newAccount = oldAccount.copyWith(newSessionToken: Nullable<SessionTokenModel>(createNewSessionToken()));
 
       // remove the old account with the old session token from the cache
       _cachedSessionTokenAccounts.remove(oldAccount.sessionToken?.token);
@@ -147,39 +218,5 @@ class AccountDataSource {
           "${oldAccount.sessionToken} to ${newAccount.sessionToken}");
     }
     return newAccount;
-  }
-
-  /// Returns [ErrorCodes.SERVER_UNKNOWN_ACCOUNT] if the username was not found.
-  /// Returns [ErrorCodes.SERVER_ACCOUNT_WRONG_PASSWORD] if the password hash was invalid.
-  Future<RestCallbackResult> handleLoginToAccountRequest(RestCallbackParams params) async {
-    final AccountLoginRequest request = AccountLoginRequest.fromJson(params.data!);
-    if (request.userName.isEmpty || request.passwordHash.isEmpty) {
-      Logger.error("Error logging in to account, because the request is empty: ${request.userName}");
-      return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_EMPTY_REQUEST_VALUES);
-    }
-
-    ServerAccountModel? account = await _loadAccountByUserName(request.userName);
-
-    if (account == null) {
-      Logger.error("Error logging in to account, because the userName was not found: ${request.userName}");
-      return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_UNKNOWN_ACCOUNT);
-    } else if (account.passwordHash != request.passwordHash) {
-      Logger.error("Error logging in to account, because the password was incorrect: ${request.userName}");
-      return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_ACCOUNT_WRONG_PASSWORD);
-    }
-
-    account = await _refreshSessionToken(account);
-
-    final AccountLoginResponse response = AccountLoginResponse(
-      sessionToken: SessionTokenModel.fromSessionToken(account.sessionToken!),
-      encryptedDataKey: account.encryptedDataKey,
-    );
-    Logger.info("Logged into account: ${request.userName} with the session token: ${account.sessionToken}");
-    return RestCallbackResult.withResponse(response);
-  }
-
-  Future<RestCallbackResult> handleChangeAccountPasswordRequest(RestCallbackParams params) async {
-    //todo: implement
-    throw UnimplementedError();
   }
 }

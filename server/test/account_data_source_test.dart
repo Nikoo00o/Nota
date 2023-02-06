@@ -13,9 +13,13 @@ import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/network/rest_client.dart';
 import 'package:shared/core/utils/logger/logger.dart';
+import 'package:shared/core/utils/nullable.dart';
 import 'package:shared/data/dtos/account/account_login_request.dart.dart';
 import 'package:shared/data/dtos/account/account_login_response.dart';
 import 'package:shared/data/dtos/account/create_account_request.dart';
+import 'package:shared/data/models/session_token_model.dart';
+import 'package:shared/domain/entities/note_info.dart';
+import 'package:shared/domain/entities/session_token.dart';
 import 'package:test/test.dart';
 import 'helper/test_helpers.dart';
 import 'mocks/session_service_mock.dart';
@@ -109,20 +113,87 @@ void _testCreateAccounts() {
   });
 }
 
-void _testLoginToAccounts() {
-//todo: implement
-  test("TODO: implement", () async {
+ServerAccountModel _getTestAccount(int testNumber) {
+  return ServerAccountModel(
+    userName: "userName$testNumber",
+    passwordHash: "passwordHash$testNumber",
+    sessionToken: null,
+    encryptedDataKey: "encryptedDataKey$testNumber",
+    noteInfoList: const <NoteInfo>[],
+  );
+}
+
+Future<void> _createTestAccounts(int amount) async {
+  for (int i = 0; i < amount; ++i) {
+    final ServerAccountModel account = _getTestAccount(i);
     await restClient.sendRequest(
       endpoint: Endpoints.ACCOUNT_CREATE,
-      bodyData: createTestUser1.toJson(),
+      bodyData: CreateAccountRequest(
+        createAccountToken: serverConfigMock.createAccountToken,
+        userName: account.userName,
+        passwordHash: account.passwordHash,
+        encryptedDataKey: account.encryptedDataKey,
+      ).toJson(),
     );
-    final Map<String, dynamic> json = await restClient.sendRequest(
-      endpoint: Endpoints.ACCOUNT_LOGIN,
-      bodyData: AccountLoginRequest(userName: createTestUser1.userName, passwordHash: createTestUser1.passwordHash).toJson(),
-    );
-    final AccountLoginResponse response = AccountLoginResponse.fromJson(json);
+  }
+}
 
-    print(response.sessionToken); // expect same as stored. then request session token again and expect same one. then
-    // invalidate session token and expect new one, etc...
+Future<AccountLoginResponse> _loginToTestAccount(int testNumber) async {
+  final Map<String, dynamic> json = await restClient.sendRequest(
+    endpoint: Endpoints.ACCOUNT_LOGIN,
+    bodyData: AccountLoginRequest(
+      userName: _getTestAccount(testNumber).userName,
+      passwordHash: _getTestAccount(testNumber).passwordHash,
+    ).toJson(),
+  );
+  return AccountLoginResponse.fromJson(json);
+}
+
+void _testLoginToAccounts() {
+  setUp(() async {
+    await _createTestAccounts(3); // run before all login tests
+  });
+
+  test("throw an exception on sending empty request values", () async {
+    expect(() async {
+      await restClient.sendRequest(
+        endpoint: Endpoints.ACCOUNT_LOGIN,
+        bodyData: const AccountLoginRequest(userName: "", passwordHash: "").toJson(),
+      );
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_EMPTY_REQUEST_VALUES));
+  });
+
+  test("throw an exception on logging in with an unknown username", () async {
+    expect(() async {
+      await restClient.sendRequest(
+        endpoint: Endpoints.ACCOUNT_LOGIN,
+        bodyData: const AccountLoginRequest(userName: "unknownUsername", passwordHash: "unknownPassword").toJson(),
+      );
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_UNKNOWN_ACCOUNT));
+  });
+
+  test("throw an exception on logging in with an invalid password hash", () async {
+    expect(() async {
+      await restClient.sendRequest(
+        endpoint: Endpoints.ACCOUNT_LOGIN,
+        bodyData: AccountLoginRequest(userName: _getTestAccount(0).userName, passwordHash: "unknownPassword").toJson(),
+      );
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_ACCOUNT_WRONG_PASSWORD));
+  });
+
+  test("a valid login request should return a login response with the correct session token", () async {
+    ServerAccountModel? account = await localDataSource.loadAccount(_getTestAccount(0).userName);
+    expect(account, isNot(null));
+    account = account!.copyWith(newSessionToken: Nullable<SessionToken>(accountDataSource.createNewSessionToken()));
+    await localDataSource.saveAccount(account); // update the account on the server with a concrete session token
+
+    final AccountLoginResponse response = await _loginToTestAccount(0);
+    expect(account.sessionToken, response.sessionToken);
+  });
+
+  test("the session token should stay the same between 2 different login requests", () async {
+    final AccountLoginResponse response1 = await _loginToTestAccount(0);
+    final AccountLoginResponse response2 = await _loginToTestAccount(0);
+    expect(response1.sessionToken, response2.sessionToken);
   });
 }
