@@ -14,7 +14,7 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<RestServer>(() => RestServer());
   sl.registerLazySingleton<LocalDataSource>(() => LocalDataSourceImpl(serverConfig: sl()));
   sl.registerLazySingleton<AccountDataSource>(() => AccountDataSource(serverConfig: sl(), localDataSource: sl()));
-  sl.registerLazySingleton<AccountRepository>(() => AccountRepository(accountDataSource: sl()));
+  sl.registerLazySingleton<AccountRepository>(() => AccountRepository(accountDataSource: sl(), serverConfig: sl()));
   sl.registerLazySingleton<ServerRepository>(() => ServerRepository(
         serverConfig: sl(),
         restServer: sl(),

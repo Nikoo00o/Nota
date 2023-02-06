@@ -50,7 +50,7 @@ Future<void> createCommonTestObjects({required int serverPort}) async {
   localDataSource = LocalDataSourceImpl(serverConfig: serverConfigMock);
   accountDataSource = AccountDataSource(serverConfig: serverConfigMock, localDataSource: localDataSource);
 
-  accountRepository = AccountRepository(accountDataSource: accountDataSource);
+  accountRepository = AccountRepository(accountDataSource: accountDataSource, serverConfig: serverConfigMock);
   serverRepository = ServerRepository(
     restServer: restServer,
     serverConfig: serverConfigMock,

@@ -96,71 +96,18 @@ class AccountDataSource {
     return account;
   }
 
-  /// Returns http status code 401 if the createAccountToken was invalid.
-  /// Returns [ErrorCodes.SERVER_ACCOUNT_ALREADY_EXISTS] if the username already exists.
+  /// Updates a stored and cached account with the new [account] parameter (if they contain the session token, or username
+  /// as keys).
   ///
-  /// Creates a new account on the server and returns [HttpStatus.ok]
-  Future<RestCallbackResult> handleCreateAccountRequest(RestCallbackParams params) async {
-    final CreateAccountRequest request = CreateAccountRequest.fromJson(params.data!);
-    if (request.userName.isEmpty || request.passwordHash.isEmpty || request.encryptedDataKey.isEmpty) {
-      Logger.error("Error creating account, because the request is empty: ${request.userName}");
-      return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_EMPTY_REQUEST_VALUES);
+  /// Is used for when the accounts note list is modified in the note repository, etc.
+  ///
+  /// This method does not modify anything and also does not refresh the session token
+  Future<void> storeAccount(ServerAccount account) async {
+    final ServerAccountModel accountModel = ServerAccountModel.fromServerAccount(account);
+    if (_cachedSessionTokenAccounts.containsKey(accountModel.sessionToken?.token)) {
+      _cachedSessionTokenAccounts[accountModel.sessionToken!.token] = accountModel;
     }
-
-    if (request.createAccountToken != serverConfig.createAccountToken) {
-      Logger.error("Error creating account, because the account token is invalid: ${request.userName}");
-      return RestCallbackResult(statusCode: HttpStatus.unauthorized);
-    }
-
-    final ServerAccountModel? oldAccount = await localDataSource.loadAccount(request.userName);
-    if (oldAccount != null) {
-      Logger.error("Error creating account, because it already exists: ${request.userName}");
-      return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_ACCOUNT_ALREADY_EXISTS);
-    }
-
-    await localDataSource.saveAccount(ServerAccountModel(
-      userName: request.userName,
-      passwordHash: request.passwordHash,
-      sessionToken: null,
-      noteInfoList: const <NoteInfo>[],
-      encryptedDataKey: request.encryptedDataKey,
-    ));
-    Logger.info("Created new Account: ${request.userName}");
-    return RestCallbackResult(statusCode: HttpStatus.ok);
-  }
-
-  /// Returns [ErrorCodes.SERVER_UNKNOWN_ACCOUNT] if the username was not found.
-  /// Returns [ErrorCodes.SERVER_ACCOUNT_WRONG_PASSWORD] if the password hash was invalid.
-  Future<RestCallbackResult> handleLoginToAccountRequest(RestCallbackParams params) async {
-    final AccountLoginRequest request = AccountLoginRequest.fromJson(params.data!);
-    if (request.userName.isEmpty || request.passwordHash.isEmpty) {
-      Logger.error("Error logging in to account, because the request is empty: ${request.userName}");
-      return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_EMPTY_REQUEST_VALUES);
-    }
-
-    ServerAccountModel? account = await getAccountByUsername(request.userName); // get account
-
-    if (account == null) {
-      Logger.error("Error logging in to account, because the userName was not found: ${request.userName}");
-      return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_UNKNOWN_ACCOUNT);
-    } else if (account.passwordHash != request.passwordHash) {
-      Logger.error("Error logging in to account, because the password was incorrect: ${request.userName}");
-      return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_ACCOUNT_WRONG_PASSWORD);
-    }
-
-    account = await _refreshSessionToken(account); // make sure session token is updated
-
-    final AccountLoginResponse response = AccountLoginResponse(
-      sessionToken: SessionTokenModel.fromSessionToken(account.sessionToken!),
-      encryptedDataKey: account.encryptedDataKey,
-    );
-
-    Logger.info("Logged into account: ${request.userName} with the session token: ${account.sessionToken}");
-    return RestCallbackResult.withResponse(response);
-  }
-
-  Future<RestCallbackResult> handleChangeAccountPasswordRequest(RestCallbackParams params) async {
-    throw UnimplementedError();
+    await localDataSource.saveAccount(accountModel);
   }
 
   /// Creates a new random session token that is valid for [serverConfig.sessionTokenMaxLifetime] from now on.
@@ -212,7 +159,7 @@ class AccountDataSource {
 
   /// refreshes the session token with a new lifetime if its life time is about to expire in the next few minutes.
   /// also updates the stored and cached account if the session token was updated!
-  Future<ServerAccountModel> _refreshSessionToken(ServerAccountModel oldAccount) async {
+  Future<ServerAccountModel> refreshSessionToken(ServerAccountModel oldAccount) async {
     ServerAccountModel newAccount = oldAccount;
     if (oldAccount.isSessionTokenValidFor(serverConfig.sessionTokenRefreshAfterRemainingTime) == false) {
       // create new account with new session token
