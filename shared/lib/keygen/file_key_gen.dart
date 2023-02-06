@@ -1,14 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:shared/core/config/shared_config.dart';
 import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/core/utils/string_utils.dart';
 
 class FileKeyGen {
   static final String _slash = Platform.pathSeparator;
-
-  static const int keyBytes = 32;
 
   static final String templatePath = getLocalFilePath("lib${_slash}keygen$_slash");
 
@@ -35,7 +34,7 @@ class FileKeyGen {
 
   static String updateKeys(String input) {
     return input.replaceAllMapped("\$\$", (Match match) {
-      return base64Encode(getRandomBytes(keyBytes));
+      return getRandomBytesAsBase64String(SharedConfig.keyBytes);
     });
   }
 

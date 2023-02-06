@@ -16,6 +16,8 @@ dependencies:
 
   cupertino_icons: ^1.0.2 # default icons
   get_it: ^7.2.0 # service locator
+  hive: ^2.2.3 # nosql database
+  hive_flutter: ^1.1.0 # flutter extension 
 
 
 dev_dependencies:

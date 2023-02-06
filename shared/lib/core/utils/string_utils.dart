@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -9,3 +10,7 @@ Uint8List getRandomBytes(int length) {
 
 /// Returns a String of [length] with character values from 0 to 255
 String getRandomBytesAsString(int length) => String.fromCharCodes(getRandomBytes(length));
+
+/// Returns a String with [length] bytes which are base64 encoded.
+/// So the length of the string will be bigger!
+String getRandomBytesAsBase64String(int length) => base64Encode(getRandomBytes(length));

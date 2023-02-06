@@ -1,7 +1,11 @@
 import 'dart:async';
-import 'package:shared/core/network/endpoints.dart';
-import 'package:shared/core/network/http_method.dart';
-import 'package:shared/domain/entities/account.dart';
+import 'dart:io';
+import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/constants/rest_json_parameter.dart';
+import 'package:shared/core/enums/http_method.dart';
+import 'package:shared/core/network/endpoint.dart';
+import 'package:shared/data/dtos/response_dto.dart';
+import 'package:shared/domain/entities/shared_account.dart';
 
 /// The Result of a rest callback method which will be send to the client as a response
 class RestCallbackResult {
@@ -11,7 +15,26 @@ class RestCallbackResult {
   /// The http status code that should be returned to the client
   final int statusCode;
 
-  RestCallbackResult({required this.jsonResult, required this.statusCode});
+  /// Both Parameter have valid default values
+  RestCallbackResult({this.jsonResult = const <String, dynamic>{}, this.statusCode = HttpStatus.ok});
+
+  /// Returns a RestCallbackResult with a specific [errorCode] from [ErrorCodes] as a json map with the key
+  /// [RestJsonParameter.SERVER_ERROR]
+  ///
+  /// The [statusCode] is optional.
+  factory RestCallbackResult.withErrorCode(String errorCode, {int statusCode = HttpStatus.ok}) {
+    return RestCallbackResult(
+      jsonResult: <String, dynamic>{RestJsonParameter.SERVER_ERROR: errorCode},
+      statusCode: statusCode,
+    );
+  }
+
+  /// Returns a RestCallbackResult with a specific [ResponseDTO] by calling toJson() on the dto.
+  ///
+  /// The [statusCode] is optional.
+  factory RestCallbackResult.withResponse(ResponseDTO responseDTO, {int statusCode = HttpStatus.ok}) {
+    return RestCallbackResult(jsonResult: responseDTO.toJson(), statusCode: statusCode);
+  }
 }
 
 /// The Parameter that a rest callback method will be called with.
@@ -32,7 +55,7 @@ class RestCallbackParams {
 
   /// If the endpoint for the http request needed a session token and this request send a valid one, this will be the
   /// attached account to the request! Otherwise it will be [null]
-  final Account? authenticatedAccount;
+  final SharedAccount? authenticatedAccount;
 
   RestCallbackParams({
     required this.httpMethod,

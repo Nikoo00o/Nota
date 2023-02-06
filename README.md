@@ -21,7 +21,7 @@
     - if your private key is password protected, you can pass the password to the server exe as a command line argument 
       with `-r "password"`, or `--rsaPassword="password"`
 
-#### Creating a Self-Signed OpenSSL Certificate and Private Key
+### Creating a Self-Signed OpenSSL Certificate and Private Key
 
 - first install openssl 
 - then open a terminal and navigate to the folder `server/notaRes`
@@ -29,12 +29,29 @@
   certificate.pem`
 - always enter `.` except for the common name, where you can enter anything you want 
 
-## Server
-...
+## Testing 
 
-## Shared
-...
+### Server
 
-## App
-...
+- navigate to the `nota/server` folder with the terminal and run `dart test`, or just start the "All Server Tests" run 
+  configuration
+
+### App 
+
+- navigate to the `nota/app` folder with the terminal and run `flutter test`, or just start the "All App Tests" run
+  configuration
+
+## The Different Projects
+
+### Server
+
+- contains the server specific code (dart project)
+
+### Shared
+
+- contains the shared code used in server and app (dart project)
+
+### App
+
+- contains the app specific code (flutter project)
 

@@ -1,11 +1,12 @@
-/// The base class for all other Exceptions which just holds a message that it displays.
-///
-/// Other more specific exceptions can add functionality like translation, or error codes, etc. You can have different
-/// classes like a RepositoryException, UseCaseException, ClientException, ServerException, etc.
+/// The base Exception class which holds a message to display
 class BaseException implements Exception {
+  /// The message which can be a translation key to be translated, or it contains a description of the error
   final String? message;
 
-  const BaseException({required this.message});
+  /// Optional message parameter for the [message] translation key to be included
+  final List<String>? messageParams;
+
+  const BaseException({required this.message, this.messageParams = const <String>[]});
 
   @override
   String toString() {
@@ -14,5 +15,9 @@ class BaseException implements Exception {
 }
 
 class ServerException extends BaseException {
-  const ServerException({required super.message});
+  const ServerException({required super.message, super.messageParams});
+}
+
+class FileException extends BaseException {
+  const FileException({required super.message, super.messageParams});
 }
