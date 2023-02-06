@@ -5,6 +5,7 @@ import 'package:server/data/models/server_account_model.dart';
 import 'package:server/data/repositories/account_repository.dart';
 import 'package:server/domain/entities/server_account.dart';
 import 'package:server/network/rest_callback.dart';
+import 'package:server/network/session_token_redirect.dart';
 import 'package:shared/core/config/shared_config.dart';
 import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/constants/error_codes.dart';
@@ -24,20 +25,27 @@ class AccountDataSource {
   final LocalDataSource localDataSource;
 
   /// A local cache of the server accounts loaded in memory which can be accessed with the session token.
-  /// This may not contain all server accounts!
+  /// This may not contain all server accounts! The Key is the session token of the [ServerAccountModel]
   final Map<String, ServerAccountModel> _cachedSessionTokenAccounts = <String, ServerAccountModel>{};
+
+  /// A cache of the session token redirects for the old session tokens that got replaced, but still have some time left!
+  /// The key is the old session token from the account.
+  final Map<String, SessionTokenRedirect> _sessionTokenRedirects = <String, SessionTokenRedirect>{};
 
   AccountDataSource({required this.serverConfig, required this.localDataSource});
 
   /// Should return a matching account if the session token is valid and otherwise null.
   ///
   /// Will also remove no longer valid session tokens and also add loaded accounts to the cache.
-  Future<ServerAccount?> getAccountBySessionToken(String sessionToken) async {
-    if (sessionToken.isEmpty) {
+  ///
+  /// Will also use the redirect session tokens if an old, but still valid session token is used
+  Future<ServerAccount?> getAccountBySessionToken(String sessionTokenParam) async {
+    if (sessionTokenParam.isEmpty) {
       return null;
     }
     ServerAccountModel? account;
     bool wasLoadedFromStorage = false;
+    final String sessionToken = _convertSessionTokenRedirect(sessionTokenParam);
 
     if (_cachedSessionTokenAccounts.containsKey(sessionToken)) {
       // check cached accounts
@@ -56,7 +64,7 @@ class AccountDataSource {
 
     if (account != null) {
       // if an account was found (cached, or stored)
-      final bool isSessionTokenStillValid = account.isSessionTokenValidFor(const Duration(milliseconds: 1));
+      final bool isSessionTokenStillValid = account.isSessionTokenStillValid();
       final bool isSessionTokenEqual = account.sessionToken?.token == sessionToken;
       if (isSessionTokenStillValid == false || isSessionTokenEqual == false) {
         // check if the session token is still valid and if it really matches and otherwise remove the account from the
@@ -83,7 +91,7 @@ class AccountDataSource {
       }
     }
     final ServerAccountModel? account = await localDataSource.loadAccount(userName); // return stored account
-    if (account != null && account.isSessionTokenValidFor(const Duration(milliseconds: 1))) {
+    if (account != null && account.isSessionTokenStillValid()) {
       final String sessionToken = account.sessionToken!.token;
       if (_cachedSessionTokenAccounts.containsKey(sessionToken)) {
         return account.copyWith(newSessionToken: const Nullable<SessionToken>(null)); // chance is almost non existent,
@@ -130,6 +138,7 @@ class AccountDataSource {
   ///
   /// can take a bit of time
   Future<void> resetAllSessionTokens() async {
+    Logger.debug("Clearing all session tokens");
     _cachedSessionTokenAccounts.clear();
     final List<String> userNames = await localDataSource.getAllAccountUserNames();
     for (final String userName in userNames) {
@@ -142,19 +151,29 @@ class AccountDataSource {
   }
 
   /// Removes the cached accounts which no longer have a valid session token and also update THOSE accounts in the local
-  /// storage
+  /// storage.
+  /// Also removes the cached session account redirects which are no longer valid
   Future<void> clearOldSessions() async {
+    Logger.debug("clearing old sessions");
     final List<ServerAccountModel> accountsToUpdate = <ServerAccountModel>[];
+
     _cachedSessionTokenAccounts.removeWhere((String sessionToken, ServerAccountModel account) {
-      final bool remove = account.isSessionTokenValidFor(const Duration(milliseconds: 1));
+      // remove cached account and mark it for updating to local storage with no session token
+      final bool remove = account.isSessionTokenStillValid();
       if (remove) {
         accountsToUpdate.add(account);
       }
       return remove;
     });
+
     for (final ServerAccountModel account in accountsToUpdate) {
       await localDataSource.saveAccount(account.copyWith(newSessionToken: const Nullable<SessionToken>(null)));
     }
+
+    _sessionTokenRedirects.removeWhere((String sessionToken, SessionTokenRedirect redirect) {
+      // also remove the session token redirects for which the old session token is no longer valid
+      return redirect.from.isStillValid() == false;
+    });
   }
 
   /// refreshes the session token with a new lifetime if its life time is about to expire in the next few minutes.
@@ -165,7 +184,9 @@ class AccountDataSource {
       // create new account with new session token
       newAccount = oldAccount.copyWith(newSessionToken: Nullable<SessionTokenModel>(createNewSessionToken()));
 
-      // remove the old account with the old session token from the cache
+      _addSessionTokenRedirect(oldAccount, newAccount);
+
+      // remove the old account with the old session token from the account cache
       _cachedSessionTokenAccounts.remove(oldAccount.sessionToken?.token);
 
       // save the new account in cache and update it in local storage
@@ -175,5 +196,28 @@ class AccountDataSource {
           "${oldAccount.sessionToken} to ${newAccount.sessionToken}");
     }
     return newAccount;
+  }
+
+  /// add redirect from the old session token to the new session token if the old session token is still valid on
+  /// refreshing the session token
+  void _addSessionTokenRedirect(ServerAccountModel oldAccount, ServerAccountModel newAccount) {
+    if (oldAccount.isSessionTokenStillValid()) {
+      _sessionTokenRedirects[oldAccount.sessionToken!.token] =
+          SessionTokenRedirect(from: oldAccount.sessionToken!, to: newAccount.sessionToken!);
+    }
+  }
+
+  /// If the [sessionToken] is an old token that is still valid and contained in the session token redirects, then the
+  /// redirected token will be returned. Otherwise the token itself will be returned
+  String _convertSessionTokenRedirect(String sessionToken) {
+    if (_sessionTokenRedirects.containsKey(sessionToken)) {
+      final SessionTokenRedirect redirect = _sessionTokenRedirects[sessionToken]!;
+      if (redirect.isStillValid()) {
+        return redirect.to.token;
+      } else {
+        _sessionTokenRedirects.remove(sessionToken);
+      }
+    }
+    return sessionToken;
   }
 }

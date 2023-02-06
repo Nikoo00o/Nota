@@ -197,10 +197,10 @@ void _testSessionTokens() {
 
   test("the session token should stay the same between 2 different login requests", () async {
     final AccountLoginResponse response1 = await _loginToTestAccount(0);
-    await Future<void>.delayed(const Duration(milliseconds: 25));
+    await Future<void>.delayed(const Duration(milliseconds: 10));
     final AccountLoginResponse response2 = await _loginToTestAccount(0);
     expect(response1.sessionToken, response2.sessionToken);
   });
 
-  // todo: test changing session token, test session token cleanup, etc
+  // todo: test changing session token, test session token cleanup, etc. also test redirects
 }

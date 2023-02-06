@@ -16,4 +16,7 @@ class SessionToken extends Entity {
 
   /// Returns if the session token is still valid for [additionalTime]
   bool isValidFor(Duration additionalTime) => DateTime.now().add(additionalTime).isBefore(validTo) && token.isNotEmpty;
+
+  /// Returns if the session token is still valid for the next millisecond
+  bool isStillValid() => isValidFor(const Duration(milliseconds: 1));
 }

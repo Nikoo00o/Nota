@@ -41,4 +41,7 @@ class SharedAccount extends Entity {
 
   /// Returns if the session token of this account is still valid for [additionalTime]
   bool isSessionTokenValidFor(Duration additionalTime) => sessionToken?.isValidFor(additionalTime) ?? false;
+
+  /// Returns if the session token of this account is still valid for the next millisecond
+  bool isSessionTokenStillValid() => sessionToken?.isStillValid() ?? false;
 }
