@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:server/config/server_config.dart';
-import 'package:server/data/datasources/account_data_source.dart.dart';
+import 'package:server/data/repositories/account_repository.dart';
 import 'package:server/network/rest_callback.dart';
 import 'package:server/network/rest_server.dart';
 import 'package:shared/core/constants/endpoints.dart';
@@ -13,7 +13,7 @@ import 'package:shared/core/utils/logger/logger.dart';
 class ServerRepository {
   final ServerConfig serverConfig;
   final RestServer restServer;
-  final AccountDataSource accountRepository;
+  final AccountRepository accountRepository;
 
   ServerRepository({required this.serverConfig, required this.restServer, required this.accountRepository});
 
@@ -28,7 +28,7 @@ class ServerRepository {
       privateKeyFilePath: serverConfig.privateKeyPath,
       rsaPassword: rsaPassword,
       port: serverConfig.serverPort,
-      authenticationCallback: accountRepository.authenticateSessionToken,
+      authenticationCallback: accountRepository.getAccountBySessionToken,
     );
     if (serverStarted) {
       Logger.debug("Clients should be able to connect to ${Endpoints.ABOUT.getFullApiPath(serverConfig.getServerUrl())}");
@@ -39,7 +39,7 @@ class ServerRepository {
         privateKeyFilePath: serverConfig.privateKeyPath,
         rsaPassword: rsaPassword,
         port: serverConfig.serverPort,
-        authenticationCallback: accountRepository.authenticateSessionToken,
+        authenticationCallback: accountRepository.getAccountBySessionToken,
       );
     }
     return serverStarted;

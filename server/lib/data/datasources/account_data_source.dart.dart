@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:server/config/server_config.dart';
 import 'package:server/data/datasources/local_data_source.dart';
 import 'package:server/data/models/server_account_model.dart';
+import 'package:server/data/repositories/account_repository.dart';
 import 'package:server/domain/entities/server_account.dart';
 import 'package:server/network/rest_callback.dart';
 import 'package:shared/core/config/shared_config.dart';
@@ -17,7 +18,7 @@ import 'package:shared/data/models/session_token_model.dart';
 import 'package:shared/domain/entities/note_info.dart';
 import 'package:shared/domain/entities/session_token.dart';
 
-/// Manages the account operations on the server
+/// This should only be used by the [AccountRepository].
 class AccountDataSource {
   final ServerConfig serverConfig;
   final LocalDataSource localDataSource;
@@ -30,14 +31,8 @@ class AccountDataSource {
 
   /// Should return a matching account if the session token is valid and otherwise null.
   ///
-  /// The returned account will be used in the http request callbacks to authenticate the user.
-  ///
-  /// The authenticated account can also be accessed from the [RestCallbackParams] in callbacks that use [Endpoints] which
-  /// need the session token!
-  /// If an account would be null for one of those callbacks, the callbacks would return an error automatically.
-  ///
   /// Will also remove no longer valid session tokens and also add loaded accounts to the cache.
-  Future<ServerAccount?> authenticateSessionToken(String sessionToken) async {
+  Future<ServerAccount?> getAccountBySessionToken(String sessionToken) async {
     if (sessionToken.isEmpty) {
       return null;
     }
@@ -75,6 +70,29 @@ class AccountDataSource {
       }
     }
 
+    return account;
+  }
+
+  /// Returns cached, or stored account and also updates the cache.
+  ///
+  /// Also makes sure that the base64 encoded session token is not already contained in the cached accounts.
+  Future<ServerAccountModel?> getAccountByUsername(String userName) async {
+    for (final ServerAccountModel account in _cachedSessionTokenAccounts.values) {
+      if (account.userName == userName) {
+        return account; // return cached account
+      }
+    }
+    final ServerAccountModel? account = await localDataSource.loadAccount(userName); // return stored account
+    if (account != null && account.isSessionTokenValidFor(const Duration(milliseconds: 1))) {
+      final String sessionToken = account.sessionToken!.token;
+      if (_cachedSessionTokenAccounts.containsKey(sessionToken)) {
+        return account.copyWith(newSessionToken: const Nullable<SessionToken>(null)); // chance is almost non existent,
+        // but if the session token is already contained in a different account, then make sure this account will have its
+        // own deleted when loading it from storage
+      } else {
+        _cachedSessionTokenAccounts[sessionToken] = account;
+      }
+    }
     return account;
   }
 
@@ -120,7 +138,7 @@ class AccountDataSource {
       return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_EMPTY_REQUEST_VALUES);
     }
 
-    ServerAccountModel? account = await _loadAccountByUserName(request.userName); // get account
+    ServerAccountModel? account = await getAccountByUsername(request.userName); // get account
 
     if (account == null) {
       Logger.error("Error logging in to account, because the userName was not found: ${request.userName}");
@@ -142,7 +160,6 @@ class AccountDataSource {
   }
 
   Future<RestCallbackResult> handleChangeAccountPasswordRequest(RestCallbackParams params) async {
-    //todo: implement
     throw UnimplementedError();
   }
 
@@ -175,29 +192,6 @@ class AccountDataSource {
         await localDataSource.saveAccount(account);
       }
     }
-  }
-
-  /// Returns cached, or stored account.
-  ///
-  /// Also makes sure that the base64 encoded session token is not already contained in the cached accounts.
-  Future<ServerAccountModel?> _loadAccountByUserName(String userName) async {
-    for (final ServerAccountModel account in _cachedSessionTokenAccounts.values) {
-      if (account.userName == userName) {
-        return account; // return cached account
-      }
-    }
-    final ServerAccountModel? account = await localDataSource.loadAccount(userName); // return stored account
-    if (account != null && account.isSessionTokenValidFor(const Duration(milliseconds: 1))) {
-      final String sessionToken = account.sessionToken!.token;
-      if (_cachedSessionTokenAccounts.containsKey(sessionToken)) {
-        return account.copyWith(newSessionToken: const Nullable<SessionToken>(null)); // chance is almost non existent,
-        // but if the session token is already contained in a different account, then make sure this account will have its
-        // own deleted when loading it from storage
-      } else {
-        _cachedSessionTokenAccounts[sessionToken] = account;
-      }
-    }
-    return account;
   }
 
   /// refreshes the session token with a new lifetime if its life time is about to expire in the next few minutes.

@@ -38,7 +38,7 @@ void main() {
     // each test (this callback will be run before each test)
   });
 
-  group("account data source tests: ", () {
+  group("account repository tests: ", () {
     group("Create Accounts", _testCreateAccounts);
     group("Login to Accounts", _testLoginToAccounts);
   });
@@ -184,7 +184,7 @@ void _testLoginToAccounts() {
   test("a valid login request should return a login response with the correct session token", () async {
     ServerAccountModel? account = await localDataSource.loadAccount(_getTestAccount(0).userName);
     expect(account, isNot(null));
-    account = account!.copyWith(newSessionToken: Nullable<SessionToken>(accountDataSource.createNewSessionToken()));
+    account = account!.copyWith(newSessionToken: Nullable<SessionToken>(await accountRepository.createNewSessionToken()));
     await localDataSource.saveAccount(account); // update the account on the server with a concrete session token
 
     final AccountLoginResponse response = await _loginToTestAccount(0);
@@ -193,6 +193,7 @@ void _testLoginToAccounts() {
 
   test("the session token should stay the same between 2 different login requests", () async {
     final AccountLoginResponse response1 = await _loginToTestAccount(0);
+    await Future<void>.delayed(const Duration(milliseconds: 25));
     final AccountLoginResponse response2 = await _loginToTestAccount(0);
     expect(response1.sessionToken, response2.sessionToken);
   });

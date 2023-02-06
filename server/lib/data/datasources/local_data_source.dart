@@ -10,7 +10,8 @@ abstract class LocalDataSource {
   static const String ACCOUNT_DATABASE_JSON = "ACCOUNT_DATABASE";
 
   /// Returns the stored [ServerAccountModel], or null.
-  /// Only the accessed accounts will be loaded into memory
+  /// Only the accessed accounts will be loaded into memory.
+  ///
   Future<ServerAccountModel?> loadAccount(String userName) async {
     final String? jsonString = await read(key: userName, databaseKey: ACCOUNT_DATABASE_JSON);
     if (jsonString != null) {
