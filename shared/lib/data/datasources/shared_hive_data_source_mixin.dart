@@ -91,9 +91,9 @@ mixin SharedHiveDataSourceMixin {
     await _loadHiveDatabases();
     final BoxBase<String> hiveBox = _getHiveBox(databaseKey);
     if (hiveBox is LazyBox<String>) {
-      return hiveBox.keys.toList() as List<String>;
+      return List<String>.from(hiveBox.keys.toList());
     } else if (hiveBox is Box<String>) {
-      return hiveBox.keys.toList() as List<String>;
+      return List<String>.from(hiveBox.keys.toList());
     }
     return <String>[];
   }

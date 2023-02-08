@@ -16,6 +16,9 @@ class ServerRepository {
   final RestServer restServer;
   final AccountRepository accountRepository;
 
+  bool _callbacksAdded = false;
+  Timer? cleanupTimer;
+
   ServerRepository({required this.serverConfig, required this.restServer, required this.accountRepository});
 
   /// runs the nota server and will not return if [autoRestart] is set to true!
@@ -38,9 +41,7 @@ class ServerRepository {
       Logger.debug("Clients should be able to connect to ${Endpoints.ABOUT.getFullApiPath(serverConfig.getServerUrl())}");
     }
 
-    Timer.periodic(serverConfig.clearOldSessionsAfter, (Timer timer) {
-      accountRepository.clearOldSessions();
-    });
+    resetSessionCleanupTimer(serverConfig.clearOldSessionsAfter);
 
     if (serverStarted && autoRestart) {
       // will not return
@@ -49,7 +50,26 @@ class ServerRepository {
     return serverStarted;
   }
 
+  /// Will be called automatically from [runNota]
+  void resetSessionCleanupTimer(Duration delay) {
+    cleanupTimer?.cancel();
+    cleanupTimer = Timer.periodic(delay, (Timer timer) {
+      accountRepository.clearOldSessions();
+    });
+  }
+
+  /// Stops the rest api server
+  Future<void> stopNota() async {
+    cleanupTimer?.cancel();
+    await restServer.stop();
+  }
+
   Future<void> _addCallbacks() async {
+    if (_callbacksAdded) {
+      return;
+    } else {
+      _callbacksAdded = true;
+    }
     restServer.addCallback(endpoint: Endpoints.ABOUT, callback: _handleAbout);
     restServer.addCallback(endpoint: Endpoints.ACCOUNT_CREATE, callback: accountRepository.handleCreateAccountRequest);
     restServer.addCallback(endpoint: Endpoints.ACCOUNT_LOGIN, callback: accountRepository.handleLoginToAccountRequest);

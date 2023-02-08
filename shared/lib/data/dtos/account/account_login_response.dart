@@ -1,23 +1,21 @@
+import 'package:shared/data/dtos/account/account_change_password_response.dart';
 import 'package:shared/data/dtos/response_dto.dart';
 import 'package:shared/data/models/session_token_model.dart';
 import 'package:shared/data/models/shared_account_model_mixin.dart';
 
-class AccountLoginResponse extends ResponseDTO {
-  /// Base64 encoded
-  final SessionTokenModel sessionToken;
-
+class AccountLoginResponse extends AccountChangePasswordResponse {
   /// Base64 encoded
   final String encryptedDataKey;
 
   const AccountLoginResponse({
-    required this.sessionToken,
+    required super.sessionToken,
     required this.encryptedDataKey,
   });
 
   @override
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
-      SharedAccountModelMixin.JSON_SESSION_TOKEN: sessionToken.toJson(),
+      ...super.toJson(),
       SharedAccountModelMixin.JSON_ENCRYPTED_DATA_KEY: encryptedDataKey,
     };
   }

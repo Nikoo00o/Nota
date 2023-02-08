@@ -31,6 +31,11 @@ void main() {
     // each test (this callback will be run before each test)
   });
 
+  tearDown(() async {
+    await cleanupTestHiveAndServer(serverRepository, serverConfigMock); // cleanup server and hive test data after every
+    // test (this callback will be run after each test)
+  });
+
   const Endpoint invalidEndpoint = Endpoint(apiPath: "test/invalid/endpoint", httpMethod: HttpMethod.GET);
   const Endpoint exceptionEndpoint = Endpoint(apiPath: "test/exception/endpoint", httpMethod: HttpMethod.GET);
   const Endpoint getEndpoint = Endpoint(apiPath: "test/method/endpoint", httpMethod: HttpMethod.GET);

@@ -10,8 +10,6 @@ class ServerConfigMock extends ServerConfig {
   /// Used to mock the server token remaining refresh lifetime for testing
   Duration? sessionTokenRefreshAfterRemainingTimeOverride;
 
-  /// Used to mock the servers periodic session cleanup
-  Duration? clearOldSessionsAfterOverride;
 
   ServerConfigMock({this.serverPortOverride});
 
@@ -25,6 +23,4 @@ class ServerConfigMock extends ServerConfig {
   Duration get sessionTokenRefreshAfterRemainingTime =>
       sessionTokenRefreshAfterRemainingTimeOverride ?? super.sessionTokenRefreshAfterRemainingTime;
 
-  @override
-  Duration get clearOldSessionsAfter => clearOldSessionsAfterOverride ?? super.clearOldSessionsAfter;
 }

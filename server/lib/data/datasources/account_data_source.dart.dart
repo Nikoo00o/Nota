@@ -36,7 +36,7 @@ class AccountDataSource {
 
   /// Should return a matching account if the session token is valid and otherwise null.
   ///
-  /// Will also remove no longer valid session tokens and also add loaded accounts to the cache.
+  /// Will also remove invalid session tokens and also add loaded accounts to the cache.
   ///
   /// Will also use the redirect session tokens if an old, but still valid session token is used
   Future<ServerAccount?> getAccountBySessionToken(String sessionTokenParam) async {
@@ -45,6 +45,7 @@ class AccountDataSource {
     }
     ServerAccountModel? account;
     bool wasLoadedFromStorage = false;
+    // also accept redirected session tokens
     final String sessionToken = _convertSessionTokenRedirect(sessionTokenParam);
 
     if (_cachedSessionTokenAccounts.containsKey(sessionToken)) {
@@ -81,9 +82,11 @@ class AccountDataSource {
     return account;
   }
 
-  /// Returns cached, or stored account and also updates the cache.
+  /// Returns cached, or stored account and also laods the account into the cache.
   ///
   /// Also makes sure that the base64 encoded session token is not already contained in the cached accounts.
+  ///
+  /// Does not modify the session token if its invalid except when its duplicated.
   Future<ServerAccountModel?> getAccountByUsername(String userName) async {
     for (final ServerAccountModel account in _cachedSessionTokenAccounts.values) {
       if (account.userName == userName) {
@@ -159,7 +162,7 @@ class AccountDataSource {
 
     _cachedSessionTokenAccounts.removeWhere((String sessionToken, ServerAccountModel account) {
       // remove cached account and mark it for updating to local storage with no session token
-      final bool remove = account.isSessionTokenStillValid();
+      final bool remove = account.isSessionTokenStillValid() == false;
       if (remove) {
         accountsToUpdate.add(account);
       }
@@ -178,13 +181,17 @@ class AccountDataSource {
 
   /// refreshes the session token with a new lifetime if its life time is about to expire in the next few minutes.
   /// also updates the stored and cached account if the session token was updated!
-  Future<ServerAccountModel> refreshSessionToken(ServerAccountModel oldAccount) async {
+  ///
+  /// if [addTokenRedirect] is true, then the old session token of the account can still be used if its still valid
+  Future<ServerAccountModel> refreshSessionToken(ServerAccountModel oldAccount, {required bool addTokenRedirect}) async {
     ServerAccountModel newAccount = oldAccount;
     if (oldAccount.isSessionTokenValidFor(serverConfig.sessionTokenRefreshAfterRemainingTime) == false) {
       // create new account with new session token
       newAccount = oldAccount.copyWith(newSessionToken: Nullable<SessionTokenModel>(createNewSessionToken()));
 
-      _addSessionTokenRedirect(oldAccount, newAccount);
+      if (addTokenRedirect) {
+        _addSessionTokenRedirect(oldAccount, newAccount);
+      }
 
       // remove the old account with the old session token from the account cache
       _cachedSessionTokenAccounts.remove(oldAccount.sessionToken?.token);

@@ -31,6 +31,9 @@
 
 ## Testing 
 
+- some of the server tests can fail on a slow processor, because of some time critical operations 
+- if this happens, just increase the delays inside of the affected tests 
+
 ### Server
 
 - navigate to the `nota/server` folder with the terminal and run `dart test`, or just start the "All Server Tests" run 

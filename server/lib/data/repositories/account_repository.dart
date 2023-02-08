@@ -7,12 +7,15 @@ import 'package:server/core/network/rest_callback.dart';
 import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/utils/logger/logger.dart';
+import 'package:shared/data/dtos/account/account_change_password_request.dart';
+import 'package:shared/data/dtos/account/account_change_password_response.dart';
 import 'package:shared/data/dtos/account/account_login_request.dart.dart';
 import 'package:shared/data/dtos/account/account_login_response.dart';
 import 'package:shared/data/dtos/account/create_account_request.dart';
 import 'package:shared/data/models/session_token_model.dart';
 import 'package:shared/domain/entities/note_info.dart';
 import 'package:shared/domain/entities/session_token.dart';
+import 'package:shared/domain/entities/shared_account.dart';
 import 'package:synchronized/synchronized.dart';
 
 /// Manages and synchronizes the account operations on the server by using the [AccountDataSource].
@@ -145,7 +148,8 @@ class AccountRepository {
         return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_ACCOUNT_WRONG_PASSWORD);
       }
 
-      account = await accountDataSource.refreshSessionToken(account); // make sure session token is updated
+      account = await accountDataSource.refreshSessionToken(account, addTokenRedirect: true); // make sure session token is
+      // updated
 
       final AccountLoginResponse response = AccountLoginResponse(
         sessionToken: SessionTokenModel.fromSessionToken(account.sessionToken!),
@@ -159,11 +163,26 @@ class AccountRepository {
 
   ///
   Future<RestCallbackResult> handleChangeAccountPasswordRequest(RestCallbackParams params) async {
-    //todo: document comments
     return _lock.synchronized(() async {
-      throw UnimplementedError();
+      // the attached account will always be a server account
+      ServerAccountModel account = ServerAccountModel.fromServerAccount(params.authenticatedAccount as ServerAccount);
+
+      final AccountChangePasswordRequest request = AccountChangePasswordRequest.fromJson(params.data!);
+      if (request.newPasswordHash.isEmpty || request.newEncryptedDataKey.isEmpty) {
+        Logger.error("Error changing password for account, because the request is empty: ${account.userName}");
+        return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_EMPTY_REQUEST_VALUES);
+      }
+
+      account = account.copyWith(newPasswordHash: request.newPasswordHash, newEncryptedDataKey: request.newEncryptedDataKey);
+      await accountDataSource.storeAccount(account);
+      await accountDataSource.refreshSessionToken(account, addTokenRedirect: false); // completely remove the old token
+      // with no redirect
+
+      final AccountChangePasswordResponse response = AccountChangePasswordResponse(
+        sessionToken: SessionTokenModel.fromSessionToken(account.sessionToken!),
+      );
+      Logger.info("Changed the password for the account ${account.userName}");
+      return RestCallbackResult.withResponse(response);
     });
   }
-
-
 }

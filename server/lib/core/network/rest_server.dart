@@ -93,7 +93,8 @@ class RestServer {
     late final String clientIp;
     try {
       final String fullApiPath = request.requestedUri.path;
-      final Map<String, String> queryParams = request.requestedUri.queryParameters;
+      final Map<String, String> queryParams = request.requestedUri.queryParameters
+          .map((String key, String value) => MapEntry<String, String>(Uri.decodeFull(key), Uri.decodeFull(value)));
       final Map<String, dynamic>? jsonBody = await _getJsonBody(request);
       clientIp = request.connectionInfo?.remoteAddress.address ?? "";
       Logger.debug("Got request ${request.requestedUri} from $clientIp with data: $jsonBody");
