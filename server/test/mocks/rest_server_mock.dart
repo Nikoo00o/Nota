@@ -8,11 +8,6 @@ class RestServerMock extends RestServer {
   FutureOr<ServerAccount?> Function(String sessionToken)? authenticationCallbackOverride;
 
   @override
-  Future<ServerAccount?> getAuthenticatedAccount(String sessionToken) async {
-    if (authenticationCallbackOverride != null) {
-      return authenticationCallbackOverride!.call(sessionToken);
-    } else {
-      return super.getAuthenticatedAccount(sessionToken);
-    }
-  }
+  FutureOr<ServerAccount?> Function(String sessionToken)? get authenticationCallback =>
+      authenticationCallbackOverride ?? super.authenticationCallback;
 }

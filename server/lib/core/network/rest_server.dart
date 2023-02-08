@@ -19,8 +19,15 @@ class RestServer {
   /// The callbacks which are called for the endpoints
   final List<RestCallback> _restCallbacks = <RestCallback>[];
 
-  /// The callback for the endpoints that require a session token
+  late SecurityContext _securityContext;
+
+  late int _port;
+
+  /// Internal variable for [authenticationCallback]
   FutureOr<ServerAccount?> Function(String sessionToken)? _authenticationCallback;
+
+  /// The callback for the endpoints that require a session token which should return a valid attached account, or null
+  FutureOr<ServerAccount?> Function(String sessionToken)? get authenticationCallback => _authenticationCallback;
 
   /// Starts the server and returns [true] if it was successful
   ///
@@ -39,42 +46,46 @@ class RestServer {
     required int port,
     FutureOr<ServerAccount?> Function(String sessionToken)? authenticationCallback,
   }) async {
-    _authenticationCallback = authenticationCallback;
     if (_server == null) {
-      try {
-        if (File(certificateFilePath).existsSync() == false) {
-          Logger.error("Error starting REST API server: certificate file $certificateFilePath does not exist");
-          return false;
-        } else if (File(privateKeyFilePath).existsSync() == false) {
-          Logger.error("Error starting REST API server: private key file $privateKeyFilePath does not exist");
-          return false;
-        } else {
-          final SecurityContext serverContext = SecurityContext();
-          serverContext.useCertificateChain(certificateFilePath);
-          serverContext.usePrivateKey(privateKeyFilePath, password: rsaPassword);
-          _server = await HttpServer.bindSecure(InternetAddress.anyIPv4, port, serverContext);
+      if (File(certificateFilePath).existsSync() == false) {
+        Logger.error("Error starting REST API server: certificate file $certificateFilePath does not exist");
+        return false;
+      } else if (File(privateKeyFilePath).existsSync() == false) {
+        Logger.error("Error starting REST API server: private key file $privateKeyFilePath does not exist");
+        return false;
+      } else {
+        _authenticationCallback = authenticationCallback;
+        _port = port;
+        _securityContext = SecurityContext();
+        _securityContext.useCertificateChain(certificateFilePath);
+        _securityContext.usePrivateKey(privateKeyFilePath, password: rsaPassword);
 
-          _subscription = _server!.listen(_onClientRequest, onError: (Object? error) {
-            Logger.error("REST API error: $error");
-          }, onDone: () {
-            Logger.debug("REST API server closed");
-            _server = null;
-          });
-
-          Logger.debug("Started REST API server");
-          return true;
-        }
-      } catch (e, s) {
-        Logger.error("Error starting REST API server", e, s);
+        return _internalRun();
       }
+    } else {
+      Logger.error("Error starting REST API server: server is already running");
     }
-    Logger.error("Error starting REST API server: server is already running");
     return false;
   }
 
-  /// Calls the [_authenticationCallback] to return the attached [ServerAccount] to a valid [sessionToken], or otherwise
-  /// [null]
-  Future<ServerAccount?> getAuthenticatedAccount(String sessionToken) async => _authenticationCallback?.call(sessionToken);
+  Future<bool> _internalRun() async {
+    try {
+      _server = await HttpServer.bindSecure(InternetAddress.anyIPv4, _port, _securityContext);
+
+      _subscription = _server!.listen(_onClientRequest, onError: (Object? error) {
+        Logger.error("REST API error: $error");
+      }, onDone: () {
+        Logger.debug("REST API server closed");
+        _server = null;
+      });
+
+      Logger.debug("Started REST API server");
+      return true;
+    } catch (e, s) {
+      Logger.error("Error starting REST API server", e, s);
+      return false;
+    }
+  }
 
   /// Is called when the server receives data from the client
   Future<void> _onClientRequest(HttpRequest request) async {
@@ -122,6 +133,13 @@ class RestServer {
     return null;
   }
 
+  /// Calls the [authenticationCallback] to return the attached [ServerAccount] to a valid [sessionToken], or otherwise
+  /// [null]
+  Future<ServerAccount?> _getAuthenticatedAccount(Map<String, String> queryParams) async {
+    final String sessionToken = queryParams[RestJsonParameter.SESSION_TOKEN] ?? "";
+    return authenticationCallback?.call(sessionToken);
+  }
+
   Future<RestCallbackResult> _handleCallback(HttpRequest request, String fullApiPath, Map<String, String> queryParams,
       Map<String, dynamic>? jsonBody, String clientIp) async {
     final Iterable<RestCallback> matchingRestCallbackIt = _restCallbacks.where((RestCallback element) =>
@@ -133,8 +151,7 @@ class RestServer {
       ServerAccount? authenticatedAccount;
 
       if (matchingRestCallbackIt.first.endpoint.needsSessionToken) {
-        final String sessionToken = queryParams[RestJsonParameter.SESSION_TOKEN] ?? "";
-        authenticatedAccount = await getAuthenticatedAccount(sessionToken);
+        authenticatedAccount = await _getAuthenticatedAccount(queryParams);
         if (authenticatedAccount == null) {
           Logger.error("REST API error, the Request ${request.requestedUri} from $clientIp does not contain a valid session "
               "token");
@@ -158,7 +175,7 @@ class RestServer {
   ///
   /// For http request where no callback is found, the StatusCode 404 will be returned.
   ///
-  /// If the [endpoint] needs a session token for authentication, then the [_authenticationCallback] method is used to
+  /// If the [endpoint] needs a session token for authentication, then the [authenticationCallback] method is used to
   /// return the attached account which the callback then can use.
   /// If the session token was invalid and the returned account was [null], the StatusCode 401 will be returned.
   ///
@@ -191,25 +208,18 @@ class RestServer {
     }
   }
 
-  /// Will call start and automatically restart the server if it closes after a delay.
+  /// Will restart the server automatically if it stops. Only call this method after a call to [start] returns true
   ///
-  /// This method will never return.
-  Future<void> restartAfterDone({
-    required String certificateFilePath,
-    required String privateKeyFilePath,
-    String? rsaPassword,
-    required int port,
-    FutureOr<ServerAccount?> Function(String sessionToken)? authenticationCallback,
-  }) async {
+  /// This method will never return if it has been called after a successful call to [start]
+  Future<void> restartAfterDone() async {
+    if (_server == null) {
+      Logger.error("Error trying to restart a rest server which has not been started! Returning.");
+      return;
+    }
     while (true) {
       await Future<void>.delayed(const Duration(seconds: 10));
       if (_server == null) {
-        await start(
-            certificateFilePath: certificateFilePath,
-            privateKeyFilePath: privateKeyFilePath,
-            rsaPassword: rsaPassword,
-            port: port,
-            authenticationCallback: authenticationCallback);
+        await _internalRun();
       }
     }
   }

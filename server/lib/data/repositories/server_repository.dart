@@ -44,13 +44,7 @@ class ServerRepository {
 
     if (serverStarted && autoRestart) {
       // will not return
-      await restServer.restartAfterDone(
-        certificateFilePath: serverConfig.certificatePath,
-        privateKeyFilePath: serverConfig.privateKeyPath,
-        rsaPassword: rsaPassword,
-        port: serverConfig.serverPort,
-        authenticationCallback: accountRepository.getAccountBySessionToken,
-      );
+      await restServer.restartAfterDone();
     }
     return serverStarted;
   }
