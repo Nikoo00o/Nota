@@ -1,7 +1,7 @@
 import 'package:args/args.dart';
 import 'package:hive/hive.dart';
-import 'package:server/config/server_config.dart';
-import 'package:server/get_it.dart';
+import 'package:server/core/config/server_config.dart';
+import 'package:server/core/get_it.dart';
 import 'package:server/data/repositories/server_repository.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 

@@ -1,9 +1,9 @@
 import 'dart:io';
-import 'package:server/config/server_config.dart';
+import 'package:server/core/config/server_config.dart';
 import 'package:server/data/datasources/account_data_source.dart.dart';
 import 'package:server/data/models/server_account_model.dart';
 import 'package:server/domain/entities/server_account.dart';
-import 'package:server/network/rest_callback.dart';
+import 'package:server/core/network/rest_callback.dart';
 import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/utils/logger/logger.dart';

@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:server/domain/entities/server_account.dart';
-import 'package:server/network/rest_server.dart';
+import 'package:server/core/network/rest_server.dart';
 
 /// Used to override the default authentication callback if needed
 class RestServerMock extends RestServer {

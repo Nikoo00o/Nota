@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:server/config/server_config.dart';
+import 'package:server/core/config/server_config.dart';
 import 'package:server/data/models/server_account_model.dart';
 import 'package:shared/data/datasources/hive_box_configuration.dart';
 import 'package:shared/data/datasources/shared_hive_data_source_mixin.dart';

@@ -1,4 +1,4 @@
-import 'package:server/config/server_config.dart';
+import 'package:server/core/config/server_config.dart';
 
 class ServerConfigMock extends ServerConfig {
   /// Used to mock the server port so that different test files can be run at the same time

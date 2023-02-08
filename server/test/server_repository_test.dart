@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:server/data/models/server_account_model.dart';
 import 'package:server/domain/entities/server_account.dart';
-import 'package:server/network/rest_callback.dart';
+import 'package:server/core/network/rest_callback.dart';
 import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/constants/rest_json_parameter.dart';

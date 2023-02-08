@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:server/config/sensitive_data.dart';
+import 'package:server/core/config/sensitive_data.dart';
 import 'package:shared/core/config/shared_config.dart';
 import 'package:shared/core/utils/file_utils.dart';
 

@@ -2,12 +2,12 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:hive/hive.dart';
-import 'package:server/config/server_config.dart';
+import 'package:server/core/config/server_config.dart';
 import 'package:server/data/datasources/account_data_source.dart.dart';
 import 'package:server/data/datasources/local_data_source.dart';
 import 'package:server/data/models/server_account_model.dart';
 import 'package:server/data/repositories/server_repository.dart';
-import 'package:server/network/rest_server.dart';
+import 'package:server/core/network/rest_server.dart';
 import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
@@ -24,7 +24,7 @@ import 'package:test/test.dart';
 import 'helper/test_helpers.dart';
 import 'mocks/session_service_mock.dart';
 
-// test for the specific account functions
+// test for the specific account functions.
 const int _serverPort = 8193;
 
 void main() {
@@ -195,9 +195,11 @@ void _testSessionTokens() {
     expect(account.sessionToken, response.sessionToken);
   });
 
-  test("the session token should stay the same between 2 different login requests", () async {
+  test("the session token should stay the same between 2 different login requests to the same account", () async {
     final AccountLoginResponse response1 = await _loginToTestAccount(0);
     await Future<void>.delayed(const Duration(milliseconds: 10));
+    final AccountLoginResponse otherResponse = await _loginToTestAccount(1);
+    expect(response1.sessionToken, isNot(otherResponse.sessionToken));
     final AccountLoginResponse response2 = await _loginToTestAccount(0);
     expect(response1.sessionToken, response2.sessionToken);
   });

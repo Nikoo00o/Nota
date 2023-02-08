@@ -12,7 +12,7 @@ class FileKeyGen {
   static final String templatePath = getLocalFilePath("lib${_slash}keygen$_slash");
 
   static final String serverDataPath = getLocalFilePath(""
-      "..${_slash}server${_slash}lib${_slash}config${_slash}sensitive_data.dart");
+      "..${_slash}server${_slash}lib${_slash}core${_slash}config${_slash}sensitive_data.dart");
 
   static final String sharedDataPath = getLocalFilePath("lib${_slash}core${_slash}config${_slash}sensitive_data.dart");
 

@@ -15,7 +15,7 @@
 
 - you have to run the run configuration "Create New Keys" at least once, because it will create the "sensitive_data.dart" 
   files with new random salts and keys
-  - then have to set the server hostname in `/shared/lib/core/config/sensitive_data.dart`
+  - then you have to set the server hostname in `/shared/lib/core/config/sensitive_data.dart`
 - you also have to add a RSA private key named `key.pem` and the matching certificate named `certificate.pem`in the 
   folder `server/notaRes` for debug mode, or just in a data folder next to the server exe in release mode
     - if your private key is password protected, you can pass the password to the server exe as a command line argument 

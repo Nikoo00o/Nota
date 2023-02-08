@@ -1,11 +1,11 @@
 import 'dart:io';
-import 'package:server/config/server_config.dart';
+import 'package:server/core/config/server_config.dart';
 import 'package:server/data/datasources/local_data_source.dart';
 import 'package:server/data/models/server_account_model.dart';
 import 'package:server/data/repositories/account_repository.dart';
 import 'package:server/domain/entities/server_account.dart';
-import 'package:server/network/rest_callback.dart';
-import 'package:server/network/session_token_redirect.dart';
+import 'package:server/core/network/rest_callback.dart';
+import 'package:server/core/network/session_token_redirect.dart';
 import 'package:shared/core/config/shared_config.dart';
 import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/constants/error_codes.dart';
