@@ -182,14 +182,15 @@ class AccountDataSource {
   /// refreshes the session token with a new lifetime if its life time is about to expire in the next few minutes.
   /// also updates the stored and cached account if the session token was updated!
   ///
-  /// if [addTokenRedirect] is true, then the old session token of the account can still be used if its still valid
-  Future<ServerAccountModel> refreshSessionToken(ServerAccountModel oldAccount, {required bool addTokenRedirect}) async {
+  /// if [forceRegenerate] is true, then a new session token will be regenerated even if the old one is still valid and
+  /// also no redirect will be added!
+  Future<ServerAccountModel> refreshSessionToken(ServerAccountModel oldAccount, {required bool forceRegenerate}) async {
     ServerAccountModel newAccount = oldAccount;
-    if (oldAccount.isSessionTokenValidFor(serverConfig.sessionTokenRefreshAfterRemainingTime) == false) {
+    if (oldAccount.isSessionTokenValidFor(serverConfig.sessionTokenRefreshAfterRemainingTime) == false || forceRegenerate) {
       // create new account with new session token
       newAccount = oldAccount.copyWith(newSessionToken: Nullable<SessionTokenModel>(createNewSessionToken()));
 
-      if (addTokenRedirect) {
+      if (forceRegenerate == false) {
         _addSessionTokenRedirect(oldAccount, newAccount);
       }
 

@@ -148,7 +148,7 @@ class AccountRepository {
         return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_ACCOUNT_WRONG_PASSWORD);
       }
 
-      account = await accountDataSource.refreshSessionToken(account, addTokenRedirect: true); // make sure session token is
+      account = await accountDataSource.refreshSessionToken(account, forceRegenerate: false); // make sure session token is
       // updated
 
       final AccountLoginResponse response = AccountLoginResponse(
@@ -174,9 +174,8 @@ class AccountRepository {
       }
 
       account = account.copyWith(newPasswordHash: request.newPasswordHash, newEncryptedDataKey: request.newEncryptedDataKey);
-      await accountDataSource.storeAccount(account);
-      await accountDataSource.refreshSessionToken(account, addTokenRedirect: false); // completely remove the old token
-      // with no redirect
+      account = await accountDataSource.refreshSessionToken(account, forceRegenerate: true); // completely remove the old
+      // token with no redirect
 
       final AccountChangePasswordResponse response = AccountChangePasswordResponse(
         sessionToken: SessionTokenModel.fromSessionToken(account.sessionToken!),

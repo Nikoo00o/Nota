@@ -126,6 +126,7 @@ class RestClient {
     if (baseUrl.endsWith("/")) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }
+    baseUrl = Uri.encodeFull(baseUrl);
     final String urlEncodedQueryParams = await _urlEncodeQueryParams(endpoint, queryParams);
     return Uri.parse("$baseUrl$urlEncodedQueryParams");
   }
@@ -157,8 +158,8 @@ class RestClient {
     if (buffer.length > 1) {
       buffer.write("&");
     }
-    buffer.write(Uri.encodeFull(key));
+    buffer.write(Uri.encodeComponent(key));
     buffer.write("=");
-    buffer.write(Uri.encodeFull(value));
+    buffer.write(Uri.encodeComponent(value));
   }
 }
