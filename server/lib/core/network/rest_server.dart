@@ -124,7 +124,7 @@ class RestServer {
   }
 
   Future<Map<String, dynamic>?> _getJsonBody(HttpRequest request) async {
-    final String dataString = await getEncoding(request.headers).decodeStream(request);
+    final String dataString = await FileUtils.getEncoding(request.headers).decodeStream(request);
     if (dataString.isNotEmpty) {
       final dynamic json = jsonDecode(dataString);
       if (json is Map<String, dynamic>) {

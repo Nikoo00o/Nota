@@ -22,6 +22,8 @@ class ClientAccount extends SharedAccount {
   /// Uses the userPassword to decrypt the [encryptedDataKey] into the [_cachedDataKey]
   void decryptDataKey(String userPassword) {
     // todo: decrypt and set the cached key
+    // todo: maybe store it as final member and also store it inside the model and handle the decrypting / encrypting
+    //  outside of the entity. (should be better)
   }
 
   /// Returns the data key of the user used for encrypting the note data.
@@ -44,14 +46,17 @@ class ClientAccount extends SharedAccount {
   ///
   /// For Nullable parameter:
   /// If the Nullable Object itself is null, then it will not be used. Otherwise it's value is used to override the previous
-  /// value (with either null, or a concrete value)
+  /// value (with either null, or a concrete value).
+  ///
+  /// Creates a new [_cachedDataKey] by decrypting the [encryptedDataKey] with the [userPasswordToDecryptDataKey] if its
+  /// not null.
   @override
   ClientAccount copyWith({
     String? newPasswordHash,
     Nullable<SessionToken>? newSessionToken,
     List<NoteInfo>? newNoteInfoList,
     String? newEncryptedDataKey,
-    String? newCachedDataKey,
+    String? userPasswordToDecryptDataKey,
   }) {
     final ClientAccount account = ClientAccount(
       userName: userName,
@@ -61,6 +66,9 @@ class ClientAccount extends SharedAccount {
       encryptedDataKey: newEncryptedDataKey ?? encryptedDataKey,
     );
     account._cachedDataKey = _cachedDataKey;
+    if (userPasswordToDecryptDataKey != null) {
+      account.decryptDataKey(userPasswordToDecryptDataKey);
+    }
     return account;
   }
 }

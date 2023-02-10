@@ -13,7 +13,7 @@ class ServerConfig extends SharedConfig {
   String get serverHostname => "https://127.0.0.1";
 
   /// Absolute path to the folder from the working directory where the server stores keys and database files
-  String get resourceFolderPath => getLocalFilePath("notaRes");
+  String get resourceFolderPath => FileUtils.getLocalFilePath("notaRes");
 
   /// Local path to server public key certificate
   String get certificatePath => "$resourceFolderPath${Platform.pathSeparator}certificate.pem";
@@ -33,5 +33,4 @@ class ServerConfig extends SharedConfig {
 
   /// The timer delay for which the account repository cleans up the old sessions periodically
   Duration get clearOldSessionsAfter => const Duration(hours: 2);
-
 }

@@ -127,7 +127,7 @@ class AccountDataSource {
   SessionTokenModel createNewSessionToken() {
     late String sessionToken;
     do {
-      sessionToken = getRandomBytesAsBase64String(SharedConfig.keyBytes);
+      sessionToken = StringUtils.getRandomBytesAsBase64String(SharedConfig.keyBytes);
     } while (_cachedSessionTokenAccounts.containsKey(sessionToken)); // chance is almost non existent, but create new
     // session tokens as long as it is already contained in the cached accounts
 
@@ -182,8 +182,9 @@ class AccountDataSource {
   /// refreshes the session token with a new lifetime if its life time is about to expire in the next few minutes.
   /// also updates the stored and cached account if the session token was updated!
   ///
-  /// if [forceRegenerate] is true, then a new session token will be regenerated even if the old one is still valid and
-  /// also no redirect will be added!
+  /// If [forceRegenerate] is true, then a new session token will be regenerated even if the old one is still valid and
+  /// also no redirect will be added (and old ones will be removed)! Otherwise a redirect from the session token of the
+  /// [oldAccount] will get added to the session token of the new one!
   Future<ServerAccountModel> refreshSessionToken(ServerAccountModel oldAccount, {required bool forceRegenerate}) async {
     ServerAccountModel newAccount = oldAccount;
     if (oldAccount.isSessionTokenValidFor(serverConfig.sessionTokenRefreshAfterRemainingTime) == false || forceRegenerate) {
@@ -192,6 +193,8 @@ class AccountDataSource {
 
       if (forceRegenerate == false) {
         _addSessionTokenRedirect(oldAccount, newAccount);
+      } else {
+        _removeSessionTokenRedirectTo(oldAccount);
       }
 
       // remove the old account with the old session token from the account cache
@@ -213,6 +216,11 @@ class AccountDataSource {
       _sessionTokenRedirects[oldAccount.sessionToken!.token] =
           SessionTokenRedirect(from: oldAccount.sessionToken!, to: newAccount.sessionToken!);
     }
+  }
+
+  /// Removes the redirects from other still valid session tokens to the session token of [targetAccount]
+  void _removeSessionTokenRedirectTo(ServerAccountModel targetAccount) {
+    _sessionTokenRedirects.removeWhere((String _, SessionTokenRedirect tokens) => tokens.to == targetAccount.sessionToken);
   }
 
   /// If the [sessionToken] is an old token that is still valid and contained in the session token redirects, then the

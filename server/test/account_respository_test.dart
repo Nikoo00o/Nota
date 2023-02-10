@@ -361,4 +361,21 @@ void _testChangePassword() {
           account.encryptedDataKey == "${_getTestAccount(0).encryptedDataKey}_changed"),
     );
   });
+
+  test("after changing passwords, old redirects should also not be valid anymore", () async {
+    serverConfigMock.sessionTokenMaxLifetimeOverride = const Duration(milliseconds: 120);
+    serverConfigMock.sessionTokenRefreshAfterRemainingTimeOverride = const Duration(milliseconds: 80);
+    await _createTestAccount(0);
+    final AccountLoginResponse response1 = await _loginToTestAccount(0);
+    await Future<void>.delayed(const Duration(milliseconds: 80));
+    await _loginToTestAccount(0); // refresh token, so a redirect gets added for the [account1] below
+    final ServerAccount? account1 = await accountRepository.getAccountBySessionToken(response1.sessionToken.token);
+
+    sessionServiceMock.sessionTokenOverride = response1.sessionToken.token; // change password with redirected token
+    await _changePasswordOfTestAccount(0);
+
+    final ServerAccount? account2 = await accountRepository.getAccountBySessionToken(response1.sessionToken.token);
+    expect(account1, isNot(account2), reason: "Accounts are not Equal");
+    expect(account2, null, reason: "Second account is null"); // first account should exist and second one not
+  });
 }

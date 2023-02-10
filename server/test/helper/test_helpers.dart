@@ -70,7 +70,7 @@ Future<void> createCommonTestObjects({required int serverPort}) async {
 /// The [Hive] data folder will be in testData/serverPort
 Future<void> initTestHiveAndServer(ServerRepository serverRepository, ServerConfig serverConfig) async {
   final String testDataPath = getTestResourceFolderPath(serverConfig);
-  createDirectory(testDataPath);
+  FileUtils.createDirectory(testDataPath);
   Hive.init(testDataPath);
 
   final bool started = await serverRepository.runNota(autoRestart: false);
@@ -84,7 +84,7 @@ Future<void> cleanupTestHiveAndServer(ServerRepository serverRepository, ServerC
   final String testDataPath = getTestResourceFolderPath(serverConfig);
   await serverRepository.stopNota();
   await Hive.close();
-  deleteDirectory(testDataPath);
+  FileUtils.deleteDirectory(testDataPath);
 }
 
 /// Returns the modified test resource folder for everything except the server key and certificate
