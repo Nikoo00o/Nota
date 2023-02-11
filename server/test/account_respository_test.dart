@@ -83,7 +83,7 @@ Future<void> _createMultipleTestAccounts(int amount) async {
 }
 
 Future<AccountLoginResponse> _loginToTestAccount(int testNumber) async {
-  final Map<String, dynamic> json = await restClient.sendRequest(
+  final Map<String, dynamic> json = await restClient.sendJsonRequest(
     endpoint: Endpoints.ACCOUNT_LOGIN,
     bodyData: AccountLoginRequest(
       userName: _getTestAccount(testNumber).userName,
@@ -311,7 +311,7 @@ String getChangedPasswordHash(int testNumber) => "${_getTestAccount(testNumber).
 String getChangedEncryptedKey(int testNumber) => "${_getTestAccount(testNumber).encryptedDataKey}_changed";
 
 Future<AccountChangePasswordResponse> _changePasswordOfTestAccount(int testNumber) async {
-  final Map<String, dynamic> json = await restClient.sendRequest(
+  final Map<String, dynamic> json = await restClient.sendJsonRequest(
     endpoint: Endpoints.ACCOUNT_CHANGE_PASSWORD,
     bodyData: AccountChangePasswordRequest(
       newPasswordHash: getChangedPasswordHash(testNumber),

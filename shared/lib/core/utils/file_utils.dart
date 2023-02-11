@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:http_parser/http_parser.dart';
 
 class FileUtils {
   /// Returns the absolute full file path for a local relative file path inside of the working directory (server, or client
@@ -12,17 +11,6 @@ class FileUtils {
 
   /// Write the [content] as a file at the [path]
   static void writeFile(String path, String content) => File(path).writeAsStringSync(content);
-
-  /// Returns the file encoding by parsing the contentType of the http headers
-  static Encoding getEncoding(HttpHeaders headers) {
-    late final MediaType mediaType;
-    if (headers.contentType != null) {
-      mediaType = MediaType.parse(headers.contentType!.value);
-    } else {
-      mediaType = MediaType('application', 'octet-stream');
-    }
-    return Encoding.getByName(mediaType.parameters['charset']) ?? latin1;
-  }
 
   /// Creates the path structure with directories for the directory at the path. If the path points to a file, then it will
   /// create the parent directory.
