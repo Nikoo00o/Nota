@@ -21,6 +21,9 @@ class ServerConfig extends SharedConfig {
   /// Local path to server rsa private key
   String get privateKeyPath => "$resourceFolderPath${Platform.pathSeparator}key.pem";
 
+  /// Local path to server notes path
+  String get noteFolder => "$resourceFolderPath${Platform.pathSeparator}notes";
+
   /// The remaining life time of a token after which the token will get refreshed.
   ///
   /// So a token gets refreshed after the time: [sessionTokenMaxLifetime] - [sessionTokenRefreshAfterRemainingTime].

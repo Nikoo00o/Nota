@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:server/domain/entities/server_account.dart';
 import 'package:server/core/network/rest_callback.dart';
 import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/constants/rest_json_parameter.dart';
 import 'package:shared/core/enums/http_method.dart';
 import 'package:shared/core/network/endpoint.dart';
+import 'package:shared/core/network/network_utils.dart';
 import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
@@ -90,19 +92,30 @@ class RestServer {
   /// Is called when the server receives data from the client
   Future<void> _onClientRequest(HttpRequest request) async {
     late RestCallbackResult response;
-    late final String clientIp;
-    try {
-      final String fullApiPath = request.requestedUri.path;
-      final Map<String, String> queryParams = request.requestedUri.queryParameters.map((String key, String value) =>
-          MapEntry<String, String>(Uri.decodeComponent(key), Uri.decodeComponent(value)));
-      final Map<String, dynamic>? jsonBody = await _getJsonBody(request);
-      clientIp = request.connectionInfo?.remoteAddress.address ?? "";
-      Logger.debug("Got request ${request.requestedUri} from $clientIp with data: $jsonBody");
+    late String log;
+    final String clientIp = request.connectionInfo?.remoteAddress.address ?? "";
+    final String fullApiPath = request.requestedUri.path;
 
-      if (queryParams.isEmpty && fullApiPath.isEmpty && (jsonBody?.isEmpty ?? false)) {
+    final Map<String, String> queryParams = request.requestedUri.queryParameters
+        .map((String key, String value) => MapEntry<String, String>(Uri.decodeComponent(key), Uri.decodeComponent(value)));
+
+    try {
+      final dynamic requestData =
+          await NetworkUtils.decodeNetworkDataStream(httpHeaders: request.headers.asMap(), data: request);
+
+      if (requestData is Map<String, dynamic>) {
+        log = " with json data: $requestData";
+      } else if (requestData is List<int>) {
+        log = " with raw data bytes";
+      } else {
+        log = " with no body data $requestData";
+      }
+      Logger.debug("Got request ${request.requestedUri} from $clientIp$log");
+
+      if (queryParams.isEmpty && fullApiPath.isEmpty && requestData == null) {
         response = RestCallbackResult(jsonResult: <String, dynamic>{}, statusCode: HttpStatus.badRequest);
       } else {
-        response = await _handleCallback(request, fullApiPath, queryParams, jsonBody, clientIp);
+        response = await _handleCallback(request, fullApiPath, queryParams, requestData, clientIp);
       }
     } catch (e, s) {
       Logger.error("REST API error parsing request", e, s);
@@ -110,28 +123,26 @@ class RestServer {
     }
 
     try {
-      request.response.statusCode = response.statusCode;
-      request.response.headers.contentType = ContentType.json;
-      request.response.headers.add("Accept", "application/json");
-      request.response.write(jsonEncode(response.jsonResult));
-      await request.response.close();
+      await _send(request.response, response);
 
-      Logger.debug("Send response for ${request.requestedUri} to $clientIp with status code: ${response.statusCode} "
-          "and data: ${response.jsonResult}");
+      if (response.data is Map<String, dynamic>) {
+        log = " and with json data: ${response.jsonResult}";
+      } else if (response.data is List<int>) {
+        log = " and with raw data bytes";
+      }
+      Logger.debug("Send response for ${request.requestedUri} to $clientIp with status code: ${response.statusCode}$log");
     } catch (e, s) {
       Logger.error("REST API error sending response", e, s);
     }
   }
 
-  Future<Map<String, dynamic>?> _getJsonBody(HttpRequest request) async {
-    final String dataString = await FileUtils.getEncoding(request.headers).decodeStream(request);
-    if (dataString.isNotEmpty) {
-      final dynamic json = jsonDecode(dataString);
-      if (json is Map<String, dynamic>) {
-        return json;
-      }
-    }
-    return null;
+  Future<void> _send(HttpResponse httpResponse, RestCallbackResult resultData) async {
+    final List<int> responseData =
+        NetworkUtils.encodeNetworkData(httpHeaders: resultData.responseHeaders, data: resultData.data);
+    httpResponse.statusCode = resultData.statusCode;
+    resultData.responseHeaders.forEach((String key, String value) => httpResponse.headers.add(key, value));
+    httpResponse.add(responseData);
+    await httpResponse.close();
   }
 
   /// Calls the [authenticationCallback] to return the attached [ServerAccount] to a valid [sessionToken], or otherwise
@@ -141,8 +152,8 @@ class RestServer {
     return authenticationCallback?.call(sessionToken);
   }
 
-  Future<RestCallbackResult> _handleCallback(HttpRequest request, String fullApiPath, Map<String, String> queryParams,
-      Map<String, dynamic>? jsonBody, String clientIp) async {
+  Future<RestCallbackResult> _handleCallback(
+      HttpRequest request, String fullApiPath, Map<String, String> queryParams, dynamic bodyData, String clientIp) async {
     final Iterable<RestCallback> matchingRestCallbackIt = _restCallbacks.where((RestCallback element) =>
         fullApiPath.endsWith(element.endpoint.apiPath) &&
         HttpMethod.fromString(request.method) == element.endpoint.httpMethod);
@@ -160,13 +171,16 @@ class RestServer {
         }
       }
 
-      return matchingRestCallbackIt.first.callback.call(RestCallbackParams(
+      final RestCallbackParams restCallbackParams = RestCallbackParams.castData(
         httpMethod: HttpMethod.fromString(request.method),
+        requestHeaders: request.headers.asMap(),
         queryParams: queryParams,
-        data: jsonBody,
+        data: bodyData,
         ip: clientIp,
         authenticatedAccount: authenticatedAccount,
-      ));
+      );
+
+      return matchingRestCallbackIt.first.callback.call(restCallbackParams);
     } else {
       return RestCallbackResult(jsonResult: <String, dynamic>{}, statusCode: HttpStatus.notFound);
     }

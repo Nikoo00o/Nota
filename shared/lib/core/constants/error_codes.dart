@@ -18,6 +18,10 @@ class ErrorCodes {
   /// Unknown http method used. automatically used during the server communication
   static const String UNKNOWN_HTTP_METHOD = "error.server.unknown.method";
 
+  /// A datatype other than Map<String, dynamic>, or String is used for the body data when sending data.
+  /// Or a "GET" request is send with body data, or a "PUT", or "POST" request is send without data!
+  static const String INVALID_DATA_TYPE = "error.invalid.data.type";
+
   /// A file could not be read / opened. the translation text should have a param for the filename
   static const String FILE_NOT_FOUND = "error.file.not.found";
 

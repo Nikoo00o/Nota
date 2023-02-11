@@ -10,6 +10,9 @@ import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/enums/http_method.dart';
 import 'package:shared/core/constants/rest_json_parameter.dart';
 import 'package:shared/core/network/endpoint.dart';
+import 'package:shared/core/network/network_utils.dart';
+import 'package:shared/core/network/response_data.dart';
+import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/services/shared_session_service.dart';
 
@@ -37,8 +40,17 @@ class RestClient {
   /// [endpoint] should be one of the [Endpoints].
   ///
   /// [queryParams] can always be used to add query params.
-  /// [bodyData] can be used for put and post requests (the [endpoint] defines the http method).
+  ///
+  /// [bodyData] can be used for put and post (and also delete) requests (the [endpoint] defines the http method).
+  /// [bodyData] can be a json map of String and dynamic, or it can be a list of raw bytes!
+  ///
+  /// For GET requests [bodyData] must be null!
+  ///
   /// [httpHeaders] can be used to add additional http headers.
+  /// Values for the keys [HttpHeaders.contentTypeHeader], [HttpHeaders.acceptHeader] and
+  /// [HttpHeaders.contentLengthHeader] will be ignored, because they are set automatically to json, or octet-stream.
+  ///
+  /// The Accept header will also include those 2 if its missing
   ///
   /// If the endpoint has the property [endpoint.needsSessionToken] set to true, then the query params will automatically
   /// have the session token returned from the session service added to them!
@@ -50,33 +62,68 @@ class RestClient {
   /// If the endpoint is unknown, 404 is returned.
   /// If the request is completely empty, or if the request parameter could not be parsed, 400 is returned.
   ///
-  /// The [RestJsonParameter.SERVER_ERROR] jsn key will be thrown as one of [ErrorCodes]
-  Future<Map<String, dynamic>> sendRequest({
+  /// The [RestJsonParameter.SERVER_ERROR] json key will be thrown as one of [ErrorCodes]
+  ///
+  /// In most cases the returned data will be a json map of string and dynamic, but for file downloads it can also
+  /// be a list of raw bytes! It will never be null.
+  /// If the content type did not match the type of the data, a [ServerException] with [ErrorCodes.INVALID_DATA_TYPE] will
+  /// be thrown! If no data was send, then a [ServerException] with [ErrorCodes.UNKNOWN_SERVER] will be thrown which will
+  /// also be thrown on timeout!
+  ///
+  Future<ResponseData> sendRequest({
     required Endpoint endpoint,
     Map<String, String> queryParams = const <String, String>{},
-    Map<String, dynamic> bodyData = const <String, dynamic>{},
-    Map<String, String> httpHeaders = const <String, String>{
-      'Content-type': 'application/json',
-      'Accept': 'application/json',
-    },
+    dynamic bodyData,
+    Map<String, String>? httpHeaders,
   }) async {
     final Uri url = await _buildFinalUrl(endpoint, queryParams);
 
+    if (endpoint.httpMethod == HttpMethod.GET && bodyData != null) {
+      Logger.error("Can not send a GET request to $url with body data");
+      throw const ServerException(message: ErrorCodes.INVALID_DATA_TYPE);
+    }
+
+    final Map<String, String> requestHeaders = httpHeaders ?? <String, String>{};
+    final List<int> requestData = NetworkUtils.encodeNetworkData(httpHeaders: requestHeaders, data: bodyData);
+
     Logger.debug("Sending the following ${endpoint.httpMethod} request to the server: $url");
-    final http.Response response = await _send(url, endpoint.httpMethod, httpHeaders, bodyData);
+    final http.Response response = await _send(url, endpoint.httpMethod, requestHeaders, requestData);
+
     if (validHttpResponseCodes.contains(response.statusCode) == false) {
+      Logger.error("Received invalid http status code from server: ${response.statusCode}");
       throw ServerException(message: ErrorCodes.httpStatusWith(response.statusCode));
     }
 
-    final dynamic jsonData = jsonDecode(response.body);
-    if (jsonData is Map<String, dynamic>) {
-      _checkResponseForErrors(jsonData);
-      Logger.debug("Received the following response: $jsonData");
-      return jsonData;
+    final dynamic responseData = NetworkUtils.decodeNetworkData(httpHeaders: response.headers, data: response.bodyBytes);
+
+    if (responseData is Map<String, dynamic>) {
+      _checkResponseForErrors(responseData);
+      Logger.debug("Received the following JSON response: $responseData");
+      return ResponseData(json: responseData, bytes: null, responseHeaders: response.headers);
+    } else if (responseData is List<int>) {
+      Logger.debug("Received binary data");
+      return ResponseData(json: null, bytes: responseData, responseHeaders: response.headers);
     } else {
-      Logger.error("Error sending the request. Invalid JSON Data: $jsonData");
+      Logger.error("Received no data from server");
       throw const ServerException(message: ErrorCodes.UNKNOWN_SERVER);
     }
+  }
+
+  /// This is the same as [sendRequest], but with explicit types for json communication.
+  ///
+  /// For "GET" http requests, the [bodyData] must stay empty!
+  Future<Map<String, dynamic>> sendJsonRequest({
+    required Endpoint endpoint,
+    Map<String, String> queryParams = const <String, String>{},
+    Map<String, dynamic> bodyData = const <String, dynamic>{},
+    Map<String, String>? httpHeaders,
+  }) async {
+    final ResponseData response = await sendRequest(
+        endpoint: endpoint,
+        queryParams: queryParams,
+        bodyData: bodyData.isEmpty ? null : bodyData,
+        httpHeaders: httpHeaders);
+    return response.json!;
   }
 
   void _checkResponseForErrors(Map<String, dynamic> jsonMap) {
@@ -87,8 +134,7 @@ class RestClient {
     }
   }
 
-  Future<http.Response> _send(
-      Uri url, HttpMethod httpMethod, Map<String, String> httpHeaders, Map<String, dynamic>? bodyData) async {
+  Future<http.Response> _send(Uri url, HttpMethod httpMethod, Map<String, String> httpHeaders, List<int> bytesToSend) async {
     try {
       late final http.Response response;
 
@@ -97,13 +143,13 @@ class RestClient {
           response = await client.get(url, headers: httpHeaders);
           break;
         case HttpMethod.POST:
-          response = await client.post(url, headers: httpHeaders, body: jsonEncode(bodyData));
+          response = await client.post(url, headers: httpHeaders, body: bytesToSend);
           break;
         case HttpMethod.PUT:
-          response = await client.put(url, headers: httpHeaders, body: jsonEncode(bodyData));
+          response = await client.put(url, headers: httpHeaders, body: bytesToSend);
           break;
         case HttpMethod.DELETE:
-          response = await client.delete(url, headers: httpHeaders, body: jsonEncode(bodyData));
+          response = await client.delete(url, headers: httpHeaders, body: bytesToSend);
           break;
         default:
           throw const ServerException(message: ErrorCodes.UNKNOWN_HTTP_METHOD);
@@ -111,7 +157,7 @@ class RestClient {
 
       return response;
     } catch (e, s) {
-      Logger.error("Error sending the request", e, s);
+      Logger.error("Error sending the $httpMethod request with the headers: $httpHeaders", e, s);
       if (e is ServerException) {
         rethrow;
       }

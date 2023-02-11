@@ -14,13 +14,6 @@ Future<void> main(List<String> arguments) async {
   await initializeGetIt();
   Hive.init(sl<ServerConfig>().resourceFolderPath);
 
-
-
-
-  final hex = SecurityUtils.hashString(StringUtils.getRandomBytesAsString(64));
-
-  print(hex);
-
   final ArgParser parser = ArgParser()..addOption("rsaPassword", abbr: "r");
   final ArgResults argResults = parser.parse(arguments);
   final String? rsaPassword = argResults["rsaPassword"] as String?;

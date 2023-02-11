@@ -99,7 +99,7 @@ class AccountRepository {
   /// Creates a new account on the server and returns [HttpStatus.ok]
   Future<RestCallbackResult> handleCreateAccountRequest(RestCallbackParams params) async {
     return _lock.synchronized(() async {
-      final CreateAccountRequest request = CreateAccountRequest.fromJson(params.data!);
+      final CreateAccountRequest request = CreateAccountRequest.fromJson(params.jsonBody!);
       if (request.userName.isEmpty || request.passwordHash.isEmpty || request.encryptedDataKey.isEmpty) {
         Logger.error("Error creating account, because the request is empty: ${request.userName}");
         return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_EMPTY_REQUEST_VALUES);
@@ -132,7 +132,7 @@ class AccountRepository {
   /// Returns [ErrorCodes.SERVER_ACCOUNT_WRONG_PASSWORD] if the password hash was invalid.
   Future<RestCallbackResult> handleLoginToAccountRequest(RestCallbackParams params) async {
     return _lock.synchronized(() async {
-      final AccountLoginRequest request = AccountLoginRequest.fromJson(params.data!);
+      final AccountLoginRequest request = AccountLoginRequest.fromJson(params.jsonBody!);
       if (request.userName.isEmpty || request.passwordHash.isEmpty) {
         Logger.error("Error logging in to account, because the request is empty: ${request.userName}");
         return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_EMPTY_REQUEST_VALUES);
@@ -167,7 +167,7 @@ class AccountRepository {
       // the attached account will always be a server account
       ServerAccountModel account = ServerAccountModel.fromServerAccount(params.authenticatedAccount as ServerAccount);
 
-      final AccountChangePasswordRequest request = AccountChangePasswordRequest.fromJson(params.data!);
+      final AccountChangePasswordRequest request = AccountChangePasswordRequest.fromJson(params.jsonBody!);
       if (request.newPasswordHash.isEmpty || request.newEncryptedDataKey.isEmpty) {
         Logger.error("Error changing password for account, because the request is empty: ${account.userName}");
         return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_EMPTY_REQUEST_VALUES);
