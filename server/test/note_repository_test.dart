@@ -18,25 +18,21 @@ import 'package:test/test.dart';
 import 'helper/test_helpers.dart';
 
 // test for the specific note updating functions.
-const int _serverPort = 8194;
 
 late ServerAccountModel _account;
 
-void main() {
-  Logger.initLogger(Logger()); // should always be the first call in every test
+const int _serverPort = 8193;
 
+void main() {
   setUp(() async {
     // will be run for each test!
-    await createCommonTestObjects(serverPort: _serverPort); // use global test objects. needs a different server port for
-    // each test file!!!
-
-    await initTestHiveAndServer(serverRepository, serverConfigMock); // init hive test data and also start server for
-    // each test (this callback will be run before each test)
+    await createCommonTestObjects(serverPort: _serverPort); // creates the global test objects.
+    // IMPORTANT: this needs a different server port for each test file! (this callback will be run before each test)
   });
 
   tearDown(() async {
-    await cleanupTestHiveAndServer(serverRepository, serverConfigMock); // cleanup server and hive test data after every
-    // test (this callback will be run after each test)
+    await cleanupTestFilesAndServer(); // cleanup server and hive test data after every test (this callback will be run
+    // after each test)
   });
 
   group("note repository tests: ", () {
@@ -132,6 +128,26 @@ void _testStartTransfer() {
   test("Client and server notes should get compared and match the prepared note update list ", () async {
     final List<NoteUpdate> noteUpdates = await noteRepository.compareClientAndServerNotes(_clientList1, _serverList1);
     expect(jsonEncode(List<NoteUpdateModel>.from(noteUpdates)), jsonEncode(_updateList1));
+  });
+
+  test("A start request with a client id should return the correct update", () async {
+    final StartNoteTransferResponse response =
+        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    final NoteUpdateModel matchingUpdate = NoteUpdateModel(
+        clientId: -1,
+        serverId: 1,
+        newEncFileName: "c1",
+        newLastEdited: _now,
+        noteTransferStatus: NoteTransferStatus.SERVER_NEEDS_NEW);
+
+    expect(response.transferToken.isEmpty, false, reason: "token not empty");
+    expect(jsonEncode(response.noteTransfers), jsonEncode(<NoteUpdateModel>[matchingUpdate]), reason: "update matches");
+  });
+
+  test("A start request with a server id that is not contained in the server account should throw an exception", () async {
+    expect(() async {
+      await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: 1, encFileName: "c1", lastEdited: _now)]);
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
   });
 }
 

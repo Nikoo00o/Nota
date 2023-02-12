@@ -1,7 +1,10 @@
 import 'dart:convert';
 
+import 'package:hive/hive.dart';
 import 'package:server/core/config/server_config.dart';
+import 'package:server/core/get_it.dart';
 import 'package:server/data/models/server_account_model.dart';
+import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/data/datasources/hive_box_configuration.dart';
 import 'package:shared/data/datasources/shared_hive_data_source_mixin.dart';
 
@@ -13,6 +16,10 @@ abstract class LocalDataSource {
   static const String CONFIG_DATABASE = "CONFIG_DATABASE";
 
   static const String NOTE_COUNTER = "NOTE_COUNTER";
+
+  /// Must be called first in the main function to initialize the [ServerConfig.resourceFolderPath] folder for the
+  /// databases, etc
+  Future<void> init();
 
   /// Returns the stored [ServerAccountModel], or null.
   /// Only the accessed accounts will be loaded into memory.
@@ -72,6 +79,12 @@ class LocalDataSourceImpl extends LocalDataSource with SharedHiveDataSourceMixin
   final ServerConfig serverConfig;
 
   LocalDataSourceImpl({required this.serverConfig});
+
+  @override
+  Future<void> init() async {
+    FileUtils.createDirectory(serverConfig.resourceFolderPath);
+    Hive.init(serverConfig.resourceFolderPath);
+  }
 
   @override
   Map<String, HiveBoxConfiguration> getHiveDataBaseConfig() {

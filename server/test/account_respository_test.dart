@@ -29,21 +29,19 @@ import 'helper/test_helpers.dart';
 import 'mocks/session_service_mock.dart';
 
 // test for the specific account functions.
-const int _serverPort = 8193;
+
+const int _serverPort = 8195;
 
 void main() {
-  Logger.initLogger(Logger()); // should always be the first call in every test
-
   setUp(() async {
-    await createCommonTestObjects(serverPort: _serverPort); // use global test objects. needs a different server port for
-    // each test file!!!
-
-    await initTestHiveAndServer(serverRepository, serverConfigMock); // init hive test data and also start server for
-    // each test (this callback will be run before each test)
+    // will be run for each test!
+    await createCommonTestObjects(serverPort: _serverPort); // creates the global test objects.
+    // IMPORTANT: this needs a different server port for each test file! (this callback will be run before each test)
   });
 
   tearDown(() async {
-    await cleanupTestHiveAndServer(serverRepository, serverConfigMock);
+    await cleanupTestFilesAndServer(); // cleanup server and hive test data after every test (this callback will be run
+    // after each test)
   });
 
   group("account repository tests: ", () {
@@ -85,7 +83,7 @@ void _testCreateAccounts() {
           encryptedDataKey: "",
         ).toJson(),
       );
-    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_EMPTY_REQUEST_VALUES));
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
   });
 
   test("create a new account testUser1 successfully which should be returned from the local data source", () async {
@@ -115,7 +113,7 @@ void _testLoginToAccounts() {
         endpoint: Endpoints.ACCOUNT_LOGIN,
         bodyData: const AccountLoginRequest(userName: "", passwordHash: "").toJson(),
       );
-    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_EMPTY_REQUEST_VALUES));
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
   });
 
   test("throw an exception on logging in with an unknown username", () async {

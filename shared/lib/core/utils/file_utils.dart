@@ -12,6 +12,9 @@ class FileUtils {
   /// Write the [content] as a file at the [path]
   static void writeFile(String path, String content) => File(path).writeAsStringSync(content);
 
+  /// The [oldPath] file must exist for this to work!
+  static void copyFile(String oldPath, String newPath) => File(oldPath).copySync(newPath);
+
   /// Creates the path structure with directories for the directory at the path. If the path points to a file, then it will
   /// create the parent directory.
   static void createDirectory(String path) {

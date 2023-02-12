@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:server/core/config/server_config.dart';
 import 'package:server/data/datasources/account_data_source.dart.dart';
 import 'package:server/data/datasources/note_data_source.dart';
@@ -10,6 +11,7 @@ import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/constants/rest_json_parameter.dart';
 import 'package:shared/core/enums/note_transfer_status.dart';
+import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/core/utils/string_utils.dart';
 import 'package:shared/data/dtos/account/account_change_password_request.dart';
@@ -40,11 +42,30 @@ class NoteRepository {
 
   NoteRepository({required this.noteDataSource, required this.serverConfig});
 
+  // todo: add cleanup method for all old transfers after server restart (if server crashes. all .temp note files)
+
+  /// Starts a note transfer and the client can already delete and rename its own notes with the response.
+  /// And it can also update its local client ids for new notes with the updated server ids.
+  ///
+  /// Afterwards the client should call [handleDownloadNote] and [handleUploadNote] for each affected note that is not empty
+  /// depending on the status of the response of this request.
+  ///
+  /// At the end to apply the transfer on the server side, the client should call [handleFinishNoteTransfer], but it can
+  /// also be called earlier to cancel the transfer.
+  ///
+  /// This request can return a [ServerException] with the error code [ErrorCodes.SERVER_INVALID_REQUEST_VALUES] if the
+  /// client sends a server note id that doesn't belong to it!
   Future<RestCallbackResult> handleStartNoteTransfer(RestCallbackParams params) async {
     final ServerAccount serverAccount = params.getAttachedServerAccount();
     final StartNoteTransferRequest request = StartNoteTransferRequest.fromJson(params.jsonBody!);
 
-    final List<NoteUpdate> noteUpdates = await compareClientAndServerNotes(request.clientNotes, serverAccount.noteInfoList);
+    late final List<NoteUpdate> noteUpdates;
+    try {
+      noteUpdates = await compareClientAndServerNotes(request.clientNotes, serverAccount.noteInfoList);
+    } on ServerException catch (e) {
+      Logger.error("Error starting note transfer, because the request parameter were invalid for ${serverAccount.userName}");
+      return RestCallbackResult.withErrorCode(e.message ?? "");
+    }
 
     final StartNoteTransferResponse response = StartNoteTransferResponse(
       transferToken: _createNewTransferToken(),
@@ -53,11 +74,21 @@ class NoteRepository {
 
     _noteTransfers[response.transferToken] = response.noteTransfers;
 
-    Logger.debug("Created the new note transfer ${response.transferToken} for "
+    Logger.info("Created the new note transfer ${response.transferToken} for "
         "${serverAccount.userName} with ${response.noteTransfers}");
+    // the client can now update name and ids and delete notes and then send/receive data. or it can cancel the transfer.
     return RestCallbackResult.withResponse(response);
   }
 
+  /// This request works with raw bytes as output and it needs the following query params:
+  /// [RestJsonParameter.TRANSFER_TOKEN] from the call to [handleStartNoteTransfer]
+  /// [RestJsonParameter.TRANSFER_NOTE_ID] for the affected note which should be downloaded from the server
+  ///
+  /// This request can return a [ServerException] with the error code [ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN] if the
+  /// client used an invalid transfer token, or if the server cancelled the note transfer!
+  /// It can also return the error code [ErrorCodes.SERVER_INVALID_REQUEST_VALUES] if the client sends a server note id
+  /// that doesn't belong to it!
+  /// And [ErrorCodes.FILE_NOT_FOUND] if the server could not find the note file.
   Future<RestCallbackResult> handleDownloadNote(RestCallbackParams params) async {
     final ServerAccount serverAccount = params.getAttachedServerAccount();
     final String transferToken = _getTransferToken(params);
@@ -67,15 +98,33 @@ class NoteRepository {
           " ${serverAccount.userName}");
       return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN);
     }
-    if (params.rawBytes?.isEmpty ?? true) {
-      Logger.error("Error downloading note, because the request is empty: ${serverAccount.userName}");
-      return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_EMPTY_REQUEST_VALUES);
-    }
-    // then download, or upload the files and store them in a new temp db for the transaction
 
-    throw UnimplementedError();
+    final int serverNoteId = _getValidNoteId(params);
+    if (serverNoteId == 0) {
+      Logger.error("Error downloading note, because the note id was invalid: $transferToken");
+      return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_REQUEST_VALUES);
+    }
+
+    late final Uint8List bytes;
+    try {
+      bytes = await noteDataSource.loadNoteData(serverNoteId);
+    } on ServerException catch (e) {
+      Logger.error("Error downloading note for $transferToken");
+      return RestCallbackResult.withErrorCode(e.message ?? "");
+    }
+
+    Logger.info("Downloaded file data for file $serverNoteId for the transfer $transferToken ");
+    return RestCallbackResult(rawBytes: bytes);
   }
 
+  /// This request works with raw bytes as input and it needs the following query params:
+  /// [RestJsonParameter.TRANSFER_TOKEN] from the call to [handleStartNoteTransfer]
+  /// [RestJsonParameter.TRANSFER_NOTE_ID] for the affected note which should be uploaded to the server
+  ///
+  /// This request can return a [ServerException] with the error code [ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN] if the
+  /// client used an invalid transfer token, or if the server cancelled the note transfer!
+  /// It can also return the error code [ErrorCodes.SERVER_INVALID_REQUEST_VALUES] if the client sends a server note id
+  /// that doesn't belong to it!
   Future<RestCallbackResult> handleUploadNote(RestCallbackParams params) async {
     final ServerAccount serverAccount = params.getAttachedServerAccount();
     final String transferToken = _getTransferToken(params);
@@ -86,16 +135,20 @@ class NoteRepository {
       return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN);
     }
     if (params.rawBytes?.isEmpty ?? true) {
-      Logger.error("Error uploading note, because the request is empty: ${serverAccount.userName}");
-      return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_EMPTY_REQUEST_VALUES);
+      Logger.error("Error uploading note, because the request is empty: $transferToken");
+      return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_REQUEST_VALUES);
     }
 
-    // then download, or upload the files and store them in a new temp db for the transaction
-    // transaction token will be in query string and this will not have a dto
+    final int serverNoteId = _getValidNoteId(params);
+    if (serverNoteId == 0) {
+      Logger.error("Error downloading note, because the note id was invalid: $transferToken");
+      return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_REQUEST_VALUES);
+    }
 
-    // also needs the note id in the query string (can be client only)
+    await noteDataSource.saveTempNoteData(serverNoteId, transferToken, params.rawBytes!);
 
-    throw UnimplementedError();
+    Logger.info("Uploaded file data for file $serverNoteId for the transfer $transferToken ");
+    return RestCallbackResult();
   }
 
   Future<RestCallbackResult> handleFinishNoteTransfer(RestCallbackParams params) async {
@@ -123,6 +176,9 @@ class NoteRepository {
   /// communication.
   ///
   /// This also already adds the correct server id for new notes in the update list and sets the correct new file name!
+  ///
+  /// If [clientNotes] contains a server id (>0) that does not exist in [serverNotes], then a [ServerException] with
+  /// [ErrorCodes.SERVER_INVALID_REQUEST_VALUES] will be thrown
   Future<List<NoteUpdate>> compareClientAndServerNotes(List<NoteInfo> clientNotes, List<NoteInfo> serverNotes) async {
     final List<NoteUpdate> noteUpdates = List<NoteUpdate>.empty(growable: true);
     final List<NoteInfo> sortedClientNotes = List<NoteInfo>.from(clientNotes);
@@ -167,6 +223,9 @@ class NoteRepository {
   Future<void> _addNoteUpdate(List<NoteUpdate> noteUpdates, NoteInfo note, NoteTransferStatus noteTransferStatus) async {
     int serverId = note.id;
     if (noteTransferStatus == NoteTransferStatus.SERVER_NEEDS_NEW) {
+      if (note.id >= 0) {
+        throw const ServerException(message: ErrorCodes.SERVER_INVALID_REQUEST_VALUES);
+      }
       serverId = await noteDataSource.getNewNoteCounter();
     }
     noteUpdates.add(NoteUpdateModel(
@@ -179,7 +238,8 @@ class NoteRepository {
   }
 
   void _addComparedNoteUpdate(List<NoteUpdate> noteUpdates, {required NoteInfo clientNote, required NoteInfo serverNote}) {
-    assert(clientNote.id == serverNote.id, "ids are the same");
+    assert(clientNote.id == serverNote.id, "both ids are the same server id");
+
     if (clientNote.lastEdited.isBefore(serverNote.lastEdited)) {
       noteUpdates.add(NoteUpdateModel(
         clientId: clientNote.id,
@@ -210,10 +270,22 @@ class NoteRepository {
 
   String _getTransferToken(RestCallbackParams params) => params.queryParams[RestJsonParameter.TRANSFER_TOKEN] ?? "";
 
+  /// Returns the note id from the params if it is a valid server id that is contained in the matching transfer.
+  /// Otherwise 0 will be returned
+  int _getValidNoteId(RestCallbackParams params) {
+    final String idString = params.queryParams[RestJsonParameter.TRANSFER_NOTE_ID] ?? "0";
+    int id = int.tryParse(idString) ?? 0;
+    if (_noteTransfers[_getTransferToken(params)]!.where((NoteUpdate noteUpdate) => noteUpdate.serverId == id).isEmpty) {
+      id = 0;
+    }
+    return id;
+  }
+
   /// Returns the note transfers unmodifiable for read only access
   Map<String, List<NoteUpdate>> getNoteTransfers() {
     final Map<String, List<NoteUpdate>> readOnly = _noteTransfers.map((String key, List<NoteUpdate> value) =>
         MapEntry<String, List<NoteUpdate>>(key, List<NoteUpdate>.unmodifiable(value)));
     return Map<String, List<NoteUpdate>>.unmodifiable(readOnly);
   }
+
 }

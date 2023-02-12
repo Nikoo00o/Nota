@@ -76,35 +76,44 @@ Future<void> createCommonTestObjects({required int serverPort}) async {
   restClient = RestClient(config: serverConfigMock, sessionService: sessionServiceMock);
 
   initialized = true;
+
+  await _setup();
 }
 
-/// Should be the last call in the [setUp] function of each test.
-///
-/// Creates a new [Hive] data folder in the specific test data folder and also starts the [ServerRepository].
-///
-/// The [Hive] data folder will be in testData/serverPort
-Future<void> initTestHiveAndServer(ServerRepository serverRepository, ServerConfig serverConfig) async {
-  final String testDataPath = getTestResourceFolderPath(serverConfig);
-  FileUtils.createDirectory(testDataPath);
-  Hive.init(testDataPath);
+Future<void> _setup() async {
+  Logger.initLogger(Logger()); // the logger must always be initialized first
+
+  // modifies the resource path to depend on the test port, so its unique for each test
+  final String baseTestPath = FileUtils.getLocalFilePath("testData");
+  serverConfigMock.resourceFolderPathOverride = "$baseTestPath${Platform.pathSeparator}${serverConfigMock.serverPort}";
+
+  await localDataSource.init(); // create the required folders and init the database
+  await noteDataSource.init();
+
+  // copy the test certificate files into the specific test folder
+  FileUtils.copyFile(
+    "$baseTestPath${Platform.pathSeparator}key.pem",
+    "${serverConfigMock.resourceFolderPath}${Platform.pathSeparator}key.pem",
+  );
+  FileUtils.copyFile(
+    "$baseTestPath${Platform.pathSeparator}certificate.pem",
+    "${serverConfigMock.resourceFolderPath}${Platform.pathSeparator}certificate.pem",
+  );
 
   final bool started = await serverRepository.runNota(autoRestart: false);
-  expect(started, true);
+  expect(started, true); // start the server and expect it to run
+
+  FileUtils.getLocalFilePath("notaRes");
 }
 
 /// Should be the last call in the [tearDown] function of each test.
 ///
 /// Stops the [ServerRepository] and deletes the hive temp files
-Future<void> cleanupTestHiveAndServer(ServerRepository serverRepository, ServerConfig serverConfig) async {
-  final String testDataPath = getTestResourceFolderPath(serverConfig);
+Future<void> cleanupTestFilesAndServer() async {
   await serverRepository.stopNota();
   await Hive.close();
-  FileUtils.deleteDirectory(testDataPath);
+  FileUtils.deleteDirectory(serverConfigMock.resourceFolderPath);
 }
-
-/// Returns the modified test resource folder for everything except the server key and certificate
-String getTestResourceFolderPath(ServerConfig serverConfig) =>
-    "${serverConfig.resourceFolderPath}${Platform.pathSeparator}testData${Platform.pathSeparator}${serverConfig.serverPort}";
 
 ServerAccountModel getTestAccount(int testNumber) {
   return ServerAccountModel(

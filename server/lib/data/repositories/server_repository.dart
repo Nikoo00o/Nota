@@ -82,10 +82,8 @@ class ServerRepository {
     restServer.addCallback(endpoint: Endpoints.ACCOUNT_LOGIN, callback: accountRepository.handleLoginToAccountRequest);
     restServer.addCallback(
         endpoint: Endpoints.ACCOUNT_CHANGE_PASSWORD, callback: accountRepository.handleChangeAccountPasswordRequest);
-    restServer.addCallback(
-        endpoint: Endpoints.NOTE_TRANSFER_START, callback: noteRepository.handleStartNoteTransfer);
-    restServer.addCallback(
-        endpoint: Endpoints.NOTE_TRANSFER_FINISH, callback: noteRepository.handleFinishNoteTransfer);
+    restServer.addCallback(endpoint: Endpoints.NOTE_TRANSFER_START, callback: noteRepository.handleStartNoteTransfer);
+    restServer.addCallback(endpoint: Endpoints.NOTE_TRANSFER_FINISH, callback: noteRepository.handleFinishNoteTransfer);
     restServer.addCallback(endpoint: Endpoints.NOTE_DOWNLOAD, callback: noteRepository.handleDownloadNote);
     restServer.addCallback(endpoint: Endpoints.NOTE_UPLOAD, callback: noteRepository.handleUploadNote);
   }

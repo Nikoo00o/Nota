@@ -6,9 +6,9 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
 Future<void> main(List<String> arguments) async {
-  Logger.initLogger(AppLogger());
   await initializeGetIt();
-  await Hive.initFlutter();
+  Logger.initLogger(AppLogger());
+  //todo: call LocalDataSource init here to initialize hive!
 
   WidgetsFlutterBinding.ensureInitialized();
 

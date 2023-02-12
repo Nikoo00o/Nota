@@ -11,6 +11,7 @@ import 'package:server/core/network/rest_server.dart';
 /// Returns the GetIt service locator / singleton instance
 final GetIt sl = GetIt.instance;
 
+/// This and all constructor calls inside may not call the logger, because it will be initialized later!
 Future<void> initializeGetIt() async {
   sl.registerLazySingleton<ServerConfig>(() => ServerConfig());
   sl.registerLazySingleton<RestServer>(() => RestServer());
