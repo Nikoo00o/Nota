@@ -4,6 +4,7 @@ import 'package:server/core/config/server_config.dart';
 import 'package:server/data/repositories/account_repository.dart';
 import 'package:server/core/network/rest_callback.dart';
 import 'package:server/core/network/rest_server.dart';
+import 'package:server/data/repositories/note_repository.dart';
 import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/constants/rest_json_parameter.dart';
 import 'package:shared/core/utils/logger/logger.dart';
@@ -15,11 +16,17 @@ class ServerRepository {
   final ServerConfig serverConfig;
   final RestServer restServer;
   final AccountRepository accountRepository;
+  final NoteRepository noteRepository;
 
   bool _callbacksAdded = false;
   Timer? cleanupTimer;
 
-  ServerRepository({required this.serverConfig, required this.restServer, required this.accountRepository});
+  ServerRepository({
+    required this.serverConfig,
+    required this.restServer,
+    required this.accountRepository,
+    required this.noteRepository,
+  });
 
   /// runs the nota server and will not return if [autoRestart] is set to true!
   /// Otherwise it returns if the server was started!
@@ -75,6 +82,12 @@ class ServerRepository {
     restServer.addCallback(endpoint: Endpoints.ACCOUNT_LOGIN, callback: accountRepository.handleLoginToAccountRequest);
     restServer.addCallback(
         endpoint: Endpoints.ACCOUNT_CHANGE_PASSWORD, callback: accountRepository.handleChangeAccountPasswordRequest);
+    restServer.addCallback(
+        endpoint: Endpoints.NOTE_TRANSFER_START, callback: noteRepository.handleStartNoteTransfer);
+    restServer.addCallback(
+        endpoint: Endpoints.NOTE_TRANSFER_FINISH, callback: noteRepository.handleFinishNoteTransfer);
+    restServer.addCallback(endpoint: Endpoints.NOTE_DOWNLOAD, callback: noteRepository.handleDownloadNote);
+    restServer.addCallback(endpoint: Endpoints.NOTE_UPLOAD, callback: noteRepository.handleUploadNote);
   }
 
   Future<RestCallbackResult> _handleAbout(RestCallbackParams params) async {

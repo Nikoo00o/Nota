@@ -13,6 +13,7 @@ mixin SharedAccountModelMixin on SharedAccount {
 
   /// Returns a json map of the member variables of [SharedAccount]
   Map<String, dynamic> toJsonMixin() {
+    // first convert the entity member to models!
     SessionTokenModel? sessionTokenModel;
     if (sessionToken != null) {
       sessionTokenModel = SessionTokenModel.fromSessionToken(sessionToken!);

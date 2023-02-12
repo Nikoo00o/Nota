@@ -12,4 +12,7 @@ class RestJsonParameter {
 
   /// The response body json key for the text that the [Endpoints.ABOUT] endpoint returns
   static const String NOTA_ABOUT = "Nota REST API";
+
+  /// The query parameter for the transfer token that is used for note transfers!
+  static const String TRANSFER_TOKEN = "TRANSFER_TOKEN";
 }

@@ -4,7 +4,9 @@ import 'package:hive/hive.dart';
 import 'package:server/core/config/server_config.dart';
 import 'package:server/data/datasources/account_data_source.dart.dart';
 import 'package:server/data/datasources/local_data_source.dart';
+import 'package:server/data/datasources/note_data_source.dart';
 import 'package:server/data/repositories/account_repository.dart';
+import 'package:server/data/repositories/note_repository.dart';
 import 'package:server/data/repositories/server_repository.dart';
 import 'package:server/core/network/rest_server.dart';
 import 'package:shared/core/network/rest_client.dart';
@@ -22,8 +24,10 @@ late ServerConfigMock serverConfigMock;
 late RestServerMock restServer;
 late LocalDataSource localDataSource;
 late AccountDataSource accountDataSource;
+late NoteDataSource noteDataSource;
 late ServerRepository serverRepository;
 late AccountRepository accountRepository;
+late NoteRepository noteRepository;
 late SessionServiceMock sessionServiceMock;
 late RestClient restClient;
 bool initialized = false;
@@ -49,12 +53,15 @@ Future<void> createCommonTestObjects({required int serverPort}) async {
 
   localDataSource = LocalDataSourceImpl(serverConfig: serverConfigMock);
   accountDataSource = AccountDataSource(serverConfig: serverConfigMock, localDataSource: localDataSource);
+  noteDataSource = NoteDataSource(serverConfig: serverConfigMock, localDataSource: localDataSource);
 
   accountRepository = AccountRepository(accountDataSource: accountDataSource, serverConfig: serverConfigMock);
+  noteRepository = NoteRepository(noteDataSource: noteDataSource, serverConfig: serverConfigMock);
   serverRepository = ServerRepository(
     restServer: restServer,
     serverConfig: serverConfigMock,
     accountRepository: accountRepository,
+    noteRepository: noteRepository,
   );
 
   sessionServiceMock = SessionServiceMock();

@@ -27,4 +27,28 @@ class Endpoints {
     httpMethod: HttpMethod.POST,
     needsSessionToken: true,
   );
+
+  static const Endpoint NOTE_TRANSFER_START = Endpoint(
+    apiPath: "/api/notes/transfer/start",
+    httpMethod: HttpMethod.POST,
+    needsSessionToken: true,
+  );
+
+  static const Endpoint NOTE_TRANSFER_FINISH = Endpoint(
+    apiPath: "/api/notes/transfer/finish",
+    httpMethod: HttpMethod.POST,
+    needsSessionToken: true,
+  );
+
+  static const Endpoint NOTE_UPLOAD = Endpoint(
+    apiPath: "/api/notes/upload",
+    httpMethod: HttpMethod.PUT,
+    needsSessionToken: true,
+  );
+
+  static const Endpoint NOTE_DOWNLOAD = Endpoint(
+    apiPath: "/api/notes/download",
+    httpMethod: HttpMethod.GET,
+    needsSessionToken: true,
+  );
 }

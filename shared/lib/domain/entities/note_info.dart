@@ -33,4 +33,7 @@ class NoteInfo extends Entity {
       lastEdited: newLastEdited ?? lastEdited,
     );
   }
+
+  /// Returns [true] if the [encFileName] of this note is empty!
+  bool get isDeleted => encFileName.isEmpty;
 }
