@@ -36,7 +36,7 @@ class Endpoints {
 
   static const Endpoint NOTE_TRANSFER_FINISH = Endpoint(
     apiPath: "/api/notes/transfer/finish",
-    httpMethod: HttpMethod.POST,
+    httpMethod: HttpMethod.DELETE,
     needsSessionToken: true,
   );
 

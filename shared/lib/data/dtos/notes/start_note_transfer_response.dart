@@ -5,7 +5,11 @@ class StartNoteTransferResponse extends ResponseDTO {
   /// The new base64 encoded transfer token that should be used for the created transfer
   final String transferToken;
 
-  /// The note transfers with the status, id, name, etc of each note after comparing server and client notes
+  /// The note transfers with the status, id, name, etc of each note after comparing server and client notes.
+  ///
+  /// The Client can now already update the [NoteUpdateModel.newEncFileName] and also update those notes which still have
+  /// a [NoteUpdateModel.clientId] that is different than [NoteUpdateModel.serverId]. And it can also delete the notes
+  /// with an empty file name.
   final List<NoteUpdateModel> noteTransfers;
 
   static const String JSON_TRANSFER_TOKEN = "JSON_TRANSFER_TOKEN";

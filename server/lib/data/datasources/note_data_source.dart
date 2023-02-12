@@ -14,7 +14,8 @@ class NoteDataSource {
 
   NoteDataSource({required this.serverConfig, required this.localDataSource});
 
-  /// Returns a new incremented note counter and also saves the update
+  /// Returns a new incremented note counter and also saves the update. This needs to be synchronized so that the counter
+  /// is unique and it cant happen that 2 calls get the same counter!!!
   Future<int> getNewNoteCounter() async {
     return _counterLock.synchronized(() async {
       int noteCounter = await localDataSource.getNoteCounter();

@@ -38,6 +38,11 @@ class ErrorCodes {
 
   /// Account password hash did not match the one stored on the server
   static const String SERVER_ACCOUNT_WRONG_PASSWORD = "error.server.account.wrong.password";
+
+  /// The note token for a note transfer was invalid (empty, or not contained in the transfer).
+  ///
+  /// This can happen if the transfer was cancelled by a different transfer from the server.
+  static const String SERVER_INVALID_NOTE_TRANSFER_TOKEN = "error.server.invalid.note.transfer.token";
 }
 
 // todo: add translation strings

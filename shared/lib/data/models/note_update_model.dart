@@ -21,7 +21,7 @@ class NoteUpdateModel extends NoteUpdate implements Model {
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       JSON_CLIENT_ID: clientId,
-      JSON_SERVER_ID: JSON_SERVER_ID,
+      JSON_SERVER_ID: serverId,
       JSON_NEW_ENCRYPTED_FILE_NAME: newEncFileName,
       JSON_NEW_LAST_EDITED: newLastEdited.toIso8601String(),
       JSON_TRANSFER_STATUS: noteTransferStatus.toString(),
