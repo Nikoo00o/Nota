@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:server/domain/entities/server_account.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/constants/rest_json_parameter.dart';
 import 'package:shared/core/enums/http_method.dart';
@@ -156,6 +157,11 @@ class RestCallbackParams {
   /// requests. For "GET" requests, this will return "null"! For "POST" and "PUT" requests it can still be null if no data
   /// was send!
   dynamic get data => rawBytes != null ? rawBytes! : jsonBody;
+
+  /// Returns the [authenticatedAccount] as a ServerAccount.
+  ///
+  /// Important: This only works for requests that need a session token and will throw an exception otherwise!
+  ServerAccount getAttachedServerAccount() => authenticatedAccount as ServerAccount;
 }
 
 /// Used in RestServer to store the callback functions
