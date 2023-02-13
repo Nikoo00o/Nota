@@ -54,27 +54,5 @@ class ServerAccountModel extends ServerAccount with SharedAccountModelMixin impl
       noteInfoList: entity.noteInfoList,
     );
   }
-
-  /// Creates a copy of this entity and changes the members to the parameters if they are not null.
-  ///
-  /// This [copyWith] of the model is the same as the one in the entity, but it returns the model instead.
-  ///
-  /// For Nullable parameter:
-  /// If the Nullable Object itself is null, then it will not be used. Otherwise it's value is used to override the previous
-  /// value (with either null, or a concrete value).
-  @override
-  ServerAccountModel copyWith({
-    String? newPasswordHash,
-    Nullable<SessionToken>? newSessionToken,
-    List<NoteInfo>? newNoteInfoList,
-    String? newEncryptedDataKey,
-  }) {
-    return ServerAccountModel(
-      userName: userName,
-      passwordHash: newPasswordHash ?? passwordHash,
-      sessionToken: newSessionToken != null ? newSessionToken.value : sessionToken,
-      noteInfoList: newNoteInfoList ?? noteInfoList,
-      encryptedDataKey: newEncryptedDataKey ?? encryptedDataKey,
-    );
-  }
+  
 }

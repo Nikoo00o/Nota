@@ -103,9 +103,9 @@ void _testCreateAccounts() {
   test("create a new account testUser1 successfully which should be returned from the local data source", () async {
     await createTestAccount(0);
     final ServerAccountModel? account = await localDataSource.loadAccount(getTestAccount(0).userName);
-    expect(account, predicate((ServerAccountModel? account) => account == getTestAccount(0)));
+    expect(account, getTestAccount(0), reason: "first account should match");
     final ServerAccount? sameAccount = await accountRepository.getAccountByUserName(getTestAccount(0).userName);
-    expect(account, predicate((ServerAccount? account) => account == sameAccount));
+    expect(account, sameAccount, reason: "second account should be the same");
   });
 
   test("throw an exception on creating another account with the same name", () async {
@@ -155,7 +155,7 @@ void _testSessionTokens() {
   test("a valid login request should return a login response with the correct session token", () async {
     ServerAccountModel? account = await localDataSource.loadAccount(getTestAccount(0).userName);
     expect(account, isNot(null));
-    account = account!.copyWith(newSessionToken: Nullable<SessionToken>(await accountRepository.createNewSessionToken()));
+    account!.sessionToken = await accountRepository.createNewSessionToken();
     await localDataSource.saveAccount(account); // update the account on the server with a concrete session token
 
     final AccountLoginResponse response = await loginToTestAccount(0);

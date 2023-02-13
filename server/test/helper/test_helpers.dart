@@ -162,5 +162,6 @@ Future<ServerAccountModel> createAndLoginToTestAccount(int testNumber) async {
   final ServerAccountModel account = getTestAccount(testNumber);
   await createTestAccount(testNumber);
   final AccountLoginResponse response = await loginToTestAccount(testNumber);
-  return account.copyWith(newSessionToken: Nullable<SessionTokenModel>(response.sessionToken));
+  account.sessionToken = response.sessionToken;
+  return account;
 }
