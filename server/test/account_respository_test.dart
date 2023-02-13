@@ -121,6 +121,15 @@ void _testLoginToAccounts() {
     await _createMultipleTestAccounts(3); // run before all login tests
   });
 
+  test("throw an exception on sending a wrong request dto", () async {
+    expect(() async {
+      await restClient.sendRequest(
+        endpoint: Endpoints.ACCOUNT_LOGIN,
+        bodyData: const AccountChangePasswordRequest(newPasswordHash: "", newEncryptedDataKey: "").toJson(),
+      );
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.httpStatusWith(400)));
+  });
+
   test("throw an exception on sending empty request values", () async {
     expect(() async {
       await restClient.sendRequest(
