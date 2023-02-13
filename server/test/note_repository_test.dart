@@ -297,6 +297,7 @@ List<NoteInfoModel> get _clientList1 => <NoteInfoModel>[
       NoteInfoModel(id: 14, encFileName: "c14", lastEdited: _now.subtract(const Duration(days: 2))),
       NoteInfoModel(id: 15, encFileName: "c15", lastEdited: _now.subtract(const Duration(days: 1))),
       NoteInfoModel(id: 16, encFileName: "c16", lastEdited: _now.subtract(const Duration(days: 1))),
+      NoteInfoModel(id: 17, encFileName: "c11", lastEdited: _now.subtract(const Duration(days: 2))),
     ];
 
 List<NoteInfoModel> get _serverList1 => <NoteInfoModel>[
@@ -306,6 +307,7 @@ List<NoteInfoModel> get _serverList1 => <NoteInfoModel>[
       NoteInfoModel(id: 14, encFileName: "c14", lastEdited: _now.subtract(const Duration(days: 1))),
       NoteInfoModel(id: 15, encFileName: "c15", lastEdited: _now.subtract(const Duration(days: 2))),
       NoteInfoModel(id: 16, encFileName: "s16", lastEdited: _now.subtract(const Duration(days: 1))),
+      NoteInfoModel(id: 17, encFileName: "c12", lastEdited: _now.subtract(const Duration(days: 1))),
       NoteInfoModel(id: 21, encFileName: "s21", lastEdited: _now.subtract(const Duration(seconds: 1))),
       NoteInfoModel(id: 20, encFileName: "s20", lastEdited: _now.subtract(const Duration(days: 10))),
     ];
@@ -352,6 +354,13 @@ List<NoteUpdateModel> get _updateList1 => <NoteUpdateModel>[
         newEncFileName: null,
         newLastEdited: _now.subtract(const Duration(days: 1)),
         noteTransferStatus: NoteTransferStatus.SERVER_NEEDS_UPDATE,
+      ),
+      NoteUpdateModel(
+        clientId: 17,
+        serverId: 17,
+        newEncFileName: "c12",
+        newLastEdited: _now.subtract(const Duration(days: 1)),
+        noteTransferStatus: NoteTransferStatus.CLIENT_NEEDS_UPDATE,
       ),
       NoteUpdateModel(
         clientId: 20,
