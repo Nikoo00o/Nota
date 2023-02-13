@@ -184,9 +184,6 @@ class RestClient {
     }
     final StringBuffer buffer = StringBuffer();
     buffer.write("?");
-    queryParams.forEach((String key, String value) {
-      _writeToBuffer(buffer, key, value);
-    });
     if (endpoint.needsSessionToken) {
       final String? sessionToken = await sessionService.fetchCurrentSessionToken();
       if (sessionToken != null) {
@@ -196,6 +193,9 @@ class RestClient {
         throw const ServerException(message: ErrorCodes.MISSING_SESSION_TOKEN);
       }
     }
+    queryParams.forEach((String key, String value) {
+      _writeToBuffer(buffer, key, value);
+    });
     return buffer.toString();
   }
 

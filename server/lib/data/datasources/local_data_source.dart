@@ -1,19 +1,31 @@
 import 'dart:convert';
 
+import 'package:hive/hive.dart';
 import 'package:server/core/config/server_config.dart';
+import 'package:server/core/get_it.dart';
 import 'package:server/data/models/server_account_model.dart';
+import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/data/datasources/hive_box_configuration.dart';
 import 'package:shared/data/datasources/shared_hive_data_source_mixin.dart';
 
 abstract class LocalDataSource {
   /// The database identifier of the hive box that contains the accounts
-  static const String ACCOUNT_DATABASE_JSON = "ACCOUNT_DATABASE";
+  static const String ACCOUNT_DATABASE = "ACCOUNT_DATABASE";
+
+  /// The database identifier of the hive box that contains general server config values, like the note counter
+  static const String CONFIG_DATABASE = "CONFIG_DATABASE";
+
+  static const String NOTE_COUNTER = "NOTE_COUNTER";
+
+  /// Must be called first in the main function to initialize the [ServerConfig.resourceFolderPath] folder for the
+  /// databases, etc
+  Future<void> init();
 
   /// Returns the stored [ServerAccountModel], or null.
   /// Only the accessed accounts will be loaded into memory.
   ///
   Future<ServerAccountModel?> loadAccount(String userName) async {
-    final String? jsonString = await read(key: userName, databaseKey: ACCOUNT_DATABASE_JSON);
+    final String? jsonString = await read(key: userName, databaseKey: ACCOUNT_DATABASE);
     if (jsonString != null) {
       return ServerAccountModel.fromJson(jsonDecode(jsonString) as Map<String, dynamic>);
     }
@@ -22,12 +34,22 @@ abstract class LocalDataSource {
 
   /// Stores a new [ServerAccountModel]
   Future<void> saveAccount(ServerAccountModel account) async {
-    await write(key: account.userName, value: jsonEncode(account), databaseKey: ACCOUNT_DATABASE_JSON);
+    await write(key: account.userName, value: jsonEncode(account), databaseKey: ACCOUNT_DATABASE);
   }
 
   /// Returns a list of all stored account user names!
   Future<List<String>> getAllAccountUserNames() async {
-    return readAllKeys(databaseKey: ACCOUNT_DATABASE_JSON);
+    return readAllKeys(databaseKey: ACCOUNT_DATABASE);
+  }
+
+  /// Returns 0 if the note counter was not initialized yet
+  Future<int> getNoteCounter() async {
+    final String? data = await read(key: NOTE_COUNTER, databaseKey: CONFIG_DATABASE);
+    return int.parse(data ?? "0");
+  }
+
+  Future<void> setNoteCounter(int noteCounter) async {
+    await write(key: NOTE_COUNTER, value: noteCounter.toString(), databaseKey: CONFIG_DATABASE);
   }
 
   /// Needs to be overridden in the subclasses.
@@ -59,10 +81,18 @@ class LocalDataSourceImpl extends LocalDataSource with SharedHiveDataSourceMixin
   LocalDataSourceImpl({required this.serverConfig});
 
   @override
+  Future<void> init() async {
+    FileUtils.createDirectory(serverConfig.resourceFolderPath);
+    Hive.init(serverConfig.resourceFolderPath);
+  }
+
+  @override
   Map<String, HiveBoxConfiguration> getHiveDataBaseConfig() {
     return <String, HiveBoxConfiguration>{
-      LocalDataSource.ACCOUNT_DATABASE_JSON:
+      LocalDataSource.ACCOUNT_DATABASE:
           HiveBoxConfiguration(isLazy: true, name: "Accounts", encryptionKey: serverConfig.serverKey),
+      LocalDataSource.CONFIG_DATABASE:
+          HiveBoxConfiguration(isLazy: false, name: "Config", encryptionKey: serverConfig.serverKey),
     };
   }
 

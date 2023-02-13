@@ -4,15 +4,18 @@ import 'package:args/args.dart';
 import 'package:hive/hive.dart';
 import 'package:server/core/config/server_config.dart';
 import 'package:server/core/get_it.dart';
+import 'package:server/data/datasources/local_data_source.dart';
+import 'package:server/data/datasources/note_data_source.dart';
 import 'package:server/data/repositories/server_repository.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/core/utils/security_utils.dart';
 import 'package:shared/core/utils/string_utils.dart';
 
 Future<void> main(List<String> arguments) async {
-  Logger.initLogger(Logger());
   await initializeGetIt();
-  Hive.init(sl<ServerConfig>().resourceFolderPath);
+  Logger.initLogger(Logger());
+  await sl<LocalDataSource>().init();
+  await sl<NoteDataSource>().init();
 
   final ArgParser parser = ArgParser()..addOption("rsaPassword", abbr: "r");
   final ArgResults argResults = parser.parse(arguments);

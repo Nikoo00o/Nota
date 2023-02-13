@@ -33,4 +33,10 @@ class NoteInfo extends Entity {
       lastEdited: newLastEdited ?? lastEdited,
     );
   }
+
+  /// Returns [true] if the [encFileName] of this note is empty!
+  bool get isDeleted => encFileName.isEmpty;
+
+  /// Compares 2 note info objects for sorting by id ascending
+  static int compareById(NoteInfo first, NoteInfo second) => first.id.compareTo(second.id);
 }

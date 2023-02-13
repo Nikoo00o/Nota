@@ -102,7 +102,7 @@ class AccountRepository {
       final CreateAccountRequest request = CreateAccountRequest.fromJson(params.jsonBody!);
       if (request.userName.isEmpty || request.passwordHash.isEmpty || request.encryptedDataKey.isEmpty) {
         Logger.error("Error creating account, because the request is empty: ${request.userName}");
-        return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_EMPTY_REQUEST_VALUES);
+        return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_REQUEST_VALUES);
       }
 
       if (request.createAccountToken != serverConfig.createAccountToken) {
@@ -135,7 +135,7 @@ class AccountRepository {
       final AccountLoginRequest request = AccountLoginRequest.fromJson(params.jsonBody!);
       if (request.userName.isEmpty || request.passwordHash.isEmpty) {
         Logger.error("Error logging in to account, because the request is empty: ${request.userName}");
-        return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_EMPTY_REQUEST_VALUES);
+        return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_REQUEST_VALUES);
       }
 
       ServerAccountModel? account = await accountDataSource.getAccountByUsername(request.userName); // get account
@@ -170,7 +170,7 @@ class AccountRepository {
       final AccountChangePasswordRequest request = AccountChangePasswordRequest.fromJson(params.jsonBody!);
       if (request.newPasswordHash.isEmpty || request.newEncryptedDataKey.isEmpty) {
         Logger.error("Error changing password for account, because the request is empty: ${account.userName}");
-        return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_EMPTY_REQUEST_VALUES);
+        return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_REQUEST_VALUES);
       }
 
       account = account.copyWith(newPasswordHash: request.newPasswordHash, newEncryptedDataKey: request.newEncryptedDataKey);

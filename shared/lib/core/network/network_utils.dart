@@ -19,7 +19,7 @@ class NetworkUtils {
   static List<int> encodeNetworkData({required Map<String, String> httpHeaders, required dynamic data}) {
     httpHeaders[HttpHeaders.acceptHeader] = "${ContentType.json},${ContentType.binary}";
     if (data == null) {
-      return List<int>.empty();
+      return List<int>.empty(growable: true);
     } else if (data is List<int>) {
       httpHeaders[HttpHeaders.contentTypeHeader] = ContentType.binary.toString();
       httpHeaders[HttpHeaders.contentLengthHeader] = data.length.toString();

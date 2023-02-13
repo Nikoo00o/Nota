@@ -28,7 +28,7 @@ class ErrorCodes {
   /// Basic error code that can be used for callbacks where the client send request parameter with empty values.
   ///
   /// For empty requests with no key values at all, a http status code will be thrown.
-  static const String SERVER_EMPTY_REQUEST_VALUES = "error.server.empty.request.values";
+  static const String SERVER_INVALID_REQUEST_VALUES = "error.server.invalid.request.values";
 
   /// Server already contains a user with that user name
   static const String SERVER_ACCOUNT_ALREADY_EXISTS = "error.server.account.exists";
@@ -38,6 +38,11 @@ class ErrorCodes {
 
   /// Account password hash did not match the one stored on the server
   static const String SERVER_ACCOUNT_WRONG_PASSWORD = "error.server.account.wrong.password";
+
+  /// The note token for a note transfer was invalid (empty, or not contained in the transfer).
+  ///
+  /// This can happen if the transfer was cancelled by a different transfer from the server.
+  static const String SERVER_INVALID_NOTE_TRANSFER_TOKEN = "error.server.invalid.note.transfer.token";
 }
 
 // todo: add translation strings

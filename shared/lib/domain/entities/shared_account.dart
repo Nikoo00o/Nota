@@ -16,7 +16,10 @@ class SharedAccount extends Entity {
   /// The base64 encoded data key of the user encrypted with the user key and used to encrypt the note data
   final String encryptedDataKey;
 
-  /// The list of the information for each note from that account
+  /// The list of the information for each note from that account.
+  ///
+  /// Important: you should not directly modify the list if you want your modification to affect equality, because the
+  /// list equality is compared by reference! Use a copyWith method in this case!
   final List<NoteInfo> noteInfoList;
 
   SharedAccount({
