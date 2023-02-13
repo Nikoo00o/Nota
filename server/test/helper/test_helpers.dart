@@ -64,7 +64,11 @@ Future<void> createCommonTestObjects({required int serverPort}) async {
   noteDataSource = NoteDataSource(serverConfig: serverConfigMock, localDataSource: localDataSource);
 
   accountRepository = AccountRepository(accountDataSource: accountDataSource, serverConfig: serverConfigMock);
-  noteRepository = NoteRepository(noteDataSource: noteDataSource, serverConfig: serverConfigMock);
+  noteRepository = NoteRepository(
+    noteDataSource: noteDataSource,
+    serverConfig: serverConfigMock,
+    accountRepository: accountRepository,
+  );
   serverRepository = ServerRepository(
     restServer: restServer,
     serverConfig: serverConfigMock,
@@ -115,7 +119,7 @@ Future<void> _setup() async {
 Future<void> cleanupTestFilesAndServer({required bool deleteTestFolderAfterwards}) async {
   await serverRepository.stopNota();
   await Hive.close();
-  if(deleteTestFolderAfterwards){
+  if (deleteTestFolderAfterwards) {
     FileUtils.deleteDirectory(serverConfigMock.resourceFolderPath);
   }
 }
@@ -158,5 +162,6 @@ Future<ServerAccountModel> createAndLoginToTestAccount(int testNumber) async {
   final ServerAccountModel account = getTestAccount(testNumber);
   await createTestAccount(testNumber);
   final AccountLoginResponse response = await loginToTestAccount(testNumber);
-  return account.copyWith(newSessionToken: Nullable<SessionTokenModel>(response.sessionToken));
+  account.sessionToken = response.sessionToken;
+  return account;
 }

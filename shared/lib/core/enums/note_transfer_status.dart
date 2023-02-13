@@ -18,10 +18,10 @@ enum NoteTransferStatus {
     return values.firstWhere((NoteTransferStatus element) => element.name == data);
   }
 
-  /// If the client needs a new version of the note
+  /// Returns if the client needs a new version of the note, so one of [CLIENT_NEEDS_NEW], or [CLIENT_NEEDS_UPDATE]
   bool get clientNeedsUpdate => index <= CLIENT_NEEDS_UPDATE.index;
 
-  /// If the server needs a new version of the note
+  /// Returns if the server needs a new version of the note, so one of [SERVER_NEEDS_UPDATE], or [SERVER_NEEDS_NEW]
   bool get serverNeedsUpdate => index >= SERVER_NEEDS_UPDATE.index;
 
   @override

@@ -172,8 +172,9 @@ class AccountRepository {
         Logger.error("Error changing password for account, because the request is empty: ${account.userName}");
         return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_REQUEST_VALUES);
       }
-
-      account = account.copyWith(newPasswordHash: request.newPasswordHash, newEncryptedDataKey: request.newEncryptedDataKey);
+      
+      account.passwordHash = request.newPasswordHash;
+      account.encryptedDataKey = request.newEncryptedDataKey;
       account = await accountDataSource.refreshSessionToken(account, forceRegenerate: true); // completely remove the old
       // token with no redirect
 

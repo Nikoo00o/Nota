@@ -81,20 +81,24 @@ class NoteDataSource {
     });
   }
 
-  /// Should be called at the start of the server to cleanup remaining notes which might be left overs from a crash
-  Future<void> deleteAllTempNotes() async {
+  /// Should be called at the start of the server to cleanup remaining notes which might be left overs from a crash.
+  ///
+  /// You can also optionally put in the [transferToken] to only cleanup the temp notes for that transfer!
+  Future<void> deleteAllTempNotes({String? transferToken}) async {
     await _fileLock.synchronized(() async {
       final Directory directory = Directory(serverConfig.noteFolder);
       await directory.list().forEach((FileSystemEntity file) {
-        if (file is File && file.path.endsWith(".temp")) {
-          Logger.debug("Cleaning up temporary note file: ${file.path}");
-          file.deleteSync();
+        if (file is File && file.path.endsWith(_getFileEnding(isTransferTempFile: true))) {
+          if (transferToken == null || file.path.startsWith(_transferTempBasePath(transferToken))) {
+            Logger.debug("Cleaning up temporary note file: ${file.path}");
+            file.deleteSync();
+          }
         }
       });
     });
   }
 
-  /// Replaces the real note data with the temporary note data of the transaction by renaming and deleting the files!
+  /// Replaces the real note data with the temporary note data of the transfer by renaming and deleting the files!
   ///
   /// throws a [ServerException] with [ErrorCodes.FILE_NOT_FOUND] if the temp file does not exist!
   Future<void> replaceNoteDataWithTempData(int noteId, String transferToken) async {
@@ -114,12 +118,17 @@ class NoteDataSource {
   }
 
   String _getFilePath(int noteId, String? transferToken) {
-    final String baseDir = "${serverConfig.noteFolder}${Platform.pathSeparator}";
-    final String fileEnding = transferToken != null ? ".temp" : ".note";
+    final String fileEnding = _getFileEnding(isTransferTempFile: transferToken != null);
     if (transferToken != null) {
-      return "$baseDir${transferToken}_$noteId$fileEnding";
+      return "${_transferTempBasePath(transferToken)}$noteId$fileEnding";
     } else {
-      return "$baseDir$noteId$fileEnding";
+      return "$_baseDir$noteId$fileEnding";
     }
   }
+
+  String _transferTempBasePath(String transferToken) => "$_baseDir${transferToken}_";
+
+  String get _baseDir => "${serverConfig.noteFolder}${Platform.pathSeparator}";
+
+  String _getFileEnding({required bool isTransferTempFile}) => isTransferTempFile ? ".temp" : ".note";
 }

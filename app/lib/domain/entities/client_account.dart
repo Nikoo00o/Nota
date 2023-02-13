@@ -41,34 +41,5 @@ class ClientAccount extends SharedAccount {
     }
     _cachedDataKey = null;
   }
-
-  /// Creates a copy of this entity and changes the members to the parameters if they are not null.
-  ///
-  /// For Nullable parameter:
-  /// If the Nullable Object itself is null, then it will not be used. Otherwise it's value is used to override the previous
-  /// value (with either null, or a concrete value).
-  ///
-  /// Creates a new [_cachedDataKey] by decrypting the [encryptedDataKey] with the [userPasswordToDecryptDataKey] if its
-  /// not null.
-  @override
-  ClientAccount copyWith({
-    String? newPasswordHash,
-    Nullable<SessionToken>? newSessionToken,
-    List<NoteInfo>? newNoteInfoList,
-    String? newEncryptedDataKey,
-    String? userPasswordToDecryptDataKey,
-  }) {
-    final ClientAccount account = ClientAccount(
-      userName: userName,
-      passwordHash: newPasswordHash ?? passwordHash,
-      sessionToken: newSessionToken != null ? newSessionToken.value : sessionToken,
-      noteInfoList: newNoteInfoList ?? noteInfoList,
-      encryptedDataKey: newEncryptedDataKey ?? encryptedDataKey,
-    );
-    account._cachedDataKey = _cachedDataKey;
-    if (userPasswordToDecryptDataKey != null) {
-      account.decryptDataKey(userPasswordToDecryptDataKey);
-    }
-    return account;
-  }
+  
 }

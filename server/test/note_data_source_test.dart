@@ -85,6 +85,14 @@ void main() {
       }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.FILE_NOT_FOUND));
     });
 
+    test("throw an exception on reading a temp note file which was already specifically cleaned up", () async {
+      await noteDataSource.saveTempNoteData(1, "test", <int>[1, 2, 3, 4]);
+      await noteDataSource.deleteAllTempNotes(transferToken: "test");
+      expect(() async {
+        await noteDataSource.replaceNoteDataWithTempData(1, "test");
+      }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.FILE_NOT_FOUND));
+    });
+
     test("still read a normal file successfully after temp cleanup", () async {
       final List<int> bytes = <int>[1, 2, 3, 4];
       await noteDataSource.saveTempNoteData(1, "test", bytes);

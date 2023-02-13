@@ -1,26 +1,31 @@
+import 'package:shared/core/utils/list_utils.dart';
 import 'package:shared/domain/entities/entity.dart';
 import 'package:shared/domain/entities/note_info.dart';
 import 'package:shared/domain/entities/session_token.dart';
 
-/// The base shared account class used in both server and client
-class SharedAccount extends Entity {
+/// The base shared account class used in both server and client.
+///
+/// This is a mutable entity.
+///
+/// Some fields of this entity can be modified and are not final.
+class SharedAccount {
   /// Used as identifier for accounts
   final String userName;
 
   /// Base64 encoded hash of the user password
-  final String passwordHash;
+  String passwordHash;
 
   /// Can be null if not yet logged in, or if it expired
-  final SessionToken? sessionToken;
+  SessionToken? sessionToken;
 
   /// The base64 encoded data key of the user encrypted with the user key and used to encrypt the note data
-  final String encryptedDataKey;
+  String encryptedDataKey;
 
   /// The list of the information for each note from that account.
   ///
   /// Important: you should not directly modify the list if you want your modification to affect equality, because the
-  /// list equality is compared by reference! Use a copyWith method in this case!
-  final List<NoteInfo> noteInfoList;
+  /// list equality is compared by reference! Better copy the list then
+  List<NoteInfo> noteInfoList;
 
   SharedAccount({
     required this.userName,
@@ -28,15 +33,41 @@ class SharedAccount extends Entity {
     required this.sessionToken,
     required this.encryptedDataKey,
     required this.noteInfoList,
-    Map<String, dynamic> additionalProperties = const <String, dynamic>{},
-  }) : super(<String, dynamic>{
-          "userName": userName,
-          "passwordHash": passwordHash,
-          "sessionToken": sessionToken,
-          "encryptedDataKey": encryptedDataKey,
-          "noteInfoList": noteInfoList,
-          ...additionalProperties
-        });
+  });
+
+  @override
+
+  /// Does not compare runtime type, because the comparison should also return true if its compared to the model
+  bool operator ==(dynamic other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! SharedAccount) {
+      return false;
+    }
+    return userName == other.userName &&
+        passwordHash == other.passwordHash &&
+        sessionToken == other.sessionToken &&
+        encryptedDataKey == other.encryptedDataKey &&
+        ListUtils.equals(noteInfoList, other.noteInfoList);
+  }
+
+  @override
+  String toString() {
+    final StringBuffer buffer = StringBuffer();
+    buffer.writeln("$runtimeType {");
+    buffer.writeln("  userName : $userName, ");
+    buffer.writeln("  passwordHash : $passwordHash, ");
+    buffer.writeln("  sessionToken : $sessionToken, ");
+    buffer.writeln("  encryptedDataKey : $encryptedDataKey, ");
+    buffer.writeln("  noteInfoList : $noteInfoList, ");
+    buffer.writeln("}");
+    return buffer.toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      userName.hashCode, passwordHash.hashCode, sessionToken.hashCode, encryptedDataKey.hashCode, noteInfoList.hashCode);
 
   /// Returns if this account contains the specific session token.
   /// Does not return if the Session token is valid, or not!!!
