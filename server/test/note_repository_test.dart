@@ -157,8 +157,8 @@ void _testStartTransfer() {
   test("An empty start transfer should just return the correct transfer token with an empty list", () async {
     final StartNoteTransferResponse response = await _startTransfer(<NoteInfoModel>[]);
     expect(response.transferToken.isEmpty, false, reason: "token not empty");
-    expect(response.noteTransfers.isEmpty, true, reason: "transfers empty");
-    expect(noteRepository.getNoteTransfers().isEmpty, false, reason: "server transfers not empty");
+    expect(response.noteUpdates.isEmpty, true, reason: "transfers empty");
+    expect(noteRepository.getReadOnlyNoteTransfers().isEmpty, false, reason: "server transfers not empty");
   });
 
   test("Client and server notes should get compared and match the prepared note update list ", () async {
@@ -177,7 +177,7 @@ void _testStartTransfer() {
         noteTransferStatus: NoteTransferStatus.SERVER_NEEDS_NEW);
 
     expect(response.transferToken.isEmpty, false, reason: "token not empty");
-    expect(jsonEncode(response.noteTransfers), jsonEncode(<NoteUpdateModel>[matchingUpdate]), reason: "update matches");
+    expect(jsonEncode(response.noteUpdates), jsonEncode(<NoteUpdateModel>[matchingUpdate]), reason: "update matches");
   });
 
   test("A start request with a server id that is not contained in the server account should throw an exception", () async {
@@ -242,7 +242,7 @@ void _testUploadNote() {
   test("An upload request with correct values should not instantly create a file", () async {
     final StartNoteTransferResponse response =
         await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
-    expect(response.noteTransfers.first.serverId, 1, reason: "note transfer should have serverId 1");
+    expect(response.noteUpdates.first.serverId, 1, reason: "note transfer should have serverId 1");
     await _upload(response.transferToken, 1, <int>[1, 2, 3, 4, 5]);
     expect(() async {
       await noteDataSource.loadNoteData(1);
@@ -252,7 +252,7 @@ void _testUploadNote() {
   test("An upload request with correct values should succeed twice", () async {
     final StartNoteTransferResponse response =
         await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
-    expect(response.noteTransfers.first.serverId, 1, reason: "note transfer should have serverId 1");
+    expect(response.noteUpdates.first.serverId, 1, reason: "note transfer should have serverId 1");
     final List<int> bytes = <int>[1, 2, 3, 4, 5];
 
     await _upload(response.transferToken, 1, bytes);

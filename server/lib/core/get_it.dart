@@ -19,7 +19,11 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<AccountDataSource>(() => AccountDataSource(serverConfig: sl(), localDataSource: sl()));
   sl.registerLazySingleton<NoteDataSource>(() => NoteDataSource(serverConfig: sl(), localDataSource: sl()));
   sl.registerLazySingleton<AccountRepository>(() => AccountRepository(accountDataSource: sl(), serverConfig: sl()));
-  sl.registerLazySingleton<NoteRepository>(() => NoteRepository(noteDataSource: sl(), serverConfig: sl()));
+  sl.registerLazySingleton<NoteRepository>(() => NoteRepository(
+        noteDataSource: sl(),
+        serverConfig: sl(),
+        accountRepository: sl(),
+      ));
   sl.registerLazySingleton<ServerRepository>(() => ServerRepository(
         serverConfig: sl(),
         restServer: sl(),

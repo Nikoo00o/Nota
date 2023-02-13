@@ -6,6 +6,9 @@ class ErrorCodes {
   static const String HTTP_STATUS = "error.server.http.";
 
   /// Returns [HTTP_STATUS] with the connected [httpStatusCode]
+  ///
+  /// For example for account security, endpoints can be secured so that they need an authenticated account and if an
+  /// invalid session token is send with an request, then the server returns unauthorized 401
   static String httpStatusWith(int httpStatusCode) => "$HTTP_STATUS$httpStatusCode";
 
   /// The client did not have a session token stored and could not send the request.
@@ -25,7 +28,8 @@ class ErrorCodes {
   /// A file could not be read / opened. the translation text should have a param for the filename
   static const String FILE_NOT_FOUND = "error.file.not.found";
 
-  /// Basic error code that can be used for callbacks where the client send request parameter with empty values.
+  /// Basic error code that can be used for callbacks where the client send request parameter with empty values, or also
+  /// invalid values that should not be used.
   ///
   /// For empty requests with no key values at all, a http status code will be thrown.
   static const String SERVER_INVALID_REQUEST_VALUES = "error.server.invalid.request.values";
@@ -39,7 +43,9 @@ class ErrorCodes {
   /// Account password hash did not match the one stored on the server
   static const String SERVER_ACCOUNT_WRONG_PASSWORD = "error.server.account.wrong.password";
 
-  /// The note token for a note transfer was invalid (empty, or not contained in the transfer).
+  /// The note token for a note transfer was invalid (empty, or not contained in the transfer). For security reasons each
+  /// transfer request after start must contain a valid transfer token to get matched to the start request and are only
+  /// applied for the specific account.
   ///
   /// This can happen if the transfer was cancelled by a different transfer from the server.
   static const String SERVER_INVALID_NOTE_TRANSFER_TOKEN = "error.server.invalid.note.transfer.token";
