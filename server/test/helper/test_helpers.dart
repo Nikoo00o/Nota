@@ -108,11 +108,16 @@ Future<void> _setup() async {
 
 /// Should be the last call in the [tearDown] function of each test.
 ///
-/// Stops the [ServerRepository] and deletes the hive temp files
-Future<void> cleanupTestFilesAndServer() async {
+/// Stops the [ServerRepository] and deletes the hive temp files.
+///
+/// You can set [deleteTestFolderAfterwards] to false if you want to inspect some test files after one single test, or if
+/// you want to test the persistence of the server.
+Future<void> cleanupTestFilesAndServer({required bool deleteTestFolderAfterwards}) async {
   await serverRepository.stopNota();
   await Hive.close();
-  FileUtils.deleteDirectory(serverConfigMock.resourceFolderPath);
+  if(deleteTestFolderAfterwards){
+    FileUtils.deleteDirectory(serverConfigMock.resourceFolderPath);
+  }
 }
 
 ServerAccountModel getTestAccount(int testNumber) {

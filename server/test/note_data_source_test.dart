@@ -40,8 +40,8 @@ void main() {
   });
 
   tearDown(() async {
-    await cleanupTestFilesAndServer(); // cleanup server and hive test data after every test (this callback will be run
-    // after each test)
+    await cleanupTestFilesAndServer(deleteTestFolderAfterwards: true); // cleanup server and hive test data after every test
+    // (this callback will be run after each test)
   });
 
   group("Note data source tests: ", () {

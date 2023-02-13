@@ -40,8 +40,8 @@ void main() {
   });
 
   tearDown(() async {
-    await cleanupTestFilesAndServer(); // cleanup server and hive test data after every test (this callback will be run
-    // after each test)
+    await cleanupTestFilesAndServer(deleteTestFolderAfterwards: true); // cleanup server and hive test data after every test
+    // (this callback will be run after each test)
   });
 
   group("account repository tests: ", () {
@@ -64,6 +64,20 @@ void _testCreateAccounts() {
         endpoint: Endpoints.ACCOUNT_CREATE,
         bodyData: const CreateAccountRequest(
           createAccountToken: "123",
+          userName: "123",
+          passwordHash: "123",
+          encryptedDataKey: "123",
+        ).toJson(),
+      );
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.httpStatusWith(HttpStatus.unauthorized)));
+  });
+
+  test("throw an exception on sending an empty account token", () async {
+    expect(() async {
+      await restClient.sendRequest(
+        endpoint: Endpoints.ACCOUNT_CREATE,
+        bodyData: const CreateAccountRequest(
+          createAccountToken: "",
           userName: "123",
           passwordHash: "123",
           encryptedDataKey: "123",
