@@ -30,7 +30,7 @@ import 'mocks/session_service_mock.dart';
 
 // test for the specific account functions.
 
-const int _serverPort = 8195;
+const int _serverPort = 8196;
 
 void main() {
   setUp(() async {

@@ -23,7 +23,7 @@ import 'package:test/test.dart';
 import 'helper/test_helpers.dart';
 
 // test for the specific note updating functions. These tests here can not cover every single permutation of possible user
-// actions!
+// actions! (the combination of tests is tested in integration_test.dart)
 
 late ServerAccountModel _account;
 
@@ -46,9 +46,8 @@ void main() {
     group("start transfer: ", _testStartTransfer);
     group("upload note: ", _testUploadNote);
     group("finish transfer: ", _testFinishTransfer);
+    group("download note: ", _testDownloadNote);
   });
-
-  //todo: download and start need to be tested again at the end when finish and upload is executed and added some files!
 }
 
 /// initializes the account to use for the tests
@@ -387,6 +386,51 @@ void _testFinishTransfer() {
   });
 }
 
+void _testDownloadNote() {
+  setUp(() async {
+    await _initAccount(); // create an account to use
+  });
+
+  test("A download request with an invalid transfer token should throw an exception ", () async {
+    await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    expect(() async {
+      await _download("_invalid_token_912830958891023905980129803895099182", -1);
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN));
+  });
+
+  test("A download request with no client id should throw an exception ", () async {
+    final StartNoteTransferResponse response =
+        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    expect(() async {
+      await _download(response.transferToken, null);
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
+  });
+
+  test("A download request with a client id should throw an exception ", () async {
+    final StartNoteTransferResponse response =
+        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    expect(() async {
+      await _download(response.transferToken, -1);
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
+  });
+
+  test("A download request with an invalid server id should throw an exception ", () async {
+    final StartNoteTransferResponse response =
+        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    expect(() async {
+      await _upload(response.transferToken, 1010, <int>[1, 2]);
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
+  });
+
+  test("A download request with correct values should succeed", () async {
+    await _uploadNote1();
+    final StartNoteTransferResponse response = await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: 1, encFileName: "c1", lastEdited: _now.subtract(const Duration(days: 1)))]);
+    final List<int> newBytes = await _download(response.transferToken, 1);
+    expect(jsonEncode(<int>[1, 2, 3, 4, 5]), jsonEncode(newBytes), reason: "downloaded bytes should match");
+  });
+}
+
 Future<StartNoteTransferResponse> _startTransfer(List<NoteInfoModel> clientNotes) async {
   final ResponseData data = await restClient.sendRequest(
     endpoint: Endpoints.NOTE_TRANSFER_START,
@@ -395,13 +439,13 @@ Future<StartNoteTransferResponse> _startTransfer(List<NoteInfoModel> clientNotes
   return StartNoteTransferResponse.fromJson(data.json!);
 }
 
-Future<void> _upload(String? transferToken, int? clientId, List<int>? bytes) async {
+Future<void> _upload(String? transferToken, int? serverId, List<int>? bytes) async {
   final Map<String, String> queryParams = <String, String>{};
   if (transferToken != null) {
     queryParams[RestJsonParameter.TRANSFER_TOKEN] = transferToken;
   }
-  if (clientId != null) {
-    queryParams[RestJsonParameter.TRANSFER_NOTE_ID] = clientId.toString();
+  if (serverId != null) {
+    queryParams[RestJsonParameter.TRANSFER_NOTE_ID] = serverId.toString();
   }
   await restClient.sendRequest(
     endpoint: Endpoints.NOTE_UPLOAD,
@@ -420,6 +464,28 @@ Future<void> _finishTransfer(String? transferToken, {required bool shouldCancel}
     queryParams: queryParams,
     bodyData: FinishNoteTransferRequest(shouldCancel: shouldCancel).toJson(),
   );
+}
+
+Future<List<int>> _download(String? transferToken, int? serverId) async {
+  final Map<String, String> queryParams = <String, String>{};
+  if (transferToken != null) {
+    queryParams[RestJsonParameter.TRANSFER_TOKEN] = transferToken;
+  }
+  if (serverId != null) {
+    queryParams[RestJsonParameter.TRANSFER_NOTE_ID] = serverId.toString();
+  }
+  final ResponseData response = await restClient.sendRequest(
+    endpoint: Endpoints.NOTE_DOWNLOAD,
+    queryParams: queryParams,
+  );
+  return response.bytes!;
+}
+
+Future<void> _uploadNote1() async {
+  final StartNoteTransferResponse response =
+      await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+  await _upload(response.transferToken, 1, <int>[1, 2, 3, 4, 5]);
+  await _finishTransfer(response.transferToken, shouldCancel: false);
 }
 
 DateTime _now = DateTime.now();

@@ -43,4 +43,7 @@ class NoteUpdate extends Entity {
   bool get wasFileNameChanged => newEncFileName != null;
 
   bool get wasFileDeleted => newEncFileName?.isEmpty ?? false;
+
+  /// Compares 2 note update objects for sorting by the server id ascending
+  static int compareByServerId(NoteUpdate first, NoteUpdate second) => first.serverId.compareTo(second.serverId);
 }

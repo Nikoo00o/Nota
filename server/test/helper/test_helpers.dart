@@ -15,6 +15,8 @@ import 'package:shared/core/network/rest_client.dart';
 import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/core/utils/nullable.dart';
+import 'package:shared/data/dtos/account/account_change_password_request.dart';
+import 'package:shared/data/dtos/account/account_change_password_response.dart';
 import 'package:shared/data/dtos/account/account_login_request.dart.dart';
 import 'package:shared/data/dtos/account/account_login_response.dart';
 import 'package:shared/data/dtos/account/create_account_request.dart';
@@ -134,7 +136,7 @@ ServerAccountModel getTestAccount(int testNumber) {
   );
 }
 
-Future<void> createTestAccount(int testNumber) async {
+Future<ServerAccountModel> createTestAccount(int testNumber) async {
   final ServerAccountModel account = getTestAccount(testNumber);
   await restClient.sendRequest(
     endpoint: Endpoints.ACCOUNT_CREATE,
@@ -145,6 +147,7 @@ Future<void> createTestAccount(int testNumber) async {
       encryptedDataKey: account.encryptedDataKey,
     ).toJson(),
   );
+  return account;
 }
 
 Future<AccountLoginResponse> loginToTestAccount(int testNumber) async {

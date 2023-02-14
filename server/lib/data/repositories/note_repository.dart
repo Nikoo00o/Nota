@@ -330,7 +330,7 @@ class NoteRepository {
       }
     }
 
-    return noteUpdates;
+    return noteUpdates..sort(NoteUpdate.compareByServerId);
   }
 
   Future<void> _addNoteUpdate(List<NoteUpdate> noteUpdates, NoteInfo note, NoteTransferStatus noteTransferStatus) async {
@@ -402,9 +402,14 @@ class NoteRepository {
   int _getValidNoteId(RestCallbackParams params, NoteTransfer noteTransfer) {
     final String idString = params.queryParams[RestJsonParameter.TRANSFER_NOTE_ID] ?? "0";
     int id = int.tryParse(idString) ?? 0;
-    if (noteTransfer.noteUpdates.where((NoteUpdate noteUpdate) => noteUpdate.serverId == id).isEmpty) {
+    final Iterable<NoteUpdate> iterator =
+        noteTransfer.noteUpdates.where((NoteUpdate noteUpdate) => noteUpdate.serverId == id);
+    if (iterator.isEmpty) {
       Logger.debug("Got an invalid id $id from ${noteTransfer.serverAccount.userName}");
       id = 0;
+    } else if (iterator.first.noteTransferStatus.clientNeedsUpdate && (params.rawBytes?.isNotEmpty ?? false)) {
+      Logger.debug("The client uploaded bytes to override a note for which the server had a newer time stamp in the "
+          "transfer");
     }
     return id;
   }

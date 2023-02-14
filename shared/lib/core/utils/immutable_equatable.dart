@@ -48,5 +48,7 @@ abstract class ImmutableEquatable extends Equatable {
 
   /// This copy method can be used to create a copy of this [ImmutableEquatable] and change the member variables by
   /// replacing them with parameters from this method.
+  ///
+  /// If this is overridden in a subclass, then all deeper sub classes must implement this method as well!!!
   ImmutableEquatable copyWith() => throw UnimplementedError();
 }
