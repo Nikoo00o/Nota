@@ -25,6 +25,8 @@ class NoteInfo extends Entity {
   /// For Nullable parameter:
   /// If the Nullable Object itself is null, then it will not be used. Otherwise it's value is used to override the previous
   /// value (with either null, or a concrete value)
+  ///
+  /// Needs to be overridden in the model as well!
   @override
   NoteInfo copyWith({int? newId, String? newEncFileName, DateTime? newLastEdited}) {
     return NoteInfo(

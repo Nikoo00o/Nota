@@ -30,7 +30,7 @@ import 'mocks/session_service_mock.dart';
 
 // test for the specific account functions.
 
-const int _serverPort = 8195;
+const int _serverPort = 8196;
 
 void main() {
   setUp(() async {
@@ -119,6 +119,15 @@ void _testCreateAccounts() {
 void _testLoginToAccounts() {
   setUp(() async {
     await _createMultipleTestAccounts(3); // run before all login tests
+  });
+
+  test("throw an exception on sending a wrong request dto", () async {
+    expect(() async {
+      await restClient.sendRequest(
+        endpoint: Endpoints.ACCOUNT_LOGIN,
+        bodyData: const AccountChangePasswordRequest(newPasswordHash: "", newEncryptedDataKey: "").toJson(),
+      );
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.httpStatusWith(400)));
   });
 
   test("throw an exception on sending empty request values", () async {

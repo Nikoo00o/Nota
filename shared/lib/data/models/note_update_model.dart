@@ -32,7 +32,7 @@ class NoteUpdateModel extends NoteUpdate implements Model {
     return NoteUpdateModel(
       clientId: (json[JSON_CLIENT_ID] as num).toInt(),
       serverId: (json[JSON_SERVER_ID] as num).toInt(),
-      newEncFileName: json[JSON_NEW_ENCRYPTED_FILE_NAME] as String,
+      newEncFileName: json[JSON_NEW_ENCRYPTED_FILE_NAME] as String?,
       newLastEdited: DateTime.parse(json[JSON_NEW_LAST_EDITED] as String),
       noteTransferStatus: NoteTransferStatus.fromString(json[JSON_TRANSFER_STATUS] as String),
     );

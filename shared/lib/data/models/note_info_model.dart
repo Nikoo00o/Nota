@@ -31,4 +31,14 @@ class NoteInfoModel extends NoteInfo implements Model {
     }
     return NoteInfoModel(encFileName: entity.encFileName, id: entity.id, lastEdited: entity.lastEdited);
   }
+
+  /// Overrides the method of the entity
+  @override
+  NoteInfoModel copyWith({int? newId, String? newEncFileName, DateTime? newLastEdited}) {
+    return NoteInfoModel(
+      id: newId ?? id,
+      encFileName: newEncFileName ?? encFileName,
+      lastEdited: newLastEdited ?? lastEdited,
+    );
+  }
 }

@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:server/data/models/server_account_model.dart';
+import 'package:server/domain/entities/server_account.dart';
 import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/constants/rest_json_parameter.dart';
@@ -9,16 +11,19 @@ import 'package:shared/core/enums/note_transfer_status.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/network/response_data.dart';
 import 'package:shared/core/utils/logger/logger.dart';
+import 'package:shared/data/dtos/notes/finish_note_request.dart';
 import 'package:shared/data/dtos/notes/start_note_transfer_request.dart';
 import 'package:shared/data/dtos/notes/start_note_transfer_response.dart';
 import 'package:shared/data/models/note_info_model.dart';
 import 'package:shared/data/models/note_update_model.dart';
+import 'package:shared/domain/entities/note_info.dart';
 import 'package:shared/domain/entities/note_update.dart';
 import 'package:test/test.dart';
 
 import 'helper/test_helpers.dart';
 
-// test for the specific note updating functions.
+// test for the specific note updating functions. These tests here can not cover every single permutation of possible user
+// actions! (the combination of tests is tested in integration_test.dart)
 
 late ServerAccountModel _account;
 
@@ -40,9 +45,9 @@ void main() {
     group("calls without authentication: ", _testAuthentication);
     group("start transfer: ", _testStartTransfer);
     group("upload note: ", _testUploadNote);
+    group("finish transfer: ", _testFinishTransfer);
+    group("download note: ", _testDownloadNote);
   });
-
-  //todo: download and start need to be tested again at the end when finish and upload is executed and added some files!
 }
 
 /// initializes the account to use for the tests
@@ -263,6 +268,169 @@ void _testUploadNote() {
   });
 }
 
+void _testFinishTransfer() {
+  setUp(() async {
+    await _initAccount(); // create an account to use
+  });
+
+  test("A finish request with an invalid transfer token should throw an exception ", () async {
+    await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    expect(() async {
+      await _finishTransfer("_invalid_token_912830958891023905980129803895099182", shouldCancel: false);
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN));
+  });
+
+  test("A finish request with correct values should succeed", () async {
+    final StartNoteTransferResponse response =
+        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    final List<int> bytes = <int>[1, 2, 3, 4, 5];
+    await _upload(response.transferToken, 1, bytes);
+
+    await _finishTransfer(response.transferToken, shouldCancel: false);
+
+    final ServerAccount? account = await accountRepository.getAccountBySessionToken(sessionServiceMock.sessionTokenOverride);
+    expect(account?.noteInfoList.length, 1, reason: "server account should have 1 note");
+    expect(account?.noteInfoList.first, NoteInfoModel(id: 1, encFileName: "c1", lastEdited: _now),
+        reason: "note info should match");
+
+    final List<int> newBytes = await noteDataSource.loadNoteData(1);
+    expect(jsonEncode(bytes), jsonEncode(newBytes), reason: "uploaded bytes should match");
+  });
+
+  test("A finish request with no bytes should also succeed", () async {
+    final StartNoteTransferResponse response =
+        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    await _finishTransfer(response.transferToken, shouldCancel: false);
+
+    final ServerAccount? account = await accountRepository.getAccountBySessionToken(sessionServiceMock.sessionTokenOverride);
+    expect(account?.noteInfoList.length, 1, reason: "server account should have 1 note");
+    expect(account?.noteInfoList.first, NoteInfoModel(id: 1, encFileName: "c1", lastEdited: _now),
+        reason: "note info should match");
+    expect(() async {
+      await noteDataSource.loadNoteData(1);
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.FILE_NOT_FOUND), reason: "file not found");
+  });
+
+  test("A finish request with no changes should also succeed", () async {
+    final StartNoteTransferResponse response = await _startTransfer(<NoteInfoModel>[]);
+    await _finishTransfer(response.transferToken, shouldCancel: false);
+
+    final ServerAccount? account = await accountRepository.getAccountBySessionToken(sessionServiceMock.sessionTokenOverride);
+    expect(account?.noteInfoList.length, 0, reason: "server account should have no notes");
+    expect(() async {
+      await noteDataSource.loadNoteData(1);
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.FILE_NOT_FOUND), reason: "file not found");
+  });
+
+  test("A cancelled finish request should not change anything", () async {
+    final StartNoteTransferResponse response =
+        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    final List<int> bytes = <int>[1, 2, 3, 4, 5];
+    await _upload(response.transferToken, 1, bytes);
+    await _finishTransfer(response.transferToken, shouldCancel: true);
+
+    final ServerAccount? account = await accountRepository.getAccountBySessionToken(sessionServiceMock.sessionTokenOverride);
+    expect(account?.noteInfoList.length, 0, reason: "server account should have 0 notes");
+    expect(() async {
+      await noteDataSource.loadNoteData(1);
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.FILE_NOT_FOUND), reason: "file not found");
+  });
+
+  test("A finish request should cancel a different transfer", () async {
+    final StartNoteTransferResponse transfer1 =
+        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c2", lastEdited: _now)]);
+    final StartNoteTransferResponse transfer2 =
+        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c3", lastEdited: _now)]);
+    expect(transfer2.noteUpdates.length, 1, reason: "only one note update");
+    expect(transfer2.noteUpdates.first.serverId, 2, reason: "serverId should be unique, so 2");
+
+    final List<int> bytes = <int>[1, 2, 3, 4, 5];
+    await _upload(transfer1.transferToken, transfer1.noteUpdates.first.serverId, bytes);
+    await _upload(transfer2.transferToken, transfer2.noteUpdates.first.serverId, bytes.sublist(1));
+
+    await _finishTransfer(transfer1.transferToken, shouldCancel: false);
+    expect(() async {
+      await _finishTransfer(transfer2.transferToken, shouldCancel: false);
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN),
+        reason: "cancelled");
+
+    final ServerAccount? account = await accountRepository.getAccountBySessionToken(sessionServiceMock.sessionTokenOverride);
+    expect(account?.noteInfoList.length, transfer1.noteUpdates.first.serverId, reason: "server account should have 1 note");
+    expect(account?.noteInfoList.first, NoteInfoModel(id: 1, encFileName: "c2", lastEdited: _now),
+        reason: "note info should match");
+
+    final List<int> newBytes = await noteDataSource.loadNoteData(1);
+    expect(jsonEncode(bytes), jsonEncode(newBytes), reason: "uploaded bytes should match");
+  });
+
+  test("A cancelled finish request should not cancel a different transfer", () async {
+    final StartNoteTransferResponse transfer1 =
+        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c2", lastEdited: _now)]);
+    final StartNoteTransferResponse transfer2 =
+        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c3", lastEdited: _now)]);
+
+    final List<int> bytes = <int>[1, 2, 3, 4, 5];
+    await _upload(transfer1.transferToken, transfer1.noteUpdates.first.serverId, bytes);
+    await _upload(transfer2.transferToken, transfer2.noteUpdates.first.serverId, bytes.sublist(1));
+
+    await _finishTransfer(transfer2.transferToken, shouldCancel: true);
+    await _finishTransfer(transfer1.transferToken, shouldCancel: false);
+
+    final ServerAccount? account = await accountRepository.getAccountBySessionToken(sessionServiceMock.sessionTokenOverride);
+    expect(account?.noteInfoList.length, transfer1.noteUpdates.first.serverId, reason: "server account should have 1 note");
+    expect(account?.noteInfoList.first, NoteInfoModel(id: 1, encFileName: "c2", lastEdited: _now),
+        reason: "note info should match");
+
+    final List<int> newBytes = await noteDataSource.loadNoteData(1);
+    expect(jsonEncode(bytes), jsonEncode(newBytes), reason: "uploaded bytes should match");
+  });
+}
+
+void _testDownloadNote() {
+  setUp(() async {
+    await _initAccount(); // create an account to use
+  });
+
+  test("A download request with an invalid transfer token should throw an exception ", () async {
+    await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    expect(() async {
+      await _download("_invalid_token_912830958891023905980129803895099182", -1);
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN));
+  });
+
+  test("A download request with no client id should throw an exception ", () async {
+    final StartNoteTransferResponse response =
+        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    expect(() async {
+      await _download(response.transferToken, null);
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
+  });
+
+  test("A download request with a client id should throw an exception ", () async {
+    final StartNoteTransferResponse response =
+        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    expect(() async {
+      await _download(response.transferToken, -1);
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
+  });
+
+  test("A download request with an invalid server id should throw an exception ", () async {
+    final StartNoteTransferResponse response =
+        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    expect(() async {
+      await _upload(response.transferToken, 1010, <int>[1, 2]);
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
+  });
+
+  test("A download request with correct values should succeed", () async {
+    await _uploadNote1();
+    final StartNoteTransferResponse response = await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: 1, encFileName: "c1", lastEdited: _now.subtract(const Duration(days: 1)))]);
+    final List<int> newBytes = await _download(response.transferToken, 1);
+    expect(jsonEncode(<int>[1, 2, 3, 4, 5]), jsonEncode(newBytes), reason: "downloaded bytes should match");
+  });
+}
+
 Future<StartNoteTransferResponse> _startTransfer(List<NoteInfoModel> clientNotes) async {
   final ResponseData data = await restClient.sendRequest(
     endpoint: Endpoints.NOTE_TRANSFER_START,
@@ -271,19 +439,53 @@ Future<StartNoteTransferResponse> _startTransfer(List<NoteInfoModel> clientNotes
   return StartNoteTransferResponse.fromJson(data.json!);
 }
 
-Future<void> _upload(String? transferToken, int? clientId, List<int>? bytes) async {
+Future<void> _upload(String? transferToken, int? serverId, List<int>? bytes) async {
   final Map<String, String> queryParams = <String, String>{};
   if (transferToken != null) {
     queryParams[RestJsonParameter.TRANSFER_TOKEN] = transferToken;
   }
-  if (clientId != null) {
-    queryParams[RestJsonParameter.TRANSFER_NOTE_ID] = clientId.toString();
+  if (serverId != null) {
+    queryParams[RestJsonParameter.TRANSFER_NOTE_ID] = serverId.toString();
   }
   await restClient.sendRequest(
     endpoint: Endpoints.NOTE_UPLOAD,
     queryParams: queryParams,
     bodyData: bytes,
   );
+}
+
+Future<void> _finishTransfer(String? transferToken, {required bool shouldCancel}) async {
+  final Map<String, String> queryParams = <String, String>{};
+  if (transferToken != null) {
+    queryParams[RestJsonParameter.TRANSFER_TOKEN] = transferToken;
+  }
+  await restClient.sendRequest(
+    endpoint: Endpoints.NOTE_TRANSFER_FINISH,
+    queryParams: queryParams,
+    bodyData: FinishNoteTransferRequest(shouldCancel: shouldCancel).toJson(),
+  );
+}
+
+Future<List<int>> _download(String? transferToken, int? serverId) async {
+  final Map<String, String> queryParams = <String, String>{};
+  if (transferToken != null) {
+    queryParams[RestJsonParameter.TRANSFER_TOKEN] = transferToken;
+  }
+  if (serverId != null) {
+    queryParams[RestJsonParameter.TRANSFER_NOTE_ID] = serverId.toString();
+  }
+  final ResponseData response = await restClient.sendRequest(
+    endpoint: Endpoints.NOTE_DOWNLOAD,
+    queryParams: queryParams,
+  );
+  return response.bytes!;
+}
+
+Future<void> _uploadNote1() async {
+  final StartNoteTransferResponse response =
+      await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+  await _upload(response.transferToken, 1, <int>[1, 2, 3, 4, 5]);
+  await _finishTransfer(response.transferToken, shouldCancel: false);
 }
 
 DateTime _now = DateTime.now();

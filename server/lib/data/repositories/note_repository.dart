@@ -24,6 +24,7 @@ import 'package:shared/data/dtos/account/create_account_request.dart';
 import 'package:shared/data/dtos/notes/finish_note_request.dart';
 import 'package:shared/data/dtos/notes/start_note_transfer_request.dart';
 import 'package:shared/data/dtos/notes/start_note_transfer_response.dart';
+import 'package:shared/data/models/note_info_model.dart';
 import 'package:shared/data/models/note_update_model.dart';
 import 'package:shared/data/models/session_token_model.dart';
 import 'package:shared/domain/entities/note_info.dart';
@@ -52,8 +53,11 @@ class NoteRepository {
 
   NoteRepository({required this.noteDataSource, required this.serverConfig, required this.accountRepository});
 
-  /// Starts a note transfer and the client can already delete and rename its own notes with the response.
-  /// And it can also update its local client ids for new notes with the updated server ids.
+  /// Starts a note transfer and sends a response with the information to the client which notes to delete, rename, or
+  /// swap client ids for server ids!
+  /// Important: these changes should be cached and only be applied at the end after [handleFinishNoteTransfer], because
+  /// otherwise the client could have changes (like server ids, or renames) that the server threw away again, because the
+  /// transfer got cancelled!
   ///
   /// Afterwards the client should call [handleDownloadNote] and [handleUploadNote] for each affected note that is not empty
   /// depending on the status of the response of this request.
@@ -162,6 +166,16 @@ class NoteRepository {
     return RestCallbackResult();
   }
 
+  /// Finishes a note transfer that was started with the note transfer token from [handleStartNoteTransfer] and cancels all
+  /// other transfers for this [ServerAccount].
+  ///
+  /// Otherwise if [FinishNoteTransferRequest.shouldCancel] is [true], then only this specific note transfer with the
+  /// transfer token will be cancelled!
+  ///
+  /// This request can return a [ServerException] with the error code [ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN] if the
+  /// client used an invalid transfer token, or if the server cancelled the note transfer!
+  ///
+  /// Now the client can also apply its temporary cached changes from the [handleStartNoteTransfer] response!
   Future<RestCallbackResult> handleFinishNoteTransfer(RestCallbackParams params) async {
     return _startFinishLock.synchronized(() async {
       final ServerAccount serverAccount = params.getAttachedServerAccount();
@@ -177,11 +191,11 @@ class NoteRepository {
       if (request.shouldCancel) {
         await _cancelTransfer(transferToken);
       } else {
-        Logger.info("Applying file transfer to old account data $serverAccount");
+        Logger.debug("Applying file transfer to old account data $serverAccount");
         await _applyTransfer(transferToken);
         await _cancelAllTransfers(serverAccount);
-        final ServerAccount? newServerAccount = await accountRepository.getAccountByUserName(serverAccount.userName);
-        Logger.info("Finished file transfer with new account data $newServerAccount");
+        await accountRepository.storeAccount(serverAccount);
+        Logger.debug("Finished file transfer with new account data $serverAccount");
       }
 
       final String logAction = request.shouldCancel ? "cancelled" : "completed";
@@ -203,12 +217,16 @@ class NoteRepository {
   /// Cancels every transfer for the [account]
   Future<void> _cancelAllTransfers(ServerAccount account) async {
     Logger.debug("Cancelling all transfers for ${account.userName}");
+    final List<String> transfersToCancel = List<String>.empty(growable: true);
     for (final iterator in _noteTransfers.entries) {
       final String transferToken = iterator.key;
       final NoteTransfer noteTransfer = iterator.value;
       if (noteTransfer.serverAccount == account) {
-        await _cancelTransfer(transferToken);
+        transfersToCancel.add(transferToken);
       }
+    }
+    for (final String transferToken in transfersToCancel) {
+      await _cancelTransfer(transferToken);
     }
   }
 
@@ -233,8 +251,22 @@ class NoteRepository {
   /// The noteUpdates transfer status must be one of serverNeedsUpdate.
   Future<void> _updateAccountNoteList(NoteUpdate noteUpdate, ServerAccount serverAccount) async {
     assert(noteUpdate.noteTransferStatus.serverNeedsUpdate, "note transfer status must be one of serverNeedsUpdate");
-
-    //todo: implement: copy old note list of account, modify it and store it again
+    for (int i = 0; i < serverAccount.noteInfoList.length; ++i) {
+      final NoteInfoModel noteInfo = NoteInfoModel.fromNoteInfo(serverAccount.noteInfoList[i]);
+      if (noteInfo.id == noteUpdate.serverId) {
+        serverAccount.noteInfoList[i] = noteInfo.copyWith(
+          newEncFileName: noteUpdate.newEncFileName,
+          newLastEdited: noteUpdate.newLastEdited,
+        );
+        return; // update the element
+      }
+    }
+    // not found, so add a new one
+    serverAccount.noteInfoList.add(NoteInfoModel(
+      id: noteUpdate.serverId,
+      encFileName: noteUpdate.newEncFileName ?? "",
+      lastEdited: noteUpdate.newLastEdited,
+    ));
   }
 
   /// Depending on the note update, either deletes the note data, or replaces it with the temp note data, or do nothing
@@ -298,7 +330,7 @@ class NoteRepository {
       }
     }
 
-    return noteUpdates;
+    return noteUpdates..sort(NoteUpdate.compareByServerId);
   }
 
   Future<void> _addNoteUpdate(List<NoteUpdate> noteUpdates, NoteInfo note, NoteTransferStatus noteTransferStatus) async {
@@ -370,9 +402,14 @@ class NoteRepository {
   int _getValidNoteId(RestCallbackParams params, NoteTransfer noteTransfer) {
     final String idString = params.queryParams[RestJsonParameter.TRANSFER_NOTE_ID] ?? "0";
     int id = int.tryParse(idString) ?? 0;
-    if (noteTransfer.noteUpdates.where((NoteUpdate noteUpdate) => noteUpdate.serverId == id).isEmpty) {
+    final Iterable<NoteUpdate> iterator =
+        noteTransfer.noteUpdates.where((NoteUpdate noteUpdate) => noteUpdate.serverId == id);
+    if (iterator.isEmpty) {
       Logger.debug("Got an invalid id $id from ${noteTransfer.serverAccount.userName}");
       id = 0;
+    } else if (iterator.first.noteTransferStatus.clientNeedsUpdate && (params.rawBytes?.isNotEmpty ?? false)) {
+      Logger.debug("The client uploaded bytes to override a note for which the server had a newer time stamp in the "
+          "transfer");
     }
     return id;
   }
