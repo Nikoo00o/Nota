@@ -1,41 +1,23 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
-import 'dart:math';
-
-import 'package:hive/hive.dart';
-import 'package:server/core/config/server_config.dart';
-import 'package:server/data/datasources/account_data_source.dart.dart';
-import 'package:server/data/datasources/local_data_source.dart';
 import 'package:server/data/models/server_account_model.dart';
-import 'package:server/data/repositories/server_repository.dart';
-import 'package:server/core/network/rest_server.dart';
-import 'package:server/domain/entities/server_account.dart';
 import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/constants/rest_json_parameter.dart';
 import 'package:shared/core/enums/note_transfer_status.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/network/response_data.dart';
-import 'package:shared/core/network/rest_client.dart';
-import 'package:shared/core/utils/logger/logger.dart';
-import 'package:shared/core/utils/nullable.dart';
 import 'package:shared/data/dtos/account/account_change_password_request.dart';
 import 'package:shared/data/dtos/account/account_change_password_response.dart';
 import 'package:shared/data/dtos/account/account_login_request.dart.dart';
 import 'package:shared/data/dtos/account/account_login_response.dart';
-import 'package:shared/data/dtos/account/create_account_request.dart';
 import 'package:shared/data/dtos/notes/finish_note_request.dart';
 import 'package:shared/data/dtos/notes/start_note_transfer_request.dart';
 import 'package:shared/data/dtos/notes/start_note_transfer_response.dart';
 import 'package:shared/data/models/note_info_model.dart';
 import 'package:shared/data/models/note_update_model.dart';
-import 'package:shared/data/models/session_token_model.dart';
-import 'package:shared/domain/entities/note_info.dart';
-import 'package:shared/domain/entities/session_token.dart';
 import 'package:test/test.dart';
 import 'helper/test_helpers.dart';
-import 'mocks/session_service_mock.dart';
 
 // test for a combination of other tests. This tests the workflow which the app would follow
 
@@ -114,6 +96,7 @@ Future<void> _firstTransfer() async {
   final StartNoteTransferResponse invalidTransfer = await _startTransfer(_account1);
   final StartNoteTransferResponse emptyTransfer = await _startTransfer(_account3);
   final StartNoteTransferResponse cancelledTransfer = await _startTransfer(_account3);
+
   expect(transfer1.noteUpdates.length, 1);
   expect(transfer1.noteUpdates.length, 1);
   expect(transfer1.noteUpdates.first.noteTransferStatus, NoteTransferStatus.SERVER_NEEDS_NEW);
@@ -131,6 +114,7 @@ Future<void> _firstTransfer() async {
   await _upload(_account2, transfer2.transferToken, transfer2.noteUpdates.first.serverId, utf8.encode("c2_1_text"));
   await _upload(
       _account1, invalidTransfer.transferToken, invalidTransfer.noteUpdates.first.serverId, utf8.encode("INVALID"));
+
   expect(() async {
     await _upload(_account3, emptyTransfer.transferToken, 1, utf8.encode("ignored"));
   }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
@@ -139,12 +123,15 @@ Future<void> _firstTransfer() async {
   print("finishing transfers");
   await _finishTransfer(_account1, transfer1.transferToken, shouldCancel: false);
   await _finishTransfer(_account2, transfer2.transferToken, shouldCancel: false);
+
   expect(() async {
     await _finishTransfer(_account1, invalidTransfer.transferToken, shouldCancel: false); // already cancelled by transfer1
   }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN));
   await Future<void>.delayed(const Duration(milliseconds: 25));
+
   await _finishTransfer(_account3, cancelledTransfer.transferToken, shouldCancel: true); // should not affect others
   await _finishTransfer(_account3, emptyTransfer.transferToken, shouldCancel: false);
+
   expect(() async {
     await _finishTransfer(_account3, emptyTransfer.transferToken, shouldCancel: false); //cancelled from last finish call
   }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN));
@@ -190,6 +177,7 @@ Future<void> _secondTransfer() async {
   print("downloading note");
   final List<int> bytes = await _download(_account1, transfer1.transferToken, transfer1.noteUpdates.first.serverId);
   expect(utf8.decode(bytes), "c1_1_text");
+
   print("uploading notes");
   await _upload(_account1, transfer1.transferToken, transfer1.noteUpdates[1].serverId, utf8.encode("c1_2_text"));
 

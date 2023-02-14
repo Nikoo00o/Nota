@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
-
 import 'package:server/data/models/server_account_model.dart';
 import 'package:server/domain/entities/server_account.dart';
 import 'package:shared/core/constants/endpoints.dart';
@@ -10,13 +8,11 @@ import 'package:shared/core/constants/rest_json_parameter.dart';
 import 'package:shared/core/enums/note_transfer_status.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/network/response_data.dart';
-import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/data/dtos/notes/finish_note_request.dart';
 import 'package:shared/data/dtos/notes/start_note_transfer_request.dart';
 import 'package:shared/data/dtos/notes/start_note_transfer_response.dart';
 import 'package:shared/data/models/note_info_model.dart';
 import 'package:shared/data/models/note_update_model.dart';
-import 'package:shared/domain/entities/note_info.dart';
 import 'package:shared/domain/entities/note_update.dart';
 import 'package:test/test.dart';
 

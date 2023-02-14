@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:server/data/models/server_account_model.dart';
-import 'package:server/domain/entities/server_account.dart';
 import 'package:server/core/network/rest_callback.dart';
 import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/constants/error_codes.dart';
@@ -9,11 +8,9 @@ import 'package:shared/core/enums/http_method.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/network/endpoint.dart';
 import 'package:shared/core/network/response_data.dart';
-import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/core/utils/string_utils.dart';
 import 'package:shared/data/models/session_token_model.dart';
 import 'package:shared/domain/entities/note_info.dart';
-import 'package:shared/domain/entities/session_token.dart';
 import 'package:test/test.dart';
 import 'helper/test_helpers.dart';
 
