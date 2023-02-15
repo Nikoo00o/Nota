@@ -1,5 +1,6 @@
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
+import 'package:shared/core/utils/string_utils.dart';
 import 'package:test/test.dart';
 import 'helper/test_helpers.dart';
 
@@ -76,5 +77,15 @@ void main() {
       final List<int> newBytes = await noteDataSource.loadNoteData(1);
       expect(bytes, newBytes);
     });
+  });
+
+  test("test if the local data source can handle bigger amounts of data (over 10 mb)...", () async {
+    final String toWrite = StringUtils.getRandomBytesAsString(1000 * 1000 * 10);
+
+    await localDataSource.write(key: "TEMP", value: toWrite, databaseKey: "ACCOUNT_DATABASE");
+    await localDataSource.read(key: "TEMP", databaseKey: "ACCOUNT_DATABASE");
+
+    await localDataSource.write(key: "TEMP", value: toWrite, databaseKey: "CONFIG_DATABASE");
+    await localDataSource.read(key: "TEMP", databaseKey: "CONFIG_DATABASE");
   });
 }

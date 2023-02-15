@@ -90,7 +90,7 @@ Future<void> _setup() async {
   Logger.initLogger(Logger()); // the logger must always be initialized first
 
   // modifies the resource path to depend on the test port, so its unique for each test
-  final String baseTestPath = FileUtils.getLocalFilePath("testData");
+  final String baseTestPath = FileUtils.getLocalFilePath("test${Platform.pathSeparator}data");
   serverConfigMock.resourceFolderPathOverride = "$baseTestPath${Platform.pathSeparator}${serverConfigMock.serverPort}";
 
   await localDataSource.init(); // create the required folders and init the database

@@ -14,6 +14,4 @@ class ServerAccount extends SharedAccount {
     required super.encryptedDataKey,
   }) : super();
 
-  /// Returns the hashed [userName] to be used as the name for the notes database of this account
-  String get noteFileName => SecurityUtils.hashString(userName);
 }

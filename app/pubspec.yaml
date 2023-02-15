@@ -17,8 +17,10 @@ dependencies:
   cupertino_icons: ^1.0.2 # default icons
   get_it: ^7.2.0 # service locator
   hive: ^2.2.3 # nosql database
-  hive_flutter: ^1.1.0 # flutter extension 
-
+  hive_flutter: ^1.1.0 # flutter extension for hive
+  flutter_secure_storage: ^8.0.0 # secure storage for keys in keychain, or keystore
+  cryptography: ^2.0.5 # basic cryptographic functions (like aes encryption)
+  cryptography_flutter: ^2.0.2 # better flutter performance for base package
 
 dev_dependencies:
   flutter_test: # flutter test package

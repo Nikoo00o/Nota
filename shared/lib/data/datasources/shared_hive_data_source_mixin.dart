@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/utils/hive_aes_gcm_cipher.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/data/datasources/hive_box_configuration.dart';
 
@@ -25,10 +26,7 @@ mixin SharedHiveDataSourceMixin {
         late final BoxBase<String> hiveBox;
         late final HiveCipher? cipher;
         if (config.value.encryptionKey != null) {
-          // only uses AES-CBC, but the data is not that critical and an attackers access to the plain and cipher data for
-          // manipulation like a padding oracle attack would be more exhausting than just decompiling the code to get the
-          // static key from the [ServerConfig]
-          cipher = HiveAesCipher(base64Decode(config.value.encryptionKey!));
+          cipher = HiveAesGcmCipher(keyBytes: base64Decode(config.value.encryptionKey!));
         }
 
         if (config.value.isLazy) {
