@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
-
 import 'package:server/data/models/server_account_model.dart';
 import 'package:server/domain/entities/server_account.dart';
 import 'package:shared/core/constants/endpoints.dart';
@@ -9,15 +7,13 @@ import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/constants/rest_json_parameter.dart';
 import 'package:shared/core/enums/note_transfer_status.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
-import 'package:shared/core/network/response_data.dart';
-import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/data/dtos/notes/finish_note_request.dart';
 import 'package:shared/data/dtos/notes/start_note_transfer_request.dart';
 import 'package:shared/data/dtos/notes/start_note_transfer_response.dart';
 import 'package:shared/data/models/note_info_model.dart';
 import 'package:shared/data/models/note_update_model.dart';
-import 'package:shared/domain/entities/note_info.dart';
 import 'package:shared/domain/entities/note_update.dart';
+import 'package:shared/domain/entities/response_data.dart';
 import 'package:test/test.dart';
 
 import 'helper/test_helpers.dart';
@@ -53,7 +49,7 @@ void main() {
 /// initializes the account to use for the tests
 Future<void> _initAccount() async {
   _account = await createAndLoginToTestAccount(0);
-  sessionServiceMock.sessionTokenOverride = _account.sessionToken!.token;
+  fetchCurrentSessionTokenMock.sessionTokenOverride = _account.sessionToken!;
 }
 
 void _testAuthentication() {
@@ -288,7 +284,8 @@ void _testFinishTransfer() {
 
     await _finishTransfer(response.transferToken, shouldCancel: false);
 
-    final ServerAccount? account = await accountRepository.getAccountBySessionToken(sessionServiceMock.sessionTokenOverride);
+    final ServerAccount? account =
+        await accountRepository.getAccountBySessionToken(fetchCurrentSessionTokenMock.sessionTokenOverride!.token);
     expect(account?.noteInfoList.length, 1, reason: "server account should have 1 note");
     expect(account?.noteInfoList.first, NoteInfoModel(id: 1, encFileName: "c1", lastEdited: _now),
         reason: "note info should match");
@@ -302,7 +299,8 @@ void _testFinishTransfer() {
         await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
     await _finishTransfer(response.transferToken, shouldCancel: false);
 
-    final ServerAccount? account = await accountRepository.getAccountBySessionToken(sessionServiceMock.sessionTokenOverride);
+    final ServerAccount? account =
+        await accountRepository.getAccountBySessionToken(fetchCurrentSessionTokenMock.sessionTokenOverride!.token);
     expect(account?.noteInfoList.length, 1, reason: "server account should have 1 note");
     expect(account?.noteInfoList.first, NoteInfoModel(id: 1, encFileName: "c1", lastEdited: _now),
         reason: "note info should match");
@@ -315,7 +313,8 @@ void _testFinishTransfer() {
     final StartNoteTransferResponse response = await _startTransfer(<NoteInfoModel>[]);
     await _finishTransfer(response.transferToken, shouldCancel: false);
 
-    final ServerAccount? account = await accountRepository.getAccountBySessionToken(sessionServiceMock.sessionTokenOverride);
+    final ServerAccount? account =
+        await accountRepository.getAccountBySessionToken(fetchCurrentSessionTokenMock.sessionTokenOverride!.token);
     expect(account?.noteInfoList.length, 0, reason: "server account should have no notes");
     expect(() async {
       await noteDataSource.loadNoteData(1);
@@ -329,7 +328,8 @@ void _testFinishTransfer() {
     await _upload(response.transferToken, 1, bytes);
     await _finishTransfer(response.transferToken, shouldCancel: true);
 
-    final ServerAccount? account = await accountRepository.getAccountBySessionToken(sessionServiceMock.sessionTokenOverride);
+    final ServerAccount? account =
+        await accountRepository.getAccountBySessionToken(fetchCurrentSessionTokenMock.sessionTokenOverride!.token);
     expect(account?.noteInfoList.length, 0, reason: "server account should have 0 notes");
     expect(() async {
       await noteDataSource.loadNoteData(1);
@@ -354,7 +354,8 @@ void _testFinishTransfer() {
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN),
         reason: "cancelled");
 
-    final ServerAccount? account = await accountRepository.getAccountBySessionToken(sessionServiceMock.sessionTokenOverride);
+    final ServerAccount? account =
+        await accountRepository.getAccountBySessionToken(fetchCurrentSessionTokenMock.sessionTokenOverride!.token);
     expect(account?.noteInfoList.length, transfer1.noteUpdates.first.serverId, reason: "server account should have 1 note");
     expect(account?.noteInfoList.first, NoteInfoModel(id: 1, encFileName: "c2", lastEdited: _now),
         reason: "note info should match");
@@ -376,7 +377,8 @@ void _testFinishTransfer() {
     await _finishTransfer(transfer2.transferToken, shouldCancel: true);
     await _finishTransfer(transfer1.transferToken, shouldCancel: false);
 
-    final ServerAccount? account = await accountRepository.getAccountBySessionToken(sessionServiceMock.sessionTokenOverride);
+    final ServerAccount? account =
+        await accountRepository.getAccountBySessionToken(fetchCurrentSessionTokenMock.sessionTokenOverride!.token);
     expect(account?.noteInfoList.length, transfer1.noteUpdates.first.serverId, reason: "server account should have 1 note");
     expect(account?.noteInfoList.first, NoteInfoModel(id: 1, encFileName: "c2", lastEdited: _now),
         reason: "note info should match");

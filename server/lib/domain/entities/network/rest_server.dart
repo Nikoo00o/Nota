@@ -2,8 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:server/domain/entities/network/rest_callback.dart';
+import 'package:server/domain/entities/network/rest_callback_params.dart';
+import 'package:server/domain/entities/network/rest_callback_result.dart';
 import 'package:server/domain/entities/server_account.dart';
-import 'package:server/core/network/rest_callback.dart';
+import 'package:server/domain/usecases/fetch_authenticated_account.dart';
 import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/constants/rest_json_parameter.dart';
 import 'package:shared/core/enums/http_method.dart';
@@ -12,7 +15,10 @@ import 'package:shared/core/network/network_utils.dart';
 import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
-/// A https REST API Webserver that you can add callbacks to which will be called for specific http requests
+/// A https REST API Webserver that you can add callbacks to which will be called for specific http requests.
+///
+/// [fetchAuthenticatedAccount] is used for endpoints that require a session token for authentication and it should return
+/// the attached account if the session token was valid. Otherwise it should return null.
 class RestServer {
   HttpServer? _server;
 
@@ -25,11 +31,9 @@ class RestServer {
 
   late int _port;
 
-  /// Internal variable for [authenticationCallback]
-  FutureOr<ServerAccount?> Function(String sessionToken)? _authenticationCallback;
+  final FetchAuthenticatedAccount fetchAuthenticatedAccount;
 
-  /// The callback for the endpoints that require a session token which should return a valid attached account, or null
-  FutureOr<ServerAccount?> Function(String sessionToken)? get authenticationCallback => _authenticationCallback;
+  RestServer({required this.fetchAuthenticatedAccount});
 
   /// Starts the server and returns [true] if it was successful
   ///
@@ -38,15 +42,11 @@ class RestServer {
   /// [privateKeyFilePath] can be null if the private key file does not need a password
   ///
   /// After calling start, use [addCallback] to add callbacks for client http requests to specific endpoint urls
-  ///
-  /// [authenticationCallback] is used for endpoints that require a session token for authentication and it should return
-  /// the attached account if the session token was valid. Otherwise it should return null.
   Future<bool> start({
     required String certificateFilePath,
     required String privateKeyFilePath,
     String? rsaPassword,
     required int port,
-    FutureOr<ServerAccount?> Function(String sessionToken)? authenticationCallback,
   }) async {
     if (_server == null) {
       if (File(certificateFilePath).existsSync() == false) {
@@ -56,7 +56,6 @@ class RestServer {
         Logger.error("Error starting REST API server: private key file $privateKeyFilePath does not exist");
         return false;
       } else {
-        _authenticationCallback = authenticationCallback;
         _port = port;
         _securityContext = SecurityContext();
         _securityContext.useCertificateChain(certificateFilePath);
@@ -113,13 +112,13 @@ class RestServer {
       Logger.debug("Got request ${request.requestedUri} from $clientIp$log");
 
       if (queryParams.isEmpty && fullApiPath.isEmpty && requestData == null) {
-        response = RestCallbackResult(jsonResult: <String, dynamic>{}, statusCode: HttpStatus.badRequest);
+        response = RestCallbackResult(jsonResult: const <String, dynamic>{}, statusCode: HttpStatus.badRequest);
       } else {
         response = await _handleCallback(request, fullApiPath, queryParams, requestData, clientIp);
       }
     } catch (e, s) {
       Logger.error("REST API error parsing request", e, s);
-      response = RestCallbackResult(jsonResult: <String, dynamic>{}, statusCode: HttpStatus.badRequest);
+      response = RestCallbackResult(jsonResult: const <String, dynamic>{}, statusCode: HttpStatus.badRequest);
     }
 
     try {
@@ -145,11 +144,11 @@ class RestServer {
     await httpResponse.close();
   }
 
-  /// Calls the [authenticationCallback] to return the attached [ServerAccount] to a valid [sessionToken], or otherwise
+  /// Calls the [fetchAuthenticatedAccount] to return the attached [ServerAccount] to a valid [sessionToken], or otherwise
   /// [null]
   Future<ServerAccount?> _getAuthenticatedAccount(Map<String, String> queryParams) async {
     final String sessionToken = queryParams[RestJsonParameter.SESSION_TOKEN] ?? "";
-    return authenticationCallback?.call(sessionToken);
+    return fetchAuthenticatedAccount.call(FetchAuthenticatedAccountParams(sessionToken: sessionToken));
   }
 
   Future<RestCallbackResult> _handleCallback(
@@ -167,7 +166,7 @@ class RestServer {
         if (authenticatedAccount == null) {
           Logger.error("REST API error, the Request ${request.requestedUri} from $clientIp does not contain a valid session "
               "token");
-          return RestCallbackResult(jsonResult: <String, dynamic>{}, statusCode: HttpStatus.unauthorized);
+          return RestCallbackResult(jsonResult: const <String, dynamic>{}, statusCode: HttpStatus.unauthorized);
         }
       }
 
@@ -182,7 +181,7 @@ class RestServer {
 
       return matchingRestCallbackIt.first.callback.call(restCallbackParams);
     } else {
-      return RestCallbackResult(jsonResult: <String, dynamic>{}, statusCode: HttpStatus.notFound);
+      return RestCallbackResult(jsonResult: const <String, dynamic>{}, statusCode: HttpStatus.notFound);
     }
   }
 
@@ -190,7 +189,7 @@ class RestServer {
   ///
   /// For http request where no callback is found, the StatusCode 404 will be returned.
   ///
-  /// If the [endpoint] needs a session token for authentication, then the [authenticationCallback] method is used to
+  /// If the [endpoint] needs a session token for authentication, then the [fetchAuthenticatedAccount] use case is used to
   /// return the attached account which the callback then can use.
   /// If the session token was invalid and the returned account was [null], the StatusCode 401 will be returned.
   ///

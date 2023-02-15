@@ -9,12 +9,13 @@ import 'package:server/data/models/server_account_model.dart';
 import 'package:server/data/repositories/account_repository.dart';
 import 'package:server/data/repositories/note_repository.dart';
 import 'package:server/data/repositories/server_repository.dart';
-import 'package:server/core/network/rest_server.dart';
+import 'package:server/domain/entities/network/rest_server.dart';
+import 'package:server/domain/usecases/fetch_authenticated_account.dart';
 import 'package:shared/core/constants/endpoints.dart';
-import 'package:shared/core/network/rest_client.dart';
 import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/core/utils/nullable.dart';
+import 'package:shared/data/datasources/rest_client.dart';
 import 'package:shared/data/dtos/account/account_change_password_request.dart';
 import 'package:shared/data/dtos/account/account_change_password_response.dart';
 import 'package:shared/data/dtos/account/account_login_request.dart.dart';
@@ -24,21 +25,22 @@ import 'package:shared/data/models/session_token_model.dart';
 import 'package:shared/domain/entities/note_info.dart';
 import 'package:test/expect.dart';
 
-import '../mocks/rest_server_mock.dart';
+import '../mocks/fetch_authenticated_account_mock.dart';
 import '../mocks/server_config_mock.dart';
-import '../mocks/session_service_mock.dart';
+import '../mocks/fetch_session_token_mock.dart';
 
 // Helper methods for the tests that are used by multiple tests. mostly used for initialisation!
 
 late ServerConfigMock serverConfigMock;
-late RestServerMock restServer;
+late FetchAuthenticatedAccountMock fetchAuthenticatedAccountMock;
+late RestServer restServer;
 late LocalDataSource localDataSource;
 late AccountDataSource accountDataSource;
 late NoteDataSource noteDataSource;
 late ServerRepository serverRepository;
 late AccountRepository accountRepository;
 late NoteRepository noteRepository;
-late SessionServiceMock sessionServiceMock;
+late FetchCurrentSessionTokenMock fetchCurrentSessionTokenMock;
 late RestClient restClient;
 bool initialized = false;
 
@@ -59,13 +61,16 @@ Future<void> createCommonTestObjects({required int serverPort}) async {
   }
 
   serverConfigMock = ServerConfigMock(serverPortOverride: serverPort);
-  restServer = RestServerMock();
 
   localDataSource = LocalDataSourceImpl(serverConfig: serverConfigMock);
   accountDataSource = AccountDataSource(serverConfig: serverConfigMock, localDataSource: localDataSource);
   noteDataSource = NoteDataSource(serverConfig: serverConfigMock, localDataSource: localDataSource);
 
   accountRepository = AccountRepository(accountDataSource: accountDataSource, serverConfig: serverConfigMock);
+
+  fetchAuthenticatedAccountMock = FetchAuthenticatedAccountMock(accountRepository: accountRepository);
+  restServer = RestServer(fetchAuthenticatedAccount: fetchAuthenticatedAccountMock);
+
   noteRepository = NoteRepository(
     noteDataSource: noteDataSource,
     serverConfig: serverConfigMock,
@@ -78,8 +83,8 @@ Future<void> createCommonTestObjects({required int serverPort}) async {
     noteRepository: noteRepository,
   );
 
-  sessionServiceMock = SessionServiceMock();
-  restClient = RestClient(config: serverConfigMock, sessionService: sessionServiceMock);
+  fetchCurrentSessionTokenMock = FetchCurrentSessionTokenMock();
+  restClient = RestClient(config: serverConfigMock, fetchSessionToken: fetchCurrentSessionTokenMock);
 
   initialized = true;
 
@@ -90,7 +95,7 @@ Future<void> _setup() async {
   Logger.initLogger(Logger()); // the logger must always be initialized first
 
   // modifies the resource path to depend on the test port, so its unique for each test
-  final String baseTestPath = FileUtils.getLocalFilePath("testData");
+  final String baseTestPath = FileUtils.getLocalFilePath("test${Platform.pathSeparator}data");
   serverConfigMock.resourceFolderPathOverride = "$baseTestPath${Platform.pathSeparator}${serverConfigMock.serverPort}";
 
   await localDataSource.init(); // create the required folders and init the database
