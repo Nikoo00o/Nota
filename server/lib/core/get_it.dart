@@ -6,15 +6,20 @@ import 'package:server/data/datasources/note_data_source.dart';
 import 'package:server/data/repositories/account_repository.dart';
 import 'package:server/data/repositories/note_repository.dart';
 import 'package:server/data/repositories/server_repository.dart';
-import 'package:server/core/network/rest_server.dart';
+import 'package:server/domain/entities/network/rest_server.dart';
+import 'package:server/domain/usecases/fetch_authenticated_account.dart';
+import 'package:shared/core/utils/logger/logger.dart';
 
 /// Returns the GetIt service locator / singleton instance
 final GetIt sl = GetIt.instance;
 
 /// This and all constructor calls inside may not call the logger, because it will be initialized later!
 Future<void> initializeGetIt() async {
+  Logger.initLogger(Logger());
+
   sl.registerLazySingleton<ServerConfig>(() => ServerConfig());
-  sl.registerLazySingleton<RestServer>(() => RestServer());
+  sl.registerLazySingleton<FetchAuthenticatedAccount>(() => FetchAuthenticatedAccount(accountRepository: sl()));
+  sl.registerLazySingleton<RestServer>(() => RestServer(fetchAuthenticatedAccount: sl()));
   sl.registerLazySingleton<LocalDataSource>(() => LocalDataSourceImpl(serverConfig: sl()));
   sl.registerLazySingleton<AccountDataSource>(() => AccountDataSource(serverConfig: sl(), localDataSource: sl()));
   sl.registerLazySingleton<NoteDataSource>(() => NoteDataSource(serverConfig: sl(), localDataSource: sl()));
@@ -30,4 +35,7 @@ Future<void> initializeGetIt() async {
         accountRepository: sl(),
         noteRepository: sl(),
       ));
+
+  await sl<LocalDataSource>().init();
+  await sl<NoteDataSource>().init();
 }

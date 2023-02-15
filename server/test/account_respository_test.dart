@@ -298,7 +298,7 @@ void _testChangePassword() {
     await createTestAccount(0);
     await loginToTestAccount(0);
 
-    sessionServiceMock.sessionTokenOverride = "invalid_session_token";
+    fetchCurrentSessionTokenMock.setBasicSessionToken("invalid_session_token");
 
     expect(() async {
       await _changePasswordOfTestAccount(0);
@@ -309,7 +309,7 @@ void _testChangePassword() {
     await createTestAccount(0);
     final AccountLoginResponse loginResponse = await loginToTestAccount(0);
 
-    sessionServiceMock.sessionTokenOverride = loginResponse.sessionToken.token;
+    fetchCurrentSessionTokenMock.sessionTokenOverride = loginResponse.sessionToken;
     await _changePasswordOfTestAccount(0);
 
     final ServerAccount? noAccount = await accountRepository.getAccountBySessionToken(loginResponse.sessionToken.token);
@@ -320,7 +320,7 @@ void _testChangePassword() {
     await createTestAccount(0);
     final AccountLoginResponse loginResponse = await loginToTestAccount(0);
 
-    sessionServiceMock.sessionTokenOverride = loginResponse.sessionToken.token;
+    fetchCurrentSessionTokenMock.sessionTokenOverride = loginResponse.sessionToken;
     final AccountChangePasswordResponse changePasswordResponse = await _changePasswordOfTestAccount(0);
 
     final ServerAccount? changedAccount =
@@ -343,7 +343,7 @@ void _testChangePassword() {
     await loginToTestAccount(0); // refresh token, so a redirect gets added for the [account1] below
     final ServerAccount? account1 = await accountRepository.getAccountBySessionToken(response1.sessionToken.token);
 
-    sessionServiceMock.sessionTokenOverride = response1.sessionToken.token; // change password with redirected token
+    fetchCurrentSessionTokenMock.sessionTokenOverride = response1.sessionToken; // change password with redirected token
     await _changePasswordOfTestAccount(0);
 
     final ServerAccount? account2 = await accountRepository.getAccountBySessionToken(response1.sessionToken.token);

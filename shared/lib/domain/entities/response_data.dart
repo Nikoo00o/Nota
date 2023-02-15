@@ -1,7 +1,8 @@
-import 'package:shared/core/network/rest_client.dart';
+import 'package:shared/data/datasources/rest_client.dart';
+import 'package:shared/domain/entities/entity.dart';
 
 /// This is just a wrapper for the http response from [RestClient.sendRequest] and will contain either [json], or [bytes]
-class ResponseData {
+class ResponseData extends Entity {
   /// The json map send from the server. This will be null if [bytes] is not null
   final Map<String, dynamic>? json;
 
@@ -11,7 +12,12 @@ class ResponseData {
   /// The http headers from the response
   final Map<String, String> responseHeaders;
 
-  ResponseData({required this.json, required this.bytes, required this.responseHeaders}) {
+  ResponseData({required this.json, required this.bytes, required this.responseHeaders})
+      : super(<String, dynamic>{
+          "json": json,
+          "bytes": bytes,
+          "responseHeaders": responseHeaders,
+        }) {
     assert((json != null || bytes != null) && !(json != null && bytes != null),
         "One of json, or bytes should be set in the response");
   }

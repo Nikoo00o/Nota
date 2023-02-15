@@ -1,16 +1,18 @@
 import 'dart:io';
 import 'package:server/data/models/server_account_model.dart';
-import 'package:server/core/network/rest_callback.dart';
+import 'package:server/domain/entities/network/rest_callback.dart';
+import 'package:server/domain/entities/network/rest_callback_params.dart';
+import 'package:server/domain/entities/network/rest_callback_result.dart';
 import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/constants/rest_json_parameter.dart';
 import 'package:shared/core/enums/http_method.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/network/endpoint.dart';
-import 'package:shared/core/network/response_data.dart';
 import 'package:shared/core/utils/string_utils.dart';
 import 'package:shared/data/models/session_token_model.dart';
 import 'package:shared/domain/entities/note_info.dart';
+import 'package:shared/domain/entities/response_data.dart';
 import 'package:test/test.dart';
 import 'helper/test_helpers.dart';
 
@@ -62,7 +64,7 @@ const Endpoint differentTestsEndpoint = Endpoint(apiPath: "test/different/tests/
 final ServerAccountModel validAccount = ServerAccountModel(
     userName: "validAccount",
     passwordHash: "validPassword",
-    sessionToken: SessionTokenModel(token: "validToken", validTo: DateTime.now()),
+    sessionToken: SessionTokenModel(token: "validToken", validTo: DateTime.now().add(const Duration(hours: 1))),
     noteInfoList: const <NoteInfo>[],
     encryptedDataKey: "validKey");
 
@@ -74,10 +76,10 @@ void initHttpMethodEndpoints() {
   restServer.addCallback(endpoint: deleteEndpoint, callback: _returnJsonRequest);
 }
 
-/// Adds a callback for the [sessionTokenEndpoint] and also overrides the [restServer.authenticationCallbackOverride] to
-/// match the [validAccount]
+/// Adds a callback for the [sessionTokenEndpoint] and also overrides the
+/// [fetchAuthenticatedAccountMock.authenticationCallbackOverride] to match the [validAccount]
 void initSessionTokenEndpoint() {
-  restServer.authenticationCallbackOverride = (String sessionToken) async {
+  fetchAuthenticatedAccountMock.authenticationCallbackOverride = (String sessionToken) async {
     if (validAccount.containsSessionToken(sessionToken)) {
       return validAccount;
     }
@@ -282,30 +284,42 @@ void _testDifferentRequests() {
 void _testWithSessionTokens() {
   test("a post request with a correct session token should get the valid accounts username", () async {
     initSessionTokenEndpoint();
-    sessionServiceMock.sessionTokenOverride = validAccount.sessionToken!.token;
+    fetchCurrentSessionTokenMock.sessionTokenOverride = validAccount.sessionToken!;
     final Map<String, dynamic> response = await restClient.sendJsonRequest(
       endpoint: sessionTokenEndpoint,
     );
     expect(response["test"], validAccount.userName);
   });
 
-  test("a post request with an empty session token should throw an unauthorized exception", () async {
+  test("a post request with an empty session token should throw a missing session token exception", () async {
     initSessionTokenEndpoint();
-    sessionServiceMock.sessionTokenOverride = "";
+    fetchCurrentSessionTokenMock.setBasicSessionToken("");
     expect(
       () async {
         await restClient.sendRequest(
           endpoint: sessionTokenEndpoint,
         );
       },
-      throwsA(
-          predicate((Object e) => e is ServerException && e.message == ErrorCodes.httpStatusWith(HttpStatus.unauthorized))),
+      throwsA(predicate((Object e) => e is ServerException && e.message == ErrorCodes.MISSING_SESSION_TOKEN)),
+    );
+  });
+
+  test("a post request with no session token should throw a missing session token exception", () async {
+    initSessionTokenEndpoint();
+    fetchCurrentSessionTokenMock.sessionTokenOverride = null;
+    expect(
+      () async {
+        await restClient.sendRequest(
+          endpoint: sessionTokenEndpoint,
+        );
+      },
+      throwsA(predicate((Object e) => e is ServerException && e.message == ErrorCodes.MISSING_SESSION_TOKEN)),
     );
   });
 
   test("a post request with an invalid session token should throw an unauthorized exception", () async {
     initSessionTokenEndpoint();
-    sessionServiceMock.sessionTokenOverride = "invalidSessionToken";
+    fetchCurrentSessionTokenMock.setBasicSessionToken("invalidSessionToken");
     expect(
       () async {
         await restClient.sendRequest(

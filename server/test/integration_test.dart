@@ -6,7 +6,6 @@ import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/constants/rest_json_parameter.dart';
 import 'package:shared/core/enums/note_transfer_status.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
-import 'package:shared/core/network/response_data.dart';
 import 'package:shared/core/utils/string_utils.dart';
 import 'package:shared/data/dtos/account/account_change_password_request.dart';
 import 'package:shared/data/dtos/account/account_change_password_response.dart';
@@ -17,6 +16,7 @@ import 'package:shared/data/dtos/notes/start_note_transfer_request.dart';
 import 'package:shared/data/dtos/notes/start_note_transfer_response.dart';
 import 'package:shared/data/models/note_info_model.dart';
 import 'package:shared/data/models/note_update_model.dart';
+import 'package:shared/domain/entities/response_data.dart';
 import 'package:test/test.dart';
 import 'helper/test_helpers.dart';
 
@@ -248,7 +248,7 @@ void _expectClientNeedsNew(NoteUpdateModel noteUpdate) {
 DateTime _now = DateTime.now();
 
 Future<AccountChangePasswordResponse> _changePasswordOfTestAccount(ServerAccountModel accountWithChangedPassword) async {
-  sessionServiceMock.sessionTokenOverride = accountWithChangedPassword.sessionToken!.token;
+  fetchCurrentSessionTokenMock.sessionTokenOverride = accountWithChangedPassword.sessionToken!;
   final Map<String, dynamic> json = await restClient.sendJsonRequest(
     endpoint: Endpoints.ACCOUNT_CHANGE_PASSWORD,
     bodyData: AccountChangePasswordRequest(
@@ -271,7 +271,7 @@ Future<AccountLoginResponse> _loginToAccount(ServerAccountModel account) async {
 }
 
 Future<StartNoteTransferResponse> _startTransfer(ServerAccountModel account) async {
-  sessionServiceMock.sessionTokenOverride = account.sessionToken!.token;
+  fetchCurrentSessionTokenMock.sessionTokenOverride = account.sessionToken!;
   final ResponseData data = await restClient.sendRequest(
     endpoint: Endpoints.NOTE_TRANSFER_START,
     bodyData: StartNoteTransferRequest(clientNotes: List<NoteInfoModel>.from(account.noteInfoList)).toJson(),
@@ -280,7 +280,7 @@ Future<StartNoteTransferResponse> _startTransfer(ServerAccountModel account) asy
 }
 
 Future<void> _upload(ServerAccountModel account, String? transferToken, int? serverId, List<int>? bytes) async {
-  sessionServiceMock.sessionTokenOverride = account.sessionToken!.token;
+  fetchCurrentSessionTokenMock.sessionTokenOverride = account.sessionToken!;
   final Map<String, String> queryParams = <String, String>{};
   if (transferToken != null) {
     queryParams[RestJsonParameter.TRANSFER_TOKEN] = transferToken;
@@ -296,7 +296,7 @@ Future<void> _upload(ServerAccountModel account, String? transferToken, int? ser
 }
 
 Future<void> _finishTransfer(ServerAccountModel account, String? transferToken, {required bool shouldCancel}) async {
-  sessionServiceMock.sessionTokenOverride = account.sessionToken!.token;
+  fetchCurrentSessionTokenMock.sessionTokenOverride = account.sessionToken!;
   final Map<String, String> queryParams = <String, String>{};
   if (transferToken != null) {
     queryParams[RestJsonParameter.TRANSFER_TOKEN] = transferToken;
@@ -309,7 +309,7 @@ Future<void> _finishTransfer(ServerAccountModel account, String? transferToken, 
 }
 
 Future<List<int>> _download(ServerAccountModel account, String? transferToken, int? serverId) async {
-  sessionServiceMock.sessionTokenOverride = account.sessionToken!.token;
+  fetchCurrentSessionTokenMock.sessionTokenOverride = account.sessionToken!;
   final Map<String, String> queryParams = <String, String>{};
   if (transferToken != null) {
     queryParams[RestJsonParameter.TRANSFER_TOKEN] = transferToken;

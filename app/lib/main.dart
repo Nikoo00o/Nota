@@ -8,8 +8,6 @@ import 'package:shared/core/utils/logger/logger.dart';
 Future<void> main(List<String> arguments) async {
   FlutterCryptography.enable(); // enable flutter cryptography for better performance
   await initializeGetIt();
-  Logger.initLogger(AppLogger());
-  await sl<LocalDataSource>().init();
   WidgetsFlutterBinding.ensureInitialized();
 
   runApp(

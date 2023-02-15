@@ -13,9 +13,6 @@ import 'package:shared/core/utils/string_utils.dart';
 
 Future<void> main(List<String> arguments) async {
   await initializeGetIt();
-  Logger.initLogger(Logger());
-  await sl<LocalDataSource>().init();
-  await sl<NoteDataSource>().init();
 
   final ArgParser parser = ArgParser()..addOption("rsaPassword", abbr: "r");
   final ArgResults argResults = parser.parse(arguments);

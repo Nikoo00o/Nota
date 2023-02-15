@@ -23,11 +23,14 @@ dependencies:
   cryptography_flutter: ^2.0.2 # better flutter performance for base package
 
 dev_dependencies:
+  test: ^1.16.0 # dart test package
   flutter_test: # flutter test package
     sdk: flutter
 
   flutter_lints: ^2.0.1 # linter rules
 
+  server: # server project for testing
+    path: ../server
 
 flutter:
 

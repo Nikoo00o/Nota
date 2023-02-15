@@ -11,23 +11,25 @@ import 'package:shared/core/enums/http_method.dart';
 import 'package:shared/core/constants/rest_json_parameter.dart';
 import 'package:shared/core/network/endpoint.dart';
 import 'package:shared/core/network/network_utils.dart';
-import 'package:shared/core/network/response_data.dart';
+import 'package:shared/domain/entities/response_data.dart';
 import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
-import 'package:shared/services/shared_session_service.dart';
+import 'package:shared/domain/entities/session_token.dart';
+import 'package:shared/domain/usecases/shared_fetch_current_session_token.dart';
+import 'package:shared/domain/usecases/usecase.dart';
 
 /// Wrapper around a http client to connect to the REST API web server.
 ///
-/// Will retrieve the server url from the [config] and the session token from the [sessionService]
+/// Will retrieve the server url from the [config] and the session token from the [fetchSessionToken] use case
 class RestClient {
   final SharedConfig config;
-  final SharedSessionService sessionService;
+  final SharedFetchCurrentSessionToken fetchSessionToken;
   late final IOClient client;
 
   /// successful http responses
   static const List<int> validHttpResponseCodes = <int>[200, 201, 202, 203, 204, 205, 206];
 
-  RestClient({required this.config, required this.sessionService}) {
+  RestClient({required this.config, required this.fetchSessionToken}) {
     final HttpClient httpClient = HttpClient();
     if (config.acceptSelfSignedCertificates) {
       httpClient.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
@@ -185,9 +187,9 @@ class RestClient {
     final StringBuffer buffer = StringBuffer();
     buffer.write("?");
     if (endpoint.needsSessionToken) {
-      final String? sessionToken = await sessionService.fetchCurrentSessionToken();
-      if (sessionToken != null) {
-        _writeToBuffer(buffer, RestJsonParameter.SESSION_TOKEN, sessionToken);
+      final SessionToken? sessionToken = await fetchSessionToken(NoParams());
+      if (sessionToken != null && sessionToken.isStillValid()) {
+        _writeToBuffer(buffer, RestJsonParameter.SESSION_TOKEN, sessionToken.token);
       } else {
         Logger.error("Error sending the following ${endpoint.httpMethod} request to the server: ${endpoint.apiPath}");
         throw const ServerException(message: ErrorCodes.MISSING_SESSION_TOKEN);
