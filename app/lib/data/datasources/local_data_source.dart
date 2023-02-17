@@ -1,14 +1,15 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:app/data/models/client_account_model.dart';
-import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared/core/config/shared_config.dart';
-import 'package:shared/core/utils/file_utils.dart';
+import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/core/utils/string_utils.dart';
-import 'package:shared/data/datasources/hive_box_configuration.dart';
-import 'package:shared/data/datasources/shared_hive_data_source_mixin.dart';
 
+/// Always call [init] first before using any other method!
 abstract class LocalDataSource {
   /// The database identifier of the hive box that contains the stored values
   static const String HIVE_DATABASE = "HIVE_DATABASE";
@@ -32,7 +33,7 @@ abstract class LocalDataSource {
     }
   }
 
-  /// Returns the currently stored [ClientAccountModel], or null if it was not found
+  /// Returns the currently stored [ClientAccountModel] decrypted with the hive key, or null if it was not found
   Future<ClientAccountModel?> loadAccount(String userName) async {
     final String? jsonString = await read(key: userName, secure: false);
     if (jsonString != null) {
@@ -41,10 +42,43 @@ abstract class LocalDataSource {
     return null;
   }
 
-  /// Stores the current account
+  /// Stores the current account and encrypts it with the hive key
   Future<void> saveAccount(ClientAccountModel account) async {
     await write(key: account.userName, value: jsonEncode(account), secure: false);
   }
+
+  /// Returns the content of the note which is encrypted with the users data key.
+  ///
+  /// The Note will be stored at "[getApplicationDocumentsDirectory()] / [appConfig.noteFolder] / [noteId] .note"
+  ///
+  /// So for example on android /data/user/0/com.nota.nota_app/app_flutter/notes/10.note
+  ///
+  /// If the note could not be found, this will throw a [FileException] with [ErrorCodes.FILE_NOT_FOUND]!
+  Future<Uint8List> loadEncryptedNoteBytes(int noteId) async {
+    final String filePath = await getNoteFilePath(noteId);
+    final Uint8List? encryptedBytes = await readFile(filePath: filePath);
+    if (encryptedBytes == null) {
+      throw const FileException(message: ErrorCodes.FILE_NOT_FOUND);
+    }
+    return encryptedBytes;
+  }
+
+  /// Stores the content of the note which is encrypted with the users data key.
+  ///
+  /// The Note will be stored at "[getApplicationDocumentsDirectory()] / [appConfig.noteFolder] / [noteId] .note"
+  ///
+  /// So for example on android /data/user/0/com.nota.nota_app/app_flutter/notes/10.note
+  Future<void> saveEncryptedNoteBytes(int noteId, List<int> encryptedBytes) async {
+    final String filePath = await getNoteFilePath(noteId);
+    await writeFile(filePath: filePath, bytes: encryptedBytes);
+  }
+
+  /// Returns the filePath to a specific note.
+  ///
+  /// The Note will be stored at "[getApplicationDocumentsDirectory()] / [appConfig.noteFolder] / [noteId] .note"
+  ///
+  /// So for example on android /data/user/0/com.nota.nota_app/app_flutter/notes/10.note
+  Future<String> getNoteFilePath(int noteId);
 
   /// Needs to be overridden in the subclasses.
   /// Writes a [value] that can be accessed with the [key].
@@ -64,4 +98,15 @@ abstract class LocalDataSource {
   ///
   /// Will write to the hive database if [secure] is false. Otherwise it will write to the secure storage!
   Future<void> delete({required String key, required bool secure});
+
+  /// Creates all parent folders and writes the [bytes] to the specified [filePath]
+  Future<void> writeFile({required String filePath, required List<int> bytes});
+
+  /// Returns the bytes of the file at [filePath].
+  ///
+  /// Returns null if the [filePath] was not found
+  Future<Uint8List?> readFile({required String filePath});
+
+  /// Returns if the file at [filePath] existed and if it was deleted, or not.
+  Future<bool> deleteFile({required String filePath});
 }

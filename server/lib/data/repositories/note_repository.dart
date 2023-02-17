@@ -105,7 +105,7 @@ class NoteRepository {
   /// client used an invalid transfer token, or if the server cancelled the note transfer!
   /// It can also return the error code [ErrorCodes.SERVER_INVALID_REQUEST_VALUES] if the client sends a server note id
   /// that doesn't belong to it!
-  /// And [ErrorCodes.FILE_NOT_FOUND] if the server could not find the note file.
+  /// And a [FileException] is thrown with [ErrorCodes.FILE_NOT_FOUND] if the server could not find the note file.
   Future<RestCallbackResult> handleDownloadNote(RestCallbackParams params) async {
     final ServerAccount serverAccount = params.getAttachedServerAccount(); // security: check authenticated account
     final String transferToken = _getValidTransferToken(params, serverAccount);

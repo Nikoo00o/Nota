@@ -1,23 +1,35 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:app/core/config/app_config.dart';
 import 'package:app/data/datasources/local_data_source.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/data/datasources/hive_box_configuration.dart';
 import 'package:shared/data/datasources/shared_hive_data_source_mixin.dart';
 
 class LocalDataSourceImpl extends LocalDataSource with SharedHiveDataSourceMixin {
   final FlutterSecureStorage secureStorage;
+  final AppConfig appConfig;
 
   /// base 64 encoded hive encryption key
   String? _hiveKey;
 
-  LocalDataSourceImpl({required this.secureStorage});
+  LocalDataSourceImpl({required this.secureStorage, required this.appConfig});
 
   @override
   Future<void> init() async {
     await Hive.initFlutter();
     _hiveKey = await generateHiveKey();
+  }
+
+  @override
+  Future<String> getNoteFilePath(int noteId) async {
+    final Directory documents = await getApplicationDocumentsDirectory();
+    return "${documents.path}${Platform.pathSeparator}${appConfig.noteFolder}${Platform.pathSeparator}$noteId.note";
   }
 
   @override
@@ -56,5 +68,20 @@ class LocalDataSourceImpl extends LocalDataSource with SharedHiveDataSourceMixin
     } else {
       await secureStorage.delete(key: key);
     }
+  }
+
+  @override
+  Future<void> writeFile({required String filePath, required List<int> bytes}) async {
+    return FileUtils.writeFileAsBytes(filePath, bytes);
+  }
+
+  @override
+  Future<Uint8List?> readFile({required String filePath}) async {
+    return FileUtils.readFileAsBytes(filePath);
+  }
+
+  @override
+  Future<bool> deleteFile({required String filePath}) async {
+    return FileUtils.deleteFileAsync(filePath);
   }
 }

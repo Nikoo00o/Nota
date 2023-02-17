@@ -7,9 +7,16 @@ import 'package:shared/domain/entities/shared_account.dart';
 
 /// The client specific account class with additional properties
 class ClientAccount extends SharedAccount {
-  /// The data key of the user used to encrypt the note data.
-  /// Is mutable and not used in comparison!
-  Uint8List? _cachedDataKey;
+  /// The cached data key of the user used to encrypt the note data.
+  ///
+  /// This is not used in comparison and might be null at first.
+  /// It's only set later when decrypting the [encryptedDataKey], or it is loaded from the storage depending on
+  /// [storeDecryptedDataKey]!
+  Uint8List? decryptedDataKey;
+
+  /// This bool is set to control if the [decryptedDataKey] should be included in the [toJson] method of the model and be
+  /// written to the storage, or not depending on the config value.
+  bool storeDecryptedDataKey;
 
   ClientAccount({
     required super.userName,
@@ -17,29 +24,18 @@ class ClientAccount extends SharedAccount {
     required super.sessionToken,
     required super.noteInfoList,
     required super.encryptedDataKey,
+    required this.decryptedDataKey,
+    required this.storeDecryptedDataKey,
   }) : super();
-
-  /// Uses the userPassword to decrypt the [encryptedDataKey] into the [_cachedDataKey]
-  void decryptDataKey(String userPassword) {
-    // todo: decrypt and set the cached key
-    // todo: maybe store it as final member and also store it inside the model and handle the decrypting / encrypting
-    //  outside of the entity. (should be better)
-  }
-
-  /// Returns the data key of the user used for encrypting the note data.
-  ///
-  /// [decryptDataKey] must be called first on this entity so that the key is not null!
-  Uint8List? get decryptedDataKey => _cachedDataKey;
 
   /// Clears the cached data key in memory and sets it to null
   void clearDecryptedDataKey() {
-    if (_cachedDataKey == null) {
+    if (decryptedDataKey == null) {
       return;
     }
-    for (int i = 0; i < _cachedDataKey!.length; ++i) {
-      _cachedDataKey![i] = 0;
+    for (int i = 0; i < decryptedDataKey!.length; ++i) {
+      decryptedDataKey![i] = 0;
     }
-    _cachedDataKey = null;
+    decryptedDataKey = null;
   }
-  
 }

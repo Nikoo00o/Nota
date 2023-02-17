@@ -44,16 +44,17 @@ class NoteDataSource {
 
   /// Reads from the real note file of the account.
   ///
-  /// throws a [ServerException] with [ErrorCodes.FILE_NOT_FOUND] if the file does not exist!
+  /// throws a [FileException] with [ErrorCodes.FILE_NOT_FOUND] if the file does not exist!
   Future<Uint8List> loadNoteData(int noteId) async {
     return _fileLock.synchronized(() async {
       final String filePath = _getFilePath(noteId, null);
-      if (File(filePath).existsSync()) {
+      if (await FileUtils.fileExistsAsync(filePath)) {
         Logger.debug("Loaded note file $filePath");
-        return File(filePath).readAsBytes();
+        final Uint8List? fileContent = await FileUtils.readFileAsBytes(filePath);
+        return fileContent!; // can not be null, because file must exist
       }
       Logger.error("Cannot load note file $filePath");
-      throw const ServerException(message: ErrorCodes.FILE_NOT_FOUND);
+      throw const FileException(message: ErrorCodes.FILE_NOT_FOUND);
     });
   }
 
@@ -61,7 +62,7 @@ class NoteDataSource {
   Future<void> saveTempNoteData(int noteId, String transferToken, List<int> bytes) async {
     await _fileLock.synchronized(() async {
       final String filePath = _getFilePath(noteId, transferToken);
-      await File(filePath).writeAsBytes(bytes, flush: true);
+      await FileUtils.writeFileAsBytes(filePath, bytes);
       Logger.debug("Saved note file $filePath");
     });
   }
@@ -72,9 +73,9 @@ class NoteDataSource {
   Future<void> deleteNoteData(int noteId, {String? transferToken}) async {
     await _fileLock.synchronized(() async {
       final String filePath = _getFilePath(noteId, transferToken);
-      if (File(filePath).existsSync()) {
+      if (await FileUtils.fileExistsAsync(filePath)) {
         Logger.debug("Deleted note file $filePath");
-        return File(filePath).delete();
+        return FileUtils.deleteFile(filePath);
       } else {
         Logger.error("Cannot delete file: $filePath");
       }
@@ -100,19 +101,21 @@ class NoteDataSource {
 
   /// Replaces the real note data with the temporary note data of the transfer by renaming and deleting the files!
   ///
-  /// throws a [ServerException] with [ErrorCodes.FILE_NOT_FOUND] if the temp file does not exist!
+  /// throws a [FileException] with [ErrorCodes.FILE_NOT_FOUND] if the temp file does not exist!
   Future<void> replaceNoteDataWithTempData(int noteId, String transferToken) async {
     await _fileLock.synchronized(() async {
       final String tempFilePath = _getFilePath(noteId, transferToken);
       final String realFilePath = _getFilePath(noteId, null);
-      if (File(tempFilePath).existsSync() == false) {
+      final bool tmpFileExists = await FileUtils.fileExistsAsync(tempFilePath);
+
+      if (tmpFileExists == false) {
         Logger.error("Cannot replace data with temp file: $tempFilePath");
-        throw const ServerException(message: ErrorCodes.FILE_NOT_FOUND);
+        throw const FileException(message: ErrorCodes.FILE_NOT_FOUND);
       }
-      if (File(realFilePath).existsSync()) {
-        await File(realFilePath).delete();
+      if (await FileUtils.fileExistsAsync(realFilePath)) {
+        await FileUtils.deleteFileAsync(realFilePath);
       }
-      await File(tempFilePath).rename(realFilePath);
+      await FileUtils.moveFileAsync(tempFilePath, realFilePath);
       Logger.debug("Replaced the real note $realFilePath with the temp note $tempFilePath");
     });
   }

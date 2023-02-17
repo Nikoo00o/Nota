@@ -40,7 +40,7 @@ class FileKeyGen {
   }
 
   static String keepServerHostName(String input) {
-    if (File(sharedDataPath).existsSync()) {
+    if (FileUtils.fileExists(sharedDataPath)) {
       final String oldFile = FileUtils.readFile(sharedDataPath);
       final RegExp regex = RegExp("static const String serverHostname =.*;?");
       final String? hostName = regex.allMatches(oldFile).first.group(0);
