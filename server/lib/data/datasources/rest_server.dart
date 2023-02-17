@@ -49,10 +49,10 @@ class RestServer {
     required int port,
   }) async {
     if (_server == null) {
-      if (File(certificateFilePath).existsSync() == false) {
+      if (FileUtils.fileExists(certificateFilePath) == false) {
         Logger.error("Error starting REST API server: certificate file $certificateFilePath does not exist");
         return false;
-      } else if (File(privateKeyFilePath).existsSync() == false) {
+      } else if (FileUtils.fileExists(privateKeyFilePath) == false) {
         Logger.error("Error starting REST API server: private key file $privateKeyFilePath does not exist");
         return false;
       } else {

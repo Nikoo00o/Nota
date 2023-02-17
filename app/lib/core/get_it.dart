@@ -15,7 +15,10 @@ Future<void> initializeGetIt() async {
   Logger.initLogger(AppLogger());
 
   sl.registerLazySingleton<AppConfig>(() => AppConfig());
-  sl.registerLazySingleton<LocalDataSource>(() => LocalDataSourceImpl(secureStorage: const FlutterSecureStorage()));
+  sl.registerLazySingleton<LocalDataSource>(() => LocalDataSourceImpl(
+        secureStorage: const FlutterSecureStorage(),
+        appConfig: sl(),
+      ));
   sl.registerLazySingleton<SessionService>(() => SessionService());
   sl.registerLazySingleton<FetchCurrentSessionToken>(() => FetchCurrentSessionToken());
 

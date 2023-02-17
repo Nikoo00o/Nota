@@ -33,7 +33,7 @@ void main() {
       await noteDataSource.saveTempNoteData(1, "test", <int>[1, 2, 3, 4]);
       expect(() async {
         await noteDataSource.loadNoteData(1);
-      }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.FILE_NOT_FOUND));
+      }, throwsA((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND));
     });
 
     test("throw an exception on reading a note file which was already deleted", () async {
@@ -42,7 +42,7 @@ void main() {
       await noteDataSource.deleteNoteData(1);
       expect(() async {
         await noteDataSource.loadNoteData(1);
-      }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.FILE_NOT_FOUND));
+      }, throwsA((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND));
     });
 
     test("throw an exception on reading a temp note file which was already deleted", () async {
@@ -50,7 +50,7 @@ void main() {
       await noteDataSource.deleteNoteData(1, transferToken: "test");
       expect(() async {
         await noteDataSource.replaceNoteDataWithTempData(1, "test");
-      }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.FILE_NOT_FOUND));
+      }, throwsA((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND));
     });
 
     test("throw an exception on reading a temp note file which was already cleaned up", () async {
@@ -58,7 +58,7 @@ void main() {
       await noteDataSource.deleteAllTempNotes();
       expect(() async {
         await noteDataSource.replaceNoteDataWithTempData(1, "test");
-      }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.FILE_NOT_FOUND));
+      }, throwsA((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND));
     });
 
     test("throw an exception on reading a temp note file which was already specifically cleaned up", () async {
@@ -66,7 +66,7 @@ void main() {
       await noteDataSource.deleteAllTempNotes(transferToken: "test");
       expect(() async {
         await noteDataSource.replaceNoteDataWithTempData(1, "test");
-      }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.FILE_NOT_FOUND));
+      }, throwsA((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND));
     });
 
     test("still read a normal file successfully after temp cleanup", () async {

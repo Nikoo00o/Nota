@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:app/domain/entities/client_account.dart';
 import 'package:shared/data/models/model.dart';
 import 'package:shared/data/models/note_info_model.dart';
@@ -6,20 +8,26 @@ import 'package:shared/data/models/shared_account_model_mixin.dart';
 import 'package:shared/domain/entities/note_info.dart';
 import 'package:shared/domain/entities/session_token.dart';
 
-/// Does not include the [ClientAccount._cachedDataKey] member
 class ClientAccountModel extends ClientAccount with SharedAccountModelMixin implements Model {
+  static const String JSON_DECRYPTED_DATA_KEY = "JSON_DECRYPTED_DATA_KEY";
+  static const String JSON_STORE_DECRYPTED_DATA_KEY = "JSON_STORE_DECRYPTED_DATA_KEY";
+
   ClientAccountModel({
     required super.userName,
     required super.passwordHash,
     required super.sessionToken,
     required super.encryptedDataKey,
     required super.noteInfoList,
+    required super.decryptedDataKey,
+    required super.storeDecryptedDataKey,
   });
 
   @override
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       ...super.toJsonMixin(),
+      if (storeDecryptedDataKey) JSON_DECRYPTED_DATA_KEY: decryptedDataKey,
+      JSON_STORE_DECRYPTED_DATA_KEY: storeDecryptedDataKey,
     };
   }
 
@@ -33,12 +41,20 @@ class ClientAccountModel extends ClientAccount with SharedAccountModelMixin impl
     final List<NoteInfo> noteInfoList =
         noteInfoDynList.map((dynamic map) => NoteInfoModel.fromJson(map as Map<String, dynamic>)).toList();
 
+    Uint8List? decryptedDataKey;
+    if (json.containsKey(JSON_DECRYPTED_DATA_KEY)) {
+      final List<dynamic> dynList = json[JSON_DECRYPTED_DATA_KEY] as List<dynamic>;
+      decryptedDataKey = Uint8List.fromList(dynList.map((dynamic element) => element as int).toList());
+    }
+
     return ClientAccountModel(
       userName: json[SharedAccountModelMixin.JSON_USER_NAME] as String,
       passwordHash: json[SharedAccountModelMixin.JSON_PASSWORD_HASH] as String,
       sessionToken: sessionToken,
       encryptedDataKey: json[SharedAccountModelMixin.JSON_ENCRYPTED_DATA_KEY] as String,
       noteInfoList: noteInfoList,
+      decryptedDataKey: decryptedDataKey,
+      storeDecryptedDataKey: json[JSON_STORE_DECRYPTED_DATA_KEY] as bool,
     );
   }
 
@@ -52,6 +68,8 @@ class ClientAccountModel extends ClientAccount with SharedAccountModelMixin impl
       sessionToken: entity.sessionToken,
       encryptedDataKey: entity.encryptedDataKey,
       noteInfoList: entity.noteInfoList,
+      decryptedDataKey: entity.decryptedDataKey,
+      storeDecryptedDataKey: entity.storeDecryptedDataKey,
     );
   }
 }

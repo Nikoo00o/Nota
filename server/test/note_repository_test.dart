@@ -247,7 +247,7 @@ void _testUploadNote() {
     await _upload(response.transferToken, 1, <int>[1, 2, 3, 4, 5]);
     expect(() async {
       await noteDataSource.loadNoteData(1);
-    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.FILE_NOT_FOUND));
+    }, throwsA((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND));
   });
 
   test("An upload request with correct values should succeed twice", () async {
@@ -306,7 +306,7 @@ void _testFinishTransfer() {
         reason: "note info should match");
     expect(() async {
       await noteDataSource.loadNoteData(1);
-    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.FILE_NOT_FOUND), reason: "file not found");
+    }, throwsA((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND), reason: "file not found");
   });
 
   test("A finish request with no changes should also succeed", () async {
@@ -318,7 +318,7 @@ void _testFinishTransfer() {
     expect(account?.noteInfoList.length, 0, reason: "server account should have no notes");
     expect(() async {
       await noteDataSource.loadNoteData(1);
-    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.FILE_NOT_FOUND), reason: "file not found");
+    }, throwsA((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND), reason: "file not found");
   });
 
   test("A cancelled finish request should not change anything", () async {
@@ -333,7 +333,7 @@ void _testFinishTransfer() {
     expect(account?.noteInfoList.length, 0, reason: "server account should have 0 notes");
     expect(() async {
       await noteDataSource.loadNoteData(1);
-    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.FILE_NOT_FOUND), reason: "file not found");
+    }, throwsA((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND), reason: "file not found");
   });
 
   test("A finish request should cancel a different transfer", () async {

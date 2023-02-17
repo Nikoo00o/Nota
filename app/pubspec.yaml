@@ -21,6 +21,7 @@ dependencies:
   flutter_secure_storage: ^8.0.0 # secure storage for keys in keychain, or keystore
   cryptography: ^2.0.5 # basic cryptographic functions (like aes encryption)
   cryptography_flutter: ^2.0.2 # better flutter performance for base package
+  path_provider: ^2.0.12 # application directory path
 
 dev_dependencies:
   test: ^1.16.0 # dart test package
