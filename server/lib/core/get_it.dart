@@ -6,8 +6,10 @@ import 'package:server/data/datasources/note_data_source.dart';
 import 'package:server/data/repositories/account_repository.dart';
 import 'package:server/data/repositories/note_repository.dart';
 import 'package:server/data/repositories/server_repository.dart';
-import 'package:server/domain/entities/network/rest_server.dart';
+import 'package:server/data/datasources/rest_server.dart';
 import 'package:server/domain/usecases/fetch_authenticated_account.dart';
+import 'package:server/domain/usecases/start_note_server.dart';
+import 'package:server/domain/usecases/stop_nota_server.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
 /// Returns the GetIt service locator / singleton instance
@@ -34,6 +36,17 @@ Future<void> initializeGetIt() async {
         restServer: sl(),
         accountRepository: sl(),
         noteRepository: sl(),
+      ));
+
+  sl.registerLazySingleton<StartNotaServer>(() => StartNotaServer(
+        serverConfig: sl(),
+        serverRepository: sl(),
+        accountRepository: sl(),
+        noteRepository: sl(),
+      ));
+
+  sl.registerLazySingleton<StopNotaServer>(() => StopNotaServer(
+        serverRepository: sl(),
       ));
 
   await sl<LocalDataSource>().init();

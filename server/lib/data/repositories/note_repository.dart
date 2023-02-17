@@ -206,6 +206,22 @@ class NoteRepository {
     });
   }
 
+  /// Cleans up old transfers for accounts that do not have a valid session token (so they are not logged in anymore)
+  Future<void> cleanUpOldTransfers() async{
+    final List<String> transfersToCancel = List<String>.empty(growable: true);
+    for (final iterator in _noteTransfers.entries) {
+      final String transferToken = iterator.key;
+      final NoteTransfer noteTransfer = iterator.value;
+      if (noteTransfer.serverAccount.isSessionTokenStillValid() == false) {
+        Logger.debug("Cancelling old note transfer $noteTransfer");
+        transfersToCancel.add(transferToken);
+      }
+    }
+    for (final String transferToken in transfersToCancel) {
+      await _cancelTransfer(transferToken);
+    }
+  }
+
   Future<void> _cancelTransfer(String transferToken) async {
     if (_noteTransfers.containsKey(transferToken)) {
       Logger.debug("Cancelling transfer: $transferToken");
@@ -231,6 +247,7 @@ class NoteRepository {
       await _cancelTransfer(transferToken);
     }
   }
+
 
   /// Does not remove any note transfers (but the tmp note files will of course be removed, because they are renamed)
   Future<void> _applyTransfer(String transferToken) async {
@@ -343,12 +360,10 @@ class NoteRepository {
       }
       serverId = await noteDataSource.getNewNoteCounter();
     }
-    noteUpdates.add(NoteUpdateModel(
-      clientId: note.id,
-      serverId: serverId,
-      newEncFileName: note.encFileName,
-      newLastEdited: note.lastEdited,
+    noteUpdates.add(_createNoteUpdate(
+      newNote: note,
       noteTransferStatus: noteTransferStatus,
+      newServerId: serverId,
     ));
   }
 
@@ -356,23 +371,41 @@ class NoteRepository {
     assert(clientNote.id == serverNote.id, "both ids are the same server id");
 
     if (clientNote.lastEdited.isBefore(serverNote.lastEdited)) {
-      noteUpdates.add(NoteUpdateModel(
-        clientId: clientNote.id,
-        serverId: serverNote.id,
-        newEncFileName: clientNote.encFileName != serverNote.encFileName ? serverNote.encFileName : null,
-        newLastEdited: serverNote.lastEdited,
+      noteUpdates.add(_createNoteUpdate(
+        newNote: serverNote,
+        oldEncFileName: clientNote.encFileName,
         noteTransferStatus: NoteTransferStatus.CLIENT_NEEDS_UPDATE,
       ));
     } else if (serverNote.lastEdited.isBefore(clientNote.lastEdited)) {
-      noteUpdates.add(NoteUpdateModel(
-        clientId: clientNote.id,
-        serverId: serverNote.id,
-        newEncFileName: clientNote.encFileName != serverNote.encFileName ? clientNote.encFileName : null,
-        newLastEdited: clientNote.lastEdited,
+      noteUpdates.add(_createNoteUpdate(
+        newNote: clientNote,
+        oldEncFileName: serverNote.encFileName,
         noteTransferStatus: NoteTransferStatus.SERVER_NEEDS_UPDATE,
       ));
     }
     // the notes had the same time stamp, so they are the same, because its practically impossible to
+  }
+
+  /// Creates a [NoteUpdateModel] from [newNote] with the note transfer status [noteTransferStatus].
+  ///
+  /// If [newServerId] is not null, then it will override the server id of the model
+  ///
+  /// If the encrypted file name of the new note is not equal to [oldEncFileName], then it will be used. Otherwise null
+  /// will be used (same as if [oldEncFileName] is null).
+  /// If the [oldEncFileName] is null, then that means that the new and old note had the same encrypted file name.
+  NoteUpdateModel _createNoteUpdate({
+    required NoteInfo newNote,
+    required NoteTransferStatus noteTransferStatus,
+    String? oldEncFileName,
+    int? newServerId,
+  }) {
+    return NoteUpdateModel(
+      clientId: newNote.id,
+      serverId: newServerId ?? newNote.id,
+      newEncFileName: newNote.encFileName != oldEncFileName ? newNote.encFileName : null,
+      newLastEdited: newNote.lastEdited,
+      noteTransferStatus: noteTransferStatus,
+    );
   }
 
   String _createNewTransferToken() {
@@ -416,6 +449,6 @@ class NoteRepository {
     return id;
   }
 
-  /// Returns the note transfers unmodifiable for read only access
+  /// Returns the note transfers unmodifiable for read only access. The note transfers themselves should not be modified!
   Map<String, NoteTransfer> getReadOnlyNoteTransfers() => Map<String, NoteTransfer>.unmodifiable(_noteTransfers);
 }
