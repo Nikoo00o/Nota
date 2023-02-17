@@ -91,7 +91,6 @@ class RestServer {
   /// Is called when the server receives data from the client
   Future<void> _onClientRequest(HttpRequest request) async {
     late RestCallbackResult response;
-    late String log;
     final String clientIp = request.connectionInfo?.remoteAddress.address ?? "";
     final String fullApiPath = request.requestedUri.path;
 
@@ -102,14 +101,7 @@ class RestServer {
       final dynamic requestData =
           await NetworkUtils.decodeNetworkDataStream(httpHeaders: request.headers.asMap(), data: request);
 
-      if (requestData is Map<String, dynamic>) {
-        log = " with json data: $requestData";
-      } else if (requestData is List<int>) {
-        log = " with raw data bytes";
-      } else {
-        log = " with no body data $requestData";
-      }
-      Logger.debug("Got request ${request.requestedUri} from $clientIp$log");
+      Logger.debug("Got request ${request.requestedUri} from $clientIp ${_getDynamicLog(requestData)}");
 
       if (queryParams.isEmpty && fullApiPath.isEmpty && requestData == null) {
         response = RestCallbackResult(jsonResult: const <String, dynamic>{}, statusCode: HttpStatus.badRequest);
@@ -124,14 +116,20 @@ class RestServer {
     try {
       await _send(request.response, response);
 
-      if (response.data is Map<String, dynamic>) {
-        log = " and with json data: ${response.jsonResult}";
-      } else if (response.data is List<int>) {
-        log = " and with raw data bytes";
-      }
-      Logger.debug("Send response for ${request.requestedUri} to $clientIp with status code: ${response.statusCode}$log");
+      Logger.debug("Send response for ${request.requestedUri} to $clientIp "
+          "with status code: ${response.statusCode} ${_getDynamicLog(response.data)}");
     } catch (e, s) {
       Logger.error("REST API error sending response", e, s);
+    }
+  }
+
+  String _getDynamicLog(dynamic data) {
+    if (data is Map<String, dynamic>) {
+      return " and with json data: $data";
+    } else if (data is List<int>) {
+      return " and with raw data bytes";
+    } else {
+      return " and with no body data $data";
     }
   }
 
@@ -200,11 +198,8 @@ class RestServer {
   /// The session token must be present in the query parameter with the tag [RestJsonParameter.SESSION_TOKEN]
   ///
   /// [endpoint] should be one of the [Endpoints]
-  void addCallback({
-    required Endpoint endpoint,
-    required FutureOr<RestCallbackResult> Function(RestCallbackParams) callback,
-  }) {
-    _restCallbacks.add(RestCallback(endpoint: endpoint, callback: callback));
+  void addCallback({required RestCallback callback}) {
+    _restCallbacks.add(callback);
   }
 
   /// Close the server. but it can be started again with another call to [start]

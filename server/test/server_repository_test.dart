@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:server/data/models/server_account_model.dart';
 import 'package:server/domain/entities/network/rest_callback.dart';
@@ -70,10 +71,10 @@ final ServerAccountModel validAccount = ServerAccountModel(
 
 /// Helper method to add the 4 http method callbacks for the same endpoint
 void initHttpMethodEndpoints() {
-  restServer.addCallback(endpoint: getEndpoint, callback: _returnJsonRequest);
-  restServer.addCallback(endpoint: postEndpoint, callback: _returnJsonRequest);
-  restServer.addCallback(endpoint: putEndpoint, callback: _returnJsonRequest);
-  restServer.addCallback(endpoint: deleteEndpoint, callback: _returnJsonRequest);
+  restServer.addCallback(callback: RestCallback(endpoint: getEndpoint, callback: _returnJsonRequest));
+  restServer.addCallback(callback: RestCallback(endpoint: postEndpoint, callback: _returnJsonRequest));
+  restServer.addCallback(callback: RestCallback(endpoint: putEndpoint, callback: _returnJsonRequest));
+  restServer.addCallback(callback: RestCallback(endpoint: deleteEndpoint, callback: _returnJsonRequest));
 }
 
 /// Adds a callback for the [sessionTokenEndpoint] and also overrides the
@@ -86,8 +87,11 @@ void initSessionTokenEndpoint() {
     return null;
   };
   restServer.addCallback(
+    callback: RestCallback(
       endpoint: sessionTokenEndpoint,
-      callback: (_) => RestCallbackResult(jsonResult: <String, dynamic>{"test": validAccount.userName}));
+      callback: (_) => RestCallbackResult(jsonResult: <String, dynamic>{"test": validAccount.userName}),
+    ),
+  );
 }
 
 /// helper method that returns either the requests body data, or the query parameter as a json map for the response
@@ -220,7 +224,8 @@ void _testDifferentRequests() {
   });
 
   test("throw a badRequest exception on a request to an endpoint callback that throws an exception", () async {
-    restServer.addCallback(endpoint: exceptionEndpoint, callback: (_) => throw const BaseException(message: ""));
+    restServer.addCallback(
+        callback: RestCallback(endpoint: exceptionEndpoint, callback: (_) => throw const BaseException(message: "")));
     expect(
       () async {
         await restClient.sendRequest(
@@ -244,16 +249,7 @@ void _testDifferentRequests() {
   test("post binary data which should be returned and have the correct headers set", () async {
     final List<int> clientBytes = StringUtils.getRandomBytes(1000000);
     final List<int> serverBytes = StringUtils.getRandomBytes(1000000);
-
-    restServer.addCallback(
-        endpoint: differentTestsEndpoint,
-        callback: (RestCallbackParams params) {
-          expect(clientBytes, params.data, reason: "The request should contain the client bytes");
-          expect(params.jsonBody, null, reason: "Json client request should be empty");
-          expect(params.requestHeaders[HttpHeaders.contentTypeHeader], ContentType.binary.toString(),
-              reason: "content type header should be binary");
-          return RestCallbackResult(rawBytes: serverBytes);
-        });
+    _addTestEndpointCallback((RestCallbackParams params) => _checkJsonBodyRestCallback(params, clientBytes, serverBytes));
 
     final ResponseData responseData = await restClient.sendRequest(endpoint: differentTestsEndpoint, bodyData: clientBytes);
     expect(serverBytes, responseData.bytes, reason: "The response should contain the server bytes");
@@ -265,20 +261,31 @@ void _testDifferentRequests() {
   test("encoding the binary data in json and testing the other way around", () async {
     final String clientBytes = StringUtils.getRandomBytesAsBase64String(40);
     final String serverBytes = StringUtils.getRandomBytesAsBase64String(40);
-
-    restServer.addCallback(
-        endpoint: differentTestsEndpoint,
-        callback: (RestCallbackParams params) {
-          expect(clientBytes, params.jsonBody!["bytes"], reason: "The request should contain the client json");
-          expect(params.rawBytes, null, reason: "Byte client request should be empty");
-          return RestCallbackResult(jsonResult: <String, String>{"bytes": serverBytes});
-        });
+    _addTestEndpointCallback((RestCallbackParams params) => _checkRawBytesCallback(params, clientBytes, serverBytes));
 
     final ResponseData responseData =
         await restClient.sendRequest(endpoint: differentTestsEndpoint, bodyData: <String, dynamic>{"bytes": clientBytes});
     expect(serverBytes, responseData.json!["bytes"], reason: "The response should contain the server json");
     expect(responseData.bytes, null, reason: "Json server response should be empty");
   });
+}
+
+void _addTestEndpointCallback(FutureOr<RestCallbackResult> Function(RestCallbackParams) callback) {
+  restServer.addCallback(callback: RestCallback(endpoint: differentTestsEndpoint, callback: callback));
+}
+
+RestCallbackResult _checkJsonBodyRestCallback(RestCallbackParams params, List<int> clientBytes, List<int> serverBytes) {
+  expect(clientBytes, params.data, reason: "The request should contain the client bytes");
+  expect(params.jsonBody, null, reason: "Json client request should be empty");
+  expect(params.requestHeaders[HttpHeaders.contentTypeHeader], ContentType.binary.toString(),
+      reason: "content type header should be binary");
+  return RestCallbackResult(rawBytes: serverBytes);
+}
+
+RestCallbackResult _checkRawBytesCallback(RestCallbackParams params, String clientBytes, String serverBytes) {
+  expect(clientBytes, params.jsonBody!["bytes"], reason: "The request should contain the client json");
+  expect(params.rawBytes, null, reason: "Byte client request should be empty");
+  return RestCallbackResult(jsonResult: <String, String>{"bytes": serverBytes});
 }
 
 void _testWithSessionTokens() {

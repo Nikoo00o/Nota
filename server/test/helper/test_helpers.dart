@@ -9,8 +9,10 @@ import 'package:server/data/models/server_account_model.dart';
 import 'package:server/data/repositories/account_repository.dart';
 import 'package:server/data/repositories/note_repository.dart';
 import 'package:server/data/repositories/server_repository.dart';
-import 'package:server/domain/entities/network/rest_server.dart';
+import 'package:server/data/datasources/rest_server.dart';
 import 'package:server/domain/usecases/fetch_authenticated_account.dart';
+import 'package:server/domain/usecases/start_note_server.dart';
+import 'package:server/domain/usecases/stop_nota_server.dart';
 import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
@@ -23,6 +25,7 @@ import 'package:shared/data/dtos/account/account_login_response.dart';
 import 'package:shared/data/dtos/account/create_account_request.dart';
 import 'package:shared/data/models/session_token_model.dart';
 import 'package:shared/domain/entities/note_info.dart';
+import 'package:shared/domain/usecases/usecase.dart';
 import 'package:test/expect.dart';
 
 import '../mocks/fetch_authenticated_account_mock.dart';
@@ -37,9 +40,11 @@ late RestServer restServer;
 late LocalDataSource localDataSource;
 late AccountDataSource accountDataSource;
 late NoteDataSource noteDataSource;
-late ServerRepository serverRepository;
 late AccountRepository accountRepository;
+late ServerRepository serverRepository;
 late NoteRepository noteRepository;
+late StartNotaServer startNotaServer;
+late StopNotaServer stopNotaServer;
 late FetchCurrentSessionTokenMock fetchCurrentSessionTokenMock;
 late RestClient restClient;
 bool initialized = false;
@@ -83,6 +88,16 @@ Future<void> createCommonTestObjects({required int serverPort}) async {
     noteRepository: noteRepository,
   );
 
+  startNotaServer = StartNotaServer(
+    serverRepository: serverRepository,
+    serverConfig: serverConfigMock,
+    accountRepository: accountRepository,
+    noteRepository: noteRepository,
+  );
+  stopNotaServer = StopNotaServer(
+    serverRepository: serverRepository,
+  );
+
   fetchCurrentSessionTokenMock = FetchCurrentSessionTokenMock();
   restClient = RestClient(config: serverConfigMock, fetchSessionToken: fetchCurrentSessionTokenMock);
 
@@ -111,7 +126,7 @@ Future<void> _setup() async {
     "${serverConfigMock.resourceFolderPath}${Platform.pathSeparator}certificate.pem",
   );
 
-  final bool started = await serverRepository.runNota(autoRestart: false);
+  final bool started = await startNotaServer(const StartNotaServerParams(autoRestart: false));
   expect(started, true); // start the server and expect it to run
 
   FileUtils.getLocalFilePath("notaRes");
@@ -124,7 +139,7 @@ Future<void> _setup() async {
 /// You can set [deleteTestFolderAfterwards] to false if you want to inspect some test files after one single test, or if
 /// you want to test the persistence of the server.
 Future<void> cleanupTestFilesAndServer({required bool deleteTestFolderAfterwards}) async {
-  await serverRepository.stopNota();
+  await stopNotaServer(NoParams());
   await Hive.close();
   if (deleteTestFolderAfterwards) {
     FileUtils.deleteDirectory(serverConfigMock.resourceFolderPath);
