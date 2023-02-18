@@ -1,24 +1,20 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:server/domain/entities/network/rest_callback.dart';
 import 'package:server/domain/entities/network/rest_callback_params.dart';
 import 'package:server/domain/entities/network/rest_callback_result.dart';
 import 'package:server/domain/entities/server_account.dart';
-import 'package:server/domain/usecases/fetch_authenticated_account.dart';
 import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/constants/rest_json_parameter.dart';
 import 'package:shared/core/enums/http_method.dart';
-import 'package:shared/core/network/endpoint.dart';
 import 'package:shared/core/network/network_utils.dart';
 import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
 /// A https REST API Webserver that you can add callbacks to which will be called for specific http requests.
 ///
-/// [fetchAuthenticatedAccount] is used for endpoints that require a session token for authentication and it should return
-/// the attached account if the session token was valid. Otherwise it should return null.
+/// [fetchAuthenticatedAccountCallback] is used for endpoints that require a session token for authentication and it should
+/// return the attached account if the session token was valid. Otherwise it should return null.
 class RestServer {
   HttpServer? _server;
 
@@ -31,9 +27,9 @@ class RestServer {
 
   late int _port;
 
-  final FetchAuthenticatedAccount fetchAuthenticatedAccount;
+  final Future<ServerAccount?> Function(String) fetchAuthenticatedAccountCallback;
 
-  RestServer({required this.fetchAuthenticatedAccount});
+  RestServer({required this.fetchAuthenticatedAccountCallback});
 
   /// Starts the server and returns [true] if it was successful
   ///
@@ -146,7 +142,7 @@ class RestServer {
   /// [null]
   Future<ServerAccount?> _getAuthenticatedAccount(Map<String, String> queryParams) async {
     final String sessionToken = queryParams[RestJsonParameter.SESSION_TOKEN] ?? "";
-    return fetchAuthenticatedAccount.call(FetchAuthenticatedAccountParams(sessionToken: sessionToken));
+    return fetchAuthenticatedAccountCallback.call(sessionToken);
   }
 
   Future<RestCallbackResult> _handleCallback(

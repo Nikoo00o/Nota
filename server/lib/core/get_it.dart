@@ -7,6 +7,7 @@ import 'package:server/data/repositories/account_repository.dart';
 import 'package:server/data/repositories/note_repository.dart';
 import 'package:server/data/repositories/server_repository.dart';
 import 'package:server/data/datasources/rest_server.dart';
+import 'package:server/domain/entities/server_account.dart';
 import 'package:server/domain/usecases/fetch_authenticated_account.dart';
 import 'package:server/domain/usecases/start_note_server.dart';
 import 'package:server/domain/usecases/stop_nota_server.dart';
@@ -20,11 +21,13 @@ Future<void> initializeGetIt() async {
   Logger.initLogger(Logger());
 
   sl.registerLazySingleton<ServerConfig>(() => ServerConfig());
-  sl.registerLazySingleton<FetchAuthenticatedAccount>(() => FetchAuthenticatedAccount(accountRepository: sl()));
-  sl.registerLazySingleton<RestServer>(() => RestServer(fetchAuthenticatedAccount: sl()));
+  sl.registerLazySingleton<RestServer>(
+      () => RestServer(fetchAuthenticatedAccountCallback: _fetchAuthenticatedAccountCallback));
+
   sl.registerLazySingleton<LocalDataSource>(() => LocalDataSourceImpl(serverConfig: sl()));
   sl.registerLazySingleton<AccountDataSource>(() => AccountDataSource(serverConfig: sl(), localDataSource: sl()));
   sl.registerLazySingleton<NoteDataSource>(() => NoteDataSource(serverConfig: sl(), localDataSource: sl()));
+
   sl.registerLazySingleton<AccountRepository>(() => AccountRepository(accountDataSource: sl(), serverConfig: sl()));
   sl.registerLazySingleton<NoteRepository>(() => NoteRepository(
         noteDataSource: sl(),
@@ -48,7 +51,11 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<StopNotaServer>(() => StopNotaServer(
         serverRepository: sl(),
       ));
+  sl.registerLazySingleton<FetchAuthenticatedAccount>(() => FetchAuthenticatedAccount(accountRepository: sl()));
 
   await sl<LocalDataSource>().init();
   await sl<NoteDataSource>().init();
 }
+
+Future<ServerAccount?> _fetchAuthenticatedAccountCallback(String sessionToken) =>
+    sl<FetchAuthenticatedAccount>().call(FetchAuthenticatedAccountParams(sessionToken: sessionToken));

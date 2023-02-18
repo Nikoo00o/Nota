@@ -7,4 +7,6 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// Otherwise null should be returned.
 ///
 /// This use case will be used inside of the [RestClient]
-abstract class SharedFetchCurrentSessionToken extends UseCase<SessionToken?, NoParams> {}
+abstract class SharedFetchCurrentSessionToken extends UseCase<SessionToken?, NoParams> {
+    const SharedFetchCurrentSessionToken();
+}

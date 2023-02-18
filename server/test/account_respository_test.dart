@@ -147,7 +147,7 @@ void _testLoginToAccounts() {
 
 void _testSessionTokens() {
   test("a valid login request should return a login response with the correct session token", () async {
-    ServerAccountModel? account = await localDataSource.loadAccount(getTestAccount(0).userName);
+    final ServerAccountModel? account = await localDataSource.loadAccount(getTestAccount(0).userName);
     expect(account, isNot(null));
     account!.sessionToken = await accountRepository.createNewSessionToken();
     await localDataSource.saveAccount(account); // update the account on the server with a concrete session token

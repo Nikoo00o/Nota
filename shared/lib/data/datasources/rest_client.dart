@@ -20,24 +20,27 @@ import 'package:shared/domain/usecases/usecase.dart';
 
 /// Wrapper around a http client to connect to the REST API web server.
 ///
-/// Will retrieve the server url from the [config] and the session token from the [fetchSessionToken] use case
+/// Will retrieve the server url from the [sharedConfig].
+///
+/// Will retrieve the session token for the authenticated account from the [fetchSessionTokenCallback]. This is needed for
+/// some http requests where the endpoint needs the logged in account!
 class RestClient {
-  final SharedConfig config;
-  final SharedFetchCurrentSessionToken fetchSessionToken;
+  final SharedConfig sharedConfig;
+  final Future<SessionToken?> Function() fetchSessionTokenCallback;
   late final IOClient client;
 
   /// successful http responses
   static const List<int> validHttpResponseCodes = <int>[200, 201, 202, 203, 204, 205, 206];
 
-  RestClient({required this.config, required this.fetchSessionToken}) {
+  RestClient({required this.sharedConfig, required this.fetchSessionTokenCallback}) {
     final HttpClient httpClient = HttpClient();
-    if (config.acceptSelfSignedCertificates) {
+    if (sharedConfig.acceptSelfSignedCertificates) {
       httpClient.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
     }
     client = IOClient(httpClient);
   }
 
-  /// Will send a http request to the specified [endpoint] of the hostname stored in the [config].
+  /// Will send a http request to the specified [endpoint] of the hostname stored in the [sharedConfig].
   ///
   /// [endpoint] should be one of the [Endpoints].
   ///
@@ -55,16 +58,16 @@ class RestClient {
   /// The Accept header will also include those 2 if its missing
   ///
   /// If the endpoint has the property [endpoint.needsSessionToken] set to true, then the query params will automatically
-  /// have the session token returned from the session service added to them!
+  /// have the session token returned from the [fetchSessionTokenCallback] added to them!
   ///
-  /// Throws a [ServerException] if the session token is null, or if any server error occurred! If the session token is
-  /// invalid, the server returns the http status code 401.
+  /// Throws a [ServerException] if any server error occurred by using the [RestJsonParameter.SERVER_ERROR] json key!
+  /// If the session token is null, the error code will be [ErrorCodes.MISSING_SESSION_TOKEN]
   ///
   /// HTTP status code errors will be thrown as [ErrorCodes.HTTP_STATUS]statusCode.
+  /// If  the session token is invalid, 401 is returned
   /// If the endpoint is unknown, 404 is returned.
   /// If the request is completely empty, or if the request parameter could not be parsed, 400 is returned.
   ///
-  /// The [RestJsonParameter.SERVER_ERROR] json key will be thrown as one of [ErrorCodes]
   ///
   /// In most cases the returned data will be a json map of string and dynamic, but for file downloads it can also
   /// be a list of raw bytes! It will never be null.
@@ -72,6 +75,7 @@ class RestClient {
   /// be thrown! If no data was send, then a [ServerException] with [ErrorCodes.UNKNOWN_SERVER] will be thrown which will
   /// also be thrown on timeout!
   ///
+  /// For some file requests (like the note transfer), a [FileException] with [ErrorCodes.FILE_NOT_FOUND] can also be thrown.
   Future<ResponseData> sendRequest({
     required Endpoint endpoint,
     Map<String, String> queryParams = const <String, String>{},
@@ -170,7 +174,7 @@ class RestClient {
   /// Adds together base server url, api url and the query parameter.
   /// throws a [ServerException] if the session token is null
   Future<Uri> _buildFinalUrl(Endpoint endpoint, Map<String, String> queryParams) async {
-    String baseUrl = endpoint.getFullApiPath(config.getServerUrl());
+    String baseUrl = endpoint.getFullApiPath(sharedConfig.getServerUrl());
     if (baseUrl.endsWith("/")) {
       baseUrl = baseUrl.substring(0, baseUrl.length - 1);
     }
@@ -187,7 +191,7 @@ class RestClient {
     final StringBuffer buffer = StringBuffer();
     buffer.write("?");
     if (endpoint.needsSessionToken) {
-      final SessionToken? sessionToken = await fetchSessionToken(NoParams());
+      final SessionToken? sessionToken = await fetchSessionTokenCallback();
       if (sessionToken != null && sessionToken.isStillValid()) {
         _writeToBuffer(buffer, RestJsonParameter.SESSION_TOKEN, sessionToken.token);
       } else {

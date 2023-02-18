@@ -78,7 +78,7 @@ class NoteRepository {
       try {
         noteUpdates = await compareClientAndServerNotes(request.clientNotes, serverAccount.noteInfoList); // security: check
         // if note ids from the client really belong to the account
-      } on ServerException catch (e) {
+      } on BaseException catch (e) {
         Logger.error("Error starting note transfer because of invalid note ids for: ${serverAccount.userName}");
         return RestCallbackResult.withErrorCode(e.message ?? ""); // [ErrorCodes.SERVER_INVALID_REQUEST_VALUES]
       }
@@ -105,7 +105,7 @@ class NoteRepository {
   /// client used an invalid transfer token, or if the server cancelled the note transfer!
   /// It can also return the error code [ErrorCodes.SERVER_INVALID_REQUEST_VALUES] if the client sends a server note id
   /// that doesn't belong to it!
-  /// And a [FileException] is thrown with [ErrorCodes.FILE_NOT_FOUND] if the server could not find the note file.
+  /// And a [FileException] is returned with [ErrorCodes.FILE_NOT_FOUND] if the server could not find the note file.
   Future<RestCallbackResult> handleDownloadNote(RestCallbackParams params) async {
     final ServerAccount serverAccount = params.getAttachedServerAccount(); // security: check authenticated account
     final String transferToken = _getValidTransferToken(params, serverAccount);
@@ -126,7 +126,7 @@ class NoteRepository {
     late final Uint8List bytes;
     try {
       bytes = await noteDataSource.loadNoteData(serverNoteId);
-    } on ServerException catch (e) {
+    } on BaseException catch (e) {
       Logger.error("Error downloading note for $transferToken");
       return RestCallbackResult.withErrorCode(e.message ?? "");
     }
@@ -177,6 +177,8 @@ class NoteRepository {
   /// This request can return a [ServerException] with the error code [ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN] if the
   /// client used an invalid transfer token, or if the server cancelled the note transfer!
   ///
+  /// It can also return a [FileException] with [ErrorCodes.FILE_NOT_FOUND] if something fails during the transfer finish.
+  ///
   /// Now the client can also apply its temporary cached changes from the [handleStartNoteTransfer] response!
   Future<RestCallbackResult> handleFinishNoteTransfer(RestCallbackParams params) async {
     return _startFinishLock.synchronized(() async {
@@ -190,14 +192,19 @@ class NoteRepository {
 
       final FinishNoteTransferRequest request = FinishNoteTransferRequest.fromJson(params.jsonBody!);
 
-      if (request.shouldCancel) {
-        await _cancelTransfer(transferToken);
-      } else {
-        Logger.debug("Applying file transfer to old account data $serverAccount");
-        await _applyTransfer(transferToken);
-        await _cancelAllTransfers(serverAccount);
-        await accountRepository.storeAccount(serverAccount);
-        Logger.debug("Finished file transfer with new account data $serverAccount");
+      try {
+        if (request.shouldCancel) {
+          await _cancelTransfer(transferToken);
+        } else {
+          Logger.debug("Applying file transfer to old account data $serverAccount");
+          await _applyTransfer(transferToken);
+          await _cancelAllTransfers(serverAccount);
+          await accountRepository.storeAccount(serverAccount);
+          Logger.debug("Finished file transfer with new account data $serverAccount");
+        }
+      } on BaseException catch (e) {
+        Logger.error("Error finishing note transfer for $transferToken");
+        return RestCallbackResult.withErrorCode(e.message ?? "");
       }
 
       final String logAction = request.shouldCancel ? "cancelled" : "completed";
@@ -207,7 +214,7 @@ class NoteRepository {
   }
 
   /// Cleans up old transfers for accounts that do not have a valid session token (so they are not logged in anymore)
-  Future<void> cleanUpOldTransfers() async{
+  Future<void> cleanUpOldTransfers() async {
     final List<String> transfersToCancel = List<String>.empty(growable: true);
     for (final iterator in _noteTransfers.entries) {
       final String transferToken = iterator.key;
@@ -248,8 +255,8 @@ class NoteRepository {
     }
   }
 
-
   /// Does not remove any note transfers (but the tmp note files will of course be removed, because they are renamed)
+  /// Can throw a [FileException] with [ErrorCodes.FILE_NOT_FOUND]
   Future<void> _applyTransfer(String transferToken) async {
     if (_noteTransfers.containsKey(transferToken)) {
       final NoteTransfer noteTransfer = _noteTransfers[transferToken]!;
@@ -290,6 +297,7 @@ class NoteRepository {
 
   /// Depending on the note update, either deletes the note data, or replaces it with the temp note data, or do nothing
   /// The noteUpdates transfer status must be one of serverNeedsUpdate.
+  /// Can throw a [FileException] with [ErrorCodes.FILE_NOT_FOUND]
   Future<void> _updateStoredNotes(NoteUpdate noteUpdate, String transferToken) async {
     assert(noteUpdate.noteTransferStatus.serverNeedsUpdate, "note transfer status must be one of serverNeedsUpdate");
     try {

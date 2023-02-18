@@ -22,8 +22,8 @@ void main() {
   test('encrypt and decrypt', () {
     const String clearText = "test text 1ä";
     final String base64Key = StringUtils.getRandomBytesAsBase64String(32);
-    final Uint8List cipher = SecurityUtils.encryptBytes(Uint8List.fromList(utf8.encode(clearText)), base64Key);
-    final Uint8List decrypted = SecurityUtils.decryptBytes(cipher, base64Key);
-    expect(utf8.decode(decrypted), clearText);
+    final String cipher = SecurityUtils.encryptString(clearText, base64Key);
+    final String decrypted = SecurityUtils.decryptString(cipher, base64Key);
+    expect(decrypted, clearText);
   });
 }
