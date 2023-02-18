@@ -224,11 +224,11 @@ void _testUploadNote() {
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
   });
 
-  test("An upload request with a client id should throw an exception ", () async {
+  test("An upload request with an invalid client id should throw an exception ", () async {
     final StartNoteTransferResponse response =
         await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
     expect(() async {
-      await _upload(response.transferToken, -1, <int>[1, 2]);
+      await _upload(response.transferToken, -1010, <int>[1, 2]);
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
   });
 
@@ -248,6 +248,14 @@ void _testUploadNote() {
     expect(() async {
       await noteDataSource.loadNoteData(1);
     }, throwsA((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND));
+  });
+
+  test("An upload request with a valid client id should work", () async {
+    final StartNoteTransferResponse response =
+    await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    expect(response.noteUpdates.first.serverId, 1, reason: "note transfer should have serverId 1");
+    expect(response.noteUpdates.first.clientId, -1, reason: "note transfer should have clientId 1");
+    await _upload(response.transferToken, -1, <int>[1, 2, 3, 4, 5]);
   });
 
   test("An upload request with correct values should succeed twice", () async {
@@ -408,20 +416,22 @@ void _testDownloadNote() {
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
   });
 
-  test("A download request with a client id should throw an exception ", () async {
-    final StartNoteTransferResponse response =
-        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+  test("A download request with an invalid server id should throw an exception ", () async {
+    await _uploadNote1();
+    final StartNoteTransferResponse response = await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: 1, encFileName: "c1", lastEdited: _now.subtract(const Duration(days: 1)))]);
     expect(() async {
-      await _download(response.transferToken, -1);
+      await _download(response.transferToken, 1010);
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
   });
 
-  test("A download request with an invalid server id should throw an exception ", () async {
-    final StartNoteTransferResponse response =
-        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+  test("A download request with a valid client id should throw a file not found exception ", () async {
+    await _uploadNote1();
+    final StartNoteTransferResponse response = await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now.subtract(const Duration(days: 1)))]);
     expect(() async {
-      await _upload(response.transferToken, 1010, <int>[1, 2]);
-    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
+      await _download(response.transferToken, -1);
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.FILE_NOT_FOUND));
   });
 
   test("A download request with correct values should succeed", () async {
@@ -431,6 +441,7 @@ void _testDownloadNote() {
     final List<int> newBytes = await _download(response.transferToken, 1);
     expect(jsonEncode(<int>[1, 2, 3, 4, 5]), jsonEncode(newBytes), reason: "downloaded bytes should match");
   });
+
 }
 
 Future<StartNoteTransferResponse> _startTransfer(List<NoteInfoModel> clientNotes) async {

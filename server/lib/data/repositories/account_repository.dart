@@ -97,6 +97,7 @@ class AccountRepository {
 
   /// Returns http status code 401 if the createAccountToken was invalid.
   /// Returns [ErrorCodes.SERVER_ACCOUNT_ALREADY_EXISTS] if the username already exists.
+  /// Returns [ErrorCodes.SERVER_INVALID_REQUEST_VALUES] if the request parameter are empty.
   ///
   /// Creates a new account on the server and returns [HttpStatus.ok]
   Future<RestCallbackResult> handleCreateAccountRequest(RestCallbackParams params) async {
@@ -132,6 +133,7 @@ class AccountRepository {
 
   /// Returns [ErrorCodes.SERVER_UNKNOWN_ACCOUNT] if the username was not found.
   /// Returns [ErrorCodes.SERVER_ACCOUNT_WRONG_PASSWORD] if the password hash was invalid.
+  /// Returns [ErrorCodes.SERVER_INVALID_REQUEST_VALUES] if the request parameter are empty.
   Future<RestCallbackResult> handleLoginToAccountRequest(RestCallbackParams params) async {
     return _lock.synchronized(() async {
       final AccountLoginRequest request = AccountLoginRequest.fromJson(params.jsonBody!);
@@ -163,7 +165,7 @@ class AccountRepository {
     });
   }
 
-  ///
+  /// Returns [ErrorCodes.SERVER_INVALID_REQUEST_VALUES] if the request parameter are empty.
   Future<RestCallbackResult> handleChangeAccountPasswordRequest(RestCallbackParams params) async {
     return _lock.synchronized(() async {
       // the attached account will always be a server account

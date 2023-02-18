@@ -67,8 +67,8 @@ class NoteRepository {
   /// At the end to apply the transfer on the server side, the client should call [handleFinishNoteTransfer], but it can
   /// also be called earlier to cancel the transfer.
   ///
-  /// This request can return a [ServerException] with the error code [ErrorCodes.SERVER_INVALID_REQUEST_VALUES] if the
-  /// client sends a server note id that doesn't belong to it!
+  /// This request can return [ErrorCodes.SERVER_INVALID_REQUEST_VALUES] if the  client sends a server note id that
+  /// doesn't belong to it!
   Future<RestCallbackResult> handleStartNoteTransfer(RestCallbackParams params) async {
     return _startFinishLock.synchronized(() async {
       final ServerAccount serverAccount = params.getAttachedServerAccount(); // security: check authenticated account
@@ -101,11 +101,11 @@ class NoteRepository {
   /// [RestJsonParameter.TRANSFER_TOKEN] from the call to [handleStartNoteTransfer]
   /// [RestJsonParameter.TRANSFER_NOTE_ID] for the affected note which should be downloaded from the server
   ///
-  /// This request can return a [ServerException] with the error code [ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN] if the
+  /// This request can return the error code [ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN] if the
   /// client used an invalid transfer token, or if the server cancelled the note transfer!
   /// It can also return the error code [ErrorCodes.SERVER_INVALID_REQUEST_VALUES] if the client sends a server note id
   /// that doesn't belong to it!
-  /// And a [FileException] is returned with [ErrorCodes.FILE_NOT_FOUND] if the server could not find the note file.
+  /// And [ErrorCodes.FILE_NOT_FOUND] is returned if the server could not find the note file.
   Future<RestCallbackResult> handleDownloadNote(RestCallbackParams params) async {
     final ServerAccount serverAccount = params.getAttachedServerAccount(); // security: check authenticated account
     final String transferToken = _getValidTransferToken(params, serverAccount);
@@ -116,8 +116,8 @@ class NoteRepository {
       return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN);
     }
 
-    final int serverNoteId = _getValidNoteId(params, _noteTransfers[transferToken]!); // security: check if the note
-    // belongs to the transaction and to the account
+    final int serverNoteId = _getValidServerNoteId(params, _noteTransfers[transferToken]!); // security: check if the note
+    // belongs to the transaction and to the account. Also map a client id to a server id!
     if (serverNoteId == 0) {
       Logger.error("Error downloading note, because the note id was invalid: $transferToken");
       return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_REQUEST_VALUES);
@@ -139,10 +139,10 @@ class NoteRepository {
   /// [RestJsonParameter.TRANSFER_TOKEN] from the call to [handleStartNoteTransfer]
   /// [RestJsonParameter.TRANSFER_NOTE_ID] for the affected note which should be uploaded to the server
   ///
-  /// This request can return a [ServerException] with the error code [ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN] if the
-  /// client used an invalid transfer token, or if the server cancelled the note transfer!
-  /// It can also return the error code [ErrorCodes.SERVER_INVALID_REQUEST_VALUES] if the client sends a server note id
-  /// that doesn't belong to it!
+  /// This request can return [ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN] if the  client used an invalid transfer
+  /// token, or if the server cancelled the note transfer!
+  /// It can also return [ErrorCodes.SERVER_INVALID_REQUEST_VALUES] if the client sends a server note id  that doesn't
+  /// belong to it!
   Future<RestCallbackResult> handleUploadNote(RestCallbackParams params) async {
     final ServerAccount serverAccount = params.getAttachedServerAccount();
     final String transferToken = _getValidTransferToken(params, serverAccount);
@@ -156,7 +156,7 @@ class NoteRepository {
       return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_REQUEST_VALUES);
     }
 
-    final int serverNoteId = _getValidNoteId(params, _noteTransfers[transferToken]!);
+    final int serverNoteId = _getValidServerNoteId(params, _noteTransfers[transferToken]!);
     if (serverNoteId == 0) {
       Logger.error("Error uploading note, because the note id was invalid: $transferToken");
       return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_REQUEST_VALUES);
@@ -174,10 +174,10 @@ class NoteRepository {
   /// Otherwise if [FinishNoteTransferRequest.shouldCancel] is [true], then only this specific note transfer with the
   /// transfer token will be cancelled!
   ///
-  /// This request can return a [ServerException] with the error code [ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN] if the
-  /// client used an invalid transfer token, or if the server cancelled the note transfer!
+  /// This request can return [ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN] if the client used an invalid transfer
+  /// token, or if the server cancelled the note transfer!
   ///
-  /// It can also return a [FileException] with [ErrorCodes.FILE_NOT_FOUND] if something fails during the transfer finish.
+  /// It can also return [ErrorCodes.FILE_NOT_FOUND] if something fails during the transfer finish.
   ///
   /// Now the client can also apply its temporary cached changes from the [handleStartNoteTransfer] response!
   Future<RestCallbackResult> handleFinishNoteTransfer(RestCallbackParams params) async {
@@ -440,21 +440,24 @@ class NoteRepository {
     return transferToken;
   }
 
-  /// Returns the note id from the params if it is a valid server id that is contained in the matching transfer.
-  /// Otherwise 0 will be returned if a server id was used that does not belong to the transfer, or if a client id was used!
-  int _getValidNoteId(RestCallbackParams params, NoteTransfer noteTransfer) {
+  /// Returns the server note id from the params if the note id is a valid server, or client id that is contained in the
+  /// matching transfer. Otherwise 0 will be returned if a server, or client id was used that does not belong to the transfer!
+  ///
+  /// This will always return the matching mapped server id and never return the client id!
+  int _getValidServerNoteId(RestCallbackParams params, NoteTransfer noteTransfer) {
     final String idString = params.queryParams[RestJsonParameter.TRANSFER_NOTE_ID] ?? "0";
-    int id = int.tryParse(idString) ?? 0;
+    final int id = int.tryParse(idString) ?? 0;
     final Iterable<NoteUpdate> iterator =
-        noteTransfer.noteUpdates.where((NoteUpdate noteUpdate) => noteUpdate.serverId == id);
+        noteTransfer.noteUpdates.where((NoteUpdate noteUpdate) => noteUpdate.serverId == id || noteUpdate.clientId == id);
     if (iterator.isEmpty) {
       Logger.debug("Got an invalid id $id from ${noteTransfer.serverAccount.userName}");
-      id = 0;
+      return 0;
     } else if (iterator.first.noteTransferStatus.clientNeedsUpdate && (params.rawBytes?.isNotEmpty ?? false)) {
       Logger.debug("The client uploaded bytes to override a note for which the server had a newer time stamp in the "
           "transfer");
     }
-    return id;
+    assert(iterator.length == 1, "There should always only be one matching note update for each file!");
+    return iterator.first.serverId;
   }
 
   /// Returns the note transfers unmodifiable for read only access. The note transfers themselves should not be modified!

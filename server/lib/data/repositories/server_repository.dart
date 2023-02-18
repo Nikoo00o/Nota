@@ -81,20 +81,20 @@ class ServerRepository {
   /// [endpointCallbacks] must be a list of endpoints with a matching callback function which handles http requests to the
   /// endpoint.
   ///
-  /// For http request where no callback is found, the StatusCode 404 will be returned.
+  /// For http request where no callback is found, the StatusCode 404 (not found) will be returned.
   ///
-  /// If the [endpoint] needs a session token for authentication, then the [RestServer.fetchAuthenticatedAccount] use case
-  /// is used to
-  /// return the attached account which the callback then can use.
-  /// If the session token was invalid and the returned account was [null], the StatusCode 401 will be returned.
+  /// If the [endpoint] needs a session token for authentication, then the [fetchAuthenticatedAccountCallback] callback is
+  /// used to return the attached account which the callback then can use.
+  /// If the session token was invalid and the returned account was [null], the StatusCode 401 (unauthorized) will be
+  /// returned.
   ///
   /// Otherwise the StatusCode of the callback along with the json response will be returned to the client.
   /// If the callback throws an exception (for example because wrong request data could not be parsed), or if the request
-  /// was empty, then the StatusCode 400 will be returned.
+  /// was empty, then the StatusCode 400 (bad request) will be returned.
   ///
-  /// The session token must be present in the query parameter with the tag [RestJsonParameter.SESSION_TOKEN]
+  /// The session token must be present in the query parameter with the tag [RestJsonParameter.SESSION_TOKEN].
   ///
-  /// [endpoint] should be one of the [Endpoints].
+  /// [endpoint] should be one of the [Endpoints]
   ///
   /// For example: <RestCallback>[RestCallback(endpoint: Endpoints.ABOUT, callback: ServerRepository.handleAbout)]
   Future<void> initEndpoints(List<RestCallback> endpointCallbacks) async {

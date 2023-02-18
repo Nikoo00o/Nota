@@ -7,8 +7,8 @@ class StartNoteTransferResponse extends ResponseDTO {
 
   /// The note updates with the status, id, name, etc of each note after comparing server and client notes.
   ///
-  /// The Client can now already update the [NoteUpdateModel.newEncFileName] and also update those notes which still have
-  /// a [NoteUpdateModel.clientId] that is different than [NoteUpdateModel.serverId]. And it can also delete the notes
+  /// The Client can later on finish update the [NoteUpdateModel.newEncFileName] and also update those notes which still
+  /// have a [NoteUpdateModel.clientId] that is different than [NoteUpdateModel.serverId]. And it can also delete the notes
   /// with an empty file name.
   final List<NoteUpdateModel> noteUpdates;
 
