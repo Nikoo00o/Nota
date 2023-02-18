@@ -3,6 +3,7 @@ import 'package:app/core/logger/app_logger.dart';
 import 'package:app/data/datasources/local_data_source.dart';
 import 'package:app/data/datasources/local_data_source_impl.dart';
 import 'package:app/data/datasources/remote_account_data_source.dart';
+import 'package:app/data/datasources/remote_note_data_source.dart';
 import 'package:app/data/repositories/account_repository_impl.dart';
 import 'package:app/domain/repositories/account_repository.dart';
 import 'package:app/domain/usecases/fetch_current_session_token.dart';
@@ -30,8 +31,9 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<LocalDataSource>(() => LocalDataSourceImpl(
         secureStorage: const FlutterSecureStorage(),
         appConfig: sl(),
-      )); // needs to be [LocalDataSourceImpl] for [LocalDataSource]!
-  sl.registerLazySingleton<RemoteAccountDataSource>(() => RemoteAccountDataSource(restClient: sl()));
+      ));
+  sl.registerLazySingleton<RemoteAccountDataSource>(() => RemoteAccountDataSourceImpl(restClient: sl()));
+  sl.registerLazySingleton<RemoteNoteDataSource>(() => RemoteNoteDataSourceImpl(restClient: sl()));
 
   // needs to be [FetchCurrentSessionToken] for [SharedFetchCurrentSessionToken]!
   sl.registerLazySingleton<SharedFetchCurrentSessionToken>(() => FetchCurrentSessionToken(accountRepository: sl()));

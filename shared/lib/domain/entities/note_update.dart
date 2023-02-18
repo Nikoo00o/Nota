@@ -11,8 +11,8 @@ class NoteUpdate extends Entity {
   final int clientId;
 
   /// This might be different than the [clientId] if the note was newly created on the client and did not exist on the
-  /// server before. It will then be send on the transfer start, so the client can update its [clientId]. Otherwise it will
-  /// be the same as  [clientId].
+  /// server before. It will then be send on the transfer start, so the client can update its [clientId] on finish. Otherwise
+  /// it will be the same as [clientId].
   ///
   /// Server ids will always be above 0
   final int serverId;
@@ -40,8 +40,10 @@ class NoteUpdate extends Entity {
           "noteTransferStatus": noteTransferStatus,
         });
 
+  /// The notes had a different file name
   bool get wasFileNameChanged => newEncFileName != null;
 
+  /// The more recent note had an empty file name, so it was deleted
   bool get wasFileDeleted => newEncFileName?.isEmpty ?? false;
 
   /// Compares 2 note update objects for sorting by the server id ascending

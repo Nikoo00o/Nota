@@ -15,6 +15,13 @@ import 'package:shared/core/utils/logger/logger.dart';
 ///
 /// [fetchAuthenticatedAccountCallback] is used for endpoints that require a session token for authentication and it should
 /// return the attached account if the session token was valid. Otherwise it should return null.
+///
+/// For http request where no callback is found, the StatusCode 404 (not found)  will be returned.
+/// If the session token was invalid and the returned account was [null], the StatusCode 401 (unauthorized) will be returned.
+///
+/// Otherwise the StatusCode of the callback along with the json response will be returned to the client.
+/// If the callback throws an exception (for example because wrong request data could not be parsed), or if the request
+/// was empty, then the StatusCode 400 (bad request) will be returned.
 class RestServer {
   HttpServer? _server;
 
@@ -181,17 +188,18 @@ class RestServer {
 
   /// Adds a new callback for the specific endpoint (url and http method) to respond to a client http request.
   ///
-  /// For http request where no callback is found, the StatusCode 404 will be returned.
+  /// For http request where no callback is found, the StatusCode 404 (not found) will be returned.
   ///
-  /// If the [endpoint] needs a session token for authentication, then the [fetchAuthenticatedAccount] use case is used to
-  /// return the attached account which the callback then can use.
-  /// If the session token was invalid and the returned account was [null], the StatusCode 401 will be returned.
+  /// If the [endpoint] needs a session token for authentication, then the [fetchAuthenticatedAccountCallback] callback is
+  /// used to return the attached account which the callback then can use.
+  /// If the session token was invalid and the returned account was [null], the StatusCode 401 (unauthorized) will be
+  /// returned.
   ///
   /// Otherwise the StatusCode of the callback along with the json response will be returned to the client.
   /// If the callback throws an exception (for example because wrong request data could not be parsed), or if the request
-  /// was empty, then the StatusCode 400 will be returned.
+  /// was empty, then the StatusCode 400 (bad request) will be returned.
   ///
-  /// The session token must be present in the query parameter with the tag [RestJsonParameter.SESSION_TOKEN]
+  /// The session token must be present in the query parameter with the tag [RestJsonParameter.SESSION_TOKEN].
   ///
   /// [endpoint] should be one of the [Endpoints]
   void addCallback({required RestCallback callback}) {

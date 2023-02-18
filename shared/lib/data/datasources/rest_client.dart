@@ -63,14 +63,15 @@ class RestClient {
   /// Throws a [ServerException] if any server error occurred by using the [RestJsonParameter.SERVER_ERROR] json key!
   /// If the session token is null, the error code will be [ErrorCodes.MISSING_SESSION_TOKEN]
   ///
-  /// HTTP status code errors will be thrown as [ErrorCodes.HTTP_STATUS]statusCode.
-  /// If  the session token is invalid, 401 is returned
-  /// If the endpoint is unknown, 404 is returned.
-  /// If the request is completely empty, or if the request parameter could not be parsed, 400 is returned.
+  /// HTTP status code errors will be thrown as [ServerException] with [ErrorCodes.HTTP_STATUS]statusCode.
+  /// If the session token is invalid, 401 (unauthorized) is returned
+  /// If the endpoint is unknown, 404 (not found) is returned.
+  /// If the request is completely empty, or if the request parameter could not be parsed, 400 (bad request) is returned.
   ///
   ///
   /// In most cases the returned data will be a json map of string and dynamic, but for file downloads it can also
   /// be a list of raw bytes! It will never be null.
+  ///
   /// If the content type did not match the type of the data, a [ServerException] with [ErrorCodes.INVALID_DATA_TYPE] will
   /// be thrown! If no data was send, then a [ServerException] with [ErrorCodes.UNKNOWN_SERVER] will be thrown which will
   /// also be thrown on timeout!
