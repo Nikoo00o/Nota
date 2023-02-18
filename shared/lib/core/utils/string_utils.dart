@@ -3,7 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 class StringUtils {
-  /// Returns a List of [length] with integer values from 0 to 255
+  /// Returns a List of [length] bytes with integer values from 0 to 255 which are cryptographically secure random numbers!
   static Uint8List getRandomBytes(int length) {
     final Random random = Random.secure();
     return Uint8List.fromList(List<int>.generate(length, (int index) => random.nextInt(256))); // 0 to 255

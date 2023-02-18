@@ -21,20 +21,26 @@ class SecurityUtils {
     nonceLength: IV_LENGTH,
   );
 
-  /// Calls [encrypt] after base64 decoding the [base64EncodedKey].
-  static Uint8List encryptBytes(Uint8List inputBytes, String base64EncodedKey) {
-    return encrypt(inputBytes, base64Decode(base64EncodedKey));
+  /// Calls [encryptBytes] after base64 decoding the [base64EncodedKey].
+  ///
+  /// The result will be base64 encoded!
+  static String encryptString(String input, String base64EncodedKey) {
+    final Uint8List bytes = encryptBytes(Uint8List.fromList(utf8.encode(input)), base64Decode(base64EncodedKey));
+    return base64UrlEncode(bytes);
   }
 
-  /// Calls [decrypt] after base64 decoding the [base64EncodedKey].
-  static Uint8List decryptBytes(Uint8List inputBytes, String base64EncodedKey) {
-    return decrypt(inputBytes, base64Decode(base64EncodedKey));
+  /// Calls [decryptBytes] after base64 decoding the [base64EncryptedInput] and [base64EncodedKey].
+  ///
+  /// The result will be utf8 encoded (clear text).
+  static String decryptString(String base64EncryptedInput, String base64EncodedKey) {
+    final Uint8List bytes = decryptBytes(base64Decode(base64EncryptedInput), base64Decode(base64EncodedKey));
+    return utf8.decode(bytes);
   }
 
   /// Will use AES GCM to encrypt the bytes by returning the iv and then the mac added before the cipher text.
   ///
   /// Uses a new random generated iv!
-  static Uint8List encrypt(Uint8List inputBytes, Uint8List keyBytes) {
+  static Uint8List encryptBytes(Uint8List inputBytes, Uint8List keyBytes) {
     final Uint8List ivBytes = StringUtils.getRandomBytes(IV_LENGTH);
     final SecretBox secretBox = _cipher.encryptSync(
       inputBytes,
@@ -47,7 +53,7 @@ class SecurityUtils {
 
   /// Will use AES GCM to decrypt the bytes by first checking the iv, then the mac of the bytes and then extracting the
   /// ciphertext
-  static Uint8List decrypt(Uint8List inputBytes, Uint8List keyBytes) {
+  static Uint8List decryptBytes(Uint8List inputBytes, Uint8List keyBytes) {
     final Uint8List ivBytes = Uint8List.view(inputBytes.buffer, inputBytes.offsetInBytes, IV_LENGTH);
     final Uint8List macBytes = Uint8List.view(inputBytes.buffer, inputBytes.offsetInBytes + IV_LENGTH, MAC_LENGTH);
 
@@ -56,5 +62,19 @@ class SecurityUtils {
 
     final SecretBox secretBox = SecretBox(cipherBytes, nonce: ivBytes, mac: Mac(macBytes));
     return Uint8List.fromList(_cipher.decryptSync(secretBox, secretKeyData: SecretKeyData(keyBytes)));
+  }
+
+  /// Uses Sha512 to create a quick hash (should not be used for passwords)
+  static Uint8List hashBytes(Uint8List bytes) {
+    const DartSha512 algorithm = DartSha512();
+    return Uint8List.fromList(algorithm.hashSync(bytes).bytes);
+  }
+
+  /// Uses Sha512 to create a quick hash (should not be used for passwords).
+  ///
+  /// The returned hash will be base 64 encoded!
+  static String hashString(String input) {
+    const DartSha512 algorithm = DartSha512();
+    return base64UrlEncode(algorithm.hashSync(utf8.encode(input)).bytes);
   }
 }

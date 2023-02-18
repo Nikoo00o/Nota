@@ -14,7 +14,7 @@ class HiveAesGcmCipher implements HiveCipher {
   @override
   int encrypt(Uint8List inp, int inpOff, int inpLength, Uint8List out, int outOff) {
     final Uint8List inputBytes = Uint8List.view(inp.buffer, inpOff, inpLength);
-    final Uint8List decryptedBytes = SecurityUtils.encrypt(inputBytes, keyBytes);
+    final Uint8List decryptedBytes = SecurityUtils.encryptBytes(inputBytes, keyBytes);
     out.setAll(outOff, decryptedBytes);
     return decryptedBytes.length;
   }
@@ -22,7 +22,7 @@ class HiveAesGcmCipher implements HiveCipher {
   @override
   int decrypt(Uint8List inp, int inpOff, int inpLength, Uint8List out, int outOff) {
     final Uint8List inputBytes = Uint8List.view(inp.buffer, inpOff, inpLength);
-    final Uint8List encryptedBytes = SecurityUtils.decrypt(inputBytes, keyBytes);
+    final Uint8List encryptedBytes = SecurityUtils.decryptBytes(inputBytes, keyBytes);
     out.setAll(outOff, encryptedBytes);
     return encryptedBytes.length;
   }
