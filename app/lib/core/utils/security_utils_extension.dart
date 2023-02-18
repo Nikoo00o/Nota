@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:html';
 import 'dart:typed_data';
 import 'package:cryptography/cryptography.dart';
 import 'package:shared/core/utils/security_utils.dart';

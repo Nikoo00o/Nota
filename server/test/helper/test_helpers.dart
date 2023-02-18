@@ -1,7 +1,5 @@
 import 'dart:io';
-
 import 'package:hive/hive.dart';
-import 'package:server/core/config/server_config.dart';
 import 'package:server/data/datasources/account_data_source.dart.dart';
 import 'package:server/data/datasources/local_data_source.dart';
 import 'package:server/data/datasources/note_data_source.dart';
@@ -10,21 +8,19 @@ import 'package:server/data/repositories/account_repository.dart';
 import 'package:server/data/repositories/note_repository.dart';
 import 'package:server/data/repositories/server_repository.dart';
 import 'package:server/data/datasources/rest_server.dart';
+import 'package:server/domain/entities/server_account.dart';
 import 'package:server/domain/usecases/fetch_authenticated_account.dart';
 import 'package:server/domain/usecases/start_note_server.dart';
 import 'package:server/domain/usecases/stop_nota_server.dart';
 import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
-import 'package:shared/core/utils/nullable.dart';
 import 'package:shared/data/datasources/rest_client.dart';
-import 'package:shared/data/dtos/account/account_change_password_request.dart';
-import 'package:shared/data/dtos/account/account_change_password_response.dart';
 import 'package:shared/data/dtos/account/account_login_request.dart.dart';
 import 'package:shared/data/dtos/account/account_login_response.dart';
 import 'package:shared/data/dtos/account/create_account_request.dart';
-import 'package:shared/data/models/session_token_model.dart';
 import 'package:shared/domain/entities/note_info.dart';
+import 'package:shared/domain/entities/session_token.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 import 'package:test/expect.dart';
 
@@ -74,7 +70,7 @@ Future<void> createCommonTestObjects({required int serverPort}) async {
   accountRepository = AccountRepository(accountDataSource: accountDataSource, serverConfig: serverConfigMock);
 
   fetchAuthenticatedAccountMock = FetchAuthenticatedAccountMock(accountRepository: accountRepository);
-  restServer = RestServer(fetchAuthenticatedAccount: fetchAuthenticatedAccountMock);
+  restServer = RestServer(fetchAuthenticatedAccountCallback: _fetchAuthenticatedAccountCallback);
 
   noteRepository = NoteRepository(
     noteDataSource: noteDataSource,
@@ -99,12 +95,18 @@ Future<void> createCommonTestObjects({required int serverPort}) async {
   );
 
   fetchCurrentSessionTokenMock = FetchCurrentSessionTokenMock();
-  restClient = RestClient(config: serverConfigMock, fetchSessionToken: fetchCurrentSessionTokenMock);
+  restClient = RestClient(sharedConfig: serverConfigMock, fetchSessionTokenCallback: _fetchCurrentSessionToken);
 
   initialized = true;
 
   await _setup();
 }
+
+Future<ServerAccount?> _fetchAuthenticatedAccountCallback(String sessionToken) =>
+    fetchAuthenticatedAccountMock.call(FetchAuthenticatedAccountParams(sessionToken: sessionToken));
+
+Future<SessionToken?> _fetchCurrentSessionToken() =>
+    fetchCurrentSessionTokenMock.call(NoParams());
 
 Future<void> _setup() async {
   Logger.initLogger(Logger()); // the logger must always be initialized first
