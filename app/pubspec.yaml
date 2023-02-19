@@ -30,7 +30,7 @@ dev_dependencies:
 
   flutter_lints: ^2.0.1 # linter rules
 
-  server: # server project for testing
+  server: # server project is needed only for testing
     path: ../server
 
 flutter:

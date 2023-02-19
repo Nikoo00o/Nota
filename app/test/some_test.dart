@@ -6,6 +6,8 @@ import "../../server/test/helper/test_helpers.dart" as server;
 // add comment: server tests should be run before, because this test here does not mock the server. it uses the real server
 // implementation!
 
+const int _serverPort = 9192;
+
 void main() {
-  server.createCommonTestObjects(serverPort: 8900); // use this and the cleanup method in the tests to control the server
+  server.createCommonTestObjects(serverPort: _serverPort); // use this and the cleanup method in the tests to control the server
 }

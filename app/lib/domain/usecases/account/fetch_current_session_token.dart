@@ -14,8 +14,10 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// This use case should return the current session token and also refresh it if its about to expire.
 /// Otherwise null should be returned. This can also throw the exceptions of [AccountRepository.login].
 ///
-/// Important: if this throws a [ServerException] with [ErrorCodes.SERVER_ACCOUNT_WRONG_PASSWORD], then the password of
+/// Important: if this throws a [ServerException] with [ErrorCodes.ACCOUNT_WRONG_PASSWORD], then the password of
 /// the account was changed on another device and you should navigate to the login page.
+///
+/// This uses the userName and passwordHash of the account and it also changes sessionToken and encryptionDataKey!
 class FetchCurrentSessionToken extends SharedFetchCurrentSessionToken {
   final AccountRepository accountRepository;
 
@@ -31,11 +33,11 @@ class FetchCurrentSessionToken extends SharedFetchCurrentSessionToken {
       return null;
     }
     if (account.isSessionTokenValidFor(appConfig.sessionTokenRefreshAfterRemainingTime) == false) {
-      Logger.info("Refreshing session token...");
+      Logger.debug("Refreshing session token...");
       account = await accountRepository.login();
       await accountRepository.saveAccount(account);
     }
-    Logger.debug("Fetched session token ${account.sessionToken}");
+    Logger.info("Fetched session token ${account.sessionToken}");
     return account.sessionToken;
   }
 }

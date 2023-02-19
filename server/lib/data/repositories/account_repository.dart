@@ -132,7 +132,7 @@ class AccountRepository {
   }
 
   /// Returns [ErrorCodes.SERVER_UNKNOWN_ACCOUNT] if the username was not found.
-  /// Returns [ErrorCodes.SERVER_ACCOUNT_WRONG_PASSWORD] if the password hash was invalid.
+  /// Returns [ErrorCodes.ACCOUNT_WRONG_PASSWORD] if the password hash was invalid.
   /// Returns [ErrorCodes.SERVER_INVALID_REQUEST_VALUES] if the request parameter are empty.
   Future<RestCallbackResult> handleLoginToAccountRequest(RestCallbackParams params) async {
     return _lock.synchronized(() async {
@@ -149,7 +149,7 @@ class AccountRepository {
         return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_UNKNOWN_ACCOUNT);
       } else if (account.passwordHash != request.passwordHash) {
         Logger.error("Error logging in to account, because the password was incorrect: ${request.userName}");
-        return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_ACCOUNT_WRONG_PASSWORD);
+        return RestCallbackResult.withErrorCode(ErrorCodes.ACCOUNT_WRONG_PASSWORD);
       }
 
       account = await accountDataSource.refreshSessionToken(account, forceRegenerate: false); // make sure session token is

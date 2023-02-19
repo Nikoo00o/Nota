@@ -13,7 +13,7 @@ abstract class UseCase<ReturnType, CallParams> {
   const UseCase();
 
   /// Contains the logic of the use case and has to be overridden in the use cases!
-  /// THis will be called by the [call] method when calling this use case like a function
+  /// This will be called by the [call] method when calling this use case like a function
   Future<ReturnType> execute(CallParams params);
 
   /// This method makes use cases available to be called like functions with `useCase(params);`.

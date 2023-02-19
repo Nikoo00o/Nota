@@ -64,15 +64,18 @@ class AccountRepositoryImpl extends AccountRepository {
   }
 
   @override
-  Future<ClientAccount> updatePasswordOnServer() async {
+  Future<ClientAccount> updatePasswordOnServer(
+      {required String newPasswordHash, required String newEncryptedDataKey}) async {
     final ClientAccount account = await getAccountAndThrowIfNull();
     final AccountChangePasswordRequest request = AccountChangePasswordRequest(
-      newPasswordHash: account.passwordHash,
-      newEncryptedDataKey: account.encryptedDataKey,
+      newPasswordHash: newPasswordHash,
+      newEncryptedDataKey: newEncryptedDataKey,
     );
     final AccountChangePasswordResponse response = await remoteAccountDataSource.changePasswordRequest(request);
+    // update session token and keys of account
     account.sessionToken = response.sessionToken;
+    account.passwordHash = newPasswordHash;
+    account.encryptedDataKey = newEncryptedDataKey;
     return account;
   }
-
 }

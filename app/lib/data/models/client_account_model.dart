@@ -28,7 +28,7 @@ class ClientAccountModel extends ClientAccount with SharedAccountModelMixin impl
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       ...super.toJsonMixin(),
-      if (storeDecryptedDataKey) JSON_DECRYPTED_DATA_KEY: decryptedDataKey,
+      JSON_DECRYPTED_DATA_KEY: storeDecryptedDataKey ? decryptedDataKey : null,
       JSON_STORE_DECRYPTED_DATA_KEY: storeDecryptedDataKey,
       JSON_NEEDS_SERVER_SIDE_LOGIN: needsServerSideLogin,
     };
@@ -45,7 +45,7 @@ class ClientAccountModel extends ClientAccount with SharedAccountModelMixin impl
         noteInfoDynList.map((dynamic map) => NoteInfoModel.fromJson(map as Map<String, dynamic>)).toList();
 
     Uint8List? decryptedDataKey;
-    if (json.containsKey(JSON_DECRYPTED_DATA_KEY)) {
+    if (json.containsKey(JSON_DECRYPTED_DATA_KEY) && json[JSON_DECRYPTED_DATA_KEY] != null) {
       final List<dynamic> dynList = json[JSON_DECRYPTED_DATA_KEY] as List<dynamic>;
       decryptedDataKey = Uint8List.fromList(dynList.map((dynamic element) => element as int).toList());
     }

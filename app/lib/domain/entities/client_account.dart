@@ -1,8 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:shared/core/utils/nullable.dart';
 import 'package:shared/domain/entities/note_info.dart';
-import 'package:shared/domain/entities/session_token.dart';
 import 'package:shared/domain/entities/shared_account.dart';
 
 /// The client specific account class with additional properties
@@ -21,6 +19,8 @@ class ClientAccount extends SharedAccount {
   /// This is set during the login use case.
   /// [true] if the account needs to be logged in with a new login request with username+password on the login page, or
   /// [false] if the login page should only display the password field and the login should only be done locally.
+  ///
+  /// The purpose of this is to keep the accounts note data even if the account is logged out.
   bool needsServerSideLogin;
 
   ClientAccount({

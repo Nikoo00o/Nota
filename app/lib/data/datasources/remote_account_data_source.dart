@@ -1,3 +1,4 @@
+import 'package:app/domain/usecases/account/fetch_current_session_token.dart';
 import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
@@ -21,7 +22,7 @@ abstract class RemoteAccountDataSource {
   Future<void> createAccountRequest(CreateAccountRequest request);
 
   /// Returns [ErrorCodes.SERVER_UNKNOWN_ACCOUNT] if the username was not found.
-  /// Returns [ErrorCodes.SERVER_ACCOUNT_WRONG_PASSWORD] if the password hash was invalid.
+  /// Returns [ErrorCodes.ACCOUNT_WRONG_PASSWORD] if the password hash was invalid.
   /// Returns [ErrorCodes.SERVER_INVALID_REQUEST_VALUES] if the request parameter are empty.
   Future<AccountLoginResponse> loginRequest(AccountLoginRequest request);
 
