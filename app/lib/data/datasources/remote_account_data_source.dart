@@ -26,7 +26,7 @@ abstract class RemoteAccountDataSource {
   Future<AccountLoginResponse> loginRequest(AccountLoginRequest request);
 
   /// Returns [ErrorCodes.SERVER_INVALID_REQUEST_VALUES] if the request parameter are empty.
-  /// Needs a logged in account!
+  /// This needs a logged in account, so it can also throw the errors of [FetchCurrentSessionToken]!
   Future<AccountChangePasswordResponse> changePasswordRequest(AccountChangePasswordRequest request);
 }
 

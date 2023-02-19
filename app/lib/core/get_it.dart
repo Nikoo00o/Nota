@@ -5,10 +5,12 @@ import 'package:app/data/datasources/local_data_source_impl.dart';
 import 'package:app/data/datasources/remote_account_data_source.dart';
 import 'package:app/data/datasources/remote_note_data_source.dart';
 import 'package:app/data/repositories/account_repository_impl.dart';
-import 'package:app/data/repositories/note_repository_impl.dart';
+import 'package:app/data/repositories/app_settings_repository_impl.dart';
+import 'package:app/data/repositories/note_transfer_repository_impl.dart';
 import 'package:app/domain/repositories/account_repository.dart';
-import 'package:app/domain/repositories/note_repository.dart';
-import 'package:app/domain/usecases/fetch_current_session_token.dart';
+import 'package:app/domain/repositories/app_settings_repository.dart';
+import 'package:app/domain/repositories/note_transfer_repository.dart';
+import 'package:app/domain/usecases/account/fetch_current_session_token.dart';
 import 'package:app/services/session_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
@@ -46,9 +48,13 @@ Future<void> initializeGetIt() async {
         localDataSource: sl(),
         appConfig: sl(),
       ));
-  sl.registerLazySingleton<NoteRepository>(() => NoteRepositoryImpl(
+  sl.registerLazySingleton<NoteTransferRepository>(() => NoteTransferRepositoryImpl(
         remoteNoteDataSource: sl(),
         localDataSource: sl(),
+      ));
+  sl.registerLazySingleton<AppSettingsRepository>(() => AppSettingsRepositoryImpl(
+        localDataSource: sl(),
+        appConfig: sl(),
       ));
 
   sl.registerLazySingleton<SessionService>(() => SessionService());

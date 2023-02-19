@@ -11,6 +11,7 @@ import 'package:shared/domain/entities/session_token.dart';
 class ClientAccountModel extends ClientAccount with SharedAccountModelMixin implements Model {
   static const String JSON_DECRYPTED_DATA_KEY = "JSON_DECRYPTED_DATA_KEY";
   static const String JSON_STORE_DECRYPTED_DATA_KEY = "JSON_STORE_DECRYPTED_DATA_KEY";
+  static const String JSON_NEEDS_SERVER_SIDE_LOGIN = "JSON_NEEDS_SERVER_SIDE_LOGIN";
 
   ClientAccountModel({
     required super.userName,
@@ -20,6 +21,7 @@ class ClientAccountModel extends ClientAccount with SharedAccountModelMixin impl
     required super.noteInfoList,
     required super.decryptedDataKey,
     required super.storeDecryptedDataKey,
+    required super.needsServerSideLogin,
   });
 
   @override
@@ -28,6 +30,7 @@ class ClientAccountModel extends ClientAccount with SharedAccountModelMixin impl
       ...super.toJsonMixin(),
       if (storeDecryptedDataKey) JSON_DECRYPTED_DATA_KEY: decryptedDataKey,
       JSON_STORE_DECRYPTED_DATA_KEY: storeDecryptedDataKey,
+      JSON_NEEDS_SERVER_SIDE_LOGIN: needsServerSideLogin,
     };
   }
 
@@ -55,10 +58,11 @@ class ClientAccountModel extends ClientAccount with SharedAccountModelMixin impl
       noteInfoList: noteInfoList,
       decryptedDataKey: decryptedDataKey,
       storeDecryptedDataKey: json[JSON_STORE_DECRYPTED_DATA_KEY] as bool,
+      needsServerSideLogin: json[JSON_NEEDS_SERVER_SIDE_LOGIN] as bool,
     );
   }
 
-  factory ClientAccountModel.fromServerAccount(ClientAccount entity) {
+  factory ClientAccountModel.fromClientAccount(ClientAccount entity) {
     if (entity is ClientAccountModel) {
       return entity;
     }
@@ -70,6 +74,7 @@ class ClientAccountModel extends ClientAccount with SharedAccountModelMixin impl
       noteInfoList: entity.noteInfoList,
       decryptedDataKey: entity.decryptedDataKey,
       storeDecryptedDataKey: entity.storeDecryptedDataKey,
+      needsServerSideLogin: entity.needsServerSideLogin,
     );
   }
 }

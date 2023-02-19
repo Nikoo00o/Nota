@@ -25,14 +25,24 @@ class AccountRepositoryImpl extends AccountRepository {
   Future<ClientAccount?> getAccount() async => _cachedAccount ??= await localDataSource.loadAccount();
 
   @override
+  Future<ClientAccount> getAccountAndThrowIfNull() async {
+    final ClientAccount? account = await getAccount();
+    if (account == null) {
+      throw const ClientException(message: ErrorCodes.CLIENT_NO_ACCOUNT);
+    } else {
+      return account;
+    }
+  }
+
+  @override
   Future<void> saveAccount(ClientAccount account) async {
     _cachedAccount = account;
-    await localDataSource.saveAccount(ClientAccountModel.fromServerAccount(_cachedAccount!));
+    await localDataSource.saveAccount(ClientAccountModel.fromClientAccount(_cachedAccount!));
   }
 
   @override
   Future<void> createNewAccount() async {
-    final ClientAccount account = await _getAccountAndThrowIfNull();
+    final ClientAccount account = await getAccountAndThrowIfNull();
     await remoteAccountDataSource.createAccountRequest(CreateAccountRequest(
       createAccountToken: appConfig.createAccountToken,
       userName: account.userName,
@@ -43,7 +53,7 @@ class AccountRepositoryImpl extends AccountRepository {
 
   @override
   Future<ClientAccount> login() async {
-    final ClientAccount account = await _getAccountAndThrowIfNull();
+    final ClientAccount account = await getAccountAndThrowIfNull();
     final AccountLoginResponse response = await remoteAccountDataSource.loginRequest(AccountLoginRequest(
       userName: account.userName,
       passwordHash: account.passwordHash,
@@ -55,7 +65,7 @@ class AccountRepositoryImpl extends AccountRepository {
 
   @override
   Future<ClientAccount> updatePasswordOnServer() async {
-    final ClientAccount account = await _getAccountAndThrowIfNull();
+    final ClientAccount account = await getAccountAndThrowIfNull();
     final AccountChangePasswordRequest request = AccountChangePasswordRequest(
       newPasswordHash: account.passwordHash,
       newEncryptedDataKey: account.encryptedDataKey,
@@ -65,12 +75,4 @@ class AccountRepositoryImpl extends AccountRepository {
     return account;
   }
 
-  Future<ClientAccount> _getAccountAndThrowIfNull() async {
-    final ClientAccount? account = await getAccount();
-    if (account == null) {
-      throw const ClientException(message: ErrorCodes.CLIENT_NO_ACCOUNT);
-    } else {
-      return account;
-    }
-  }
 }

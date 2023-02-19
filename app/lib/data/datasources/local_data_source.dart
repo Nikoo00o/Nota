@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:app/data/models/client_account_model.dart';
 import 'package:path_provider/path_provider.dart';
@@ -18,6 +19,8 @@ abstract class LocalDataSource {
   static const String HIVE_KEY = "HIVE_KEY";
 
   static const String ACCOUNT = "ACCOUNT";
+
+  static const String LOCALE = "LOCALE";
 
   /// Must be called first in the main function to initialize hive to the [getApplicationDocumentsDirectory].
   Future<void> init();
@@ -47,6 +50,18 @@ abstract class LocalDataSource {
   /// Stores the current account and encrypts it with the hive key
   Future<void> saveAccount(ClientAccountModel account) async {
     await write(key: ACCOUNT, value: jsonEncode(account), secure: false);
+  }
+
+  Future<Locale?> getLocale() async {
+    final String? languageCode = await read(key: LOCALE, secure: false);
+    if (languageCode == null) {
+      return null;
+    }
+    return Locale(languageCode);
+  }
+
+  Future<void> setLocale(Locale locale) async {
+    await write(key: LOCALE, value: locale.languageCode, secure: false);
   }
 
   /// Returns the content of the note which is encrypted with the users data key.
