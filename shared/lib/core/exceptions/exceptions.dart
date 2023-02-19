@@ -21,3 +21,7 @@ class ServerException extends BaseException {
 class FileException extends BaseException {
   const FileException({required super.message, super.messageParams});
 }
+
+class ClientException extends BaseException {
+  const ClientException({required super.message, super.messageParams});
+}

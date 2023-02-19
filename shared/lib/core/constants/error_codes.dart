@@ -49,6 +49,9 @@ class ErrorCodes {
   ///
   /// This can happen if the transfer was cancelled by a different transfer from the server.
   static const String SERVER_INVALID_NOTE_TRANSFER_TOKEN = "error.server.invalid.note.transfer.token";
+
+  /// The client has currently no account stored
+  static const String CLIENT_NO_ACCOUNT = "error.client.no_account";
 }
 
 // todo: add translation strings

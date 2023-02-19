@@ -17,6 +17,8 @@ abstract class LocalDataSource {
   /// The identifier for the hive encryption key
   static const String HIVE_KEY = "HIVE_KEY";
 
+  static const String ACCOUNT = "ACCOUNT";
+
   /// Must be called first in the main function to initialize hive to the [getApplicationDocumentsDirectory].
   Future<void> init();
 
@@ -34,8 +36,8 @@ abstract class LocalDataSource {
   }
 
   /// Returns the currently stored [ClientAccountModel] decrypted with the hive key, or null if it was not found
-  Future<ClientAccountModel?> loadAccount(String userName) async {
-    final String? jsonString = await read(key: userName, secure: false);
+  Future<ClientAccountModel?> loadAccount() async {
+    final String? jsonString = await read(key: ACCOUNT, secure: false);
     if (jsonString != null) {
       return ClientAccountModel.fromJson(jsonDecode(jsonString) as Map<String, dynamic>);
     }
@@ -44,7 +46,7 @@ abstract class LocalDataSource {
 
   /// Stores the current account and encrypts it with the hive key
   Future<void> saveAccount(ClientAccountModel account) async {
-    await write(key: account.userName, value: jsonEncode(account), secure: false);
+    await write(key: ACCOUNT, value: jsonEncode(account), secure: false);
   }
 
   /// Returns the content of the note which is encrypted with the users data key.
