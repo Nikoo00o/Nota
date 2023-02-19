@@ -3,7 +3,7 @@ import 'package:shared/core/utils/logger/log_message.dart';
 
 class Logger {
   static const String _DEBUG_COLOUR = "\x1b[35m"; // magenta
-  static const String _INFO_COLOUR = "\x1b[32m";// green
+  static const String _INFO_COLOUR = "\x1b[32m"; // green
   static const String _ERROR_COLOUR = "\x1b[31m"; // red
   static const String _RESET_COLOUR = "\x1b[0m"; // white
 
@@ -25,7 +25,12 @@ class Logger {
   static Logger? _instance;
 
   /// Has to be called at the start of the main function to enable logging with a subclass of Logger
-  static void initLogger(Logger instance) => _instance = instance;
+  static void initLogger(Logger instance) {
+    if (_instance != null) {
+      debug("Overriding old logger instance");
+    }
+    _instance = instance;
+  }
 
   static const int consoleBufferSize = 1000;
 

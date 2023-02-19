@@ -43,12 +43,15 @@
 
 - navigate to the `nota/app` folder with the terminal and run `flutter test`, or just start the "All App Tests" run
   configuration
+- the tests of the app also directly use the server tests for the real server responses instead of mocks!
 
 ## The Different Projects
 
 ### Server
 
 - contains the server specific code (dart project)
+- in the scope of the whole project and in relation to the app, the server is mostly written in the data layer without 
+  many use cases
 
 ### Shared
 

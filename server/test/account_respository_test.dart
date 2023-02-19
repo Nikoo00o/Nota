@@ -139,7 +139,7 @@ void _testLoginToAccounts() {
         endpoint: Endpoints.ACCOUNT_LOGIN,
         bodyData: AccountLoginRequest(userName: getTestAccount(0).userName, passwordHash: "unknownPassword").toJson(),
       );
-    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_ACCOUNT_WRONG_PASSWORD));
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.ACCOUNT_WRONG_PASSWORD));
   });
 
   group("Session Token: ", _testSessionTokens);

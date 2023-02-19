@@ -40,8 +40,8 @@ class ErrorCodes {
   /// Server did not find the send user name
   static const String SERVER_UNKNOWN_ACCOUNT = "error.server.unknown.account";
 
-  /// Account password hash did not match the one stored on the server
-  static const String SERVER_ACCOUNT_WRONG_PASSWORD = "error.server.account.wrong.password";
+  /// Account password hash did not match the one stored on the server, or client
+  static const String ACCOUNT_WRONG_PASSWORD = "error.account.wrong.password";
 
   /// The note token for a note transfer was invalid (empty, or not contained in the transfer). For security reasons each
   /// transfer request after start must contain a valid transfer token to get matched to the start request and are only
@@ -49,6 +49,9 @@ class ErrorCodes {
   ///
   /// This can happen if the transfer was cancelled by a different transfer from the server.
   static const String SERVER_INVALID_NOTE_TRANSFER_TOKEN = "error.server.invalid.note.transfer.token";
+
+  /// The client has currently no account stored
+  static const String CLIENT_NO_ACCOUNT = "error.client.no_account";
 }
 
 // todo: add translation strings

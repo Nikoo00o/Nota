@@ -10,7 +10,7 @@ import 'package:shared/domain/entities/session_token.dart';
 /// Some fields of this entity can be modified and are not final.
 class SharedAccount {
   /// Used as identifier for accounts
-  final String userName;
+  String userName;
 
   /// Base64 encoded hash of the user password
   String passwordHash;

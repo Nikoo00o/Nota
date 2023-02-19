@@ -1,12 +1,8 @@
+import 'package:app/domain/usecases/account/fetch_current_session_token.dart';
 import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/data/datasources/rest_client.dart';
-import 'package:shared/data/dtos/account/account_change_password_request.dart';
-import 'package:shared/data/dtos/account/account_change_password_response.dart';
-import 'package:shared/data/dtos/account/account_login_request.dart.dart';
-import 'package:shared/data/dtos/account/account_login_response.dart';
-import 'package:shared/data/dtos/account/create_account_request.dart';
 import 'package:shared/data/dtos/notes/download_note_request.dart';
 import 'package:shared/data/dtos/notes/download_note_response.dart';
 import 'package:shared/data/dtos/notes/finish_note_request.dart';
@@ -31,6 +27,8 @@ abstract class RemoteNoteDataSource {
   /// The same applies to the migration from client to server id if the note was newly created on the server!
   ///
   /// Returns [ErrorCodes.SERVER_INVALID_REQUEST_VALUES] if the  client sends a server note id that doesn't belong to it!
+  ///
+  /// This needs a logged in account, so it can also throw the errors of [FetchCurrentSessionToken]!
   Future<StartNoteTransferResponse> startNoteTransferRequest(StartNoteTransferRequest request);
 
   /// Uploads the note content if the [NoteUpdate.noteTransferStatus] from [startNoteTransferRequest] indicated that the
@@ -44,6 +42,8 @@ abstract class RemoteNoteDataSource {
   /// not belong to the clients transfer!
   /// Returns [ErrorCodes.FILE_NOT_FOUND] is returned if the server could not find the note file (also happens by
   /// sending wrong ids)!
+  ///
+  /// This needs a logged in account, so it can also throw the errors of [FetchCurrentSessionToken]!
   Future<DownloadNoteResponse> downloadNoteRequest(DownloadNoteRequest request);
 
   /// Downloads the note content if the [NoteUpdate.noteTransferStatus] from [startNoteTransferRequest] indicated that the
@@ -53,6 +53,8 @@ abstract class RemoteNoteDataSource {
   /// server cancelled the note transfer!
   /// Returns [ErrorCodes.SERVER_INVALID_REQUEST_VALUES] if the client sends an invalid server, or client note id that does
   /// not belong to the clients transfer. Or if the raw bytes are empty!
+  ///
+  /// This needs a logged in account, so it can also throw the errors of [FetchCurrentSessionToken]!
   Future<void> uploadNoteRequest(UploadNoteRequest request);
 
   /// Finishes the transfer from [startNoteTransferRequest] and cancels all other transfers on the server.
@@ -65,6 +67,8 @@ abstract class RemoteNoteDataSource {
   /// Returns [ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN] if the client used an invalid transfer  token, or if the
   /// server cancelled the note transfer!
   /// Return [ErrorCodes.FILE_NOT_FOUND] if something fails during the transfer finish.
+  ///
+  /// This needs a logged in account, so it can also throw the errors of [FetchCurrentSessionToken]!
   Future<void> finishNoteTransferRequest(FinishNoteTransferRequestWithTransferToken request);
 }
 
