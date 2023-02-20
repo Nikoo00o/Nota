@@ -51,7 +51,7 @@ class RemoteAccountDataSourceImpl extends RemoteAccountDataSource {
   @override
   Future<AccountChangePasswordResponse> changePasswordRequest(AccountChangePasswordRequest request) async {
     final Map<String, dynamic> json =
-        await restClient.sendJsonRequest(endpoint: Endpoints.ACCOUNT_CREATE, bodyData: request.toJson());
+        await restClient.sendJsonRequest(endpoint: Endpoints.ACCOUNT_CHANGE_PASSWORD, bodyData: request.toJson());
     return AccountChangePasswordResponse.fromJson(json);
   }
 }

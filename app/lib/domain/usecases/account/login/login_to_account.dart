@@ -38,11 +38,12 @@ class LoginToAccount extends UseCase<void, LoginParams> {
     // get the new password hash for comparison and the new user key for decrypting the encrypted data key
     final String passwordHash = await SecurityUtilsExtension.hashStringSecure(params.password, appConfig.passwordHashSalt);
     final String userKey = await SecurityUtilsExtension.hashStringSecure(params.password, appConfig.userKeySalt);
-    final RequiredLoginStatus loginStatus = await getRequiredLoginStatus(NoParams());
 
-    // get the correct account depending on the params. throws error if [params] is not one of the sub classes
+    // get the correct account depending on the params. throws error if [params] is not one of the sub classes. also
+    // creates the account if not already exists
     ClientAccount account = await _getMatchingAccount(params, passwordHash);
 
+    final RequiredLoginStatus loginStatus = await getRequiredLoginStatus(NoParams());
     // login, or compare password hash
     if (params is RemoteLoginParams) {
       if (loginStatus != RequiredLoginStatus.REMOTE) {

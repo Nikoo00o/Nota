@@ -104,7 +104,7 @@ class RestServer {
       final dynamic requestData =
           await NetworkUtils.decodeNetworkDataStream(httpHeaders: request.headers.asMap(), data: request);
 
-      Logger.debug("Got request ${request.requestedUri} from $clientIp ${_getDynamicLog(requestData)}");
+      Logger.debug("Got request ${request.requestedUri} from $clientIp \n${_getDynamicLog(requestData)}");
 
       if (queryParams.isEmpty && fullApiPath.isEmpty && requestData == null) {
         response = RestCallbackResult(jsonResult: const <String, dynamic>{}, statusCode: HttpStatus.badRequest);
@@ -128,11 +128,11 @@ class RestServer {
 
   String _getDynamicLog(dynamic data) {
     if (data is Map<String, dynamic>) {
-      return " and with json data: $data";
+      return "and with json data: \n$data";
     } else if (data is List<int>) {
-      return " and with raw data bytes";
+      return "and with raw data bytes";
     } else {
-      return " and with no body data $data";
+      return "and with no body data \n$data";
     }
   }
 

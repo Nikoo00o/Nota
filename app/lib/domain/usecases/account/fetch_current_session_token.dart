@@ -37,6 +37,11 @@ class FetchCurrentSessionToken extends SharedFetchCurrentSessionToken {
       account = await accountRepository.login();
       await accountRepository.saveAccount(account);
     }
+
+    if (account.isLoggedIn == false) {
+      Logger.debug("The account $account is not logged in yet");
+    }
+
     Logger.info("Fetched session token ${account.sessionToken}");
     return account.sessionToken;
   }

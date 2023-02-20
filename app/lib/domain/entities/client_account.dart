@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:shared/domain/entities/note_info.dart';
 import 'package:shared/domain/entities/shared_account.dart';
 
-/// The client specific account class with additional properties
+/// The client specific account class with additional properties which are not used in the comparison
 class ClientAccount extends SharedAccount {
   /// The cached data key of the user used to encrypt the note data.
   ///
@@ -61,6 +61,18 @@ class ClientAccount extends SharedAccount {
       decryptedDataKey![i] = 0;
     }
     decryptedDataKey = null;
+  }
+
+  @override
+  Map<String, Object?> getProperties() {
+    return super.getProperties()
+      ..addAll(<String, Object?>{
+        "decryptedDataKey": isLoggedIn ? "Not empty" : "Empty",
+        "storeDecryptedDataKey": storeDecryptedDataKey,
+        "needsServerSideLogin": needsServerSideLogin,
+        "encryptedDataKey": encryptedDataKey,
+        "noteInfoList": noteInfoList,
+      });
   }
 
   /// Returns if the account is completely logged in and ready to decrypt/encrypt notes by checking the [decryptedDataKey].

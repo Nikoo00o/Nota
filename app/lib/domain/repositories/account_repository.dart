@@ -12,7 +12,8 @@ abstract class AccountRepository {
   ///
   /// The [ClientAccount] can be modified for the other functions!
   ///
-  /// If [forceLoad] is true, the cached account will be replaced
+  /// If [forceLoad] is true, the cached account will be replaced and this might clear the decrypted data key depending on
+  /// the saved bool!!!
   Future<ClientAccount?> getAccount({bool forceLoad = false});
 
   /// Returns the [getAccount] if its not null, or otherwise throws a [ClientException] with [ErrorCodes.CLIENT_NO_ACCOUNT]

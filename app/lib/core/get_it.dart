@@ -21,6 +21,7 @@ import 'package:app/domain/usecases/account/login/login_to_account.dart';
 import 'package:app/services/session_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
+import 'package:shared/core/enums/log_level.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/data/datasources/rest_client.dart';
 import 'package:shared/domain/entities/session_token.dart';
@@ -37,11 +38,11 @@ final GetIt sl = GetIt.instance;
 ///
 /// Also initializes the logger first. The next call after this should be: [LocalDataSource.init]
 Future<void> initializeGetIt() async {
-  Logger.initLogger(AppLogger());
+  Logger.initLogger(AppLogger(logLevel: LogLevel.VERBOSE));
 
   sl.registerLazySingleton<AppConfig>(() => AppConfig());
   sl.registerLazySingleton<RestClient>(
-      () => RestClient(sharedConfig: _config(), fetchSessionTokenCallback: _fetchCurrentSessionToken));
+      () => RestClient(sharedConfig: _config(), fetchSessionTokenCallback: fetchCurrentSessionToken));
 
   sl.registerLazySingleton<LocalDataSource>(
       () => LocalDataSourceImpl(secureStorage: const FlutterSecureStorage(), appConfig: sl()));
@@ -77,6 +78,6 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<SessionService>(() => SessionService());
 }
 
-Future<SessionToken?> _fetchCurrentSessionToken() => sl<SharedFetchCurrentSessionToken>().call(NoParams());
+Future<SessionToken?> fetchCurrentSessionToken() => sl<SharedFetchCurrentSessionToken>().call(NoParams());
 
 AppConfig _config() => sl<AppConfig>();

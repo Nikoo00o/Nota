@@ -64,17 +64,17 @@ class SecurityUtils {
     return Uint8List.fromList(_cipher.decryptSync(secretBox, secretKeyData: SecretKeyData(keyBytes)));
   }
 
-  /// Uses Sha512 to create a quick hash (should not be used for passwords)
+  /// Uses Sha256 to create a quick hash (should not be used for passwords)
   static Uint8List hashBytes(Uint8List bytes) {
-    const DartSha512 algorithm = DartSha512();
+    const DartSha256 algorithm = DartSha256();
     return Uint8List.fromList(algorithm.hashSync(bytes).bytes);
   }
 
-  /// Uses Sha512 to create a quick hash (should not be used for passwords).
+  /// Uses Sha256 to create a quick hash (should not be used for passwords).
   ///
   /// The returned hash will be base 64 encoded!
   static String hashString(String input) {
-    const DartSha512 algorithm = DartSha512();
+    const DartSha256 algorithm = DartSha256();
     return base64UrlEncode(algorithm.hashSync(utf8.encode(input)).bytes);
   }
 }
