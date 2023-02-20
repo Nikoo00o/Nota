@@ -13,6 +13,7 @@ import 'package:server/domain/usecases/fetch_authenticated_account.dart';
 import 'package:server/domain/usecases/start_note_server.dart';
 import 'package:server/domain/usecases/stop_nota_server.dart';
 import 'package:shared/core/constants/endpoints.dart';
+import 'package:shared/core/enums/log_level.dart';
 import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/data/datasources/rest_client.dart';
@@ -109,7 +110,7 @@ Future<SessionToken?> _fetchCurrentSessionToken() =>
     fetchCurrentSessionTokenMock.call(NoParams());
 
 Future<void> _setup() async {
-  Logger.initLogger(Logger()); // the logger must always be initialized first
+  Logger.initLogger(Logger(logLevel: LogLevel.VERBOSE)); // the logger must always be initialized first
 
   // modifies the resource path to depend on the test port, so its unique for each test
   final String baseTestPath = FileUtils.getLocalFilePath("test${Platform.pathSeparator}data");

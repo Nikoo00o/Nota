@@ -1,4 +1,5 @@
 import 'package:shared/core/utils/list_utils.dart';
+import 'package:shared/core/utils/string_utils.dart';
 import 'package:shared/domain/entities/entity.dart';
 import 'package:shared/domain/entities/note_info.dart';
 import 'package:shared/domain/entities/session_token.dart';
@@ -52,17 +53,19 @@ class SharedAccount {
         ListUtils.equals(noteInfoList, other.noteInfoList);
   }
 
+  Map<String, Object?> getProperties() {
+    return <String, Object?>{
+      "userName": userName,
+      "passwordHash": passwordHash,
+      "sessionToken": sessionToken,
+      "encryptedDataKey": encryptedDataKey,
+      "noteInfoList": noteInfoList,
+    };
+  }
+
   @override
   String toString() {
-    final StringBuffer buffer = StringBuffer();
-    buffer.writeln("$runtimeType {");
-    buffer.writeln("  userName : $userName, ");
-    buffer.writeln("  passwordHash : $passwordHash, ");
-    buffer.writeln("  sessionToken : $sessionToken, ");
-    buffer.writeln("  encryptedDataKey : $encryptedDataKey, ");
-    buffer.writeln("  noteInfoList : $noteInfoList, ");
-    buffer.writeln("}");
-    return buffer.toString();
+    return StringUtils.toStringPretty(this, getProperties());
   }
 
   @override

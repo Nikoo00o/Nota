@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:shared/core/utils/string_utils.dart';
 
 /// Used for easy comparison for immutable objects that only have final member variables which should be included in the
 /// comparison. They will be passed to the constructor as a map with descriptions and they will be used with the
@@ -37,13 +38,7 @@ abstract class ImmutableEquatable extends Equatable {
   // The custom toString method is the main reason for this class
   @override
   String toString() {
-    final StringBuffer buffer = StringBuffer();
-    buffer.writeln("$runtimeType {");
-    properties.forEach((String key, Object? value) {
-      buffer.writeln("  $key : $value, ");
-    });
-    buffer.writeln("}");
-    return buffer.toString();
+    return StringUtils.toStringPretty(this, properties);
   }
 
   /// This copy method can be used to create a copy of this [ImmutableEquatable] and change the member variables by

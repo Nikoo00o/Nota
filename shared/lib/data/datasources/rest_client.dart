@@ -105,7 +105,7 @@ class RestClient {
 
     if (responseData is Map<String, dynamic>) {
       _checkResponseForErrors(responseData);
-      Logger.debug("Received the following JSON response: $responseData");
+      Logger.debug("Received the following JSON response:\n$responseData");
       return ResponseData(json: responseData, bytes: null, responseHeaders: response.headers);
     } else if (responseData is List<int>) {
       Logger.debug("Received binary data");

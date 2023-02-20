@@ -15,27 +15,26 @@ class LogMessage {
     this.stackTrace,
   });
 
+  String get _formattedTime {
+    final String hour = timestamp.hour.toString().padLeft(2, "0");
+    final String minutes = timestamp.minute.toString().padLeft(2, "0");
+    final String second = timestamp.second.toString().padLeft(2, "0");
+    final String millisecond = timestamp.millisecond.toString().padLeft(3, "0");
+    return "$hour:$minutes:$second.$millisecond";
+  }
+
   @override
   String toString() {
     final StringBuffer buffer = StringBuffer();
-    buffer.write("$timestamp $level ");
-    bool alreadyHasText = false;
+    buffer.write("$_formattedTime $level: ");
     if (message != null) {
       buffer.write(message);
-      alreadyHasText = true;
     }
     if (error != null) {
-      if (alreadyHasText) {
-        buffer.write(", ");
-      }
-      buffer.write("Error: $error");
-      alreadyHasText = true;
+      buffer.write("\nException: $error");
     }
     if (stackTrace != null) {
-      if (alreadyHasText) {
-        buffer.write(", ");
-      }
-      buffer.write("StackTrace: $stackTrace");
+      buffer.write("\nStackTrace: $stackTrace");
     }
     return buffer.toString();
   }

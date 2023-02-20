@@ -1,23 +1,33 @@
-/// type of the log entry
+/// The type of the log entry (a lower level is more important)
 enum LogLevel {
   /// 0
   ERROR,
 
   /// 1
-  INFO,
+  WARN,
 
   /// 2
-  DEBUG;
+  INFO,
+
+  /// 3
+  DEBUG,
+
+  /// 4
+  VERBOSE;
 
   @override
   String toString() {
     switch (this) {
       case ERROR:
-        return "ERROR:";
+        return "ERROR";
+      case WARN:
+        return "WARN";
       case INFO:
-        return "INFO:";
+        return "INFO";
       case DEBUG:
-        return "DEBUG:";
+        return "DEBUG";
+      case VERBOSE:
+        return "VERBOSE";
     }
   }
 }

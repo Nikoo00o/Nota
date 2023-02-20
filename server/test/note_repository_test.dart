@@ -16,7 +16,7 @@ import 'package:shared/domain/entities/note_update.dart';
 import 'package:shared/domain/entities/response_data.dart';
 import 'package:test/test.dart';
 
-import 'helper/test_helpers.dart';
+import 'helper/server_test_helper.dart';
 
 // test for the specific note updating functions. These tests here can not cover every single permutation of possible user
 // actions! (the combination of tests is tested in integration_test.dart)

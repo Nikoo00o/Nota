@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:app/data/datasources/local_data_source.dart';
 
-class LocalDataSourceImpl extends LocalDataSource {
+class LocalDataSourceMock extends LocalDataSource {
   Map<String, String> hiveStorage = <String, String>{};
   Map<String, String> secureStorage = <String, String>{};
 

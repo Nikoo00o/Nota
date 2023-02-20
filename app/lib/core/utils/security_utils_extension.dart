@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:app/core/utils/argon_wrapper.dart';
 import 'package:cryptography/cryptography.dart';
+import 'package:dargon2_flutter/dargon2_flutter.dart';
+import 'package:shared/core/config/shared_config.dart';
 import 'package:shared/core/utils/security_utils.dart';
 import 'package:shared/core/utils/string_utils.dart';
 
@@ -9,13 +12,10 @@ import 'package:shared/core/utils/string_utils.dart';
 class SecurityUtilsExtension {
   static final AesGcm _asyncCipher = AesGcm.with256bits(nonceLength: SecurityUtils.IV_LENGTH);
 
-  // t=1, p=1, m=47104, see https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#argon2id
-  static final Argon2id _argon = Argon2id(
-    memorySize: 47104,
-    iterations: 1,
-    parallelism: 1,
-    hashLength: 32,
-  );
+  static ArgonWrapper _argonWrapper = ArgonWrapperImpl();
+
+  /// For testing, this can replace the [_argonWrapper] used for the [encryptBytesAsync].
+  static void replaceArgonWrapper(ArgonWrapper instance) => _argonWrapper = instance;
 
   /// Calls [encryptBytesAsync] after base64 decoding the [base64EncodedKey].
   ///
@@ -68,13 +68,8 @@ class SecurityUtilsExtension {
   /// This should be used to derive a key from a password, or to hash a password which should be stored.
   ///
   /// Uses Argon2id (winner of the password hashing competition 2015) for best security.
-  static Future<List<int>> hashBytesSecure(List<int> bytes, List<int> salt) async {
-    final SecretKey secretKey = await _argon.deriveKey(
-      secretKey: SecretKey(bytes),
-      nonce: salt,
-    );
-    return secretKey.extractBytes();
-  }
+  static Future<List<int>> hashBytesSecure(List<int> bytes, List<int> saltBytes) async =>
+      _argonWrapper.hashBytesSecure(bytes, saltBytes, SharedConfig.keyBytes);
 
   /// This should be used to derive a key from a password, or to hash a password which should be stored.
   ///
@@ -82,11 +77,7 @@ class SecurityUtilsExtension {
   ///
   /// The returned hash will be base 64 encoded!
   static Future<String> hashStringSecure(String input, String base64EncodedSalt) async {
-    final SecretKey secretKey = await _argon.deriveKey(
-      secretKey: SecretKey(utf8.encode(input)),
-      nonce: base64Decode(base64EncodedSalt),
-    );
-    final List<int> bytes = await secretKey.extractBytes();
+    final List<int> bytes = await hashBytesSecure(utf8.encode(input), base64Decode(base64EncodedSalt));
     return base64UrlEncode(bytes);
   }
 }

@@ -22,7 +22,12 @@ class AccountRepositoryImpl extends AccountRepository {
   AccountRepositoryImpl({required this.remoteAccountDataSource, required this.localDataSource, required this.appConfig});
 
   @override
-  Future<ClientAccount?> getAccount() async => _cachedAccount ??= await localDataSource.loadAccount();
+  Future<ClientAccount?> getAccount({bool forceLoad = false}) async {
+    if (_cachedAccount == null || forceLoad) {
+      _cachedAccount = await localDataSource.loadAccount();
+    }
+    return _cachedAccount;
+  }
 
   @override
   Future<ClientAccount> getAccountAndThrowIfNull() async {

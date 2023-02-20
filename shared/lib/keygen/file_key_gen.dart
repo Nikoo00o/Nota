@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:shared/core/config/shared_config.dart';
+import 'package:shared/core/enums/log_level.dart';
 import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/core/utils/string_utils.dart';
@@ -18,7 +19,7 @@ class FileKeyGen {
       FileUtils.getLocalFilePath("lib${_slash}core${_slash}config${_slash}sensitive_data.dart");
 
   static void updateSensitiveData() {
-    Logger.initLogger(Logger());
+    Logger.initLogger(Logger(logLevel: LogLevel.VERBOSE));
 
     String serverTemplate = FileUtils.readFile("${templatePath}server_sensitive_data.template");
     String sharedTemplate = FileUtils.readFile("${templatePath}shared_sensitive_data.template");

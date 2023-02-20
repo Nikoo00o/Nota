@@ -13,9 +13,10 @@ dependencies:
   http_parser: ^4.0.2 # parsing content type and media type
   http: ^0.13.5 # http client
   hive: ^2.2.3 # nosql database
-  cryptography: ^2.0.5 # basic cryptographic functions (like aes encryption)
-  encrypt: ^5.0.1 # aes encryption
   convert: ^3.1.1 # hex conversion
+  cryptography: 2.1.1 # basic cryptographic functions (like aes encryption)
+  encrypt: 5.0.1 # aes encryption
+  synchronized: 3.0.1 # locks for concurrent access
 
 dev_dependencies:
   flutter_lints: ^2.0.1  # linter rules

@@ -11,14 +11,19 @@ import 'package:server/domain/entities/server_account.dart';
 import 'package:server/domain/usecases/fetch_authenticated_account.dart';
 import 'package:server/domain/usecases/start_note_server.dart';
 import 'package:server/domain/usecases/stop_nota_server.dart';
+import 'package:shared/core/enums/log_level.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
 /// Returns the GetIt service locator / singleton instance
 final GetIt sl = GetIt.instance;
 
-/// This and all constructor calls inside may not call the logger, because it will be initialized later!
+/// Initializes all singletons (also the lazy ones).
+///
+/// Some registrations are done with the abstract type instead of the implementation type.
+///
+/// Also initializes the logger first. The next calls after this should be: [LocalDataSource.init] and [NoteDataSource.init]!
 Future<void> initializeGetIt() async {
-  Logger.initLogger(Logger());
+    Logger.initLogger(Logger(logLevel: LogLevel.VERBOSE));
 
   sl.registerLazySingleton<ServerConfig>(() => ServerConfig());
   sl.registerLazySingleton<RestServer>(
@@ -52,9 +57,6 @@ Future<void> initializeGetIt() async {
         serverRepository: sl(),
       ));
   sl.registerLazySingleton<FetchAuthenticatedAccount>(() => FetchAuthenticatedAccount(accountRepository: sl()));
-
-  await sl<LocalDataSource>().init();
-  await sl<NoteDataSource>().init();
 }
 
 Future<ServerAccount?> _fetchAuthenticatedAccountCallback(String sessionToken) =>

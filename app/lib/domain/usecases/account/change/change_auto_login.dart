@@ -8,13 +8,13 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// Just changes the accounts config value [ClientAccount.storeDecryptedDataKey] and saves the account to storage again.
 ///
 /// This can throw a [ClientException] with [ErrorCodes.CLIENT_NO_ACCOUNT]
-class ChangeAutoLogin extends UseCase<void, GetAutoLoginParams> {
+class ChangeAutoLogin extends UseCase<void, ChangeAutoLoginParams> {
   final AccountRepository accountRepository;
 
   const ChangeAutoLogin({required this.accountRepository});
 
   @override
-  Future<void> execute(GetAutoLoginParams params) async {
+  Future<void> execute(ChangeAutoLoginParams params) async {
     final ClientAccount account = await accountRepository.getAccountAndThrowIfNull();
     account.storeDecryptedDataKey = params.autoLogin;
     await accountRepository.saveAccount(account);
@@ -22,8 +22,8 @@ class ChangeAutoLogin extends UseCase<void, GetAutoLoginParams> {
   }
 }
 
-class GetAutoLoginParams {
+class ChangeAutoLoginParams {
   final bool autoLogin;
 
-  const GetAutoLoginParams({required this.autoLogin});
+  const ChangeAutoLoginParams({required this.autoLogin});
 }
