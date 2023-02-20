@@ -11,7 +11,7 @@ import 'package:shared/data/dtos/account/account_login_request.dart.dart';
 import 'package:shared/data/dtos/account/account_login_response.dart';
 import 'package:shared/data/dtos/account/create_account_request.dart';
 import 'package:test/test.dart';
-import 'helper/test_helpers.dart';
+import 'helper/server_test_helper.dart';
 
 // test for the specific account functions.
 

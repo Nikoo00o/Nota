@@ -2,7 +2,7 @@ import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/string_utils.dart';
 import 'package:test/test.dart';
-import 'helper/test_helpers.dart';
+import 'helper/server_test_helper.dart';
 
 // test for the specific account functions.
 

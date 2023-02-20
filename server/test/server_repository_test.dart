@@ -15,7 +15,7 @@ import 'package:shared/data/models/session_token_model.dart';
 import 'package:shared/domain/entities/note_info.dart';
 import 'package:shared/domain/entities/response_data.dart';
 import 'package:test/test.dart';
-import 'helper/test_helpers.dart';
+import 'helper/server_test_helper.dart';
 
 // test for the general server functions
 

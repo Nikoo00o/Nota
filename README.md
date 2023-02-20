@@ -44,6 +44,8 @@
 - navigate to the `nota/app` folder with the terminal and run `flutter test`, or just start the "All App Tests" run
   configuration
 - the tests of the app also directly use the server tests for the real server responses instead of mocks!
+  - because of this, the app tests also don't have to care about the server errors, because they are already tested in 
+    the server tests
 
 ## The Different Projects
 

@@ -18,7 +18,7 @@ import 'package:shared/data/models/note_info_model.dart';
 import 'package:shared/data/models/note_update_model.dart';
 import 'package:shared/domain/entities/response_data.dart';
 import 'package:test/test.dart';
-import 'helper/test_helpers.dart';
+import 'helper/server_test_helper.dart';
 
 // test for a combination of other tests. This tests the workflow which the app would follow
 
