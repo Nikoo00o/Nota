@@ -3,6 +3,7 @@ import 'package:app/core/get_it.dart';
 import 'package:app/core/utils/security_utils_extension.dart';
 import 'package:app/data/datasources/local_data_source.dart';
 import 'package:app/data/repositories/account_repository_impl.dart';
+import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/repositories/account_repository.dart';
 
 import '../../../server/test/helper/server_test_helper.dart' as server; // relative import of the server test helpers, so
@@ -33,10 +34,4 @@ Future<void> testCleanup() async {
 }
 
 /// Makes it so that the account is reloaded from the mock local data source the next time in the [AccountRepository]!
-Future<void> clearAccountCache() async {
-  sl.registerLazySingleton<AccountRepository>(() => AccountRepositoryImpl(
-        appConfig: sl(),
-        localDataSource: sl(),
-        remoteAccountDataSource: sl(),
-      ));
-}
+Future<ClientAccount?> clearAccountCache() async => sl<AccountRepository>().getAccount(forceLoad: true);

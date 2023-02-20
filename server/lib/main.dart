@@ -13,5 +13,5 @@ Future<void> main(List<String> arguments) async {
   final ArgResults argResults = parser.parse(arguments);
   final String? rsaPassword = argResults["rsaPassword"] as String?;
 
-  await sl<StartNotaServer>().execute(StartNotaServerParams(rsaPassword: rsaPassword, autoRestart: true));
+  await sl<StartNotaServer>().call(StartNotaServerParams(rsaPassword: rsaPassword, autoRestart: true));
 }

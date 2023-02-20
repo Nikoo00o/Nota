@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:app/core/config/app_config.dart';
+import 'package:app/core/enums/required_login_status.dart';
 import 'package:app/core/utils/security_utils_extension.dart';
 import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/repositories/account_repository.dart';
@@ -20,29 +21,38 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// token and encrypted data key of the client.
 ///
 /// A login with [LocalLoginParams] needs a stored account and can throw a [ClientException] with
-/// [ErrorCodes.ACCOUNT_WRONG_PASSWORD], or [ErrorCodes.CLIENT_NO_ACCOUNT].
+/// [ErrorCodes.ACCOUNT_WRONG_PASSWORD], or [ErrorCodes.CLIENT_NO_ACCOUNT] if the wrong [LoginParams] are used, or if no
+/// account is stored.
 ///
 ///
 /// Without the [LocalLoginParams], offline editing would not be possible!
 class LoginToAccount extends UseCase<void, LoginParams> {
   final AccountRepository accountRepository;
   final AppConfig appConfig;
+  final GetRequiredLoginStatus getRequiredLoginStatus;
 
-  const LoginToAccount({required this.accountRepository, required this.appConfig});
+  const LoginToAccount({required this.accountRepository, required this.appConfig, required this.getRequiredLoginStatus});
 
   @override
   Future<void> execute(LoginParams params) async {
     // get the new password hash for comparison and the new user key for decrypting the encrypted data key
     final String passwordHash = await SecurityUtilsExtension.hashStringSecure(params.password, appConfig.passwordHashSalt);
     final String userKey = await SecurityUtilsExtension.hashStringSecure(params.password, appConfig.userKeySalt);
+    final RequiredLoginStatus loginStatus = await getRequiredLoginStatus(NoParams());
 
-    // get the correct account depending on the params
+    // get the correct account depending on the params. throws error if [params] is not one of the sub classes
     ClientAccount account = await _getMatchingAccount(params, passwordHash);
 
     // login, or compare password hash
     if (params is RemoteLoginParams) {
+      if (loginStatus != RequiredLoginStatus.REMOTE) {
+        throw const ClientException(message: ErrorCodes.CLIENT_NO_ACCOUNT);
+      }
       account = await accountRepository.login(); //login and update the account (updates session token and enc data key)
     } else if (params is LocalLoginParams) {
+      if (loginStatus != RequiredLoginStatus.LOCAL) {
+        throw const ClientException(message: ErrorCodes.CLIENT_NO_ACCOUNT);
+      }
       if (account.passwordHash != passwordHash) {
         throw const ClientException(message: ErrorCodes.ACCOUNT_WRONG_PASSWORD);
       }

@@ -16,6 +16,7 @@ import 'package:app/domain/usecases/account/change/logout_of_account.dart';
 import 'package:app/domain/usecases/account/fetch_current_session_token.dart';
 import 'package:app/domain/usecases/account/get_auto_login.dart';
 import 'package:app/domain/usecases/account/login/create_account.dart';
+import 'package:app/domain/usecases/account/login/get_required_login_status.dart';
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
 import 'package:app/services/session_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -62,14 +63,18 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<SharedFetchCurrentSessionToken>(
       () => FetchCurrentSessionToken(accountRepository: sl(), appConfig: sl()));
   sl.registerLazySingleton<CreateAccount>(() => CreateAccount(accountRepository: sl(), appConfig: sl()));
-  sl.registerLazySingleton<LoginToAccount>(() => LoginToAccount(accountRepository: sl(), appConfig: sl()));
+  sl.registerLazySingleton<GetRequiredLoginStatus>(() => GetRequiredLoginStatus(accountRepository: sl()));
+  sl.registerLazySingleton<LoginToAccount>(() => LoginToAccount(
+        accountRepository: sl(),
+        appConfig: sl(),
+        getRequiredLoginStatus: sl(),
+      ));
   sl.registerLazySingleton<LogoutOfAccount>(() => LogoutOfAccount(accountRepository: sl(), appConfig: sl()));
   sl.registerLazySingleton<ChangeAccountPassword>(() => ChangeAccountPassword(accountRepository: sl(), appConfig: sl()));
   sl.registerLazySingleton<GetAutoLogin>(() => GetAutoLogin(accountRepository: sl()));
   sl.registerLazySingleton<ChangeAutoLogin>(() => ChangeAutoLogin(accountRepository: sl()));
 
   sl.registerLazySingleton<SessionService>(() => SessionService());
-
 }
 
 Future<SessionToken?> _fetchCurrentSessionToken() => sl<SharedFetchCurrentSessionToken>().call(NoParams());

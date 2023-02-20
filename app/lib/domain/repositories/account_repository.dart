@@ -11,7 +11,9 @@ abstract class AccountRepository {
   /// This can return null if no account is stored.
   ///
   /// The [ClientAccount] can be modified for the other functions!
-  Future<ClientAccount?> getAccount();
+  ///
+  /// If [forceLoad] is true, the cached account will be replaced
+  Future<ClientAccount?> getAccount({bool forceLoad = false});
 
   /// Returns the [getAccount] if its not null, or otherwise throws a [ClientException] with [ErrorCodes.CLIENT_NO_ACCOUNT]
   Future<ClientAccount> getAccountAndThrowIfNull();
