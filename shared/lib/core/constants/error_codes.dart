@@ -51,7 +51,10 @@ class ErrorCodes {
   static const String SERVER_INVALID_NOTE_TRANSFER_TOKEN = "error.server.invalid.note.transfer.token";
 
   /// The client has currently no account stored
-  static const String CLIENT_NO_ACCOUNT = "error.client.no_account";
+  static const String CLIENT_NO_ACCOUNT = "error.client.no.account";
+
+  /// The client has currently no transfer stored
+  static const String CLIENT_NO_TRANSFER = "error.client.no.transfer";
 }
 
 // todo: add translation strings

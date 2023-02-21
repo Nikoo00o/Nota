@@ -104,7 +104,7 @@ class RestServer {
       final dynamic requestData =
           await NetworkUtils.decodeNetworkDataStream(httpHeaders: request.headers.asMap(), data: request);
 
-      Logger.debug("Got request ${request.requestedUri} from $clientIp \n${_getDynamicLog(requestData)}");
+      Logger.verbose("Got client request ${request.requestedUri} from $clientIp \n${_getDynamicLog(requestData)}");
 
       if (queryParams.isEmpty && fullApiPath.isEmpty && requestData == null) {
         response = RestCallbackResult(jsonResult: const <String, dynamic>{}, statusCode: HttpStatus.badRequest);
@@ -119,7 +119,7 @@ class RestServer {
     try {
       await _send(request.response, response);
 
-      Logger.debug("Send response for ${request.requestedUri} to $clientIp "
+      Logger.verbose("Send response for ${request.requestedUri} to client $clientIp "
           "with status code: ${response.statusCode} ${_getDynamicLog(response.data)}");
     } catch (e, s) {
       Logger.error("REST API error sending response", e, s);

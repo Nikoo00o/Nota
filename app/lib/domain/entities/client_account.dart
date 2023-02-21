@@ -1,13 +1,14 @@
 import 'dart:typed_data';
 
+import 'package:shared/core/utils/list_utils.dart';
 import 'package:shared/domain/entities/note_info.dart';
 import 'package:shared/domain/entities/shared_account.dart';
 
-/// The client specific account class with additional properties which are not used in the comparison
+/// The client specific account class with additional properties
 class ClientAccount extends SharedAccount {
   /// The cached data key of the user used to encrypt the note data.
   ///
-  /// This is not used in comparison and might be null at first.
+  /// This might be null at first.
   /// It's only set later when decrypting the [encryptedDataKey], or it is loaded from the storage depending on
   /// [storeDecryptedDataKey]!
   Uint8List? decryptedDataKey;
@@ -70,10 +71,23 @@ class ClientAccount extends SharedAccount {
         "decryptedDataKey": isLoggedIn ? "Not empty" : "Empty",
         "storeDecryptedDataKey": storeDecryptedDataKey,
         "needsServerSideLogin": needsServerSideLogin,
-        "encryptedDataKey": encryptedDataKey,
-        "noteInfoList": noteInfoList,
       });
   }
+
+  @override
+
+  /// Does not compare runtime type, because the comparison should also return true if its compared to the model
+  bool operator ==(dynamic other) {
+    return super == other &&
+        other is ClientAccount &&
+        ListUtils.equals(decryptedDataKey, other.decryptedDataKey) &&
+        storeDecryptedDataKey == other.storeDecryptedDataKey &&
+        needsServerSideLogin == other.needsServerSideLogin;
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(super.hashCode, decryptedDataKey?.hashCode, storeDecryptedDataKey.hashCode, needsServerSideLogin.hashCode);
 
   /// Returns if the account is completely logged in and ready to decrypt/encrypt notes by checking the [decryptedDataKey].
   /// This decides if the app shows the login page, or not!

@@ -5,6 +5,9 @@ class SharedConfig {
   /// This is static and should not change in the different projects, or during development
   static const int keyBytes = 32;
 
+  /// Returns ".temp", or ".note"
+  static String noteFileEnding({required bool isTempNote}) => isTempNote ? ".temp" : ".note";
+
   /// This is used as a part of [getServerUrl].
   int get serverPort => 8191;
 

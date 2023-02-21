@@ -53,6 +53,10 @@ class SharedAccount {
         ListUtils.equals(noteInfoList, other.noteInfoList);
   }
 
+  @override
+  int get hashCode => Object.hash(
+      userName.hashCode, passwordHash.hashCode, sessionToken.hashCode, encryptedDataKey.hashCode, noteInfoList.hashCode);
+
   Map<String, Object?> getProperties() {
     return <String, Object?>{
       "userName": userName,
@@ -67,10 +71,6 @@ class SharedAccount {
   String toString() {
     return StringUtils.toStringPretty(this, getProperties());
   }
-
-  @override
-  int get hashCode => Object.hash(
-      userName.hashCode, passwordHash.hashCode, sessionToken.hashCode, encryptedDataKey.hashCode, noteInfoList.hashCode);
 
   /// Returns if this account contains the specific session token.
   /// Does not return if the Session token is valid, or not!!!

@@ -51,7 +51,7 @@ class NetworkUtils {
         dataString = getEncoding(httpHeaders).decode(data);
         return jsonDecode(dataString) as Map<String, dynamic>;
       } catch (e) {
-        Logger.debug("Could not decode json string: $dataString");
+        Logger.warn("Could not decode json string: $dataString");
       }
     }
     Logger.error("Error decoding data with an invalid content type for headers: $httpHeaders");
@@ -76,7 +76,7 @@ class NetworkUtils {
         dataString = await getEncoding(httpHeaders).decodeStream(data);
         return jsonDecode(dataString) as Map<String, dynamic>;
       } catch (e) {
-        Logger.debug("Could not decode json string: $dataString");
+        Logger.warn("Could not decode json string: $dataString");
       }
     } else {
       final bool gotNoData = await data.isEmpty;

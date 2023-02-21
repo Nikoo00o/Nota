@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:server/core/config/server_config.dart';
 import 'package:server/data/datasources/local_data_source.dart';
 import 'package:server/data/repositories/note_repository.dart';
+import 'package:shared/core/config/shared_config.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/file_utils.dart';
@@ -89,7 +90,7 @@ class NoteDataSource {
     await _fileLock.synchronized(() async {
       final Directory directory = Directory(serverConfig.noteFolder);
       await directory.list().forEach((FileSystemEntity file) {
-        if (file is File && file.path.endsWith(_getFileEnding(isTransferTempFile: true))) {
+        if (file is File && file.path.endsWith(SharedConfig.noteFileEnding(isTempNote: true))) {
           if (transferToken == null || file.path.startsWith(_transferTempBasePath(transferToken))) {
             Logger.debug("Cleaning up temporary note file: ${file.path}");
             file.deleteSync();
@@ -121,7 +122,7 @@ class NoteDataSource {
   }
 
   String _getFilePath(int noteId, String? transferToken) {
-    final String fileEnding = _getFileEnding(isTransferTempFile: transferToken != null);
+    final String fileEnding = SharedConfig.noteFileEnding(isTempNote: transferToken != null);
     if (transferToken != null) {
       return "${_transferTempBasePath(transferToken)}$noteId$fileEnding";
     } else {
@@ -132,6 +133,4 @@ class NoteDataSource {
   String _transferTempBasePath(String transferToken) => "$_baseDir${transferToken}_";
 
   String get _baseDir => "${serverConfig.noteFolder}${Platform.pathSeparator}";
-
-  String _getFileEnding({required bool isTransferTempFile}) => isTransferTempFile ? ".temp" : ".note";
 }

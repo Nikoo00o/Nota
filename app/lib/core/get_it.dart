@@ -6,10 +6,10 @@ import 'package:app/data/datasources/remote_account_data_source.dart';
 import 'package:app/data/datasources/remote_note_data_source.dart';
 import 'package:app/data/repositories/account_repository_impl.dart';
 import 'package:app/data/repositories/app_settings_repository_impl.dart';
-import 'package:app/data/repositories/note_transfer_repository_impl.dart';
+import 'package:app/data/repositories/note_repository_impl.dart';
 import 'package:app/domain/repositories/account_repository.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';
-import 'package:app/domain/repositories/note_transfer_repository.dart';
+import 'package:app/domain/repositories/note_repository.dart';
 import 'package:app/domain/usecases/account/change/change_account_password.dart';
 import 'package:app/domain/usecases/account/change/change_auto_login.dart';
 import 'package:app/domain/usecases/account/change/logout_of_account.dart';
@@ -55,9 +55,10 @@ Future<void> initializeGetIt() async {
         localDataSource: sl(),
         appConfig: sl(),
       ));
-  sl.registerLazySingleton<NoteTransferRepository>(() => NoteTransferRepositoryImpl(
+  sl.registerLazySingleton<NoteRepository>(() => NoteRepositoryImpl(
         remoteNoteDataSource: sl(),
         localDataSource: sl(),
+        appConfig: sl(),
       ));
   sl.registerLazySingleton<AppSettingsRepository>(() => AppSettingsRepositoryImpl(localDataSource: sl(), appConfig: sl()));
 

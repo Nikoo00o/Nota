@@ -5,7 +5,9 @@ import 'package:app/data/models/client_account_model.dart';
 import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/repositories/account_repository.dart';
 import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/enums/log_level.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
+import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/data/dtos/account/account_change_password_request.dart';
 import 'package:shared/data/dtos/account/account_change_password_response.dart';
 import 'package:shared/data/dtos/account/account_login_request.dart.dart';
@@ -24,7 +26,9 @@ class AccountRepositoryImpl extends AccountRepository {
   @override
   Future<ClientAccount?> getAccount({bool forceLoad = false}) async {
     if (_cachedAccount == null || forceLoad) {
+      final ClientAccount? oldAccount = _cachedAccount;
       _cachedAccount = await localDataSource.loadAccount();
+      Logger.verbose("Replaced the cached account $oldAccount\nwith the stored account $_cachedAccount");
     }
     return _cachedAccount;
   }
@@ -33,6 +37,7 @@ class AccountRepositoryImpl extends AccountRepository {
   Future<ClientAccount> getAccountAndThrowIfNull() async {
     final ClientAccount? account = await getAccount();
     if (account == null) {
+      Logger.error("No account is saved");
       throw const ClientException(message: ErrorCodes.CLIENT_NO_ACCOUNT);
     } else {
       return account;
@@ -41,6 +46,12 @@ class AccountRepositoryImpl extends AccountRepository {
 
   @override
   Future<void> saveAccount(ClientAccount account) async {
+    if (Logger.canLog(LogLevel.VERBOSE)) {
+      final ClientAccount? oldAccount = await localDataSource.loadAccount();
+      if (_cachedAccount != oldAccount) {
+        Logger.verbose("Replaced the stored account $oldAccount\nwith the cached account $_cachedAccount");
+      }
+    }
     _cachedAccount = account;
     await localDataSource.saveAccount(ClientAccountModel.fromClientAccount(_cachedAccount!));
   }

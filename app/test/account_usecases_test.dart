@@ -150,7 +150,7 @@ void _testLoginToAccount() {
     await clearAccountCache(); // the decrypted data key should now no longer be stored
     final ClientAccount storedAccount = await _localLogin("password1"); // then local login
 
-    expect(storedAccount, cachedAccount, reason: "accounts should match, data key is not compared");
+    expect(storedAccount, cachedAccount, reason: "accounts should match and also have the same data key");
   });
 }
 

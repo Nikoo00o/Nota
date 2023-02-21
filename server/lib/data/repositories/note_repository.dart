@@ -235,7 +235,7 @@ class NoteRepository {
       _noteTransfers.remove(transferToken);
       await noteDataSource.deleteAllTempNotes(transferToken: transferToken);
     } else {
-      Logger.debug("Could not cancel transfer: $transferToken");
+      Logger.warn("Could not cancel transfer: $transferToken");
     }
   }
 
@@ -268,7 +268,7 @@ class NoteRepository {
         }
       }
     } else {
-      Logger.debug("Could not apply transfer: $transferToken");
+      Logger.warn("Could not apply transfer: $transferToken");
     }
   }
 
@@ -308,7 +308,7 @@ class NoteRepository {
         // was send
       }
     } catch (_) {
-      Logger.debug("Client did not send any note file data");
+      Logger.warn("Client did not send any note file data");
     }
   }
 
@@ -434,7 +434,7 @@ class NoteRepository {
         transferToken.isEmpty ||
         _noteTransfers.containsKey(transferToken) == false ||
         _noteTransfers[transferToken]!.serverAccount != serverAccount) {
-      Logger.debug("Got an invalid transfer token $transferToken from ${serverAccount.userName}");
+      Logger.warn("Got an invalid transfer token $transferToken from ${serverAccount.userName}");
       return "";
     }
     return transferToken;
@@ -450,10 +450,10 @@ class NoteRepository {
     final Iterable<NoteUpdate> iterator =
         noteTransfer.noteUpdates.where((NoteUpdate noteUpdate) => noteUpdate.serverId == id || noteUpdate.clientId == id);
     if (iterator.isEmpty) {
-      Logger.debug("Got an invalid id $id from ${noteTransfer.serverAccount.userName}");
+      Logger.warn("Got an invalid id $id from ${noteTransfer.serverAccount.userName}");
       return 0;
     } else if (iterator.first.noteTransferStatus.clientNeedsUpdate && (params.rawBytes?.isNotEmpty ?? false)) {
-      Logger.debug("The client uploaded bytes to override a note for which the server had a newer time stamp in the "
+      Logger.warn("The client uploaded bytes to override a note for which the server had a newer time stamp in the "
           "transfer");
     }
     assert(iterator.length == 1, "There should always only be one matching note update for each file!");
