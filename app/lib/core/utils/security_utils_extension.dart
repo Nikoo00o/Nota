@@ -4,6 +4,7 @@ import 'package:app/core/utils/argon_wrapper.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:dargon2_flutter/dargon2_flutter.dart';
 import 'package:shared/core/config/shared_config.dart';
+import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/security_utils.dart';
 import 'package:shared/core/utils/string_utils.dart';
 
@@ -77,6 +78,9 @@ class SecurityUtilsExtension {
   static Future<Uint8List> decryptBytesAsync(Uint8List inputBytes, Uint8List keyBytes) async {
     if (inputBytes.isEmpty) {
       return Uint8List(0);
+    }
+    if (inputBytes.length <= SecurityUtils.GCM_INFO_LENGTH) {
+      throw const BaseException(message: "Decryption error");
     }
     final Uint8List ivBytes = Uint8List.view(inputBytes.buffer, inputBytes.offsetInBytes, SecurityUtils.IV_LENGTH);
     final Uint8List macBytes =

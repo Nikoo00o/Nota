@@ -215,4 +215,9 @@ class RestClient {
     buffer.write("=");
     buffer.write(Uri.encodeComponent(value));
   }
+
+  /// Closes the inner http client t o terminate the active connections
+  void close() {
+    client.close();
+  }
 }
