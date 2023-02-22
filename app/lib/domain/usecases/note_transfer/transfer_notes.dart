@@ -38,8 +38,8 @@ class TransferNotes extends UseCase<void, NoParams> {
 
   @override
   Future<void> execute(NoParams params) async {
-    Logger.verbose("Starting note transfer");
     final ClientAccount account = await getLoggedInAccount.call(NoParams());
+    Logger.verbose("Starting note transfer for the account $account");
 
     final List<NoteUpdate> noteUpdates = await noteTransferRepository.startNoteTransfer(account.noteInfoList);
     if (await _didUserCancel(noteUpdates, account)) {
@@ -118,7 +118,7 @@ class TransferNotes extends UseCase<void, NoParams> {
   Future<bool> _didUserCancel(List<NoteUpdate> updates, ClientAccount account) async {
     if (_containsAServerChange(updates)) {
       final List<String> serverChanges = await _getServerChangeFileNames(updates, account);
-      Logger.debug("Got the following new server changes: $serverChanges");
+      Logger.debug("Got the following new server changed note names: $serverChanges");
 
       final bool wasCancelled = await dialogService.showConfirmDialog(
         dialogTextKey: "note.transfer.server.change",

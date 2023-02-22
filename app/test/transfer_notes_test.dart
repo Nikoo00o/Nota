@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:app/core/enums/required_login_status.dart';
 import 'package:app/core/get_it.dart';
+import 'package:app/core/utils/security_utils_extension.dart';
 import 'package:app/data/datasources/local_data_source.dart';
 import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/repositories/account_repository.dart';
@@ -15,10 +16,15 @@ import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/account/login/get_required_login_status.dart';
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
+import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
 import 'package:app/domain/usecases/note_transfer/store_note_encrypted.dart';
+import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:server/domain/entities/note_transfer.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
+import 'package:shared/core/utils/logger/logger.dart';
+import 'package:shared/core/utils/security_utils.dart';
 import 'package:shared/domain/entities/session_token.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
@@ -43,10 +49,25 @@ void main() {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
       await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
       await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
-          noteId: -1, decryptedName: "test", decryptedContent: Uint8List.fromList(utf8.encode("test"))));
+          noteId: -1, decryptedName: "name", decryptedContent: Uint8List.fromList(utf8.encode("test"))));
 
-      
+      await sl<TransferNotes>().call(NoParams());
 
+      final Uint8List bytes = await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
+      expect(utf8.decode(bytes), "test");
+
+      final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
+
+      account.noteInfoList[0] = account.noteInfoList.first.copyWith(
+          newEncFileName: SecurityUtils.encryptString("invalid", base64UrlEncode(account.decryptedDataKey!)),
+          newLastEdited: DateTime.now().subtract(const Duration(hours: 1)));
+
+      Logger.verbose("next round");
+
+      await sl<TransferNotes>().call(NoParams());
+
+      expect(SecurityUtils.decryptString(account.noteInfoList.first.encFileName, base64UrlEncode(account.decryptedDataKey!)),
+          "name");
     });
   });
 }

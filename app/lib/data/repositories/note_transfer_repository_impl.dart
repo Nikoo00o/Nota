@@ -87,10 +87,9 @@ class NoteTransferRepositoryImpl extends NoteTransferRepository {
     } else {
       Logger.error("The enum NoteTransferStatus is broken for ${iterator.first.noteTransferStatus}");
     }
-    assert(
-        iterator.first.noteTransferStatus.clientNeedsUpdate == false &&
-            iterator.first.noteTransferStatus.serverNeedsUpdate == false,
-        "this should never happen during a note transfer!");
+
+    assert(iterator.first.noteTransferStatus.clientNeedsUpdate || iterator.first.noteTransferStatus.serverNeedsUpdate,
+        "both should never be false!");
   }
 
   @override

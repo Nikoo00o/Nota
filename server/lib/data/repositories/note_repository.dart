@@ -196,11 +196,11 @@ class NoteRepository {
         if (request.shouldCancel) {
           await _cancelTransfer(transferToken);
         } else {
-          Logger.debug("Applying file transfer to old account data $serverAccount");
+          Logger.debug("Applying note file transfer to old account data $serverAccount");
           await _applyTransfer(transferToken);
           await _cancelAllTransfers(serverAccount);
           await accountRepository.storeAccount(serverAccount);
-          Logger.debug("Finished file transfer with new account data $serverAccount");
+          Logger.debug("Finished note file transfer with new account data $serverAccount");
         }
       } on BaseException catch (e) {
         Logger.error("Error finishing note transfer for $transferToken");
@@ -208,7 +208,7 @@ class NoteRepository {
       }
 
       final String logAction = request.shouldCancel ? "cancelled" : "completed";
-      Logger.info("File transfer was $logAction: $transferToken from ${serverAccount.userName}");
+      Logger.info("Note file transfer $transferToken was $logAction from account ${serverAccount.userName}");
       return RestCallbackResult();
     });
   }

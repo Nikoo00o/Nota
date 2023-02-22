@@ -22,7 +22,7 @@ class LogoutOfAccount extends UseCase<void, NoParams> {
     // update accounts login status
     account.needsServerSideLogin = true;
 
-    // for security reasons, clear the saved user keys and also the session token
+    // for security reasons, clear the saved user keys and also the session token, but keep the notes
     account.clearDecryptedDataKey();
     account.passwordHash = "";
     account.sessionToken = null;

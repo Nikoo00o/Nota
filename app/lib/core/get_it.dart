@@ -20,6 +20,9 @@ import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/account/login/get_required_login_status.dart';
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
 import 'package:app/domain/usecases/account/save_account.dart';
+import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
+import 'package:app/domain/usecases/note_transfer/store_note_encrypted.dart';
+import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:app/services/session_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -85,6 +88,18 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<GetLoggedInAccount>(() => GetLoggedInAccount(accountRepository: sl()));
   sl.registerLazySingleton<SaveAccount>(() => SaveAccount(accountRepository: sl()));
 
+  sl.registerLazySingleton<LoadNoteContent>(() => LoadNoteContent(getLoggedInAccount: sl(), noteTransferRepository: sl()));
+  sl.registerLazySingleton<StoreNoteEncrypted>(() => StoreNoteEncrypted(
+        getLoggedInAccount: sl(),
+        noteTransferRepository: sl(),
+        saveAccount: sl(),
+      ));
+  sl.registerLazySingleton<TransferNotes>(() => TransferNotes(
+        getLoggedInAccount: sl(),
+        noteTransferRepository: sl(),
+        saveAccount: sl(),
+        dialogService: sl(),
+      ));
 
   sl.registerLazySingleton<SessionService>(() => SessionService());
   sl.registerLazySingleton<DialogService>(() => DialogService());
