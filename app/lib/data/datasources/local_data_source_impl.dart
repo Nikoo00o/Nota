@@ -27,12 +27,6 @@ class LocalDataSourceImpl extends LocalDataSource with SharedHiveDataSourceMixin
   }
 
   @override
-  Future<String> getNoteFilePath(int noteId) async {
-    final Directory documents = await getApplicationDocumentsDirectory();
-    return "${documents.path}${Platform.pathSeparator}${appConfig.noteFolder}${Platform.pathSeparator}$noteId.note";
-  }
-
-  @override
   Map<String, HiveBoxConfiguration> getHiveDataBaseConfig() {
     assert(_hiveKey != null, "hive key must be set by calling init before");
     return <String, HiveBoxConfiguration>{
@@ -71,17 +65,40 @@ class LocalDataSourceImpl extends LocalDataSource with SharedHiveDataSourceMixin
   }
 
   @override
-  Future<void> writeFile({required String filePath, required List<int> bytes}) async {
-    return FileUtils.writeFileAsBytes(filePath, bytes);
+  Future<void> writeFile({required String localFilePath, required List<int> bytes}) async {
+    return FileUtils.writeFileAsBytes(await _getAbsolutePath(localFilePath), bytes);
   }
 
   @override
-  Future<Uint8List?> readFile({required String filePath}) async {
-    return FileUtils.readFileAsBytes(filePath);
+  Future<Uint8List?> readFile({required String localFilePath}) async {
+    return FileUtils.readFileAsBytes(await _getAbsolutePath(localFilePath));
   }
 
   @override
-  Future<bool> deleteFile({required String filePath}) async {
-    return FileUtils.deleteFileAsync(filePath);
+  Future<bool> deleteFile({required String localFilePath}) async {
+    return FileUtils.deleteFileAsync(await _getAbsolutePath(localFilePath));
+  }
+
+  @override
+  Future<bool> renameFile({required String oldLocalFilePath, required String newLocalFilePath}) async {
+    final String oldPath = await _getAbsolutePath(oldLocalFilePath);
+    if (await FileUtils.fileExistsAsync(oldPath) == false) {
+      return false;
+    }
+    await FileUtils.moveFileAsync(oldPath, newLocalFilePath);
+    return true;
+  }
+
+  @override
+  Future<List<String>> getFilePaths({required String subFolderPath}) async =>
+      FileUtils.getFilesInDirectory(await _getAbsolutePath(subFolderPath));
+
+  Future<String> _getAbsolutePath(String localFilePath) async {
+    final Directory documents = await getApplicationDocumentsDirectory();
+    if(localFilePath.isEmpty){
+      return documents.path;
+    } else {
+      return "${documents.path}${Platform.pathSeparator}$localFilePath";
+    }
   }
 }

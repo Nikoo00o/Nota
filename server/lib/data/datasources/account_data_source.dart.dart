@@ -192,6 +192,7 @@ class AccountDataSource {
       account.sessionToken = newSessionToken;
 
       if (forceRegenerate == false) {
+        Logger.verbose("Added session token redirect from $oldSessionToken\nto $newSessionToken");
         _addSessionTokenRedirect(oldSessionToken, newSessionToken);
       } else {
         _removeSessionTokenRedirectTo(oldSessionToken);
@@ -203,7 +204,7 @@ class AccountDataSource {
       // save the new account in cache and update it in local storage
       _cachedSessionTokenAccounts[newSessionToken.token] = account;
       await localDataSource.saveAccount(account);
-      Logger.debug("Updated the session token for ${account.userName} from $oldSessionToken to $newSessionToken");
+      Logger.debug("Updated the session token for ${account.userName} from $oldSessionToken\nto $newSessionToken");
     }
     return account;
   }

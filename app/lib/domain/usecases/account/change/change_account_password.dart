@@ -5,6 +5,7 @@ import 'package:app/core/config/app_config.dart';
 import 'package:app/core/utils/security_utils_extension.dart';
 import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/repositories/account_repository.dart';
+import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
@@ -15,25 +16,19 @@ import 'package:shared/domain/usecases/usecase.dart';
 ///
 /// Important: other devices will now get a [ServerException] with [ErrorCodes.ACCOUNT_WRONG_PASSWORD] when trying to login.
 ///
-/// This can throw a [ClientException] with [ErrorCodes.CLIENT_NO_ACCOUNT].
-///
-/// This can also throw a [ServerException] if another device changed the password before, or a [ClientException] or if the
-/// decrypted data key is not available. Both will have the error code [ErrorCodes.ACCOUNT_WRONG_PASSWORD].
+/// This can throw the exceptions of [GetLoggedInAccount].
 ///
 /// Otherwise it can also throw those of [AccountRepository.updatePasswordOnServer]
 class ChangeAccountPassword extends UseCase<void, ChangePasswordParams> {
   final AccountRepository accountRepository;
   final AppConfig appConfig;
+  final GetLoggedInAccount getLoggedInAccount;
 
-  const ChangeAccountPassword({required this.accountRepository, required this.appConfig});
+  const ChangeAccountPassword({required this.accountRepository, required this.appConfig, required this.getLoggedInAccount});
 
   @override
   Future<void> execute(ChangePasswordParams params) async {
-    final ClientAccount account = await accountRepository.getAccountAndThrowIfNull();
-
-    if (account.isLoggedIn == false) {
-      throw const ClientException(message: ErrorCodes.ACCOUNT_WRONG_PASSWORD); // data key is not available
-    }
+    final ClientAccount account = await getLoggedInAccount.call(NoParams());
 
     // create the new base64 encoded user keys
     final String newPasswordHash =

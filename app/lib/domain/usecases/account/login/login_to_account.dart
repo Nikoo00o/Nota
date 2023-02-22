@@ -80,7 +80,7 @@ class LoginToAccount extends UseCase<void, LoginParams> {
     if (params is RemoteLoginParams) {
       ClientAccount? account = await accountRepository.getAccount();
       if (account == null) {
-        Logger.debug("There was no account stored before");
+        Logger.warn("There was no account stored before the login");
         account = ClientAccount.defaultValues(userName: params.username, passwordHash: passwordHash);
         await accountRepository.saveAccount(account);
       } else {

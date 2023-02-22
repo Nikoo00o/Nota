@@ -13,9 +13,6 @@ class LocalDataSourceMock extends LocalDataSource {
   Future<void> init() async {}
 
   @override
-  Future<String> getNoteFilePath(int noteId) async => noteId.toString();
-
-  @override
   Future<void> write({required String key, required String? value, required bool secure}) async {
     if (value == null) {
       return delete(key: key, secure: secure);
@@ -46,19 +43,40 @@ class LocalDataSourceMock extends LocalDataSource {
   }
 
   @override
-  Future<void> writeFile({required String filePath, required List<int> bytes}) async {
-    files[filePath] = Uint8List.fromList(bytes);
+  Future<void> writeFile({required String localFilePath, required List<int> bytes}) async {
+    files[localFilePath] = Uint8List.fromList(bytes);
   }
 
   @override
-  Future<Uint8List?> readFile({required String filePath}) async {
-    return files[filePath];
+  Future<Uint8List?> readFile({required String localFilePath}) async {
+    return files[localFilePath];
   }
 
   @override
-  Future<bool> deleteFile({required String filePath}) async {
-    final bool contained = files.containsKey(filePath);
-    files.remove(filePath);
+  Future<bool> deleteFile({required String localFilePath}) async {
+    final bool contained = files.containsKey(localFilePath);
+    files.remove(localFilePath);
     return contained;
+  }
+
+  @override
+  Future<bool> renameFile({required String oldLocalFilePath, required String newLocalFilePath}) async {
+    if (files.containsKey(oldLocalFilePath) == false) {
+      return false;
+    }
+    final Uint8List bytes = files.remove(oldLocalFilePath)!;
+    files[newLocalFilePath] = bytes;
+    return true;
+  }
+
+  @override
+  Future<List<String>> getFilePaths({required String subFolderPath}) async {
+    final List<String> filePaths = List<String>.empty(growable: true);
+    for (final String path in files.keys) {
+      if (subFolderPath.isEmpty || path.startsWith(subFolderPath)) {
+        filePaths.add(path);
+      }
+    }
+    return filePaths;
   }
 }

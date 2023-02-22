@@ -39,7 +39,7 @@ class FetchCurrentSessionToken extends SharedFetchCurrentSessionToken {
     }
 
     if (account.isLoggedIn == false) {
-      Logger.debug("The account $account is not logged in yet");
+      Logger.warn("The account $account\nis not logged in yet");
     }
 
     Logger.info("Fetched session token ${account.sessionToken}");

@@ -93,7 +93,7 @@ class RestClient {
     final Map<String, String> requestHeaders = httpHeaders ?? <String, String>{};
     final List<int> requestData = NetworkUtils.encodeNetworkData(httpHeaders: requestHeaders, data: bodyData);
 
-    Logger.debug("Sending the following ${endpoint.httpMethod} request to the server: $url");
+    Logger.verbose("Sending the following ${endpoint.httpMethod} request to the server: $url");
     final http.Response response = await _send(url, endpoint.httpMethod, requestHeaders, requestData);
 
     if (validHttpResponseCodes.contains(response.statusCode) == false) {
@@ -105,10 +105,10 @@ class RestClient {
 
     if (responseData is Map<String, dynamic>) {
       _checkResponseForErrors(responseData);
-      Logger.debug("Received the following JSON response:\n$responseData");
+      Logger.verbose("Received the following JSON response:\n$responseData");
       return ResponseData(json: responseData, bytes: null, responseHeaders: response.headers);
     } else if (responseData is List<int>) {
-      Logger.debug("Received binary data");
+      Logger.verbose("Received binary data");
       return ResponseData(json: null, bytes: responseData, responseHeaders: response.headers);
     } else {
       Logger.error("Received no data from server");

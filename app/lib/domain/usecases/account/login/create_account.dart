@@ -39,7 +39,7 @@ class CreateAccount extends UseCase<void, CreateAccountParams> {
       account.userName = params.username;
       account.passwordHash = passwordHash;
     } else {
-      Logger.debug("There was no account stored before");
+      Logger.verbose("This is the first created account on this device");
       account = ClientAccount.defaultValues(userName: params.username, passwordHash: passwordHash);
     }
 

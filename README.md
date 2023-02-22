@@ -1,9 +1,10 @@
 # Nota
 
-## About the App
+## About the Project
 - Nota is a Cross-Platform Note-Taking App designed to work both offline locally, or synchronized with a server across 
   all devices 
 - The users notes will be securely encrypted and the server stores them, but can't decrypt them
+- The notes can be accessed in a folder like structure
 - Currently the app is still in development
 
 ## Building The Project
@@ -87,4 +88,4 @@ flutter build ipa --release           # ios
   - because of this, the app tests also don't have to care about the server errors, because they are already tested in
     the server tests
 
-# todo: screenshots of the app should follow here
+<!--- // todo: screenshots of the app should follow here -->

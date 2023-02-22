@@ -5,6 +5,7 @@ import 'package:app/data/datasources/local_data_source.dart';
 import 'package:app/data/repositories/account_repository_impl.dart';
 import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/repositories/account_repository.dart';
+import 'package:app/services/dialog_service.dart';
 import 'package:shared/core/enums/log_level.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
@@ -12,7 +13,10 @@ import '../../../server/test/helper/server_test_helper.dart' as server; // relat
 // that the real server responses can be used for testing instead of mocks! The server tests should be run before!
 import '../mocks/app_config_mock.dart';
 import '../mocks/argon_wrapper_mock.dart';
+import '../mocks/dialog_service_mock.dart';
 import '../mocks/local_data_source_mock.dart';
+
+late DialogServiceMock dialogServiceMock;
 
 /// The [serverPort] also needs to be unique across the app and server tests. Afterwards you can replace more app
 /// implementations with mocks!
@@ -29,6 +33,9 @@ Future<void> createCommonTestObjects({required int serverPort}) async {
   appConfigMock.serverPortOverride = serverPort;
   appConfigMock.serverHostnameOverride = "https://127.0.0.1";
   sl.registerSingleton<AppConfig>(appConfigMock);
+
+  dialogServiceMock = DialogServiceMock();
+  sl.registerSingleton<DialogService>(dialogServiceMock);
 }
 
 Future<void> testCleanup() async {

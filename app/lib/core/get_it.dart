@@ -15,9 +15,15 @@ import 'package:app/domain/usecases/account/change/change_auto_login.dart';
 import 'package:app/domain/usecases/account/change/logout_of_account.dart';
 import 'package:app/domain/usecases/account/fetch_current_session_token.dart';
 import 'package:app/domain/usecases/account/get_auto_login.dart';
+import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/account/login/get_required_login_status.dart';
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
+import 'package:app/domain/usecases/account/save_account.dart';
+import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
+import 'package:app/domain/usecases/note_transfer/store_note_encrypted.dart';
+import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
+import 'package:app/services/dialog_service.dart';
 import 'package:app/services/session_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
@@ -58,6 +64,7 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<NoteTransferRepository>(() => NoteTransferRepositoryImpl(
         remoteNoteDataSource: sl(),
         localDataSource: sl(),
+        appConfig: sl(),
       ));
   sl.registerLazySingleton<AppSettingsRepository>(() => AppSettingsRepositoryImpl(localDataSource: sl(), appConfig: sl()));
 
@@ -71,11 +78,31 @@ Future<void> initializeGetIt() async {
         getRequiredLoginStatus: sl(),
       ));
   sl.registerLazySingleton<LogoutOfAccount>(() => LogoutOfAccount(accountRepository: sl(), appConfig: sl()));
-  sl.registerLazySingleton<ChangeAccountPassword>(() => ChangeAccountPassword(accountRepository: sl(), appConfig: sl()));
+  sl.registerLazySingleton<ChangeAccountPassword>(() => ChangeAccountPassword(
+        accountRepository: sl(),
+        appConfig: sl(),
+        getLoggedInAccount: sl(),
+      ));
   sl.registerLazySingleton<GetAutoLogin>(() => GetAutoLogin(accountRepository: sl()));
   sl.registerLazySingleton<ChangeAutoLogin>(() => ChangeAutoLogin(accountRepository: sl()));
+  sl.registerLazySingleton<GetLoggedInAccount>(() => GetLoggedInAccount(accountRepository: sl()));
+  sl.registerLazySingleton<SaveAccount>(() => SaveAccount(accountRepository: sl()));
+
+  sl.registerLazySingleton<LoadNoteContent>(() => LoadNoteContent(getLoggedInAccount: sl(), noteTransferRepository: sl()));
+  sl.registerLazySingleton<StoreNoteEncrypted>(() => StoreNoteEncrypted(
+        getLoggedInAccount: sl(),
+        noteTransferRepository: sl(),
+        saveAccount: sl(),
+      ));
+  sl.registerLazySingleton<TransferNotes>(() => TransferNotes(
+        getLoggedInAccount: sl(),
+        noteTransferRepository: sl(),
+        saveAccount: sl(),
+        dialogService: sl(),
+      ));
 
   sl.registerLazySingleton<SessionService>(() => SessionService());
+  sl.registerLazySingleton<DialogService>(() => DialogService());
 }
 
 Future<SessionToken?> fetchCurrentSessionToken() => sl<SharedFetchCurrentSessionToken>().call(NoParams());

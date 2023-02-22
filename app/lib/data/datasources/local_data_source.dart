@@ -64,39 +64,6 @@ abstract class LocalDataSource {
     await write(key: LOCALE, value: locale.languageCode, secure: false);
   }
 
-  /// Returns the content of the note which is encrypted with the users data key.
-  ///
-  /// The Note will be stored at "[getApplicationDocumentsDirectory()] / [appConfig.noteFolder] / [noteId] .note"
-  ///
-  /// So for example on android /data/user/0/com.nota.nota_app/app_flutter/notes/10.note
-  ///
-  /// If the note could not be found, this will throw a [FileException] with [ErrorCodes.FILE_NOT_FOUND]!
-  Future<Uint8List> loadEncryptedNoteBytes(int noteId) async {
-    final String filePath = await getNoteFilePath(noteId);
-    final Uint8List? encryptedBytes = await readFile(filePath: filePath);
-    if (encryptedBytes == null) {
-      throw const FileException(message: ErrorCodes.FILE_NOT_FOUND);
-    }
-    return encryptedBytes;
-  }
-
-  /// Stores the content of the note which is encrypted with the users data key.
-  ///
-  /// The Note will be stored at "[getApplicationDocumentsDirectory()] / [appConfig.noteFolder] / [noteId] .note"
-  ///
-  /// So for example on android /data/user/0/com.nota.nota_app/app_flutter/notes/10.note
-  Future<void> saveEncryptedNoteBytes(int noteId, List<int> encryptedBytes) async {
-    final String filePath = await getNoteFilePath(noteId);
-    await writeFile(filePath: filePath, bytes: encryptedBytes);
-  }
-
-  /// Returns the filePath to a specific note.
-  ///
-  /// The Note will be stored at "[getApplicationDocumentsDirectory()] / [appConfig.noteFolder] / [noteId] .note"
-  ///
-  /// So for example on android /data/user/0/com.nota.nota_app/app_flutter/notes/10.note
-  Future<String> getNoteFilePath(int noteId);
-
   /// Needs to be overridden in the subclasses.
   /// Writes a [value] that can be accessed with the [key].
   /// Calls [delete] if [value] is [null].
@@ -116,14 +83,31 @@ abstract class LocalDataSource {
   /// Will write to the hive database if [secure] is false. Otherwise it will write to the secure storage!
   Future<void> delete({required String key, required bool secure});
 
-  /// Creates all parent folders and writes the [bytes] to the specified [filePath]
-  Future<void> writeFile({required String filePath, required List<int> bytes});
-
-  /// Returns the bytes of the file at [filePath].
+  /// Creates all parent folders and writes the [bytes] to the specified [getApplicationDocumentsDirectory()] / [localFilePath]
   ///
-  /// Returns null if the [filePath] was not found
-  Future<Uint8List?> readFile({required String filePath});
+  /// The application documents directory will for example be: /data/user/0/com.nota.nota_app/app_flutter/
+  Future<void> writeFile({required String localFilePath, required List<int> bytes});
 
-  /// Returns if the file at [filePath] existed and if it was deleted, or not.
-  Future<bool> deleteFile({required String filePath});
+  /// Returns the bytes of the file at [getApplicationDocumentsDirectory()] / [localFilePath].
+  ///
+  /// Returns null if the [getApplicationDocumentsDirectory()] / [localFilePath] was not found
+  ///
+  /// The application documents directory will for example be: /data/user/0/com.nota.nota_app/app_flutter/
+  Future<Uint8List?> readFile({required String localFilePath});
+
+  /// Returns if the file at [getApplicationDocumentsDirectory()] / [localFilePath] existed and if it was deleted, or not.
+  ///
+  /// The application documents directory will for example be: /data/user/0/com.nota.nota_app/app_flutter/
+  Future<bool> deleteFile({required String localFilePath});
+
+  /// Renames the file from [oldLocalFilePath] to [newLocalFilePath] and returns if the old file existed, or not.
+  ///
+  /// Both paths must be in the application documents directory!
+  Future<bool> renameFile({required String oldLocalFilePath,required String newLocalFilePath});
+
+  /// Returns a list of files with their full absolute file paths inside of the [subFolderPath] in relation to the
+  /// applications documents directory.
+  ///
+  /// [subFolderPath] can also be empty and it can also point to a file inside of the target folder!
+  Future<List<String>> getFilePaths({required String subFolderPath});
 }

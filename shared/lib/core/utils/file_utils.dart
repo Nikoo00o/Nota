@@ -118,6 +118,13 @@ class FileUtils {
     }
   }
 
+  /// Returns a list of files of either the directory at [path], or the parent directory if [path] is a file
+  static List<String> getFilesInDirectory(String path) {
+    final Directory directory = _getDirectoryForPath(path);
+    final List<FileSystemEntity> files = directory.listSync();
+    return files.map((FileSystemEntity file) => file.path).toList();
+  }
+
   /// Returns either the directory at [path], or the parent directory if [path] is a file
   static Directory _getDirectoryForPath(String path) {
     if (File(path).existsSync()) {

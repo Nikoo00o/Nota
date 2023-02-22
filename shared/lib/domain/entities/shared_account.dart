@@ -1,4 +1,5 @@
 import 'package:shared/core/utils/list_utils.dart';
+import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/core/utils/string_utils.dart';
 import 'package:shared/domain/entities/entity.dart';
 import 'package:shared/domain/entities/note_info.dart';
@@ -53,6 +54,10 @@ class SharedAccount {
         ListUtils.equals(noteInfoList, other.noteInfoList);
   }
 
+  @override
+  int get hashCode => Object.hash(
+      userName.hashCode, passwordHash.hashCode, sessionToken.hashCode, encryptedDataKey.hashCode, noteInfoList.hashCode);
+
   Map<String, Object?> getProperties() {
     return <String, Object?>{
       "userName": userName,
@@ -68,9 +73,32 @@ class SharedAccount {
     return StringUtils.toStringPretty(this, getProperties());
   }
 
-  @override
-  int get hashCode => Object.hash(
-      userName.hashCode, passwordHash.hashCode, sessionToken.hashCode, encryptedDataKey.hashCode, noteInfoList.hashCode);
+  /// Returns the [NoteInfo] for the [noteId] or null if it was not found
+  NoteInfo? getNoteById(int noteId) {
+    final Iterable<NoteInfo> iterator = noteInfoList.where((NoteInfo note) => note.id == noteId);
+    if (iterator.isEmpty) {
+      return null;
+    }
+    if (iterator.length > 1) {
+      Logger.warn("The Account $this\ncontains more than one note with the note id: $noteId");
+    }
+    return iterator.first;
+  }
+
+  /// Changes the [NoteInfo] for the [noteId] with the optional parameters by creating a new object (and changing the
+  /// reference).
+  ///
+  /// It returns false if no note was found!
+  bool changeNote({required int noteId, int? newNodeId, String? newEncFileName, DateTime? newLastEdited}) {
+    for (int i = 0; i < noteInfoList.length; ++i) {
+      final NoteInfo note = noteInfoList.elementAt(i);
+      if (note.id == noteId) {
+        noteInfoList[i] = note.copyWith(newId: newNodeId, newEncFileName: newEncFileName, newLastEdited: newLastEdited);
+        return true;
+      }
+    }
+    return false;
+  }
 
   /// Returns if this account contains the specific session token.
   /// Does not return if the Session token is valid, or not!!!

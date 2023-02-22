@@ -41,6 +41,9 @@ class SecurityUtils {
   ///
   /// Uses a new random generated iv!
   static Uint8List encryptBytes(Uint8List inputBytes, Uint8List keyBytes) {
+    if (inputBytes.isEmpty) {
+      return Uint8List(0);
+    }
     final Uint8List ivBytes = StringUtils.getRandomBytes(IV_LENGTH);
     final SecretBox secretBox = _cipher.encryptSync(
       inputBytes,
@@ -54,6 +57,9 @@ class SecurityUtils {
   /// Will use AES GCM to decrypt the bytes by first checking the iv, then the mac of the bytes and then extracting the
   /// ciphertext
   static Uint8List decryptBytes(Uint8List inputBytes, Uint8List keyBytes) {
+    if (inputBytes.isEmpty) {
+      return Uint8List(0);
+    }
     final Uint8List ivBytes = Uint8List.view(inputBytes.buffer, inputBytes.offsetInBytes, IV_LENGTH);
     final Uint8List macBytes = Uint8List.view(inputBytes.buffer, inputBytes.offsetInBytes + IV_LENGTH, MAC_LENGTH);
 
@@ -66,6 +72,9 @@ class SecurityUtils {
 
   /// Uses Sha256 to create a quick hash (should not be used for passwords)
   static Uint8List hashBytes(Uint8List bytes) {
+    if (bytes.isEmpty) {
+      return Uint8List(0);
+    }
     const DartSha256 algorithm = DartSha256();
     return Uint8List.fromList(algorithm.hashSync(bytes).bytes);
   }

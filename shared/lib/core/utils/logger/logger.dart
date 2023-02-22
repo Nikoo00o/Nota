@@ -40,7 +40,7 @@ class Logger {
   /// Has to be called at the start of the main function to enable logging with a subclass of Logger
   static void initLogger(Logger instance) {
     if (_instance != null) {
-      debug("Overriding old logger instance");
+      verbose("Overriding old logger instance");
     }
     _instance = instance;
   }
@@ -70,9 +70,15 @@ class Logger {
     _instance?.log(message, LogLevel.VERBOSE, error, stackTrace);
   }
 
+  /// Returns if the current [logLevel] is set high enough, so that the [targetLevel] would be logged into the console and
+  /// storage!
+  ///
+  /// This can be used for performance improvement to prevent execution of some logging code!
+  static bool canLog(LogLevel targetLevel) => targetLevel.index <= _instance!.logLevel.index;
+
   /// The main log method that is called by the static log methods. will log to console, storage, etc...
   Future<void> log(String? message, LogLevel level, Object? error, StackTrace? stackTrace) async {
-    if (level.index > logLevel.index) {
+    if (canLog(level) == false) {
       return;
     }
     final LogMessage logMessage =

@@ -57,11 +57,6 @@ bool initialized = false;
 ///
 /// The [serverPort] also gets used to assign different test data folders to each test file!
 Future<void> createCommonTestObjects({required int serverPort}) async {
-  if (initialized) {
-    //cleanup for old test:
-    await restServer.stop();
-  }
-
   serverConfigMock = ServerConfigMock(serverPortOverride: serverPort);
 
   localDataSource = LocalDataSourceImpl(serverConfig: serverConfigMock);
