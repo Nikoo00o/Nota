@@ -15,7 +15,7 @@ class GetRequiredLoginStatus extends UseCase<RequiredLoginStatus, NoParams> {
     final ClientAccount? account = await accountRepository.getAccount();
     late final RequiredLoginStatus status;
     if (account?.needsServerSideLogin ?? true) {
-      assert((account?.isLoggedIn ?? true) == false, "account is never logged in if it needs a server side login");
+      assert((account?.isLoggedIn ?? false) == false, "account is never logged in if it needs a server side login");
       status = RequiredLoginStatus.REMOTE;
     } else if (account?.isLoggedIn ?? false) {
       status = RequiredLoginStatus.NONE;
