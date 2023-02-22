@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:app/core/utils/security_utils_extension.dart';
 import 'package:app/domain/entities/client_account.dart';
@@ -92,7 +93,7 @@ class StoreNoteEncrypted extends UseCase<DateTime, StoreNoteEncryptedParams> {
 
     await noteTransferRepository.storeEncryptedNote(
       noteId: params.noteId,
-      encryptedBytes: await _encryptContent(params.decryptedContent!, account),
+      encryptedBytes: await _encryptAndCompressContent(params.decryptedContent!, account),
     );
   }
 
@@ -115,7 +116,7 @@ class StoreNoteEncrypted extends UseCase<DateTime, StoreNoteEncryptedParams> {
     if (params.decryptedContent != null) {
       await noteTransferRepository.storeEncryptedNote(
         noteId: params.noteId,
-        encryptedBytes: await _encryptContent(params.decryptedContent!, account),
+        encryptedBytes: await _encryptAndCompressContent(params.decryptedContent!, account),
       );
     }
   }
@@ -127,8 +128,11 @@ class StoreNoteEncrypted extends UseCase<DateTime, StoreNoteEncryptedParams> {
     return SecurityUtilsExtension.encryptStringAsync2(fileName, account.decryptedDataKey!);
   }
 
-  Future<Uint8List> _encryptContent(Uint8List content, ClientAccount account) async =>
-      SecurityUtilsExtension.encryptBytesAsync(content, account.decryptedDataKey!);
+  Future<Uint8List> _encryptAndCompressContent(List<int> content, ClientAccount account) async {
+    final List<int> compressed = gzip.encode(content);
+    // todo: maybe clear content list here, or also add a config option for the compression level
+    return SecurityUtilsExtension.encryptBytesAsync(Uint8List.fromList(compressed), account.decryptedDataKey!);
+  }
 }
 
 /// Use the fitting subclass for the use case!
@@ -140,8 +144,8 @@ abstract class StoreNoteEncryptedParams {
   final String? decryptedName;
 
   /// This can be empty if the file has no content yet and must be set if the note is newly created!
-  /// If this is [null] it means that the file content did not change
-  final Uint8List? decryptedContent;
+  /// If this is [null] it means that the file content did not change.
+  final List<int>? decryptedContent;
 
   StoreNoteEncryptedParams({required this.noteId, required this.decryptedName, required this.decryptedContent});
 }

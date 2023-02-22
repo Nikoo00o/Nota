@@ -54,7 +54,7 @@ void main() {
 
       await sl<TransferNotes>().call(NoParams());
 
-      final Uint8List bytes = await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
+      final List<int> bytes = await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
       expect(utf8.decode(bytes), "test");
 
       final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
@@ -65,7 +65,7 @@ void main() {
 
       final bool deleted = await sl<NoteTransferRepository>().deleteNote(noteId: 1);
       expect(deleted, true);
-      
+
 
       Logger.verbose("next round");
 
@@ -74,7 +74,7 @@ void main() {
       expect(SecurityUtils.decryptString(account.noteInfoList.first.encFileName, base64UrlEncode(account.decryptedDataKey!)),
           "name");
 
-      final Uint8List bytes2 = await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
+      final List<int> bytes2 = await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
       expect(utf8.decode(bytes2), "test");
     });
   });
