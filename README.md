@@ -9,7 +9,9 @@
 
 ## Building The Project
 
-- just import the project in android studio and have flutter and dart installed
+- just import the project in android studio and have the flutter and dart sdks installed and the android studio flutter 
+  plugin
+  - instead of android studio, you can also use visual studio code with the flutter plugin
 - then edit the config like explained below
 - and afterwards you can use the run configurations in android studio to start the app and the server in debug mode
 - This project contains the sub projects **shared**, **server** and **app**

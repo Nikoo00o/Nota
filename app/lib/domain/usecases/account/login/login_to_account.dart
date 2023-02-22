@@ -8,6 +8,7 @@ import 'package:app/domain/usecases/account/login/get_required_login_status.dart
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
+import 'package:shared/domain/entities/note_info.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
 /// This logs the user into the app and decrypts the [ClientAccount.decryptedDataKey] and stores it in memory, or also in
@@ -26,6 +27,8 @@ import 'package:shared/domain/usecases/usecase.dart';
 ///
 ///
 /// Without the [LocalLoginParams], offline editing would not be possible!
+///
+/// This also restores old note info lists stored on the device if multiple accounts are used!
 class LoginToAccount extends UseCase<void, LoginParams> {
   final AccountRepository accountRepository;
   final AppConfig appConfig;
@@ -40,7 +43,7 @@ class LoginToAccount extends UseCase<void, LoginParams> {
     final String userKey = await SecurityUtilsExtension.hashStringSecure(params.password, appConfig.userKeySalt);
 
     // get the correct account depending on the params. throws error if [params] is not one of the sub classes. also
-    // creates the account if not already exists
+    // creates the account if not already exists. also sets username and password hash to params
     ClientAccount account = await _getMatchingAccount(params, passwordHash);
 
     final RequiredLoginStatus loginStatus = await getRequiredLoginStatus(NoParams());
@@ -68,10 +71,22 @@ class LoginToAccount extends UseCase<void, LoginParams> {
     // update the accounts login status
     account.needsServerSideLogin = false;
 
+    if (params is RemoteLoginParams) {
+      await _tryToReuseNotes(account); // see if the account had some notes cached that should be used
+    }
+
     // save the account (and if the [ClientAccount.storeDecryptedDataKey] is set, then also the decrypted data key)
     await accountRepository.saveAccount(account);
 
     Logger.info("Logged in ${params.runtimeType} to the account: $account");
+  }
+
+  Future<void> _tryToReuseNotes(ClientAccount account) async {
+    final List<NoteInfo>? oldNotes = await accountRepository.getOldNotesForAccount(account.userName);
+    if (oldNotes != null) {
+      account.noteInfoList = oldNotes;
+      Logger.verbose("Loaded previous notes\n$oldNotes\nfor the new account ${account.userName}");
+    }
   }
 
   /// For remote login, the username and [passwordHash] will be set to the account.

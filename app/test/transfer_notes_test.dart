@@ -7,6 +7,7 @@ import 'package:app/core/utils/security_utils_extension.dart';
 import 'package:app/data/datasources/local_data_source.dart';
 import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/repositories/account_repository.dart';
+import 'package:app/domain/repositories/note_transfer_repository.dart';
 import 'package:app/domain/usecases/account/change/change_account_password.dart';
 import 'package:app/domain/usecases/account/change/change_auto_login.dart';
 import 'package:app/domain/usecases/account/change/logout_of_account.dart';
@@ -53,7 +54,7 @@ void main() {
 
       await sl<TransferNotes>().call(NoParams());
 
-      final Uint8List bytes = await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
+      final List<int> bytes = await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
       expect(utf8.decode(bytes), "test");
 
       final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
@@ -62,12 +63,19 @@ void main() {
           newEncFileName: SecurityUtils.encryptString("invalid", base64UrlEncode(account.decryptedDataKey!)),
           newLastEdited: DateTime.now().subtract(const Duration(hours: 1)));
 
+      final bool deleted = await sl<NoteTransferRepository>().deleteNote(noteId: 1);
+      expect(deleted, true);
+
+
       Logger.verbose("next round");
 
       await sl<TransferNotes>().call(NoParams());
 
       expect(SecurityUtils.decryptString(account.noteInfoList.first.encFileName, base64UrlEncode(account.decryptedDataKey!)),
           "name");
+
+      final List<int> bytes2 = await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
+      expect(utf8.decode(bytes2), "test");
     });
   });
 }

@@ -3,6 +3,7 @@ import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/usecases/account/fetch_current_session_token.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
+import 'package:shared/domain/entities/note_info.dart';
 
 abstract class AccountRepository {
   const AccountRepository();
@@ -21,7 +22,7 @@ abstract class AccountRepository {
 
   /// Saves the [account] to the storage and also overwrites the cache.
   /// This should be used after each update to the account if the change should be persisted!
-  Future<void> saveAccount(ClientAccount account);
+  Future<void> saveAccount(ClientAccount? account);
 
   /// This will use the currently cached account and create it on the server.
   /// This can throw the exceptions of [RemoteAccountDataSource.createAccountRequest]
@@ -44,4 +45,10 @@ abstract class AccountRepository {
   /// for the login if the session token was no longer valid of [FetchCurrentSessionToken].
   /// The keys of the account will also be updated!
   Future<ClientAccount> updatePasswordOnServer({required String newPasswordHash, required String newEncryptedDataKey});
+
+  /// Returns the old notes from the account, or null if none were stored
+  Future<List<NoteInfo>?> getOldNotesForAccount(String userName);
+
+  /// Saves the old notes for the account, so that they can be reused
+  Future<void> saveNotesForOldAccount(String userName, List<NoteInfo> notes);
 }

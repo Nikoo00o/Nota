@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:app/core/enums/required_login_status.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/data/datasources/local_data_source.dart';
@@ -15,6 +17,8 @@ import 'package:app/domain/usecases/account/login/login_to_account.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
+import 'package:shared/data/models/note_info_model.dart';
+import 'package:shared/domain/entities/note_info.dart';
 import 'package:shared/domain/entities/session_token.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
@@ -213,30 +217,80 @@ void _testLogoutOfAccount() {
   test("Logout of an account", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
     await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+
+    final List<NoteInfo> notes = <NoteInfo>[NoteInfoModel(id: -1, encFileName: "test", lastEdited: DateTime.now())];
+    final ClientAccount cachedAccount = await sl<AccountRepository>().getAccountAndThrowIfNull();
+    cachedAccount.noteInfoList = notes;
+
     await sl<LogoutOfAccount>().call(NoParams());
 
-    final ClientAccount cachedAccount = await sl<AccountRepository>().getAccountAndThrowIfNull();
+    final ClientAccount? cachedAccountAfterwards = await sl<AccountRepository>().getAccount();
     final ClientAccount? storedAccount = await sl<AccountRepository>().getAccount(forceLoad: true);
     final RequiredLoginStatus loginStatus = await sl<GetRequiredLoginStatus>().call(NoParams());
 
     expect(loginStatus, RequiredLoginStatus.REMOTE, reason: "should need remote login");
     expect(cachedAccount.isLoggedIn, false, reason: "and not be logged in");
-    expect(cachedAccount.passwordHash.isEmpty, true, reason: "and have no password hash");
-    expect(cachedAccount.isSessionTokenStillValid(), false, reason: "and have no valid session token");
-    expect(cachedAccount, storedAccount, reason: "accounts should be same");
+    expect(cachedAccount.passwordHash.isEmpty, true, reason: "and has no password hash");
+    expect(cachedAccount.isSessionTokenStillValid(), false, reason: "and has no valid session token");
+    expect(jsonEncode(cachedAccount.noteInfoList), jsonEncode(notes), reason: "but still has the note info list");
+    expect(cachedAccountAfterwards, storedAccount, reason: "cached afterwards and stored accounts should be null");
   });
 
-  test("Login after logout", () async {
+  test("Login to the same account after logout should work and have the same note info list", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
     await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+
+    final List<NoteInfo> notes = <NoteInfo>[NoteInfoModel(id: -1, encFileName: "test", lastEdited: DateTime.now())];
+    final ClientAccount account = await sl<AccountRepository>().getAccountAndThrowIfNull();
+    account.noteInfoList = notes;
+
     await sl<LogoutOfAccount>().call(NoParams());
     await _remoteLogin("test1", "password1");
+    expect(jsonEncode(account.noteInfoList), jsonEncode(notes), reason: "should still have the same note info list");
   });
 
-  test("logout with no account", () async {
+  test("logout with no account should not work", () async {
     expect(() async {
       await sl<LogoutOfAccount>().call(NoParams());
     }, throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.CLIENT_NO_ACCOUNT)));
+  });
+
+  test("Login to a different account after logout should restore the note info list", () async {
+    await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
+    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+
+    final List<NoteInfo> notes = <NoteInfo>[NoteInfoModel(id: -1, encFileName: "test", lastEdited: DateTime.now())];
+    final ClientAccount account = await sl<AccountRepository>().getAccountAndThrowIfNull();
+    account.noteInfoList = notes;
+    await sl<LogoutOfAccount>().call(NoParams());
+
+    //should store the old notes for the account test1
+    await sl<CreateAccount>().call(const CreateAccountParams(username: "test2", password: "password2"));
+    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test2", password: "password2"));
+    expect(account.noteInfoList.isEmpty, true, reason: "second account should have no notes");
+
+    await sl<LogoutOfAccount>().call(NoParams());
+    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    expect(jsonEncode(account.noteInfoList), jsonEncode(notes), reason: "test1 should have the notes");
+  });
+
+  test("Login to a different account after logout should restore the note info list without a create in between", () async {
+    await sl<CreateAccount>().call(const CreateAccountParams(username: "test2", password: "password2"));
+    await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
+    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+
+    final List<NoteInfo> notes = <NoteInfo>[NoteInfoModel(id: -1, encFileName: "test", lastEdited: DateTime.now())];
+    final ClientAccount account = await sl<AccountRepository>().getAccountAndThrowIfNull();
+    account.noteInfoList = notes;
+    await sl<LogoutOfAccount>().call(NoParams());
+
+    //should store the old notes for the account test1
+    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test2", password: "password2"));
+    expect(account.noteInfoList.isEmpty, true, reason: "second account should have no notes");
+
+    await sl<LogoutOfAccount>().call(NoParams());
+    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    expect(jsonEncode(account.noteInfoList), jsonEncode(notes), reason: "test1 should have the notes");
   });
 }
 

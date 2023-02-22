@@ -13,6 +13,8 @@ import 'package:shared/data/dtos/account/account_change_password_response.dart';
 import 'package:shared/data/dtos/account/account_login_request.dart.dart';
 import 'package:shared/data/dtos/account/account_login_response.dart';
 import 'package:shared/data/dtos/account/create_account_request.dart';
+import 'package:shared/data/models/note_info_model.dart';
+import 'package:shared/domain/entities/note_info.dart';
 
 class AccountRepositoryImpl extends AccountRepository {
   final RemoteAccountDataSource remoteAccountDataSource;
@@ -45,7 +47,7 @@ class AccountRepositoryImpl extends AccountRepository {
   }
 
   @override
-  Future<void> saveAccount(ClientAccount account) async {
+  Future<void> saveAccount(ClientAccount? account) async {
     if (Logger.canLog(LogLevel.VERBOSE)) {
       final ClientAccount? oldAccount = await localDataSource.loadAccount();
       if (_cachedAccount != oldAccount) {
@@ -53,7 +55,11 @@ class AccountRepositoryImpl extends AccountRepository {
       }
     }
     _cachedAccount = account;
-    await localDataSource.saveAccount(ClientAccountModel.fromClientAccount(_cachedAccount!));
+    if (_cachedAccount != null) {
+      await localDataSource.saveAccount(ClientAccountModel.fromClientAccount(_cachedAccount!));
+    } else {
+      await localDataSource.saveAccount(null);
+    }
   }
 
   @override
@@ -93,5 +99,18 @@ class AccountRepositoryImpl extends AccountRepository {
     account.passwordHash = newPasswordHash;
     account.encryptedDataKey = newEncryptedDataKey;
     return account;
+  }
+
+  @override
+  Future<List<NoteInfo>?> getOldNotesForAccount(String userName) async {
+    final Map<String, List<NoteInfoModel>> accounts = await localDataSource.getOldAccounts();
+    return accounts[userName];
+  }
+
+  @override
+  Future<void> saveNotesForOldAccount(String userName, List<NoteInfo> notes) async {
+    final Map<String, List<NoteInfoModel>> accounts = await localDataSource.getOldAccounts();
+    accounts[userName] = notes.map((NoteInfo note) => NoteInfoModel.fromNoteInfo(note)).toList();
+    await localDataSource.saveOldAccounts(accounts);
   }
 }

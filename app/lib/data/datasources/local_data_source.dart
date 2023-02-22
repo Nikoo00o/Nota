@@ -9,6 +9,8 @@ import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/core/utils/string_utils.dart';
+import 'package:shared/data/models/note_info_model.dart';
+import 'package:shared/domain/entities/note_info.dart';
 
 /// Always call [init] first before using any other method!
 abstract class LocalDataSource {
@@ -19,6 +21,8 @@ abstract class LocalDataSource {
   static const String HIVE_KEY = "HIVE_KEY";
 
   static const String ACCOUNT = "ACCOUNT";
+
+  static const String OLD_ACCOUNTS = "OLD_ACCOUNTS";
 
   static const String LOCALE = "LOCALE";
 
@@ -47,9 +51,33 @@ abstract class LocalDataSource {
     return null;
   }
 
-  /// Stores the current account and encrypts it with the hive key
-  Future<void> saveAccount(ClientAccountModel account) async {
-    await write(key: ACCOUNT, value: jsonEncode(account), secure: false);
+  /// Stores the current account and encrypts it with the hive key, or deletes the stored account if [account] is null.
+  Future<void> saveAccount(ClientAccountModel? account) async {
+    if (account == null) {
+      await delete(key: ACCOUNT, secure: false);
+    } else {
+      await write(key: ACCOUNT, value: jsonEncode(account), secure: false);
+    }
+  }
+
+  /// Returns the usernames matched to the note info lists of old logged in accounts, so that the notes don't get lost
+  Future<Map<String, List<NoteInfoModel>>> getOldAccounts() async {
+    final String? jsonString = await read(key: OLD_ACCOUNTS, secure: false);
+    if (jsonString == null) {
+      return <String, List<NoteInfoModel>>{};
+    }
+    final Map<String, dynamic> json = jsonDecode(jsonString) as Map<String, dynamic>;
+    return json.map((String userName, dynamic value) {
+      final List<dynamic> dynList = value as List<dynamic>;
+      final List<NoteInfoModel> notes =
+          dynList.map((dynamic map) => NoteInfoModel.fromJson(map as Map<String, dynamic>)).toList();
+      return MapEntry<String, List<NoteInfoModel>>(userName, notes);
+    });
+  }
+
+  /// Stores the usernames matched to the note info lists of old logged in accounts, so that the notes don't get lost
+  Future<void> saveOldAccounts(Map<String, List<NoteInfoModel>> oldAccounts) async {
+    await write(key: OLD_ACCOUNTS, value: jsonEncode(oldAccounts), secure: false);
   }
 
   Future<Locale?> getLocale() async {
@@ -103,7 +131,7 @@ abstract class LocalDataSource {
   /// Renames the file from [oldLocalFilePath] to [newLocalFilePath] and returns if the old file existed, or not.
   ///
   /// Both paths must be in the application documents directory!
-  Future<bool> renameFile({required String oldLocalFilePath,required String newLocalFilePath});
+  Future<bool> renameFile({required String oldLocalFilePath, required String newLocalFilePath});
 
   /// Returns a list of files with their full absolute file paths inside of the [subFolderPath] in relation to the
   /// applications documents directory.

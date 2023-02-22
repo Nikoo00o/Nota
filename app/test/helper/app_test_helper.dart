@@ -8,6 +8,7 @@ import 'package:app/domain/repositories/account_repository.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:shared/core/enums/log_level.dart';
 import 'package:shared/core/utils/logger/logger.dart';
+import 'package:shared/data/datasources/rest_client.dart';
 
 import '../../../server/test/helper/server_test_helper.dart' as server; // relative import of the server test helpers, so
 // that the real server responses can be used for testing instead of mocks! The server tests should be run before!
@@ -39,6 +40,7 @@ Future<void> createCommonTestObjects({required int serverPort}) async {
 }
 
 Future<void> testCleanup() async {
+  sl<RestClient>().close();
   await server.cleanupTestFilesAndServer(deleteTestFolderAfterwards: true); // cleanup server
   await sl.reset(); // cleanup app singletons
 }

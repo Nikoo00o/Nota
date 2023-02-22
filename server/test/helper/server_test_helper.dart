@@ -137,6 +137,7 @@ Future<void> _setup() async {
 /// You can set [deleteTestFolderAfterwards] to false if you want to inspect some test files after one single test, or if
 /// you want to test the persistence of the server.
 Future<void> cleanupTestFilesAndServer({required bool deleteTestFolderAfterwards}) async {
+  restClient.close();
   await stopNotaServer(NoParams());
   await Hive.close();
   if (deleteTestFolderAfterwards) {
