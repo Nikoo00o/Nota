@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:app/core/config/app_config.dart';
 import 'package:app/data/datasources/local_data_source.dart';
 import 'package:app/data/datasources/remote_note_data_source.dart';
-import 'package:app/domain/repositories/note_repository.dart';
+import 'package:app/domain/repositories/note_transfer_repository.dart';
 import 'package:shared/core/config/shared_config.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
@@ -21,7 +21,7 @@ import 'package:shared/domain/entities/note_info.dart';
 import 'package:shared/domain/entities/note_update.dart';
 
 /// For a description of the usage/workflow and the error codes, look at [RemoteNoteDataSource]
-class NoteRepositoryImpl extends NoteRepository {
+class NoteTransferRepositoryImpl extends NoteTransferRepository {
   final RemoteNoteDataSource remoteNoteDataSource;
   final LocalDataSource localDataSource;
   final AppConfig appConfig;
@@ -29,24 +29,15 @@ class NoteRepositoryImpl extends NoteRepository {
   /// Will be set in [startNoteTransfer] and cleared in [finishNoteTransfer]
   StartNoteTransferResponse? _currentCachedTransfer;
 
-  NoteRepositoryImpl({required this.remoteNoteDataSource, required this.localDataSource, required this.appConfig});
+  NoteTransferRepositoryImpl({required this.remoteNoteDataSource, required this.localDataSource, required this.appConfig});
 
-  /// Stores the content of the note which is encrypted with the users data key.
-  ///
-  /// The Note will be stored at "[getApplicationDocumentsDirectory()] / [appConfig.noteFolder] / [noteId] .note"
-  ///
-  /// So for example on android /data/user/0/com.nota.nota_app/app_flutter/notes/10.note
-  Future<void> storeEncryptedNote({required int noteId, required List<int> bytes, bool isTempNote = false}) async {
-    await localDataSource.writeFile(localFilePath: getLocalNotePath(noteId: noteId, isTempNote: isTempNote), bytes: bytes);
+  @override
+  Future<void> storeEncryptedNote({required int noteId, required List<int> encryptedBytes, bool isTempNote = false}) async {
+    await localDataSource.writeFile(
+        localFilePath: getLocalNotePath(noteId: noteId, isTempNote: isTempNote), bytes: encryptedBytes);
   }
 
-  /// Returns the content of the note which is encrypted with the users data key.
-  ///
-  /// The Note will be stored at "[getApplicationDocumentsDirectory()] / [appConfig.noteFolder] / [noteId] .note"
-  ///
-  /// So for example on android /data/user/0/com.nota.nota_app/app_flutter/notes/10.note
-  ///
-  /// If the note could not be found, this will throw a [FileException] with [ErrorCodes.FILE_NOT_FOUND]!
+  @override
   Future<Uint8List> loadEncryptedNote({required int noteId, bool isTempNote = false}) async {
     final Uint8List? encryptedBytes =
         await localDataSource.readFile(localFilePath: getLocalNotePath(noteId: noteId, isTempNote: isTempNote));
@@ -56,9 +47,7 @@ class NoteRepositoryImpl extends NoteRepository {
     return encryptedBytes;
   }
 
-  /// This starts the note transfer and can throw the exceptions of [RemoteNoteDataSource.startNoteTransferRequest].
-  ///
-  /// It also returns the note updates which the client has to deal with and store as temp changes until [finishNoteTransfer]
+  @override
   Future<List<NoteUpdate>> startNoteTransfer(List<NoteInfo> clientNotes) async {
     Logger.debug("Starting note transfer");
     final List<NoteInfoModel> models = clientNotes.map((NoteInfo element) => NoteInfoModel.fromNoteInfo(element)).toList();
@@ -70,46 +59,41 @@ class NoteRepositoryImpl extends NoteRepository {
     return response.noteUpdates;
   }
 
-  /// Either calls [RemoteNoteDataSource.downloadNoteRequest], or [RemoteNoteDataSource.uploadNoteRequest] depending on
-  /// the [_currentCachedTransfer] and also throws the exceptions of those.
-  ///
-  /// It can also throw a [ClientException] with [ErrorCodes.CLIENT_NO_TRANSFER] if there is no active transfer, or if the
-  /// [noteId] does not belong to the transfer!
-  ///
-  /// This either reads the data from a real note file, or saves the data in a new temp note file!
-  Future<void> uploadOrDownloadNote({required int noteId}) async {
+  @override
+  Future<void> uploadOrDownloadNote({required int noteClientId}) async {
     _checkCachedTransfer(); // throws exception
 
     final Iterable<NoteUpdateModel> iterator = _currentCachedTransfer!.noteUpdates
-        .where((NoteUpdateModel update) => update.clientId == noteId || update.serverId == noteId);
+        .where((NoteUpdateModel update) => update.clientId == noteClientId || update.serverId == noteClientId);
     if (iterator.length != 1) {
-      Logger.error("Invalid note id $noteId for the transfer ${_currentCachedTransfer!.transferToken}");
+      Logger.error("Invalid note id $noteClientId for the transfer ${_currentCachedTransfer!.transferToken}");
       throw const ClientException(message: ErrorCodes.CLIENT_NO_TRANSFER);
     }
 
     if (iterator.first.noteTransferStatus.clientNeedsUpdate) {
-      Logger.debug("Downloading note $noteId");
-      final DownloadNoteResponse response = await remoteNoteDataSource
-          .downloadNoteRequest(DownloadNoteRequest(transferToken: _currentCachedTransfer!.transferToken, noteId: noteId));
+      Logger.debug("Downloading note $noteClientId");
+      final DownloadNoteResponse response = await remoteNoteDataSource.downloadNoteRequest(DownloadNoteRequest(
+        transferToken: _currentCachedTransfer!.transferToken,
+        noteId: noteClientId,
+      ));
 
-      await storeEncryptedNote(noteId: noteId, bytes: response.rawBytes);
+      await storeEncryptedNote(noteId: noteClientId, encryptedBytes: response.rawBytes);
     } else if (iterator.first.noteTransferStatus.serverNeedsUpdate) {
-      Logger.debug("Uploading note $noteId");
-      final Uint8List bytes = await loadEncryptedNote(noteId: noteId);
+      Logger.debug("Uploading note $noteClientId");
+      final Uint8List bytes = await loadEncryptedNote(noteId: noteClientId);
 
       await remoteNoteDataSource.uploadNoteRequest(
-          UploadNoteRequest(transferToken: _currentCachedTransfer!.transferToken, noteId: noteId, rawBytes: bytes));
+          UploadNoteRequest(transferToken: _currentCachedTransfer!.transferToken, noteId: noteClientId, rawBytes: bytes));
     } else {
-      assert(false, "this should never happen during a note transfer!");
+      Logger.error("The enum NoteTransferStatus is broken for ${iterator.first.noteTransferStatus}");
     }
+    assert(
+        iterator.first.noteTransferStatus.clientNeedsUpdate == false &&
+            iterator.first.noteTransferStatus.serverNeedsUpdate == false,
+        "this should never happen during a note transfer!");
   }
 
-  /// Depending on [shouldCancel] this either cancels, or finishes the note transfer started with [startNoteTransfer].
-  /// It can throw the exceptions of [RemoteNoteDataSource.finishNoteTransferRequest].
-  /// And also a [ClientException] with [ErrorCodes.CLIENT_NO_TRANSFER] if there is no active transfer.
-  ///
-  /// This will apply the changes on the server side and now the client should also apply its temp changes afterwards.
-  /// This also resets the cached transfer.
+  @override
   Future<void> finishNoteTransfer({required bool shouldCancel}) async {
     _checkCachedTransfer(); // throws exception
 
@@ -127,7 +111,7 @@ class NoteRepositoryImpl extends NoteRepository {
     }
   }
 
-  /// Deletes all temp notes
+  @override
   Future<void> clearTempNotes() async {
     final List<String> files = await _getAllNotes();
     files.removeWhere((String path) => path.endsWith(SharedConfig.noteFileEnding(isTempNote: true)) == false);
@@ -137,9 +121,7 @@ class NoteRepositoryImpl extends NoteRepository {
     }
   }
 
-  /// Replaces the real notes with the temp notes that are currently stored if they are part of the note transfer!
-  ///
-  /// If this finds temp notes that are not part of the note transfer, those will get deleted!
+  @override
   Future<void> replaceNotesWithTemp() async {
     final List<String> files = await _getAllNotes();
     files.removeWhere((String path) => path.endsWith(SharedConfig.noteFileEnding(isTempNote: true)) == false);
@@ -149,9 +131,7 @@ class NoteRepositoryImpl extends NoteRepository {
     }
   }
 
-  /// Renames a real note from the [oldNoteId] to the [newNoteId].
-  ///
-  /// If the [oldNoteId] file did not exist, it will throw a [FileException] with [ErrorCodes.FILE_NOT_FOUND]!
+  @override
   Future<bool> renameNote({required int oldNoteId, required int newNoteId}) async {
     return localDataSource.renameFile(
       oldLocalFilePath: getLocalNotePath(noteId: oldNoteId, isTempNote: false),
@@ -159,9 +139,7 @@ class NoteRepositoryImpl extends NoteRepository {
     );
   }
 
-  /// Returns if the file at [getApplicationDocumentsDirectory()] / [localFilePath] existed and if it was deleted, or not.
-  ///
-  /// The application documents directory will for example be: /data/user/0/com.nota.nota_app/app_flutter/
+  @override
   Future<bool> deleteNote({required int noteId, bool isTempNote = false}) async {
     final String path = getLocalNotePath(noteId: noteId, isTempNote: isTempNote);
     Logger.debug("Deleting note $path");
@@ -171,13 +149,7 @@ class NoteRepositoryImpl extends NoteRepository {
   /// Returns a list of absolute note file paths
   Future<List<String>> _getAllNotes() async => localDataSource.getFilePaths(subFolderPath: appConfig.noteFolder);
 
-  /// Returns the relative filePath to a specific note from the application documents directory.
-  ///
-  /// The Note will be stored at "[getApplicationDocumentsDirectory()] / [appConfig.noteFolder] / [noteId] .note"
-  ///
-  /// So for example on android /data/user/0/com.nota.nota_app/app_flutter/notes/10.note
-  ///
-  /// If [isTempNote] is true, then the note ending will be ".temp" instead.
+  @override
   String getLocalNotePath({required int noteId, required bool isTempNote}) {
     final String ending = SharedConfig.noteFileEnding(isTempNote: isTempNote);
     return "${appConfig.noteFolder}${Platform.pathSeparator}$noteId$ending";

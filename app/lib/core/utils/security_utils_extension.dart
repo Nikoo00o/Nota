@@ -25,11 +25,29 @@ class SecurityUtilsExtension {
     return base64UrlEncode(bytes);
   }
 
+  /// Calls [encryptBytesAsync]. This version has a byte key instead of a base64encoded string.
+  ///
+  /// The result will be base64 encoded!
+  static Future<String> encryptStringAsync2(String input, Uint8List keyBytesy) async {
+    final Uint8List bytes = await encryptBytesAsync(Uint8List.fromList(utf8.encode(input)), keyBytesy);
+    return base64UrlEncode(bytes);
+  }
+
   /// Calls [decryptBytesAsync] after base64 decoding the [base64EncryptedInput] and [base64EncodedKey].
   ///
   /// The result will be utf8 encoded (clear text).
   static Future<String> decryptStringAsync(String base64EncryptedInput, String base64EncodedKey) async {
     final Uint8List bytes = await decryptBytesAsync(base64Decode(base64EncryptedInput), base64Decode(base64EncodedKey));
+    return utf8.decode(bytes);
+  }
+
+  /// Calls [decryptBytesAsync] after base64 decoding the [base64EncryptedInput].
+  ///
+  /// This version has a byte key instead of a base64encoded string.
+  ///
+  /// The result will be utf8 encoded (clear text).
+  static Future<String> decryptStringAsync2(String base64EncryptedInput, Uint8List keyBytes) async {
+    final Uint8List bytes = await decryptBytesAsync(base64Decode(base64EncryptedInput), keyBytes);
     return utf8.decode(bytes);
   }
 
@@ -39,6 +57,9 @@ class SecurityUtilsExtension {
   ///
   /// This is the async version that is faster!
   static Future<Uint8List> encryptBytesAsync(Uint8List inputBytes, Uint8List keyBytes) async {
+    if (inputBytes.isEmpty) {
+      return Uint8List(0);
+    }
     final Uint8List ivBytes = StringUtils.getRandomBytes(SecurityUtils.IV_LENGTH);
     final SecretBox secretBox = await _asyncCipher.encrypt(
       inputBytes,
@@ -54,6 +75,9 @@ class SecurityUtilsExtension {
   ///
   /// This is the async version that is faster!
   static Future<Uint8List> decryptBytesAsync(Uint8List inputBytes, Uint8List keyBytes) async {
+    if (inputBytes.isEmpty) {
+      return Uint8List(0);
+    }
     final Uint8List ivBytes = Uint8List.view(inputBytes.buffer, inputBytes.offsetInBytes, SecurityUtils.IV_LENGTH);
     final Uint8List macBytes =
         Uint8List.view(inputBytes.buffer, inputBytes.offsetInBytes + SecurityUtils.IV_LENGTH, SecurityUtils.MAC_LENGTH);
@@ -68,8 +92,12 @@ class SecurityUtilsExtension {
   /// This should be used to derive a key from a password, or to hash a password which should be stored.
   ///
   /// Uses Argon2id (winner of the password hashing competition 2015) for best security.
-  static Future<List<int>> hashBytesSecure(List<int> bytes, List<int> saltBytes) async =>
-      _argonWrapper.hashBytesSecure(bytes, saltBytes, SharedConfig.keyBytes);
+  static Future<List<int>> hashBytesSecure(List<int> bytes, List<int> saltBytes) async {
+    if (bytes.isEmpty) {
+      return List<int>.empty(growable: true);
+    }
+    return _argonWrapper.hashBytesSecure(bytes, saltBytes, SharedConfig.keyBytes);
+  }
 
   /// This should be used to derive a key from a password, or to hash a password which should be stored.
   ///

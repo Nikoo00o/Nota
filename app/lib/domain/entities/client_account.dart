@@ -92,4 +92,5 @@ class ClientAccount extends SharedAccount {
   /// Returns if the account is completely logged in and ready to decrypt/encrypt notes by checking the [decryptedDataKey].
   /// This decides if the app shows the login page, or not!
   bool get isLoggedIn => decryptedDataKey?.isNotEmpty ?? false;
+
 }

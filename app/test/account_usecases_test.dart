@@ -8,6 +8,7 @@ import 'package:app/domain/usecases/account/change/change_auto_login.dart';
 import 'package:app/domain/usecases/account/change/logout_of_account.dart';
 import 'package:app/domain/usecases/account/fetch_current_session_token.dart';
 import 'package:app/domain/usecases/account/get_auto_login.dart';
+import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/account/login/get_required_login_status.dart';
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
@@ -40,6 +41,7 @@ void main() {
     group("Logout of Account: ", _testLogoutOfAccount);
     group("Fetch current Session Token: ", _testFetchCurrentSessionToken);
     group("Change Account Password: ", _testChangeAccountPassword);
+    group("Get Logged in Account: ", _testGetLoggedInAccount);
   });
 }
 
@@ -357,5 +359,41 @@ void _testChangeAccountPassword() {
       await sl<ChangeAccountPassword>().call(const ChangePasswordParams(newPassword: "password1"));
     }, throwsA(predicate((Object e) => e is ServerException && e.message == ErrorCodes.httpStatusWith(401))));
   });
+}
 
+void _testGetLoggedInAccount() {
+  test("Get logged in account should work with a logged in account and the session token should not matter", () async {
+    await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
+    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
+    expect(account.isLoggedIn, true, reason: "account should be logged in");
+    expect(account.userName, "test1", reason: "and contain the correct data");
+    expect(account.isSessionTokenStillValid(), true, reason: "and have a valid session token");
+
+    account.sessionToken = null;
+    await sl<GetLoggedInAccount>().call(NoParams());
+  });
+
+  test("Get logged in account should not work without an account", () async {
+    expect(() async {
+      await sl<GetLoggedInAccount>().call(NoParams());
+    }, throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.CLIENT_NO_ACCOUNT)));
+  });
+
+  test("Get logged in account should not work without being logged in", () async {
+    await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
+    expect(() async {
+      await sl<GetLoggedInAccount>().call(NoParams());
+    }, throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.ACCOUNT_WRONG_PASSWORD)));
+  });
+
+  test("Get logged in account should apply changes and not work without a data key", () async {
+    await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
+    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
+    account.clearDecryptedDataKey();
+    expect(() async {
+      await sl<GetLoggedInAccount>().call(NoParams());
+    }, throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.ACCOUNT_WRONG_PASSWORD)));
+  });
 }
