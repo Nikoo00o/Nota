@@ -1,8 +1,8 @@
 import 'package:app/services/dialog_service.dart';
 
 class DialogServiceMock extends DialogService {
-  /// Used to mock the [showConfirmDialog] response
-  bool confirmedOverride = false;
+  /// Used to mock the [showConfirmDialog] response if the user confirms the dialog, or not
+  bool confirmedOverride = true;
 
   @override
   void showErrorDialog(String dialogTextKey, {List<String>? dialogTextKeyParams}) {}

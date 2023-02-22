@@ -26,7 +26,7 @@ class LoadNoteContent extends UseCase<List<int>, LoadNoteContentParams> {
     final Uint8List encryptedBytes = await noteTransferRepository.loadEncryptedNote(noteId: params.noteId);
     final List<int> uncompressedBytes = await _decryptAndDecompressBytes(encryptedBytes, account);
 
-    Logger.debug("Decrypted and returned note content for ${params.noteId}");
+    Logger.debug("Decrypted and returned note content for note ${params.noteId}");
     return uncompressedBytes;
   }
 

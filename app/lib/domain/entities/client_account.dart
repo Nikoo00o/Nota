@@ -74,15 +74,21 @@ class ClientAccount extends SharedAccount {
       });
   }
 
-  @override
-
   /// Does not compare runtime type, because the comparison should also return true if its compared to the model
+  /// The [decryptedDataKey] is only compared if [storeDecryptedDataKey] is true!
+  @override
   bool operator ==(dynamic other) {
-    return super == other &&
-        other is ClientAccount &&
-        ListUtils.equals(decryptedDataKey, other.decryptedDataKey) &&
-        storeDecryptedDataKey == other.storeDecryptedDataKey &&
-        needsServerSideLogin == other.needsServerSideLogin;
+    if (other is! ClientAccount) {
+      return false;
+    }
+    if (storeDecryptedDataKey != other.storeDecryptedDataKey) {
+      return false;
+    }
+    if (storeDecryptedDataKey && ListUtils.equals(decryptedDataKey, other.decryptedDataKey) == false) {
+      return false;
+    }
+
+    return super == other && needsServerSideLogin == other.needsServerSideLogin;
   }
 
   @override
@@ -92,5 +98,4 @@ class ClientAccount extends SharedAccount {
   /// Returns if the account is completely logged in and ready to decrypt/encrypt notes by checking the [decryptedDataKey].
   /// This decides if the app shows the login page, or not!
   bool get isLoggedIn => decryptedDataKey?.isNotEmpty ?? false;
-
 }

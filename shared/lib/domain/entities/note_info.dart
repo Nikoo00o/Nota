@@ -1,4 +1,7 @@
+import 'package:shared/core/utils/list_utils.dart';
 import 'package:shared/domain/entities/entity.dart';
+
+// ignore_for_file: hash_and_equals
 
 /// The Information about a note which will be compared on server and client
 class NoteInfo extends Entity {
@@ -35,6 +38,11 @@ class NoteInfo extends Entity {
       lastEdited: newLastEdited ?? lastEdited,
     );
   }
+
+  /// Override the default operator==, because note info models should be able to be equal to note info objects (so
+  /// runtimetype is not compared here!)
+  @override
+  bool operator ==(Object other) => identical(this, other) || other is NoteInfo && ListUtils.equals(props, other.props);
 
   /// Returns [true] if the [encFileName] of this note is empty!
   bool get isDeleted => encFileName.isEmpty;

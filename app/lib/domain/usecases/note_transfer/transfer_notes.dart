@@ -18,7 +18,6 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// This updates the notes on server and client side by executing the note transfer.
 /// It updates the account and the note files remotely and locally!
 ///
-///
 /// This can throw the exceptions of [NoteTransferRepository.startNoteTransfer], [NoteTransferRepository.uploadOrDownloadNote]
 /// , [NoteTransferRepository.finishNoteTransfer] and [NoteTransferRepository.renameNote] !
 ///
@@ -96,8 +95,11 @@ class TransferNotes extends UseCase<void, NoParams> {
       Logger.verbose("Applying change with: $newId, $newFileName, $newTimeStamp to $oldId");
       final bool replaced =
           account.changeNote(noteId: oldId, newNodeId: newId, newEncFileName: newFileName, newLastEdited: newTimeStamp);
-      if (replaced == false) {
-        Logger.warn("Did not find note with the id $oldId to apply the change!");
+      if (replaced == false && newTimeStamp != null && newFileName != null) {
+        Logger.verbose("Added new note");
+        account.noteInfoList.add(NoteInfo(id: newId ?? oldId, encFileName: newFileName, lastEdited: newTimeStamp));
+      } else {
+        Logger.warn("No note changed and also none added!");
       }
 
       if (newId != null) {
@@ -120,14 +122,14 @@ class TransferNotes extends UseCase<void, NoParams> {
       final List<String> serverChanges = await _getServerChangeFileNames(updates, account);
       Logger.debug("Got the following new server changed note names: $serverChanges");
 
-      final bool wasCancelled = await dialogService.showConfirmDialog(
+      final bool wasConfirmed = await dialogService.showConfirmDialog(
         dialogTextKey: "note.transfer.server.change",
         dialogTextKeyParams: serverChanges,
         confirmTextKey: "accept",
         cancelTextKey: "cancel",
       );
 
-      if (wasCancelled) {
+      if (wasConfirmed == false) {
         return true;
       }
     }

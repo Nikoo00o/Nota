@@ -66,6 +66,7 @@ class LocalDataSourceMock extends LocalDataSource {
     }
     final Uint8List bytes = files.remove(oldLocalFilePath)!;
     files[newLocalFilePath] = bytes;
+
     return true;
   }
 

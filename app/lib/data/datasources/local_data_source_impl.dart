@@ -95,8 +95,10 @@ class LocalDataSourceImpl extends LocalDataSource with SharedHiveDataSourceMixin
 
   Future<String> _getAbsolutePath(String localFilePath) async {
     final Directory documents = await getApplicationDocumentsDirectory();
-    if(localFilePath.isEmpty){
+    if (localFilePath.isEmpty) {
       return documents.path;
+    } else if (localFilePath.startsWith(documents.path)) {
+      return localFilePath;
     } else {
       return "${documents.path}${Platform.pathSeparator}$localFilePath";
     }

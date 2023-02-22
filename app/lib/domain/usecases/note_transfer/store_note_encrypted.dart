@@ -23,6 +23,9 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// This can throw a [FileException] with [ErrorCodes.FILE_NOT_FOUND] if the note was not found, or if it was already
 /// contained when creating a new note.
 ///
+/// It can also trow a [ClientException] with [ErrorCodes.INVALID_PARAMS] if change/create params were used with an
+/// empty filename, or if change was used with no params at all!
+///
 /// This can throw the exceptions of [GetLoggedInAccount]!
 class StoreNoteEncrypted extends UseCase<DateTime, StoreNoteEncryptedParams> {
   final GetLoggedInAccount getLoggedInAccount;
@@ -42,13 +45,13 @@ class StoreNoteEncrypted extends UseCase<DateTime, StoreNoteEncryptedParams> {
 
     if (params is DeleteNoteEncryptedParams) {
       await _delete(params, account, now);
-      Logger.debug("Deleted note ${params.noteId}");
+      Logger.info("Deleted note ${params.noteId}");
     } else if (params is CreateNoteEncryptedParams) {
       await _create(params, account, now);
-      Logger.debug("Created note ${params.noteId}");
+      Logger.info("Created note ${params.noteId}");
     } else if (params is ChangeNoteEncryptedParams) {
       await _change(params, account, now);
-      Logger.debug("Changed note ${params.noteId}");
+      Logger.info("Changed note ${params.noteId}");
     }
 
     await saveAccount.call(NoParams()); // always save changes to the account to the local storage at the end!
@@ -155,7 +158,10 @@ class CreateNoteEncryptedParams extends StoreNoteEncryptedParams {
   /// The file name may not be empty!
   CreateNoteEncryptedParams({required int noteId, required String decryptedName, required Uint8List decryptedContent})
       : super(noteId: noteId, decryptedName: decryptedName, decryptedContent: decryptedContent) {
-    assert(decryptedName.isNotEmpty, "file name may not be empty");
+    if (decryptedName.isEmpty) {
+      Logger.error("CreateNoteEncryptedParams: file name may not be empty");
+      throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
+    }
   }
 }
 
@@ -163,8 +169,14 @@ class ChangeNoteEncryptedParams extends StoreNoteEncryptedParams {
   /// This constructor is used when the note was changed (renamed, or content changed).
   /// One of both must be not null and the file name may not be empty.
   ChangeNoteEncryptedParams({required super.noteId, required super.decryptedName, required super.decryptedContent}) {
-    assert(decryptedName != null || decryptedContent != null, "One of the params must be non null");
-    assert(decryptedName?.isNotEmpty ?? true, "file name may not be empty");
+    if (decryptedName == null && decryptedContent == null) {
+      Logger.error("ChangeNoteEncryptedParams: One of the params must be non null");
+      throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
+    }
+    if (decryptedName?.isEmpty ?? false) {
+      Logger.error("ChangeNoteEncryptedParams: file name may not be empty");
+      throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
+    }
   }
 }
 
