@@ -1,4 +1,5 @@
 import 'package:app/domain/entities/structure_folder.dart';
+import 'package:app/domain/entities/structure_note.dart';
 import 'package:shared/core/config/shared_config.dart';
 import 'package:shared/domain/entities/entity.dart';
 
@@ -68,5 +69,15 @@ abstract class StructureItem extends Entity {
       return topMost;
     }
     return directParent;
+  }
+
+  /// Copies the [copy] and changes the [directParent] to [newParent].
+  static StructureItem changeParent(StructureItem copy, StructureFolder newParent) {
+    if (copy is StructureFolder) {
+      return copy.copyWith(newDirectParent: newParent);
+    } else if (copy is StructureNote) {
+      return copy.copyWith(newDirectParent: newParent);
+    }
+    throw UnimplementedError();
   }
 }

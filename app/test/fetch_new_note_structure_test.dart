@@ -21,6 +21,8 @@ import 'helper/app_test_helper.dart';
 const int _serverPort = 9194; // also needs to be a different port for each test file. The app tests dont have to care
 // about the server errors!
 
+/// this test also tests the use cases [GetCurrentStructureItem] and [GetCurrentStructureFolders].
+
 void main() {
     setUp(() async {
         await createCommonTestObjects(serverPort: _serverPort); // init all helper objects

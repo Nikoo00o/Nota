@@ -39,12 +39,7 @@ class StructureFolder extends StructureItem {
     );
 
     for (int i = 0; i < folder._children.length; ++i) {
-      final StructureItem item = folder._children[i];
-      if (item is StructureFolder) {
-        folder._children[i] = item.copyWith(newDirectParent: folder);
-      } else if (item is StructureNote) {
-        folder._children[i] = item.copyWith(newDirectParent: folder);
-      }
+      folder._children[i] = StructureItem.changeParent(folder._children[i], folder);
     }
 
     return folder;
@@ -61,31 +56,37 @@ class StructureFolder extends StructureItem {
           "children": children,
           "sorting": sorting,
         }) {
-    _sortChildren();
+    sortChildren();
   }
 
-  /// Sorts the children.
-  void addChild(StructureItem child) {
-    _children.add(child);
-    _sortChildren();
+  /// Adds a copy of the [child] with the [directParent] set to [this].
+  ///
+  /// If [sortAfterwards] is true, then this will sort the children afterwards.
+  void addChild(StructureItem child, {bool sortAfterwards = true}) {
+    _children.add(StructureItem.changeParent(child, this));
+    if (sortAfterwards) {
+      sortChildren();
+    }
   }
 
+  /// Removes the child at the [position].
   /// Can throw [ErrorCodes.INVALID_PARAMS] and sorts the children.
   void removeChild(int position) {
     if (position >= _children.length) {
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
     _children.removeAt(position);
-    _sortChildren();
+    sortChildren();
   }
 
+  /// Replaces the child at the [position] with a copy of [newChild] with the [directParent] set to [this].
   /// Can throw [ErrorCodes.INVALID_PARAMS] and sorts the children.
   void changeChild(int position, StructureItem newChild) {
     if (position >= _children.length) {
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
-    _children[position] = newChild;
-    _sortChildren();
+    _children[position] = StructureItem.changeParent(newChild, this);
+    sortChildren();
   }
 
   /// Can throw [ErrorCodes.INVALID_PARAMS].
@@ -111,7 +112,7 @@ class StructureFolder extends StructureItem {
     return null;
   }
 
-  /// Returns the children folder that matches the [path], or null if none was found
+  /// Returns the children folder recursively for which its full path starts with [path], or null if none was found
   StructureFolder? getFolderByPath(String path) {
     if (path == this.path) {
       return this;
@@ -119,6 +120,19 @@ class StructureFolder extends StructureItem {
     for (final StructureItem child in _children) {
       if (child is StructureFolder && path.startsWith(child.path)) {
         return child.getFolderByPath(path);
+      }
+    }
+    return null;
+  }
+
+  /// Returns the direct folder children that has the same [name], or null if none was found!
+  StructureFolder? getDirectFolderByName(String name) {
+    if (name == this.name) {
+      return this;
+    }
+    for (final StructureItem child in _children) {
+      if (child is StructureFolder && child.name == name) {
+        return child;
       }
     }
     return null;
@@ -137,11 +151,19 @@ class StructureFolder extends StructureItem {
     return notes;
   }
 
-  void _sortChildren() {
+  /// If [recursive] is true, all sub folders will also be sorted!
+  void sortChildren({bool recursive = false}) {
     if (sorting == NoteSorting.BY_NAME) {
       _children.sort(_sortByName);
     } else if (sorting == NoteSorting.BY_DATE) {
       _children.sort(_sortByDate);
+    }
+    if (recursive) {
+      for (final StructureItem child in _children) {
+        if (child is StructureFolder) {
+          child.sortChildren(recursive: true);
+        }
+      }
     }
   }
 

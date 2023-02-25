@@ -1,6 +1,12 @@
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
+import 'package:shared/domain/entities/note_info.dart';
 
+/// structure notes will always have a [directParent] folder!
+///
+/// The decrypted name of a note is the [path] and note the [name]!
+///
+/// The [id] and [lastModified] are the same as in [NoteInfo]
 class StructureNote extends StructureItem {
   /// The noteId
   final int id;
@@ -11,7 +17,7 @@ class StructureNote extends StructureItem {
 
   StructureNote({
     required super.name,
-    required StructureFolder directParent,
+    required StructureFolder? directParent,
     required super.canBeModified,
     required this.id,
     required this.lastModified,
@@ -29,7 +35,7 @@ class StructureNote extends StructureItem {
   }) {
     return StructureNote(
       name: newName ?? name,
-      directParent: newDirectParent ?? directParent!,
+      directParent: newDirectParent ?? directParent,
       canBeModified: newCanBeModified ?? canBeModified,
       id: newId ?? id,
       lastModified: newLastModified ?? lastModified,

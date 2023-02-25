@@ -5,6 +5,7 @@ import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
+import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
 /// This updates the current note and the "recent" directory of the [NoteStructureRepository]
@@ -41,6 +42,8 @@ class UpdateNoteStructure extends UseCase<void, NoParams> {
       children: notes,
       sorting: NoteSorting.BY_DATE,
     );
+
+    Logger.debug("Updated the recent notes to:\n${noteStructureRepository.recent}");
   }
 
   void _updateCurrentItem() {
@@ -77,5 +80,7 @@ class UpdateNoteStructure extends UseCase<void, NoParams> {
 
     // set item
     noteStructureRepository.currentItem = current;
+
+    Logger.debug("Updated the current item to:\n$current");
   }
 }
