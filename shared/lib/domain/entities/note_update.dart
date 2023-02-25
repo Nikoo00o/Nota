@@ -32,7 +32,7 @@ class NoteUpdate extends Entity {
     required this.newEncFileName,
     required this.newLastEdited,
     required this.noteTransferStatus,
-  }) : super(<String, dynamic>{
+  }) : super(<String, Object?>{
           "clientId": clientId,
           "serverId": serverId,
           "newEncFileName": newEncFileName,

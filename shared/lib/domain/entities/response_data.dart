@@ -13,7 +13,7 @@ class ResponseData extends Entity {
   final Map<String, String> responseHeaders;
 
   ResponseData({required this.json, required this.bytes, required this.responseHeaders})
-      : super(<String, dynamic>{
+      : super(<String, Object?>{
           "json": json,
           "bytes": bytes,
           "responseHeaders": responseHeaders,

@@ -19,7 +19,10 @@ import 'package:shared/core/utils/string_utils.dart';
 /// members to the call of the getter of the super class.
 ///
 /// Best practice is to always make sub classes of this class immutable with only final members and then provide a
-/// copyWith function that returns a new object with modified members!
+/// copyWith function that returns a new object with modified members from the parameters!
+/// If that function is used in a subclass, then all deeper sub classes should implement the method again. And if the same
+/// parameters are used for example inside of a model for an entity, then it is a valid override for the method of the
+/// entity and can also be called with an entity reference.
 abstract class ImmutableEquatable extends Equatable {
   final Map<String, Object?> _properties;
 
@@ -40,10 +43,4 @@ abstract class ImmutableEquatable extends Equatable {
   String toString() {
     return StringUtils.toStringPretty(this, properties);
   }
-
-  /// This copy method can be used to create a copy of this [ImmutableEquatable] and change the member variables by
-  /// replacing them with parameters from this method.
-  ///
-  /// If this is overridden in a subclass, then all deeper sub classes must implement this method as well!!!
-  ImmutableEquatable copyWith() => throw UnimplementedError();
 }

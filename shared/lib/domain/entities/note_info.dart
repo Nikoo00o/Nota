@@ -8,16 +8,19 @@ class NoteInfo extends Entity {
   /// The unique id of the note for identification
   final int id;
 
-  /// The base64 encoded file name of the note encrypted with the data key
+  /// The base64 encoded file name of the note encrypted with the data key.
   ///
-  /// If this is empty, then that means that the note was deleted
+  /// If this is empty, then that means that the note was deleted.
+  ///
+  /// The file name contains the virtual path of the note structure as well as the name of the note! It does not contain a
+  /// file extension!
   final String encFileName;
 
   /// The TimeStamp for when the note was edited the last time
   final DateTime lastEdited;
 
   NoteInfo({required this.id, required this.encFileName, required this.lastEdited})
-      : super(<String, dynamic>{
+      : super(<String, Object?>{
           "id": id,
           "encFileName": encFileName,
           "lastEdited": lastEdited,
