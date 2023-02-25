@@ -1,0 +1,38 @@
+import 'package:app/domain/entities/structure_folder.dart';
+import 'package:app/domain/entities/structure_item.dart';
+
+class StructureNote extends StructureItem {
+  /// The noteId
+  final int id;
+
+  /// The lastModified timestamp of the note
+  @override
+  final DateTime lastModified;
+
+  StructureNote({
+    required super.name,
+    required StructureFolder directParent,
+    required super.canBeModified,
+    required this.id,
+    required this.lastModified,
+  }) : super(directParent: directParent, additionalProperties: <String, Object?>{
+          "id": id,
+          "lastModified": lastModified,
+        });
+
+  StructureNote copyWith({
+    String? newName,
+    StructureFolder? newDirectParent,
+    bool? newCanBeModified,
+    int? newId,
+    DateTime? newLastModified,
+  }) {
+    return StructureNote(
+      name: newName ?? name,
+      directParent: newDirectParent ?? directParent!,
+      canBeModified: newCanBeModified ?? canBeModified,
+      id: newId ?? id,
+      lastModified: newLastModified ?? lastModified,
+    );
+  }
+}
