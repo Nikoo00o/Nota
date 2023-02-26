@@ -107,6 +107,19 @@ class StructureFolder extends StructureItem {
     sortChildren();
   }
 
+  /// Replaces the own [oldChild] reference with [newChild] without changing the parent, or copying them!
+  /// Also sorts the children and returns the [newChild].
+  /// Can throw [ErrorCodes.INVALID_PARAMS] if the [oldChild] was not found.
+  void replaceChildRef(StructureItem oldChild, StructureItem newChild) {
+    _children.clear();
+    for (int i = 0; i < _children.length; ++i) {
+      if (_children[i] == oldChild) {
+        _children[i] = newChild;
+      }
+    }
+    sortChildren();
+  }
+
   /// Returns a reference to the element at the [position] of the [_children].
   /// Can throw [ErrorCodes.INVALID_PARAMS].
   StructureItem getChild(int position) {
@@ -116,7 +129,7 @@ class StructureFolder extends StructureItem {
     return _children.elementAt(position);
   }
 
-  /// Returns the children note that matches the [noteId], or null if none was found (recursively)
+  /// Returns a reference to the children note that matches the [noteId], or null if none was found (recursively)
   StructureNote? getNoteById(int noteId) {
     for (final StructureItem child in _children) {
       if (child is StructureFolder) {
@@ -131,24 +144,32 @@ class StructureFolder extends StructureItem {
     return null;
   }
 
-  /// Returns a deep copy of the children folder recursively for which its full path starts with [path], or null if none was
-  /// found
-  StructureFolder? getFolderByPath(String path) {
+  /// Returns a reference, or deep copy of the children folder recursively for which its full path starts with [path], or
+  /// null if none was found!
+  StructureFolder? getFolderByPath(String path, {required bool deepCopy}) {
     if (path == this.path) {
-      return copyWith(changeParentOfChildren: true);
+      if (deepCopy) {
+        return copyWith(changeParentOfChildren: true);
+      } else {
+        return this;
+      }
     }
     for (final StructureItem child in _children) {
       if (child is StructureFolder && path.startsWith(child.path)) {
-        return child.getFolderByPath(path);
+        return child.getFolderByPath(path, deepCopy: deepCopy);
       }
     }
     return null;
   }
 
-  /// Returns a deep copy of the direct folder children that has the same [name], or null if none was found!
-  StructureFolder? getDirectFolderByName(String name) {
+  /// Returns a reference, or deep copy of the direct folder children that has the same [name], or null if none was found!
+  StructureFolder? getDirectFolderByName(String name, {required bool deepCopy}) {
     if (name == this.name) {
-      return copyWith(changeParentOfChildren: true);
+      if (deepCopy) {
+        return copyWith(changeParentOfChildren: true);
+      } else {
+        return this;
+      }
     }
     for (final StructureItem child in _children) {
       if (child is StructureFolder && child.name == name) {
@@ -186,6 +207,9 @@ class StructureFolder extends StructureItem {
       }
     }
   }
+
+  /// Returns "[path] + [delimiter] + [name]".
+  String getPathForChildName(String name) => "$path${StructureItem.delimiter}$name";
 
   int get amountOfChildren => _children.length;
 

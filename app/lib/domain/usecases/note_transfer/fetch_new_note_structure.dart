@@ -6,6 +6,8 @@ import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
+import 'package:app/domain/usecases/note_structure/get_current_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/get_structure_folders.dart';
 import 'package:app/domain/usecases/note_structure/update_note_structure.dart';
 import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
 import 'package:shared/core/utils/logger/logger.dart';
@@ -76,7 +78,7 @@ class FetchNewNoteStructure extends UseCase<void, NoParams> {
       // parse folders from path and create folders first, then the note
       final String subFolderName = path.removeAt(0);
       final String remainingPath = path.join(StructureItem.delimiter);
-      StructureFolder? subFolder = targetFolder.getDirectFolderByName(subFolderName);
+      StructureFolder? subFolder = targetFolder.getDirectFolderByName(subFolderName, deepCopy: false);
 
       if (subFolder == null) {
         // create folder if it does not exist
@@ -90,7 +92,7 @@ class FetchNewNoteStructure extends UseCase<void, NoParams> {
         ));
 
         // important: update the reference (will not be null afterwards!)
-        subFolder = targetFolder.getDirectFolderByName(subFolderName);
+        subFolder = targetFolder.getDirectFolderByName(subFolderName, deepCopy: false);
         Logger.verbose("created new folder ${subFolder!.path}");
       }
 

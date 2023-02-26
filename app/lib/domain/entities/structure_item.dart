@@ -1,6 +1,8 @@
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:shared/core/config/shared_config.dart';
+import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/domain/entities/entity.dart';
 
 /// The base class for the structure notes and folders which are displayed in the main view of the gui!
@@ -42,7 +44,7 @@ abstract class StructureItem extends Entity {
   /// This is equal to the decrypted file name of a note.
   String get path {
     if (directParent != null && directParent!.isRoot == false && directParent!.isRecent == false) {
-      return "${directParent!.path}$delimiter$name";
+      return directParent!.getPathForChildName(name);
     }
     return name;
   }
@@ -88,5 +90,20 @@ abstract class StructureItem extends Entity {
       return item.copyWith(newDirectParent: newDirectParent);
     }
     throw UnimplementedError();
+  }
+
+  /// This throws [ErrorCodes.INVALID_PARAMS] if the [nameToValidate] is empty, or if it contains the [delimiter].
+  ///
+  /// It throws [ErrorCodes.NAME_ALREADY_USED] if the [StructureFolder.recentFolderNames], or
+  /// [StructureFolder.rootFolderNames] contain  the name.
+  static void throwErrorForName(String nameToValidate) {
+    if (nameToValidate.isEmpty || nameToValidate.contains(StructureItem.delimiter)) {
+      throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
+    }
+
+    if (StructureFolder.recentFolderNames.contains(nameToValidate) ||
+        StructureFolder.rootFolderNames.contains(nameToValidate)) {
+      throw const ClientException(message: ErrorCodes.NAME_ALREADY_USED);
+    }
   }
 }

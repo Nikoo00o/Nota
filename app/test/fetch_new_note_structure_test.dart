@@ -58,7 +58,7 @@ void _testWithoutAccount() {
   });
 
   test("same throw with no account and get current structure item", () async {
-    expect(() async => sl<GetCurrentStructureItem>().call(NoParams()),
+    expect(() async => sl<GetCurrentStructureItem>().call(GetCurrentStructureItemParams(deepCopy: true)),
         throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.CLIENT_NO_ACCOUNT)));
   });
 
@@ -109,7 +109,7 @@ Future<void> _testSimpleNoteStructure({required bool callFetchNewStructure}) asy
     await sl<FetchNewNoteStructure>().call(NoParams());
   }
 
-  final StructureItem item = await sl<GetCurrentStructureItem>().call(NoParams());
+  final StructureItem item = await sl<GetCurrentStructureItem>().call(GetCurrentStructureItemParams(deepCopy: true));
   final List<StructureFolder> folders = await sl<GetCurrentStructureFolders>().call(NoParams());
 
   expect(folders[0].isRoot, true, reason: "root true");
@@ -215,7 +215,8 @@ void _testChanges() {
     sl<NoteStructureRepository>().currentItem = (root.getChild(0) as StructureFolder).getChild(0);
 
     await sl<FetchNewNoteStructure>().call(NoParams());
-    final StructureItem currentItem = await sl<GetCurrentStructureItem>().call(NoParams());
+    final StructureItem currentItem =
+        await sl<GetCurrentStructureItem>().call(GetCurrentStructureItemParams(deepCopy: true));
     expect(currentItem.path, "dir1/a_third");
   });
 
@@ -225,7 +226,8 @@ void _testChanges() {
     sl<NoteStructureRepository>().currentItem = recent.getChild(1);
 
     await sl<FetchNewNoteStructure>().call(NoParams());
-    final StructureItem currentItem = await sl<GetCurrentStructureItem>().call(NoParams());
+    final StructureItem currentItem =
+        await sl<GetCurrentStructureItem>().call(GetCurrentStructureItemParams(deepCopy: true));
     expect(currentItem.path, "dir1/a_third");
   });
 
@@ -240,8 +242,9 @@ void _testChanges() {
     expect(n1, n2, reason: "Should be same note");
     expect(n1?.path, "dir1/dir3/fourth", reason: "should be the correct note");
 
-    final StructureFolder? f1 = root.getFolderByPath("dir1/dir3");
-    final StructureFolder? f2 = root.getDirectFolderByName("dir1")?.getDirectFolderByName("dir3");
+    final StructureFolder? f1 = root.getFolderByPath("dir1/dir3", deepCopy: true);
+    final StructureFolder? f2 =
+        root.getDirectFolderByName("dir1", deepCopy: true)?.getDirectFolderByName("dir3", deepCopy: true);
     expect(f1, f2, reason: "Should be same folder");
     expect(f1?.path, "dir1/dir3", reason: "should be the correct folder");
   });

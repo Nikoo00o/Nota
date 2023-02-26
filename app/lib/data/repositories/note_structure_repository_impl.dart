@@ -15,5 +15,5 @@ class NoteStructureRepositoryImpl extends NoteStructureRepository {
   }
 
   @override
-  StructureFolder? getFolderByPath(String path) => root?.getFolderByPath(path);
+  StructureFolder? getFolderByPath(String path, {required bool deepCopy}) => root?.getFolderByPath(path, deepCopy: deepCopy);
 }
