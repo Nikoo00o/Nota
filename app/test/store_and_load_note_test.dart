@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/client_account.dart';
@@ -168,7 +169,7 @@ void main() {
       await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
           noteId: -1, decryptedName: "name", decryptedContent: Uint8List.fromList(utf8.encode("test"))));
 
-      await sl<StoreNoteEncrypted>()
+     final DateTime time = await sl<StoreNoteEncrypted>()
           .call(ChangeNoteEncryptedParams(noteId: -1, decryptedName: null, decryptedContent: Uint8List(0)));
 
       final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
@@ -177,6 +178,7 @@ void main() {
           SecurityUtils.decryptString(account.noteInfoList.first.encFileName, base64UrlEncode(account.decryptedDataKey!)),
           reason: "file name should match");
       expect(utf8.decode(bytes), "", reason: "bytes should match");
+      expect(account.noteInfoList.first.lastEdited, time, reason: "time should match");
     });
 
     test("Changing a note with only a filename should work", () async {
@@ -185,7 +187,7 @@ void main() {
       await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
           noteId: -1, decryptedName: "name", decryptedContent: Uint8List.fromList(utf8.encode("test"))));
 
-      await sl<StoreNoteEncrypted>()
+      final DateTime time = await sl<StoreNoteEncrypted>()
           .call(ChangeNoteEncryptedParams(noteId: -1, decryptedName: "file", decryptedContent: null));
 
       final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
@@ -194,6 +196,7 @@ void main() {
           SecurityUtils.decryptString(account.noteInfoList.first.encFileName, base64UrlEncode(account.decryptedDataKey!)),
           reason: "file name should match");
       expect(utf8.decode(bytes), "test", reason: "bytes should match");
+      expect(account.noteInfoList.first.lastEdited, time, reason: "time should match");
     });
   });
 }
