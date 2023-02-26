@@ -10,7 +10,7 @@ class SessionTokenRedirect extends Entity {
   final SessionToken to;
 
   SessionTokenRedirect({required this.from, required this.to})
-      : super(<String, dynamic>{
+      : super(<String, Object?>{
           "from": from,
           "to": to,
         });

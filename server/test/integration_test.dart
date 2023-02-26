@@ -6,6 +6,7 @@ import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/constants/rest_json_parameter.dart';
 import 'package:shared/core/enums/note_transfer_status.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
+import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/core/utils/string_utils.dart';
 import 'package:shared/data/dtos/account/account_change_password_request.dart';
 import 'package:shared/data/dtos/account/account_change_password_response.dart';
@@ -49,16 +50,16 @@ Future<void> _integrationTest() async {
 }
 
 Future<void> _accountTests() async {
-  print("create accounts");
+  Logger.info("create accounts");
   _account1 = await createAndLoginToTestAccount(1);
   _account2 = await createAndLoginToTestAccount(2);
 
-  print("login to one again again");
+  Logger.info("login to one again again");
   final AccountLoginResponse login = await _loginToAccount(_account1);
   expect(login.sessionToken, _account1.sessionToken);
   expect(_account1.sessionToken, isNot(_account2.sessionToken));
 
-  print("change password of one account");
+  Logger.info("change password of one account");
   _account2.passwordHash = "changed";
   final AccountChangePasswordResponse changePw = await _changePasswordOfTestAccount(_account2);
   final AccountLoginResponse login2 = await _loginToAccount(_account2);
@@ -66,7 +67,7 @@ Future<void> _accountTests() async {
   expect(changePw.sessionToken, isNot(_account2.sessionToken));
   _account2.sessionToken = changePw.sessionToken;
 
-  print("create a third account");
+  Logger.info("create a third account");
   _account3 = await createAndLoginToTestAccount(3);
   expect(_account3.sessionToken, isNot(_account2.sessionToken));
   expect(_account3.sessionToken, isNot(_account1.sessionToken));
@@ -74,7 +75,7 @@ Future<void> _accountTests() async {
 
 Future<void> _noteTests() async {
   await _firstTransfer();
-  print("restarting server and loading data from files");
+  Logger.info("restarting server and loading data from files");
   await cleanupTestFilesAndServer(deleteTestFolderAfterwards: false);
   await createCommonTestObjects(serverPort: _serverPort);
   await _secondTransfer();
@@ -91,7 +92,7 @@ Future<void> _firstTransfer() async {
     NoteInfoModel(id: -1, encFileName: "c2_1", lastEdited: _now.subtract(const Duration(days: 5))),
   ];
 
-  print("starting first transfers to add some notes to the server");
+  Logger.info("starting first transfers to add some notes to the server");
   final StartNoteTransferResponse transfer1 = await _startTransfer(_account1);
   final StartNoteTransferResponse transfer2 = await _startTransfer(_account2);
   final StartNoteTransferResponse invalidTransfer = await _startTransfer(_account1);
@@ -110,7 +111,7 @@ Future<void> _firstTransfer() async {
   expect(transfer1.noteUpdates.first.newEncFileName, invalidTransfer.noteUpdates.first.newEncFileName);
   expect(emptyTransfer.noteUpdates.isEmpty, true);
 
-  print("uploading notes");
+  Logger.info("uploading notes");
   await _upload(_account1, transfer1.transferToken, transfer1.noteUpdates.first.serverId, utf8.encode("c1_1_text"));
   await _upload(_account2, transfer2.transferToken, transfer2.noteUpdates.first.serverId, utf8.encode("c2_1_text"));
   await _upload(
@@ -121,7 +122,7 @@ Future<void> _firstTransfer() async {
   }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
   await Future<void>.delayed(const Duration(milliseconds: 25));
 
-  print("finishing transfers");
+  Logger.info("finishing transfers");
   await _finishTransfer(_account1, transfer1.transferToken, shouldCancel: false);
   await _finishTransfer(_account2, transfer2.transferToken, shouldCancel: false);
 
@@ -138,7 +139,7 @@ Future<void> _firstTransfer() async {
   }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN));
   await Future<void>.delayed(const Duration(milliseconds: 25));
 
-  print("updating client ids");
+  Logger.info("updating client ids");
   _account1.noteInfoList[0] = NoteInfoModel(
       id: transfer1.noteUpdates.first.serverId,
       encFileName: "c1_1_changed",
@@ -154,7 +155,7 @@ Future<void> _secondTransfer() async {
 
   _account2.noteInfoList.add(NoteInfoModel(id: -3, encFileName: "c2_2", lastEdited: _now.subtract(const Duration(days: 5))));
 
-  print("starting second transfers to change some notes");
+  Logger.info("starting second transfers to change some notes");
 
   final StartNoteTransferResponse transfer1 = await _startTransfer(_account1);
   final StartNoteTransferResponse transfer2 = await _startTransfer(_account2);
@@ -175,17 +176,17 @@ Future<void> _secondTransfer() async {
   expect(transfer2.noteUpdates.first.serverId, 2);
   expect(transfer2.noteUpdates[1].serverId, 5);
 
-  print("downloading note");
+  Logger.info("downloading note");
   final List<int> bytes = await _download(_account1, transfer1.transferToken, transfer1.noteUpdates.first.serverId);
   expect(utf8.decode(bytes), "c1_1_text");
 
-  print("uploading notes");
+  Logger.info("uploading notes");
   await _upload(_account1, transfer1.transferToken, transfer1.noteUpdates[1].serverId, utf8.encode("c1_2_text"));
 
   await _upload(_account2, transfer2.transferToken, transfer2.noteUpdates.first.serverId, utf8.encode("c2_1_changed_text"));
   await _upload(_account2, transfer2.transferToken, transfer2.noteUpdates[1].serverId, utf8.encode("c2_2_text"));
 
-  print("finishing transfers");
+  Logger.info("finishing transfers");
   await _finishTransfer(_account1, transfer1.transferToken, shouldCancel: false);
   await _finishTransfer(_account2, transfer2.transferToken, shouldCancel: false);
 }
@@ -194,13 +195,13 @@ Future<void> _thirdTransfer() async {
   _account1.noteInfoList.clear();
   _account2.noteInfoList.clear();
 
-  print("starting third transfer to download all notes again");
+  Logger.info("starting third transfer to download all notes again");
   final StartNoteTransferResponse transfer1 = await _startTransfer(_account1);
   final StartNoteTransferResponse transfer2 = await _startTransfer(_account2);
   transfer1.noteUpdates.forEach(_expectClientNeedsNew);
   transfer2.noteUpdates.forEach(_expectClientNeedsNew);
 
-  print("downloading note");
+  Logger.info("downloading note");
   final List<int> bytes1 = await _download(_account1, transfer1.transferToken, transfer1.noteUpdates.first.serverId);
   final List<int> bytes2 = await _download(_account1, transfer1.transferToken, transfer1.noteUpdates[1].serverId);
   expect(utf8.decode(bytes1), "c1_1_text");
@@ -211,7 +212,7 @@ Future<void> _thirdTransfer() async {
   expect(utf8.decode(bytes3), "c2_1_changed_text");
   expect(utf8.decode(bytes4), "c2_2_text");
 
-  print("finishing transfers and add notes");
+  Logger.info("finishing transfers and add notes");
   await _finishTransfer(_account1, transfer1.transferToken, shouldCancel: false);
   await _finishTransfer(_account2, transfer2.transferToken, shouldCancel: false);
   _addNotes(_account1, transfer1.noteUpdates);
@@ -219,14 +220,14 @@ Future<void> _thirdTransfer() async {
 }
 
 Future<void> _fourthTransfer() async {
-  print("starting third transfer which should do nothing");
+  Logger.info("starting third transfer which should do nothing");
   final StartNoteTransferResponse transfer1 = await _startTransfer(_account1);
   final StartNoteTransferResponse transfer2 = await _startTransfer(_account2);
 
   expect(transfer1.noteUpdates.isEmpty, true);
   expect(transfer2.noteUpdates.isEmpty, true);
 
-  print("finishing transfers");
+  Logger.info("finishing transfers");
   await _finishTransfer(_account1, transfer1.transferToken, shouldCancel: false);
   await _finishTransfer(_account2, transfer2.transferToken, shouldCancel: false);
 }

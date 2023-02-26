@@ -55,6 +55,9 @@ class ErrorCodes {
 
   /// The client has currently no transfer stored
   static const String CLIENT_NO_TRANSFER = "error.client.no.transfer";
+
+  /// Invalid parameters, or values were used
+  static const String INVALID_PARAMS = "error.invalid.params";
 }
 
 // todo: add translation strings

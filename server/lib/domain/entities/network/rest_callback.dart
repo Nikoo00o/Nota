@@ -15,7 +15,7 @@ class RestCallback extends Entity {
   final FutureOr<RestCallbackResult> Function(RestCallbackParams) callback;
 
   RestCallback({required this.endpoint, required this.callback})
-      : super(<String, dynamic>{
+      : super(<String, Object?>{
           "endpoint": endpoint,
           "callback": callback,
         });

@@ -5,25 +5,23 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=2.18.6 <3.0.0'
+  sdk: '>=2.19.2 <3.0.0'
+  flutter: ^3.7.5
 
 dependencies:
-  flutter:
-    sdk: flutter
-
   shared: # shared code
     path: ../shared
 
   cupertino_icons: ^1.0.2 # default icons
   get_it: ^7.2.0 # service locator
   tuple: ^2.0.0 # tuples
-  path_provider: 2.0.12 # application directory path
+  path_provider: ^2.0.12 # application directory path
   hive: ^2.2.3 # nosql database
   hive_flutter: ^1.1.0 # flutter extension for hive
   flutter_secure_storage: ^8.0.0 # secure storage for keys in keychain, or keystore
   cryptography: 2.1.1 # basic cryptographic functions (like aes encryption)
-  cryptography_flutter: 2.0.2 # better flutter performance for base package
-  dargon2_flutter: 3.2.0 # argon2 implementation
+  cryptography_flutter: ^2.0.2 # better flutter performance for base package
+  dargon2_flutter: ^3.2.0 # argon2 implementation
 
 dev_dependencies:
   test: ^1.16.0 # dart test package

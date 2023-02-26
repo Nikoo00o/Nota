@@ -9,7 +9,7 @@ class SessionToken extends Entity {
   final DateTime validTo;
 
   SessionToken({required this.token, required this.validTo})
-      : super(<String, dynamic>{
+      : super(<String, Object?>{
           "token": token,
           "validTo": validTo,
         });

@@ -34,20 +34,40 @@ class StringUtils {
     buffer.writeln("\n${object.runtimeType} {");
     propertiesOfObject.forEach((String key, Object? value) {
       buffer.write("  $key : ");
-      String valueString = value?.toString() ?? "null";
+      final String valueString = value?.toString() ?? "null";
       if (valueString.startsWith("\n")) {
-        valueString = valueString.substring(1); // remove the line break
-        final List<String> innerLogs = valueString.split("\n");
-        buffer.writeln(innerLogs.elementAt(0).toString()); // first line should not have spaces added
-        for (int i = 1; i < innerLogs.length - 1; ++i) {
-          buffer.writeln("  ${innerLogs.elementAt(i)}");
-        }
-        buffer.writeln("  ${innerLogs.elementAt(innerLogs.length - 1)},");
+        _printInnerObject(buffer, valueString);
+      } else if (value is List<dynamic>) {
+        _printInnerList(buffer, valueString);
       } else {
         buffer.writeln("$valueString,");
       }
     });
     buffer.write("}");
     return buffer.toString();
+  }
+
+  static void _printInnerObject(StringBuffer buffer, String value) {
+    final String valueString = value.substring(1); // remove the line break
+    final List<String> innerLogs = valueString.split("\n");
+    buffer.writeln(innerLogs.first); // first line should not have spaces added
+    for (int i = 1; i < innerLogs.length - 1; ++i) {
+      buffer.writeln("  ${innerLogs.elementAt(i)}");
+    }
+    buffer.writeln("  ${innerLogs.last},");
+  }
+
+  static void _printInnerList(StringBuffer buffer, String value) {
+    final List<String> lines = value.split("\n");
+    buffer.writeln(lines.first);
+    for (int i = 1; i < lines.length - 1; ++i) {
+      buffer.writeln("    ${lines.elementAt(i)}");
+    }
+    if (lines.last.length == 2) {
+      buffer.writeln("    ${lines.last.substring(0, 1)}");
+      buffer.writeln("  ${lines.last.substring(1)},");
+    } else {
+      buffer.writeln("  ${lines.last}");
+    }
   }
 }

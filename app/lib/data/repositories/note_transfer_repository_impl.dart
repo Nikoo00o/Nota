@@ -32,15 +32,18 @@ class NoteTransferRepositoryImpl extends NoteTransferRepository {
   NoteTransferRepositoryImpl({required this.remoteNoteDataSource, required this.localDataSource, required this.appConfig});
 
   @override
-  Future<void> storeEncryptedNote({required int noteId, required List<int> encryptedBytes, bool isTempNote = false}) async {
-    await localDataSource.writeFile(
-        localFilePath: getLocalNotePath(noteId: noteId, isTempNote: isTempNote), bytes: encryptedBytes);
-  }
+  Future<void> storeEncryptedNote({required int noteId, required List<int> encryptedBytes}) async =>
+      _storeEncryptedNoteInternal(noteId: noteId, encryptedBytes: encryptedBytes, isTempNote: false);
+
+  Future<void> _storeEncryptedNoteInternal(
+          {required int noteId, required List<int> encryptedBytes, required bool isTempNote}) async =>
+      localDataSource.writeFile(
+          localFilePath: getLocalNotePath(noteId: noteId, isTempNote: isTempNote), bytes: encryptedBytes);
 
   @override
-  Future<Uint8List> loadEncryptedNote({required int noteId, bool isTempNote = false}) async {
+  Future<Uint8List> loadEncryptedNote({required int noteId}) async {
     final Uint8List? encryptedBytes =
-        await localDataSource.readFile(localFilePath: getLocalNotePath(noteId: noteId, isTempNote: isTempNote));
+        await localDataSource.readFile(localFilePath: getLocalNotePath(noteId: noteId, isTempNote: false));
     if (encryptedBytes == null) {
       throw const FileException(message: ErrorCodes.FILE_NOT_FOUND);
     }
@@ -77,7 +80,7 @@ class NoteTransferRepositoryImpl extends NoteTransferRepository {
         noteId: noteClientId,
       ));
 
-      await storeEncryptedNote(noteId: noteClientId, encryptedBytes: response.rawBytes);
+      await _storeEncryptedNoteInternal(noteId: noteClientId, encryptedBytes: response.rawBytes, isTempNote: true);
     } else if (iterator.first.noteTransferStatus.serverNeedsUpdate) {
       Logger.debug("Uploading note $noteClientId");
       final Uint8List bytes = await loadEncryptedNote(noteId: noteClientId);
@@ -123,10 +126,14 @@ class NoteTransferRepositoryImpl extends NoteTransferRepository {
   @override
   Future<void> replaceNotesWithTemp() async {
     final List<String> files = await _getAllNotes();
+    final String tempEnding = SharedConfig.noteFileEnding(isTempNote: true);
     files.removeWhere((String path) => path.endsWith(SharedConfig.noteFileEnding(isTempNote: true)) == false);
-    Logger.debug("Clearing replacing the real notes with the following temp notes: $files");
+    final RegExp endingMatch = RegExp("\\$tempEnding\$"); //the regex escapes the dot (.) of the file ending
+
+    Logger.debug("Replacing the real notes with the following temp notes: $files");
     for (final String path in files) {
-      await localDataSource.deleteFile(localFilePath: path);
+      final String newPath = path.replaceFirst(endingMatch, SharedConfig.noteFileEnding(isTempNote: false));
+      await localDataSource.renameFile(oldLocalFilePath: path, newLocalFilePath: newPath);
     }
   }
 
@@ -139,8 +146,8 @@ class NoteTransferRepositoryImpl extends NoteTransferRepository {
   }
 
   @override
-  Future<bool> deleteNote({required int noteId, bool isTempNote = false}) async {
-    final String path = getLocalNotePath(noteId: noteId, isTempNote: isTempNote);
+  Future<bool> deleteNote({required int noteId}) async {
+    final String path = getLocalNotePath(noteId: noteId, isTempNote: false);
     Logger.debug("Deleting note $path");
     return localDataSource.deleteFile(localFilePath: path);
   }

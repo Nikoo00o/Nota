@@ -1,0 +1,247 @@
+import 'package:app/core/enums/note_sorting.dart';
+import 'package:app/domain/entities/structure_item.dart';
+import 'package:app/domain/entities/structure_note.dart';
+import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/exceptions/exceptions.dart';
+import 'package:shared/core/utils/logger/logger.dart';
+
+class StructureFolder extends StructureItem {
+  /// The reserved names for the "root" top level folder.
+  /// Contains the translation key first and then the translation values for all languages!
+  static List<String> rootFolderNames = <String>["notes.root", "Root", "Stammordner"];
+
+  /// The reserved names for the "recent notes" top level folder.
+  /// Contains the translation key first and then the translation values for all languages!
+  static List<String> recentFolderNames = <String>["notes.recent", "Recent Notes", "Zuletzt Bearbeitet"];
+
+  /// The folders and files within this folder.
+  ///
+  /// This will not be used for comparison and can be modified!
+  late final List<StructureItem> _children;
+
+  /// The sorting of the children of this folder
+  final NoteSorting sorting;
+
+  /// The [children] list will be deep copied by calling [StructureItem.deepCopy] and it will be sorted.
+  ///
+  /// If [changeParentOfChildren] is [true], then the individual children elements will also have their [directParent]
+  /// changed to [this]!!!
+  factory StructureFolder({
+    required String name,
+    required StructureFolder? directParent,
+    required bool canBeModified,
+    required List<StructureItem> children,
+    required NoteSorting sorting,
+    required bool changeParentOfChildren,
+  }) {
+    final StructureFolder folder = StructureFolder._internal(
+      name: name,
+      directParent: directParent,
+      canBeModified: canBeModified,
+      children: List<StructureItem>.empty(growable: true),
+      sorting: sorting,
+    );
+
+    for (final StructureItem child in children) {
+      folder._children.add(StructureItem.deepCopy(
+        child,
+        newDirectParent: changeParentOfChildren ? folder : null,
+        changeParentOfChildren: changeParentOfChildren,
+      ));
+    }
+
+    return folder;
+  }
+
+  StructureFolder._internal({
+    required super.name,
+    required super.directParent,
+    required super.canBeModified,
+    required List<StructureItem> children,
+    required this.sorting,
+  })  : _children = children,
+        super(additionalProperties: <String, Object?>{
+          "children": children,
+          "sorting": sorting,
+        }) {
+    sortChildren();
+  }
+
+  /// Adds a deep copy of the [child] with the [directParent] set to [this].
+  ///
+  /// If [sortAfterwards] is true, then this will sort the children afterwards.
+  void addChild(StructureItem child, {bool sortAfterwards = true}) {
+    _children.add(StructureItem.deepCopy(child, newDirectParent: this, changeParentOfChildren: true));
+    if (sortAfterwards) {
+      sortChildren();
+    }
+  }
+
+  /// Removes the child at the [position].
+  /// Can throw [ErrorCodes.INVALID_PARAMS] and sorts the children.
+  void removeChild(int position) {
+    if (position >= _children.length) {
+      throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
+    }
+    _children.removeAt(position);
+    sortChildren();
+  }
+
+  /// Replaces the child at the [position] with a deep copy of [newChild] with the [directParent] set to [this].
+  /// Can throw [ErrorCodes.INVALID_PARAMS] and sorts the children.
+  void changeChild(int position, StructureItem newChild) {
+    if (position >= _children.length) {
+      throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
+    }
+    _children[position] = StructureItem.deepCopy(newChild, newDirectParent: this, changeParentOfChildren: true);
+    sortChildren();
+  }
+
+  /// Replaces the own children references with the [newChildren] without changing the parent, or copying them!
+  /// Also sorts the children.
+  void replaceChildren(List<StructureItem> newChildren) {
+    _children.clear();
+    for (final StructureItem child in newChildren) {
+      _children.add(child);
+    }
+    sortChildren();
+  }
+
+  /// Returns a reference to the element at the [position] of the [_children].
+  /// Can throw [ErrorCodes.INVALID_PARAMS].
+  StructureItem getChild(int position) {
+    if (position >= _children.length) {
+      throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
+    }
+    return _children.elementAt(position);
+  }
+
+  /// Returns the children note that matches the [noteId], or null if none was found (recursively)
+  StructureNote? getNoteById(int noteId) {
+    for (final StructureItem child in _children) {
+      if (child is StructureFolder) {
+        final StructureNote? childNote = child.getNoteById(noteId);
+        if (childNote != null) {
+          return childNote;
+        }
+      } else if (child is StructureNote && child.id == noteId) {
+        return child;
+      }
+    }
+    return null;
+  }
+
+  /// Returns a deep copy of the children folder recursively for which its full path starts with [path], or null if none was
+  /// found
+  StructureFolder? getFolderByPath(String path) {
+    if (path == this.path) {
+      return copyWith(changeParentOfChildren: true);
+    }
+    for (final StructureItem child in _children) {
+      if (child is StructureFolder && path.startsWith(child.path)) {
+        return child.getFolderByPath(path);
+      }
+    }
+    return null;
+  }
+
+  /// Returns a deep copy of the direct folder children that has the same [name], or null if none was found!
+  StructureFolder? getDirectFolderByName(String name) {
+    if (name == this.name) {
+      return copyWith(changeParentOfChildren: true);
+    }
+    for (final StructureItem child in _children) {
+      if (child is StructureFolder && child.name == name) {
+        return child;
+      }
+    }
+    return null;
+  }
+
+  /// Returns all children notes of this folder recursively as a new list.
+  List<StructureNote> getAllNotes() {
+    final List<StructureNote> notes = List<StructureNote>.empty(growable: true);
+    for (final StructureItem child in _children) {
+      if (child is StructureFolder) {
+        notes.addAll(child.getAllNotes());
+      } else if (child is StructureNote) {
+        notes.add(child);
+      }
+    }
+    return notes;
+  }
+
+  /// If [recursive] is true, all sub folders will also be sorted!
+  void sortChildren({bool recursive = false}) {
+    if (sorting == NoteSorting.BY_NAME) {
+      _children.sort(_sortByName);
+    } else if (sorting == NoteSorting.BY_DATE) {
+      _children.sort(_sortByDate);
+    }
+    if (recursive) {
+      for (final StructureItem child in _children) {
+        if (child is StructureFolder) {
+          child.sortChildren(recursive: true);
+        }
+      }
+    }
+  }
+
+  int get amountOfChildren => _children.length;
+
+  bool get isRoot => rootFolderNames.contains(name);
+
+  bool get isRecent => recentFolderNames.contains(name);
+
+  /// Compares 2 structure items in alphabetical order
+  static int _sortByName(StructureItem first, StructureItem second) =>
+      first.name.toLowerCase().compareTo(second.name.toLowerCase());
+
+  /// Compares 2 structure items by the newest modified time stamp first in descending order
+  static int _sortByDate(StructureItem first, StructureItem second) => second.lastModified.compareTo(first.lastModified);
+
+  @override
+  DateTime get lastModified {
+    DateTime newest = DateTime.fromMillisecondsSinceEpoch(0);
+    for (final StructureItem child in _children) {
+      final DateTime childModified = child.lastModified;
+      if (childModified.isAfter(newest)) {
+        newest = childModified;
+      }
+    }
+    return newest;
+  }
+
+  /// This makes a deep copy of this, so every sub folder and note file will be copied!
+  ///
+  /// If [changeParentOfChildren] is true, then the [directParent] of the children will be changed to this new copy!
+  /// Most of the times when working with the folders, this will be true, but when getting it for the guy, or when working
+  /// with the top level folder "recent", then it will be false (because for recent it would change the parent of the items)!
+  ///
+  /// The [newChildren], or [_children] will be copied to a new list and each folder, or note file will be deep copied!
+  ///
+  /// This also calls [StructureItem.deepCopy].
+  ///
+  /// This can throw an [ErrorCodes.INVALID_PARAMS] when [isRecent] and [changeParentOfChildren] is true!
+  StructureFolder copyWith({
+    String? newName,
+    StructureFolder? newDirectParent,
+    bool? newCanBeModified,
+    List<StructureItem>? newChildren,
+    NoteSorting? newSorting,
+    required bool changeParentOfChildren,
+  }) {
+    if (isRecent && changeParentOfChildren) {
+      Logger.error("CopyWith called on recent with changeParentOfChildren enabled:\ $this");
+      throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
+    }
+    return StructureFolder(
+      name: newName ?? name,
+      directParent: newDirectParent ?? directParent,
+      canBeModified: newCanBeModified ?? canBeModified,
+      children: newChildren ?? _children,
+      sorting: newSorting ?? sorting,
+      changeParentOfChildren: changeParentOfChildren,
+    );
+  }
+}

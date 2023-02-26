@@ -30,7 +30,7 @@ class RestCallbackResult extends Entity {
     this.statusCode = HttpStatus.ok,
     this.rawBytes,
     Map<String, String>? responseHeaders,
-  }) : super(<String, dynamic>{
+  }) : super(<String, Object?>{
           "jsonResult": jsonResult,
           "statusCode": statusCode,
           "rawBytes": rawBytes,

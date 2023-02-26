@@ -1,0 +1,263 @@
+import 'dart:convert';
+import 'dart:math';
+import 'dart:typed_data';
+import 'package:app/core/enums/note_sorting.dart';
+import 'package:app/core/get_it.dart';
+import 'package:app/domain/entities/client_account.dart';
+import 'package:app/domain/entities/structure_folder.dart';
+import 'package:app/domain/entities/structure_item.dart';
+import 'package:app/domain/entities/structure_note.dart';
+import 'package:app/domain/repositories/note_structure_repository.dart';
+import 'package:app/domain/repositories/note_transfer_repository.dart';
+import 'package:app/domain/usecases/account/get_logged_in_account.dart';
+import 'package:app/domain/usecases/account/login/create_account.dart';
+import 'package:app/domain/usecases/account/login/login_to_account.dart';
+import 'package:app/domain/usecases/note_structure/get_current_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/get_structure_folders.dart';
+import 'package:app/domain/usecases/note_structure/update_note_structure.dart';
+import 'package:app/domain/usecases/note_transfer/fetch_new_note_structure.dart';
+import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
+import 'package:app/domain/usecases/note_transfer/store_note_encrypted.dart';
+import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/exceptions/exceptions.dart';
+import 'package:shared/core/utils/list_utils.dart';
+import 'package:shared/core/utils/logger/logger.dart';
+import 'package:shared/core/utils/security_utils.dart';
+import 'package:shared/domain/usecases/usecase.dart';
+
+import '../../server/test/helper/server_test_helper.dart' as server; // relative import of the server test helpers, so that
+// the real server responses can be used for testing instead of mocks! The server tests should be run before!
+import 'helper/app_test_helper.dart';
+
+const int _serverPort = 9194; // also needs to be a different port for each test file. The app tests dont have to care
+// about the server errors!
+
+/// this test also tests the use cases [GetCurrentStructureItem] and [GetCurrentStructureFolders] and [UpdateNoteStructure].
+
+void main() {
+  setUp(() async {
+    await createCommonTestObjects(serverPort: _serverPort); // init all helper objects
+  });
+
+  tearDown(() async {
+    await testCleanup();
+  });
+
+  group("fetch new note structure use case: ", () {
+    group("no account: ", _testWithoutAccount);
+    group("logged in account: ", _testWithAccount);
+  });
+}
+
+void _testWithoutAccount() {
+  test("fetch new structure should throw with no account", () async {
+    expect(() async => sl<FetchNewNoteStructure>().call(NoParams()),
+        throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.CLIENT_NO_ACCOUNT)));
+  });
+
+  test("same throw with no account and get current structure item", () async {
+    expect(() async => sl<GetCurrentStructureItem>().call(NoParams()),
+        throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.CLIENT_NO_ACCOUNT)));
+  });
+
+  test("other throw with no logged in account and get current structure folders", () async {
+    await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
+    expect(() async => sl<GetCurrentStructureFolders>().call(NoParams()),
+        throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.ACCOUNT_WRONG_PASSWORD)));
+  });
+}
+
+Future<ClientAccount> _loginToAccount() async {
+  await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
+  await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+  final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
+  return account;
+}
+
+void _testWithAccount() {
+  setUp(() async {
+    await _loginToAccount();
+  });
+
+  test("update note without fetch new structure should throw ", () async {
+    expect(() async => sl<UpdateNoteStructure>().call(NoParams()),
+        throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.INVALID_PARAMS)));
+  });
+
+  test("fetching a simple new note structure should work and also call update note structure ", () async {
+    await _testSimpleNoteStructure(callFetchNewStructure: true);
+  });
+
+  test("the same should also work the same without an explicit call to fetch the new structure ", () async {
+    await _testSimpleNoteStructure(callFetchNewStructure: false);
+  });
+
+  test("the complex structure should be build correctly ", () async {
+    await _testComplexStructure();
+  });
+
+  group("test changes: ", _testChanges);
+}
+
+Future<void> _testSimpleNoteStructure({required bool callFetchNewStructure}) async {
+  await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
+      noteId: -1, decryptedName: "name", decryptedContent: Uint8List.fromList(utf8.encode("test"))));
+
+  if (callFetchNewStructure) {
+    await sl<FetchNewNoteStructure>().call(NoParams());
+  }
+
+  final StructureItem item = await sl<GetCurrentStructureItem>().call(NoParams());
+  final List<StructureFolder> folders = await sl<GetCurrentStructureFolders>().call(NoParams());
+
+  expect(folders[0].isRoot, true, reason: "root true");
+  expect(folders[0].sorting, NoteSorting.BY_NAME, reason: "name sorting");
+  expect(folders[0].canBeModified, false, reason: "not modifiable");
+
+  expect(item, folders[1], reason: "current should be recent");
+  expect(folders[1].isRecent, true, reason: "recent true");
+  expect(folders[1].sorting, NoteSorting.BY_DATE, reason: "name sorting");
+  expect(folders[1].canBeModified, false, reason: "not modifiable");
+
+  expect(folders[0].amountOfChildren, folders[1].amountOfChildren, reason: "same children");
+  expect(folders[0].amountOfChildren, 1, reason: "1 child");
+  expect(folders[0].getChild(0).name, folders[1].getChild(0).name, reason: "same child name");
+  expect(folders[0].getChild(0).directParent, isNot(folders[1].getChild(0).directParent), reason: "but different parents");
+
+  expect(folders[0].getChild(0).name, "name", reason: "note name match");
+  expect((folders[0].getChild(0) as StructureNote).id, -1, reason: "note id match");
+  expect(folders[0].getChild(0).directParent, folders[0], reason: "parent of root child should be root");
+  expect(folders[1].getChild(0).directParent, folders[1], reason: "the parent of a direct recent child should be recent");
+}
+
+Future<void> _testComplexStructure() async {
+  await createSomeNotes();
+
+  final List<StructureFolder> folders = await sl<GetCurrentStructureFolders>().call(NoParams());
+  final StructureFolder root = folders[0];
+  final StructureFolder recent = folders[1];
+
+  final List<StructureNote> rootNotes = root.getAllNotes();
+  final List<StructureNote> recentNotes = recent.getAllNotes();
+
+  // first test root
+  expect(root.amountOfChildren, 3, reason: "3 children of root");
+  expect(rootNotes.length, 5, reason: "but all root notes should have length 5");
+
+  expect(root.getChild(0).name, "dir1", reason: "first child is dir1");
+  expect(root.getChild(1).name, "dir2", reason: "second child is dir2");
+  expect(root.getChild(2).name, "first", reason: "third child is the note");
+
+  final StructureFolder subFolder = root.getChild(0) as StructureFolder;
+  final StructureFolder deepestFolder = subFolder.getChild(1) as StructureFolder;
+
+  expect(subFolder.canBeModified, true, reason: "subfolder should be modifiable");
+  expect(subFolder.sorting, NoteSorting.BY_NAME, reason: "subfolder correct sorting");
+  expect(subFolder.amountOfChildren, 3, reason: "subfolder 3 children");
+
+  expect(deepestFolder.name, "dir3", reason: "second child of subfolder is dir3");
+  expect(subFolder.getChild(2).name, "second", reason: "last child of subfolder is second");
+  expect((root.getChild(1) as StructureFolder).getChild(0).name, "second", reason: "dir2 should also have a second");
+  expect(subFolder.getChild(2).name, "second", reason: "last child of subfolder is second");
+
+  expect(deepestFolder.getChild(0).name, "fourth", reason: "dir3 should have fourth");
+  expect(deepestFolder.getChild(0).directParent, deepestFolder, reason: "fourth should have correct parent");
+
+  expect(deepestFolder.directParent, subFolder, reason: "dir3 should have correct parent");
+  expect(deepestFolder.directParent, deepestFolder.getParent(), reason: "for root get parent should match: 1/2");
+  expect(deepestFolder.getChild(0).directParent, deepestFolder.getChild(0).getParent(),
+      reason: "for root get parent should match: 2/2");
+
+  // then test recent
+  expect(recent.amountOfChildren, 5, reason: "5 children of recent");
+  expect(recentNotes.length, 5, reason: "all recent notes should also have length 5");
+
+  expect(recent.getChild(0).name, "fourth", reason: "first child is most recent");
+  expect(recent.getChild(4).name, "first", reason: "last child is oldest");
+
+  expect(recent.getChild(0).directParent, deepestFolder,
+      reason: "fourth should have correct direct parent folder for recent");
+  expect(recent.getChild(0).getParent(), recent, reason: "but the getParent() should return recent as the top most folder");
+
+  expect(recent.getChild(3).directParent!.directParent, recent,
+      reason: "in recent the direct parent of dir1 should be recent itself!");
+  expect(recent.getChild(4).directParent, recent, reason: "in recent the direct parent of first should be recent itself!");
+  expect(recent.getChild(0).directParent!.getParent(), recent,
+      reason: "getParent() should also work for a folder in recent");
+
+  // then test notes and paths
+  expect(deepestFolder.path, "dir1/dir3", reason: "dir3 should have correct path");
+  final List<String> rootPaths = rootNotes.map((StructureNote note) => note.path).toList();
+  final List<String> recentPaths = recentNotes.map((StructureNote note) => note.path).toList();
+
+  expect(rootPaths.first, "dir1/a_third", reason: "root first path should be third");
+  expect(rootPaths.last, "first", reason: "root last path should be first");
+  expect(rootPaths[2], "dir1/second", reason: "root third path should be second1");
+
+  expect(recentPaths.first, "dir1/dir3/fourth", reason: "recent first path should be fourth");
+  expect(recentPaths[2], "dir2/second", reason: "recent third path should be second2");
+
+  rootPaths.sort();
+  recentPaths.sort();
+  expect(ListUtils.equals(rootPaths, recentPaths), true, reason: "root and recent note paths should be same");
+}
+
+void _testChanges() {
+  setUp(() async {
+    await createSomeNotes();
+  });
+
+  test("changing current item of root and fetching new structure", () async {
+    final List<StructureFolder> folders = await sl<GetCurrentStructureFolders>().call(NoParams());
+    final StructureFolder root = folders[0];
+    sl<NoteStructureRepository>().currentItem = (root.getChild(0) as StructureFolder).getChild(0);
+
+    await sl<FetchNewNoteStructure>().call(NoParams());
+    final StructureItem currentItem = await sl<GetCurrentStructureItem>().call(NoParams());
+    expect(currentItem.path, "dir1/a_third");
+  });
+
+  test("changing current item of recent and fetching new structure", () async {
+    final List<StructureFolder> folders = await sl<GetCurrentStructureFolders>().call(NoParams());
+    final StructureFolder recent = folders[1];
+    sl<NoteStructureRepository>().currentItem = recent.getChild(1);
+
+    await sl<FetchNewNoteStructure>().call(NoParams());
+    final StructureItem currentItem = await sl<GetCurrentStructureItem>().call(NoParams());
+    expect(currentItem.path, "dir1/a_third");
+  });
+
+  test("get notes by id and folders by path / name", () async {
+    final List<StructureFolder> folders = await sl<GetCurrentStructureFolders>().call(NoParams());
+    final StructureFolder root = folders[0];
+    final StructureFolder recent = folders[1];
+
+    final StructureNote? n1 = root.getNoteById(-5);
+    final StructureNote? n2 = recent.getNoteById(-5);
+
+    expect(n1, n2, reason: "Should be same note");
+    expect(n1?.path, "dir1/dir3/fourth", reason: "should be the correct note");
+
+    final StructureFolder? f1 = root.getFolderByPath("dir1/dir3");
+    final StructureFolder? f2 = root.getDirectFolderByName("dir1")?.getDirectFolderByName("dir3");
+    expect(f1, f2, reason: "Should be same folder");
+    expect(f1?.path, "dir1/dir3", reason: "should be the correct folder");
+  });
+}
+
+Future<void> createSomeNotes() async {
+  int counter = -1;
+  final Uint8List content = Uint8List.fromList(utf8.encode(""));
+  await sl<StoreNoteEncrypted>()
+      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "first", decryptedContent: content));
+  await sl<StoreNoteEncrypted>()
+      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir1/second", decryptedContent: content));
+  await sl<StoreNoteEncrypted>()
+      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir2/second", decryptedContent: content));
+  await sl<StoreNoteEncrypted>()
+      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir1/a_third", decryptedContent: content));
+  await sl<StoreNoteEncrypted>()
+      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir1/dir3/fourth", decryptedContent: content));
+}

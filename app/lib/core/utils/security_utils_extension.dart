@@ -29,8 +29,8 @@ class SecurityUtilsExtension {
   /// Calls [encryptBytesAsync]. This version has a byte key instead of a base64encoded string.
   ///
   /// The result will be base64 encoded!
-  static Future<String> encryptStringAsync2(String input, Uint8List keyBytesy) async {
-    final Uint8List bytes = await encryptBytesAsync(Uint8List.fromList(utf8.encode(input)), keyBytesy);
+  static Future<String> encryptStringAsync2(String input, Uint8List keyBytes) async {
+    final Uint8List bytes = await encryptBytesAsync(Uint8List.fromList(utf8.encode(input)), keyBytes);
     return base64UrlEncode(bytes);
   }
 

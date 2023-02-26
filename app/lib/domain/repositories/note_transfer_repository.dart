@@ -13,7 +13,7 @@ abstract class NoteTransferRepository {
   /// The Note will be stored at "[getApplicationDocumentsDirectory()] / [AppConfig.noteFolder] / [noteId] .note"
   ///
   /// So for example on android /data/user/0/com.nota.nota_app/app_flutter/notes/10.note
-  Future<void> storeEncryptedNote({required int noteId, required List<int> encryptedBytes, bool isTempNote = false});
+  Future<void> storeEncryptedNote({required int noteId, required List<int> encryptedBytes});
 
   /// Returns the content of the note which is encrypted with the users data key.
   ///
@@ -22,7 +22,7 @@ abstract class NoteTransferRepository {
   /// So for example on android /data/user/0/com.nota.nota_app/app_flutter/notes/10.note
   ///
   /// If the note could not be found, this will throw a [FileException] with [ErrorCodes.FILE_NOT_FOUND]!
-  Future<Uint8List> loadEncryptedNote({required int noteId, bool isTempNote = false});
+  Future<Uint8List> loadEncryptedNote({required int noteId});
 
   /// This starts the note transfer and can throw the exceptions of [RemoteNoteDataSource.startNoteTransferRequest].
   ///
@@ -64,7 +64,7 @@ abstract class NoteTransferRepository {
   /// Returns if the file at [getApplicationDocumentsDirectory()] / [getLocalNotePath] existed and if it was deleted, or not.
   ///
   /// The application documents directory will for example be: /data/user/0/com.nota.nota_app/app_flutter/
-  Future<bool> deleteNote({required int noteId, bool isTempNote = false});
+  Future<bool> deleteNote({required int noteId});
 
   /// Returns the relative filePath to a specific note from the application documents directory.
   ///

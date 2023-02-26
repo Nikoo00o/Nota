@@ -10,7 +10,7 @@ class NoteTransfer extends Entity {
   NoteTransfer({
     required this.serverAccount,
     required this.noteUpdates,
-  }) : super(<String, dynamic>{
+  }) : super(<String, Object?>{
           "serverAccount": serverAccount,
           "noteUpdates": noteUpdates,
         });

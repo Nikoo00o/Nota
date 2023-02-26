@@ -8,6 +8,9 @@ class SharedConfig {
   /// Returns ".temp", or ".note"
   static String noteFileEnding({required bool isTempNote}) => isTempNote ? ".temp" : ".note";
 
+  /// The platform independent delimiter for the path of the notes which is saved in the file name of the note info!
+  static String noteStructureDelimiter = "/";
+
   /// This is used as a part of [getServerUrl].
   int get serverPort => 8191;
 

@@ -43,7 +43,7 @@ class RestCallbackParams extends Entity {
     required this.rawBytes,
     required this.ip,
     required this.authenticatedAccount,
-  }) : super(<String, dynamic>{
+  }) : super(<String, Object?>{
           "httpMethod": httpMethod,
           "requestHeaders": requestHeaders,
           "queryParams": queryParams,

@@ -26,7 +26,7 @@ import '../../server/test/helper/server_test_helper.dart' as server; // relative
 // the real server responses can be used for testing instead of mocks! The server tests should be run before!
 import 'helper/app_test_helper.dart';
 
-const int _serverPort = 9192; // also needs to be a different port for each test file. The app tests dont have to care
+const int _serverPort = 9195; // also needs to be a different port for each test file. The app tests dont have to care
 // about the server errors!
 
 void main() {

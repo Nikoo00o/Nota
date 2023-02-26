@@ -9,6 +9,9 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// This logs the user out of the app and clears the keys and sets the account to null, but keeps the encrypted note data
 /// for later use and caches the note info for the account!
 ///
+/// Important: because this resets the account, references to the old should be updated afterwards, so they are not used
+/// anymore!!!
+///
 /// This can throw a [ClientException] with [ErrorCodes.CLIENT_NO_ACCOUNT]
 class LogoutOfAccount extends UseCase<void, NoParams> {
   final AccountRepository accountRepository;
