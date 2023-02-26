@@ -26,6 +26,8 @@ class StructureNote extends StructureItem {
           "lastModified": lastModified,
         });
 
+  /// This just copies the note with the additional values. It does not have to make a deep copy, because all members are
+  /// final!
   StructureNote copyWith({
     String? newName,
     StructureFolder? newDirectParent,

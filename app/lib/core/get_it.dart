@@ -6,9 +6,11 @@ import 'package:app/data/datasources/remote_account_data_source.dart';
 import 'package:app/data/datasources/remote_note_data_source.dart';
 import 'package:app/data/repositories/account_repository_impl.dart';
 import 'package:app/data/repositories/app_settings_repository_impl.dart';
+import 'package:app/data/repositories/note_structure_repository_impl.dart';
 import 'package:app/data/repositories/note_transfer_repository_impl.dart';
 import 'package:app/domain/repositories/account_repository.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';
+import 'package:app/domain/repositories/note_structure_repository.dart';
 import 'package:app/domain/repositories/note_transfer_repository.dart';
 import 'package:app/domain/usecases/account/change/change_account_password.dart';
 import 'package:app/domain/usecases/account/change/change_auto_login.dart';
@@ -20,6 +22,10 @@ import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/account/login/get_required_login_status.dart';
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
 import 'package:app/domain/usecases/account/save_account.dart';
+import 'package:app/domain/usecases/note_structure/get_current_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/get_structure_folders.dart';
+import 'package:app/domain/usecases/note_structure/update_note_structure.dart';
+import 'package:app/domain/usecases/note_transfer/fetch_new_note_structure.dart';
 import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
 import 'package:app/domain/usecases/note_transfer/store_note_encrypted.dart';
 import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
@@ -67,6 +73,7 @@ Future<void> initializeGetIt() async {
         appConfig: sl(),
       ));
   sl.registerLazySingleton<AppSettingsRepository>(() => AppSettingsRepositoryImpl(localDataSource: sl(), appConfig: sl()));
+  sl.registerLazySingleton<NoteStructureRepository>(() => NoteStructureRepositoryImpl());
 
   sl.registerLazySingleton<SharedFetchCurrentSessionToken>(
       () => FetchCurrentSessionToken(accountRepository: sl(), appConfig: sl()));
@@ -99,6 +106,21 @@ Future<void> initializeGetIt() async {
         noteTransferRepository: sl(),
         saveAccount: sl(),
         dialogService: sl(),
+      ));
+
+  sl.registerLazySingleton<FetchNewNoteStructure>(() => FetchNewNoteStructure(
+        noteStructureRepository: sl(),
+        updateNoteStructure: sl(),
+        getLoggedInAccount: sl(),
+      ));
+  sl.registerLazySingleton<UpdateNoteStructure>(() => UpdateNoteStructure(noteStructureRepository: sl()));
+  sl.registerLazySingleton<GetCurrentStructureItem>(() => GetCurrentStructureItem(
+        noteStructureRepository: sl(),
+        fetchNewNoteStructure: sl(),
+      ));
+  sl.registerLazySingleton<GetCurrentStructureFolders>(() => GetCurrentStructureFolders(
+        noteStructureRepository: sl(),
+        fetchNewNoteStructure: sl(),
       ));
 
   sl.registerLazySingleton<SessionService>(() => SessionService());

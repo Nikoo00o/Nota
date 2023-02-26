@@ -5,7 +5,9 @@ import 'package:app/domain/usecases/note_transfer/fetch_new_note_structure.dart'
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
-/// This returns a list of copies of the top level note structure folders (first "root" and second element "recent").
+/// This returns a a list of deep copies of the top level note structure folders (first "root" and second element "recent").
+///
+/// But the parent folder references for the children are not changed
 ///
 /// This should be used to build the menu items for navigating to the folders.
 ///
@@ -29,8 +31,8 @@ class GetCurrentStructureFolders extends UseCase<List<StructureFolder>, NoParams
 
     final List<StructureFolder> folders = List<StructureFolder>.empty(growable: true);
 
-    folders.add(noteStructureRepository.root!.copyWith());
-    folders.add(noteStructureRepository.recent!.copyWith());
+    folders.add(noteStructureRepository.root!.copyWith(changeParentOfChildren: false));
+    folders.add(noteStructureRepository.recent!.copyWith(changeParentOfChildren: false));
 
     Logger.verbose("Returned a new list of the top level folders");
     return folders;

@@ -8,7 +8,7 @@ import 'package:app/domain/usecases/note_transfer/fetch_new_note_structure.dart'
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
-/// This returns a copy of the current selected note structure item.
+/// This returns a deep copy of the current selected note structure item (only the parent folder references are not changed).
 ///
 /// This should always be called after the use case [UpdateNoteStructure] to refresh the GUI after each modification to
 /// the note structure. Look at [UpdateNoteStructure] to see when its called!
@@ -37,7 +37,7 @@ class GetCurrentStructureItem extends UseCase<StructureItem, NoParams> {
     if (item is StructureNote) {
       return item.copyWith();
     } else if (item is StructureFolder) {
-      return item.copyWith();
+      return item.copyWith(changeParentOfChildren: false);
     }
     throw UnimplementedError();
   }

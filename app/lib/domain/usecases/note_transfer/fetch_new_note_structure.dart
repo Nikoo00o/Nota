@@ -40,7 +40,8 @@ class FetchNewNoteStructure extends UseCase<void, NoParams> {
       directParent: null,
       canBeModified: false,
       children: List<StructureItem>.empty(growable: true),
-      sorting: NoteSorting.BY_DATE,
+      sorting: NoteSorting.BY_NAME,
+      changeParentOfChildren: true,
     );
 
     for (final NoteInfo note in account.noteInfoList) {
@@ -85,6 +86,7 @@ class FetchNewNoteStructure extends UseCase<void, NoParams> {
           canBeModified: true,
           children: List<StructureItem>.empty(growable: true),
           sorting: NoteSorting.BY_NAME,
+          changeParentOfChildren: true,
         ));
 
         // important: update the reference (will not be null afterwards!)

@@ -4,15 +4,11 @@ import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/usecases/note_structure/update_note_structure.dart';
 import 'package:shared/core/constants/error_codes.dart';
 
-class NoteStructureRepository {
-  // todo: make class abstract and only add getter + setter for the variables
-
+abstract class NoteStructureRepository {
   /// Contains the whole note structure with sub folders and notes with this being the top most parent folder.
   ///
   /// After the use case [UpdateNoteStructure], this will never be null!
   StructureFolder? root;
-
-  // todo: children should also have recent as parent ( copy with!!!)
 
   /// Will be updated with the notes of [root], but the children will not include the sub folders!#
   ///
@@ -32,16 +28,10 @@ class NoteStructureRepository {
   ///
   /// If [useRootAsParent] is true, then the top most parent will be [root], otherwise the direct parent will always be
   /// [recent]
-  StructureNote? getNoteById({required int noteId, required bool useRootAsParent}) {
-    if (useRootAsParent) {
-      return root?.getNoteById(noteId);
-    } else {
-      return recent?.getNoteById(noteId);
-    }
-  }
+  StructureNote? getNoteById({required int noteId, required bool useRootAsParent});
 
   /// Returns the folder matching to the path and otherwise null if its not found.
   ///
   /// This will always use [root] as the top most parent!
-  StructureFolder? getFolderByPath(String path) => root?.getFolderByPath(path);
+  StructureFolder? getFolderByPath(String path);
 }
