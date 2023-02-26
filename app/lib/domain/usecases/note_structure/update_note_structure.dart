@@ -63,6 +63,7 @@ class UpdateNoteStructure extends UseCase<void, NoParams> {
         current = newItem; // not deleted note
       } else {
         current = current.getParent(); // returns either direct parent of the "root" tree, or "recent" itself
+        Logger.verbose("The current note had to be changed to the parent:\n$current");
       }
     }
 
@@ -78,6 +79,7 @@ class UpdateNoteStructure extends UseCase<void, NoParams> {
             break;
           } else {
             current = current.directParent; // will never be in recent, so this is allowed
+            Logger.verbose("The current folder had to be changed to the parent:\n$current");
           }
         }
       }

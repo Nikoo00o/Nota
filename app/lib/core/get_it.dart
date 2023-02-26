@@ -22,6 +22,7 @@ import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/account/login/get_required_login_status.dart';
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
 import 'package:app/domain/usecases/account/save_account.dart';
+import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/get_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/get_structure_folders.dart';
 import 'package:app/domain/usecases/note_structure/update_note_structure.dart';
@@ -122,6 +123,13 @@ Future<void> initializeGetIt() async {
         noteStructureRepository: sl(),
         fetchNewNoteStructure: sl(),
       ));
+
+  sl.registerLazySingleton<ChangeCurrentStructureItem>(() => ChangeCurrentStructureItem(
+      noteStructureRepository: sl(),
+      getCurrentStructureItem: sl(),
+      updateNoteStructure: sl(),
+      storeNoteEncrypted: sl(),
+  ));
 
   sl.registerLazySingleton<SessionService>(() => SessionService());
   sl.registerLazySingleton<DialogService>(() => DialogService());

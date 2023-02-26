@@ -34,11 +34,13 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// This calls the use cases [GetCurrentStructureItem], [StoreNoteEncrypted] and [UpdateNoteStructure] and can throw the
 /// exceptions of them!
 class ChangeCurrentStructureItem extends UseCase<void, ChangeCurrentStructureItemParams> {
+  final NoteStructureRepository noteStructureRepository;
   final GetCurrentStructureItem getCurrentStructureItem;
   final UpdateNoteStructure updateNoteStructure;
   final StoreNoteEncrypted storeNoteEncrypted;
 
   const ChangeCurrentStructureItem({
+    required this.noteStructureRepository,
     required this.getCurrentStructureItem,
     required this.updateNoteStructure,
     required this.storeNoteEncrypted,
@@ -47,6 +49,7 @@ class ChangeCurrentStructureItem extends UseCase<void, ChangeCurrentStructureIte
   @override
   Future<void> execute(ChangeCurrentStructureItemParams params) async {
     final StructureItem item = await getCurrentStructureItem.call(GetCurrentStructureItemParams(deepCopy: false));
+    late final StructureItem result;
 
     if (hasNoChangesOrHasErrors(params, item)) {
       Logger.debug("The params $params did not include any changes for the item:\n$item");
@@ -60,31 +63,40 @@ class ChangeCurrentStructureItem extends UseCase<void, ChangeCurrentStructureIte
         throw const ClientException(message: ErrorCodes.NAME_ALREADY_USED);
       }
 
-      await _changeFolder(item, params.newName);
+      result = await _changeFolder(item, params.newName);
     } else if (params is ChangeCurrentNoteParam && item is StructureNote) {
-      await _changeNote(item, params.newName, params.newContent, parentChanged: false);
+      result = await _changeNote(item, params.newName, params.newContent, parentChanged: false);
     } else {
       Logger.error("The params $params did not have the same type as the item:\n$item");
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
+
+    // important: also update the current item. without this a rename of a folder would make the current item jump to the
+    // parent folder
+    noteStructureRepository.currentItem = result;
 
     Logger.info("Updated the following item with the params $params:\n$item");
     // update the note structure at the end
     await updateNoteStructure.call(NoParams());
   }
 
-  Future<void> _changeFolder(StructureFolder folder, String newName) async {
+  Future<StructureItem> _changeFolder(StructureFolder folder, String newName) async {
     // first update folder name
-    folder.directParent!.replaceChildRef(folder, folder.copyWith(newName: newName, changeParentOfChildren: true));
+    final StructureFolder newFolder = folder.copyWith(newName: newName, changeParentOfChildren: true);
+    folder.directParent!.replaceChildRef(folder, newFolder);
+    Logger.verbose("changed folder name for ${folder.path} to $newName");
 
-    // then update all notes recursively
-    final List<StructureNote> notes = folder.getAllNotes();
+    // then update all of the new notes recursively
+    final List<StructureNote> notes = newFolder.getAllNotes();
     for (final StructureNote note in notes) {
       await _changeNote(note, note.name, null, parentChanged: true);
     }
+
+    return newFolder;
   }
 
-  Future<void> _changeNote(StructureNote note, String newName, Uint8List? newContent, {required bool parentChanged}) async {
+  Future<StructureItem> _changeNote(StructureNote note, String newName, Uint8List? newContent,
+      {required bool parentChanged}) async {
     String? newPath; // only not null if the path was changed
     if (newName != note.name) {
       newPath = note.directParent!.getPathForChildName(newName);
@@ -97,7 +109,15 @@ class ChangeCurrentStructureItem extends UseCase<void, ChangeCurrentStructureIte
         .call(ChangeNoteEncryptedParams(noteId: note.id, decryptedName: newPath, decryptedContent: newContent));
 
     // then update note structure
-    note.directParent!.replaceChildRef(note, note.copyWith(newName: newName, newLastModified: newTime));
+    final StructureNote newNote = note.copyWith(newName: newName, newLastModified: newTime);
+    note.directParent!.replaceChildRef(note, newNote);
+
+    if (newPath == null) {
+      Logger.verbose("Only updated note content for ${note.path} with time $newTime");
+    } else {
+      Logger.verbose("Updated the note path to $newPath with time $newTime");
+    }
+    return newNote;
   }
 
   bool hasNoChangesOrHasErrors(ChangeCurrentStructureItemParams params, StructureItem item) {

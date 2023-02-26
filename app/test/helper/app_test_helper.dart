@@ -1,14 +1,21 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:app/core/config/app_config.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/core/utils/security_utils_extension.dart';
 import 'package:app/data/datasources/local_data_source.dart';
-import 'package:app/data/repositories/account_repository_impl.dart';
 import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/repositories/account_repository.dart';
+import 'package:app/domain/usecases/account/get_logged_in_account.dart';
+import 'package:app/domain/usecases/account/login/create_account.dart';
+import 'package:app/domain/usecases/account/login/login_to_account.dart';
+import 'package:app/domain/usecases/note_transfer/store_note_encrypted.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:shared/core/enums/log_level.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/data/datasources/rest_client.dart';
+import 'package:shared/domain/usecases/usecase.dart';
 
 import '../../../server/test/helper/server_test_helper.dart' as server; // relative import of the server test helpers, so
 // that the real server responses can be used for testing instead of mocks! The server tests should be run before!
@@ -47,3 +54,25 @@ Future<void> testCleanup() async {
 
 /// Makes it so that the account is reloaded from the mock local data source the next time in the [AccountRepository]!
 Future<ClientAccount?> clearAccountCache() async => sl<AccountRepository>().getAccount(forceLoad: true);
+
+Future<void> createSomeTestNotes() async {
+  int counter = -1;
+  final Uint8List content = Uint8List.fromList(utf8.encode("123"));
+  await sl<StoreNoteEncrypted>()
+      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "first", decryptedContent: content));
+  await sl<StoreNoteEncrypted>()
+      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir1/second", decryptedContent: content));
+  await sl<StoreNoteEncrypted>()
+      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir2/second", decryptedContent: content));
+  await sl<StoreNoteEncrypted>()
+      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir1/a_third", decryptedContent: content));
+  await sl<StoreNoteEncrypted>()
+      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir1/dir3/fourth", decryptedContent: content));
+}
+
+Future<ClientAccount> loginToTestAccount() async {
+  await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
+  await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+  final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
+  return account;
+}

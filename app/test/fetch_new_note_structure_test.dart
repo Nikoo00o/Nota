@@ -69,16 +69,9 @@ void _testWithoutAccount() {
   });
 }
 
-Future<ClientAccount> _loginToAccount() async {
-  await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-  await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
-  final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
-  return account;
-}
-
 void _testWithAccount() {
   setUp(() async {
-    await _loginToAccount();
+    await loginToTestAccount();
   });
 
   test("update note without fetch new structure should throw ", () async {
@@ -133,7 +126,7 @@ Future<void> _testSimpleNoteStructure({required bool callFetchNewStructure}) asy
 }
 
 Future<void> _testComplexStructure() async {
-  await createSomeNotes();
+  await createSomeTestNotes();
 
   final List<StructureFolder> folders = await sl<GetCurrentStructureFolders>().call(NoParams());
   final StructureFolder root = folders[0];
@@ -206,7 +199,7 @@ Future<void> _testComplexStructure() async {
 
 void _testChanges() {
   setUp(() async {
-    await createSomeNotes();
+    await createSomeTestNotes();
   });
 
   test("changing current item of root and fetching new structure", () async {
@@ -248,19 +241,4 @@ void _testChanges() {
     expect(f1, f2, reason: "Should be same folder");
     expect(f1?.path, "dir1/dir3", reason: "should be the correct folder");
   });
-}
-
-Future<void> createSomeNotes() async {
-  int counter = -1;
-  final Uint8List content = Uint8List.fromList(utf8.encode(""));
-  await sl<StoreNoteEncrypted>()
-      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "first", decryptedContent: content));
-  await sl<StoreNoteEncrypted>()
-      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir1/second", decryptedContent: content));
-  await sl<StoreNoteEncrypted>()
-      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir2/second", decryptedContent: content));
-  await sl<StoreNoteEncrypted>()
-      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir1/a_third", decryptedContent: content));
-  await sl<StoreNoteEncrypted>()
-      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir1/dir3/fourth", decryptedContent: content));
 }

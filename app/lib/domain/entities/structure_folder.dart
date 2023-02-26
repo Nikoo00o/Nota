@@ -110,14 +110,15 @@ class StructureFolder extends StructureItem {
   /// Replaces the own [oldChild] reference with [newChild] without changing the parent, or copying them!
   /// Also sorts the children and returns the [newChild].
   /// Can throw [ErrorCodes.INVALID_PARAMS] if the [oldChild] was not found.
-  void replaceChildRef(StructureItem oldChild, StructureItem newChild) {
-    _children.clear();
+  StructureItem replaceChildRef(StructureItem oldChild, StructureItem newChild) {
     for (int i = 0; i < _children.length; ++i) {
       if (_children[i] == oldChild) {
         _children[i] = newChild;
+        sortChildren();
+        return newChild;
       }
     }
-    sortChildren();
+    throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
   }
 
   /// Returns a reference to the element at the [position] of the [_children].
@@ -179,7 +180,7 @@ class StructureFolder extends StructureItem {
     return null;
   }
 
-  /// Returns all children notes of this folder recursively as a new list.
+  /// Returns all children note references of this folder recursively as a new list.
   List<StructureNote> getAllNotes() {
     final List<StructureNote> notes = List<StructureNote>.empty(growable: true);
     for (final StructureItem child in _children) {
@@ -209,7 +210,12 @@ class StructureFolder extends StructureItem {
   }
 
   /// Returns "[path] + [delimiter] + [name]".
-  String getPathForChildName(String name) => "$path${StructureItem.delimiter}$name";
+  String getPathForChildName(String name) {
+    if (isRoot == false && isRecent == false) {
+      return "$path${StructureItem.delimiter}$name";
+    }
+    return name;
+  }
 
   int get amountOfChildren => _children.length;
 
