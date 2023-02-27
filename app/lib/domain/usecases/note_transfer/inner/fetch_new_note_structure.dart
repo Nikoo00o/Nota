@@ -37,7 +37,7 @@ class FetchNewNoteStructure extends UseCase<void, NoParams> {
 
   @override
   Future<void> execute(NoParams params) async {
-    final ClientAccount account = await getLoggedInAccount.call(NoParams());
+    final ClientAccount account = await getLoggedInAccount.call(const NoParams());
 
     noteStructureRepository.root = StructureFolder(
       name: StructureFolder.rootFolderNames.first,

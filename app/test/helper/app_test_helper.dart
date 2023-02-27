@@ -28,7 +28,7 @@ late DialogServiceMock dialogServiceMock;
 
 /// The [serverPort] also needs to be unique across the app and server tests. Afterwards you can replace more app
 /// implementations with mocks!
-Future<void> createCommonTestObjects({required int serverPort, LogLevel logLevel = LogLevel.ERROR}) async {
+Future<void> createCommonTestObjects({required int serverPort, LogLevel logLevel = LogLevel.VERBOSE}) async {
   await server.createCommonTestObjects(serverPort: serverPort, logLevel: logLevel); // init the server test helper objects
   // this will also init the dart console logger
 
@@ -78,6 +78,6 @@ Future<void> createSomeTestNotes() async {
 Future<ClientAccount> loginToTestAccount() async {
   await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
   await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
-  final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
+  final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
   return account;
 }

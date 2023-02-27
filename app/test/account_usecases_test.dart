@@ -161,12 +161,12 @@ void _testLoginToAccount() {
 }
 
 Future<ClientAccount> _remoteLogin(String username, String password) async {
-  RequiredLoginStatus loginStatus = await sl<GetRequiredLoginStatus>().call(NoParams());
+  RequiredLoginStatus loginStatus = await sl<GetRequiredLoginStatus>().call(const NoParams());
   expect(loginStatus, RequiredLoginStatus.REMOTE, reason: "before it should require a remote login");
 
   await sl<LoginToAccount>().call(RemoteLoginParams(username: username, password: password));
   final ClientAccount cachedAccount = await sl<AccountRepository>().getAccountAndThrowIfNull();
-  loginStatus = await sl<GetRequiredLoginStatus>().call(NoParams());
+  loginStatus = await sl<GetRequiredLoginStatus>().call(const NoParams());
 
   expect(cachedAccount.isSessionTokenStillValid(), true, reason: "should have valid session token");
   expect(cachedAccount.isLoggedIn, true, reason: "should be logged in and have a decrypted data key ready");
@@ -176,12 +176,12 @@ Future<ClientAccount> _remoteLogin(String username, String password) async {
 
 Future<ClientAccount> _localLogin(String password) async {
   final ClientAccount storedAccount = await sl<AccountRepository>().getAccountAndThrowIfNull();
-  RequiredLoginStatus loginStatus = await sl<GetRequiredLoginStatus>().call(NoParams());
+  RequiredLoginStatus loginStatus = await sl<GetRequiredLoginStatus>().call(const NoParams());
   expect(storedAccount.isLoggedIn, false, reason: "should no longer be logged in");
   expect(loginStatus, RequiredLoginStatus.LOCAL, reason: "now it should require a local login");
 
   await sl<LoginToAccount>().call(LocalLoginParams(password: password));
-  loginStatus = await sl<GetRequiredLoginStatus>().call(NoParams());
+  loginStatus = await sl<GetRequiredLoginStatus>().call(const NoParams());
 
   // the changes should also be applied to the account reference without having to load it again
   expect(storedAccount.isLoggedIn, true, reason: "afterwards it should be logged in again");
@@ -195,20 +195,20 @@ void _testAutoLogin() {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
     await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
 
-    bool hasAutoLogin = await sl<GetAutoLogin>().call(NoParams());
+    bool hasAutoLogin = await sl<GetAutoLogin>().call(const NoParams());
     expect(hasAutoLogin, false, reason: "default should be no auto login");
 
     await sl<ChangeAutoLogin>().call(const ChangeAutoLoginParams(autoLogin: true));
-    hasAutoLogin = await sl<GetAutoLogin>().call(NoParams());
+    hasAutoLogin = await sl<GetAutoLogin>().call(const NoParams());
     expect(hasAutoLogin, true, reason: "now it should be true");
 
     await clearAccountCache();
-    RequiredLoginStatus loginStatus = await sl<GetRequiredLoginStatus>().call(NoParams());
+    RequiredLoginStatus loginStatus = await sl<GetRequiredLoginStatus>().call(const NoParams());
     expect(loginStatus, RequiredLoginStatus.NONE, reason: "clearing cache should not require a new login");
 
     await sl<ChangeAutoLogin>().call(const ChangeAutoLoginParams(autoLogin: false));
     await clearAccountCache();
-    loginStatus = await sl<GetRequiredLoginStatus>().call(NoParams());
+    loginStatus = await sl<GetRequiredLoginStatus>().call(const NoParams());
     expect(loginStatus, RequiredLoginStatus.LOCAL, reason: "but after changing it it should require one again");
   });
 }
@@ -222,11 +222,11 @@ void _testLogoutOfAccount() {
     final ClientAccount cachedAccount = await sl<AccountRepository>().getAccountAndThrowIfNull();
     cachedAccount.noteInfoList = notes;
 
-    await sl<LogoutOfAccount>().call(NoParams());
+    await sl<LogoutOfAccount>().call(const NoParams());
 
     final ClientAccount? cachedAccountAfterwards = await sl<AccountRepository>().getAccount();
     final ClientAccount? storedAccount = await sl<AccountRepository>().getAccount(forceLoad: true);
-    final RequiredLoginStatus loginStatus = await sl<GetRequiredLoginStatus>().call(NoParams());
+    final RequiredLoginStatus loginStatus = await sl<GetRequiredLoginStatus>().call(const NoParams());
 
     expect(loginStatus, RequiredLoginStatus.REMOTE, reason: "should need remote login");
     expect(cachedAccount.isLoggedIn, false, reason: "and not be logged in");
@@ -244,14 +244,14 @@ void _testLogoutOfAccount() {
     final ClientAccount account = await sl<AccountRepository>().getAccountAndThrowIfNull();
     account.noteInfoList = notes;
 
-    await sl<LogoutOfAccount>().call(NoParams());
+    await sl<LogoutOfAccount>().call(const NoParams());
     await _remoteLogin("test1", "password1");
     expect(jsonEncode(account.noteInfoList), jsonEncode(notes), reason: "should still have the same note info list");
   });
 
   test("logout with no account should not work", () async {
     expect(() async {
-      await sl<LogoutOfAccount>().call(NoParams());
+      await sl<LogoutOfAccount>().call(const NoParams());
     }, throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.CLIENT_NO_ACCOUNT)));
   });
 
@@ -262,14 +262,14 @@ void _testLogoutOfAccount() {
     final List<NoteInfo> notes = <NoteInfo>[NoteInfoModel(id: -1, encFileName: "test", lastEdited: DateTime.now())];
     final ClientAccount account = await sl<AccountRepository>().getAccountAndThrowIfNull();
     account.noteInfoList = notes;
-    await sl<LogoutOfAccount>().call(NoParams());
+    await sl<LogoutOfAccount>().call(const NoParams());
 
     //should store the old notes for the account test1
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test2", password: "password2"));
     await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test2", password: "password2"));
     expect(account.noteInfoList.isEmpty, true, reason: "second account should have no notes");
 
-    await sl<LogoutOfAccount>().call(NoParams());
+    await sl<LogoutOfAccount>().call(const NoParams());
     await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
     expect(jsonEncode(account.noteInfoList), jsonEncode(notes), reason: "test1 should have the notes");
   });
@@ -282,13 +282,13 @@ void _testLogoutOfAccount() {
     final List<NoteInfo> notes = <NoteInfo>[NoteInfoModel(id: -1, encFileName: "test", lastEdited: DateTime.now())];
     final ClientAccount account = await sl<AccountRepository>().getAccountAndThrowIfNull();
     account.noteInfoList = notes;
-    await sl<LogoutOfAccount>().call(NoParams());
+    await sl<LogoutOfAccount>().call(const NoParams());
 
     //should store the old notes for the account test1
     await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test2", password: "password2"));
     expect(account.noteInfoList.isEmpty, true, reason: "second account should have no notes");
 
-    await sl<LogoutOfAccount>().call(NoParams());
+    await sl<LogoutOfAccount>().call(const NoParams());
     await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
     expect(jsonEncode(account.noteInfoList), jsonEncode(notes), reason: "test1 should have the notes");
   });
@@ -383,7 +383,7 @@ void _testChangeAccountPassword() {
 
     await sl<ChangeAccountPassword>().call(const ChangePasswordParams(newPassword: "newPassword3"));
     final ClientAccount accountAfter = await sl<AccountRepository>().getAccountAndThrowIfNull();
-    final RequiredLoginStatus loginStatus = await sl<GetRequiredLoginStatus>().call(NoParams());
+    final RequiredLoginStatus loginStatus = await sl<GetRequiredLoginStatus>().call(const NoParams());
 
     expect(accountAfter.isSessionTokenStillValid(), true, reason: "valid session token");
     expect(accountAfter.sessionToken, isNot(accountBefore.sessionToken), reason: "different session token");
@@ -419,35 +419,35 @@ void _testGetLoggedInAccount() {
   test("Get logged in account should work with a logged in account and the session token should not matter", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
     await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
-    final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
+    final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
     expect(account.isLoggedIn, true, reason: "account should be logged in");
     expect(account.userName, "test1", reason: "and contain the correct data");
     expect(account.isSessionTokenStillValid(), true, reason: "and have a valid session token");
 
     account.sessionToken = null;
-    await sl<GetLoggedInAccount>().call(NoParams());
+    await sl<GetLoggedInAccount>().call(const NoParams());
   });
 
   test("Get logged in account should not work without an account", () async {
     expect(() async {
-      await sl<GetLoggedInAccount>().call(NoParams());
+      await sl<GetLoggedInAccount>().call(const NoParams());
     }, throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.CLIENT_NO_ACCOUNT)));
   });
 
   test("Get logged in account should not work without being logged in", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
     expect(() async {
-      await sl<GetLoggedInAccount>().call(NoParams());
+      await sl<GetLoggedInAccount>().call(const NoParams());
     }, throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.ACCOUNT_WRONG_PASSWORD)));
   });
 
   test("Get logged in account should apply changes and not work without a data key", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
     await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
-    final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
+    final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
     account.clearDecryptedDataKey();
     expect(() async {
-      await sl<GetLoggedInAccount>().call(NoParams());
+      await sl<GetLoggedInAccount>().call(const NoParams());
     }, throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.ACCOUNT_WRONG_PASSWORD)));
   });
 }

@@ -49,7 +49,7 @@ void main() {
     setUp(() async {
       await loginToTestAccount();
       await createSomeTestNotes();
-      await sl<FetchNewNoteStructure>().call(NoParams());
+      await sl<FetchNewNoteStructure>().call(const NoParams());
     });
 
     _testErrors();
@@ -126,7 +126,7 @@ void _testValid() {
     expect(current.path, "dir1/dir3/fourthNew", reason: "path should match");
     expect(current.lastModified.isAfter(oldTime), true, reason: "should be newer");
 
-    final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
+    final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
     expect(current.path,
         SecurityUtils.decryptString(account.noteInfoList.last.encFileName, base64UrlEncode(account.decryptedDataKey!)),
         reason: "enc file name should match");
@@ -150,7 +150,7 @@ void _testValid() {
     expect(currentNote.path, "dir1/dir3New/fourth", reason: "path should match");
     expect(currentNote.lastModified.isAfter(oldTime), true, reason: "should be newer");
 
-    final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
+    final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
     expect(currentNote.path,
         SecurityUtils.decryptString(account.noteInfoList.last.encFileName, base64UrlEncode(account.decryptedDataKey!)),
         reason: "enc file name should match");
@@ -184,7 +184,7 @@ void _testValid() {
         reason: "but a different top level parent");
 
     // the locally stored stuff should still match
-    final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
+    final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
     expect(currentNote.path,
         SecurityUtils.decryptString(account.noteInfoList.last.encFileName, base64UrlEncode(account.decryptedDataKey!)),
         reason: "enc file name should match");
@@ -206,7 +206,7 @@ Future<void> _defaultNoteTest(String newName, Uint8List? newContent) async {
   expect(current.path, newName, reason: "path should match");
   expect(current.lastModified.isAfter(oldTime), true, reason: "should be newer");
 
-  final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
+  final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
   expect(current.path,
       SecurityUtils.decryptString(account.noteInfoList.first.encFileName, base64UrlEncode(account.decryptedDataKey!)),
       reason: "enc file name should match");

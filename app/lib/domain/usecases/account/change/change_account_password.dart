@@ -28,7 +28,7 @@ class ChangeAccountPassword extends UseCase<void, ChangePasswordParams> {
 
   @override
   Future<void> execute(ChangePasswordParams params) async {
-    final ClientAccount account = await getLoggedInAccount.call(NoParams());
+    final ClientAccount account = await getLoggedInAccount.call(const NoParams());
 
     // create the new base64 encoded user keys
     final String newPasswordHash =

@@ -102,7 +102,7 @@ Future<ServerAccount?> _fetchAuthenticatedAccountCallback(String sessionToken) =
     fetchAuthenticatedAccountMock.call(FetchAuthenticatedAccountParams(sessionToken: sessionToken));
 
 Future<SessionToken?> _fetchCurrentSessionToken() =>
-    fetchCurrentSessionTokenMock.call(NoParams());
+    fetchCurrentSessionTokenMock.call(const NoParams());
 
 Future<void> _setup(LogLevel logLevel) async {
   Logger.initLogger(Logger(logLevel: logLevel)); // the logger must always be initialized first
@@ -138,7 +138,7 @@ Future<void> _setup(LogLevel logLevel) async {
 /// you want to test the persistence of the server.
 Future<void> cleanupTestFilesAndServer({required bool deleteTestFolderAfterwards}) async {
   restClient.close();
-  await stopNotaServer(NoParams());
+  await stopNotaServer(const NoParams());
   await Hive.close();
   if (deleteTestFolderAfterwards) {
     FileUtils.deleteDirectory(serverConfigMock.resourceFolderPath);

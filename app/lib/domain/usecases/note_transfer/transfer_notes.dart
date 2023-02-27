@@ -37,7 +37,7 @@ class TransferNotes extends UseCase<void, NoParams> {
 
   @override
   Future<void> execute(NoParams params) async {
-    final ClientAccount account = await getLoggedInAccount.call(NoParams());
+    final ClientAccount account = await getLoggedInAccount.call(const NoParams());
     Logger.verbose("Starting note transfer for the account $account");
 
     final List<NoteUpdate> noteUpdates = await noteTransferRepository.startNoteTransfer(account.noteInfoList);
@@ -64,7 +64,7 @@ class TransferNotes extends UseCase<void, NoParams> {
       rethrow;
     }
 
-    await saveAccount.call(NoParams()); // always save changes to the account to the local storage at the end!
+    await saveAccount.call(const NoParams()); // always save changes to the account to the local storage at the end!
     Logger.info("Transferred notes between client and server: $noteUpdates");
   }
 

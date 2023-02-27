@@ -138,6 +138,6 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<DialogService>(() => DialogService());
 }
 
-Future<SessionToken?> fetchCurrentSessionToken() => sl<SharedFetchCurrentSessionToken>().call(NoParams());
+Future<SessionToken?> fetchCurrentSessionToken() => sl<SharedFetchCurrentSessionToken>().call(const NoParams());
 
 AppConfig _config() => sl<AppConfig>();

@@ -21,7 +21,7 @@ class LoadNoteContent extends UseCase<List<int>, LoadNoteContentParams> {
 
   @override
   Future<List<int>> execute(LoadNoteContentParams params) async {
-    final ClientAccount account = await getLoggedInAccount.call(NoParams());
+    final ClientAccount account = await getLoggedInAccount.call(const NoParams());
 
     final Uint8List encryptedBytes = await noteTransferRepository.loadEncryptedNote(noteId: params.noteId);
     final List<int> uncompressedBytes = await _decryptAndDecompressBytes(encryptedBytes, account);
