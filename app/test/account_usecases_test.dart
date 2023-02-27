@@ -8,7 +8,7 @@ import 'package:app/domain/repositories/account_repository.dart';
 import 'package:app/domain/usecases/account/change/change_account_password.dart';
 import 'package:app/domain/usecases/account/change/change_auto_login.dart';
 import 'package:app/domain/usecases/account/change/logout_of_account.dart';
-import 'package:app/domain/usecases/account/fetch_current_session_token.dart';
+import 'package:app/domain/usecases/account/inner/fetch_current_session_token.dart';
 import 'package:app/domain/usecases/account/get_auto_login.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/login/create_account.dart';

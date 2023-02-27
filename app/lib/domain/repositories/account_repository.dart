@@ -1,6 +1,6 @@
 import 'package:app/data/datasources/remote_account_data_source.dart';
 import 'package:app/domain/entities/client_account.dart';
-import 'package:app/domain/usecases/account/fetch_current_session_token.dart';
+import 'package:app/domain/usecases/account/inner/fetch_current_session_token.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/domain/entities/note_info.dart';

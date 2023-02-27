@@ -4,8 +4,12 @@ import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
 import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/create_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/get_current_structure_item.dart';
-import 'package:app/domain/usecases/note_transfer/fetch_new_note_structure.dart';
+import 'package:app/domain/usecases/note_structure/inner/get_original_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/move_current_structure_item.dart';
+import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
@@ -16,6 +20,8 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// This also updates the [NoteStructureRepository.currentItem] reference to a matching item from either recent, or root
 /// by using either the old current item, or the [UpdateNoteStructureParams.originalItem] for comparison!
 ///
+/// The [UpdateNoteStructureParams.originalItem] should be retrieved from [GetOriginalStructureItem].
+///
 /// If "recent" is the parent and the item is a folder, then it will always navigate to the recent folder. Otherwise for
 /// root the folder path gets compared. For notes the id will be compared in both cases.
 /// Per default if both current item and original item are null, then the resulting item will be "recent".
@@ -23,7 +29,8 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// This is called at the end of each use case that changes the structure like [CreateStructureItem],
 /// [MoveCurrentStructureItem], [ChangeCurrentStructureItem], [DeleteCurrentStructureItem] and [FetchNewNoteStructure].
 ///
-/// Afterwards [GetCurrentStructureItem] should be called to return a new copy of the [NoteStructureRepository.currentItem]!
+/// Afterwards [GetCurrentStructureItem] should be called again by the ui to return a new copy of the
+/// [NoteStructureRepository.currentItem]!
 ///
 /// [FetchNewNoteStructure] must be have been called at least once before, otherwise this throws
 /// [ErrorCodes.INVALID_PARAMS] if  [NoteStructureRepository.root] is null!

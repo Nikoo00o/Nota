@@ -3,9 +3,9 @@ import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
-import 'package:app/domain/usecases/note_structure/get_original_structure_item.dart';
-import 'package:app/domain/usecases/note_structure/update_note_structure.dart';
-import 'package:app/domain/usecases/note_transfer/fetch_new_note_structure.dart';
+import 'package:app/domain/usecases/note_structure/inner/get_original_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/inner/update_note_structure.dart';
+import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 

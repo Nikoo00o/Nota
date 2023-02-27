@@ -1,23 +1,27 @@
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
-import 'package:app/domain/usecases/note_structure/update_note_structure.dart';
+import 'package:app/domain/usecases/note_structure/inner/update_note_structure.dart';
 import 'package:shared/core/constants/error_codes.dart';
 
 abstract class NoteStructureRepository {
   /// Contains the whole note structure with sub folders and notes with this being the top most parent folder.
   ///
+  /// This contains the original references that should be used for modifications to the structure items!
+  ///
   /// After the use case [UpdateNoteStructure], this will never be null!
   StructureFolder? root;
 
-  /// Will be updated with the notes of [root], but the children will not include the sub folders!#
+  /// This will always be updated with a deep copy of the notes of [root], but the children will not include the sub folders!
   ///
   /// [StructureItem.getParent] will always directly return [recent] for the children here.
   ///
   /// After the use case [UpdateNoteStructure], this will never be null!
+  ///
+  /// This should not be used to modify the structure items!
   StructureFolder? recent;
 
-  /// Will be a children (either note, or folder) of either [root], or [recent].
+  /// This will always be a reference to a child (either note, or folder) of either [root], or [recent].
   ///
   /// The direct parent will always be a folder and the top most parent will be [root], or [recent].
   ///

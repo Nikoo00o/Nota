@@ -9,7 +9,7 @@ import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
 import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
-import 'package:app/domain/usecases/note_transfer/store_note_encrypted.dart';
+import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
 import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:flutter_test/flutter_test.dart';
