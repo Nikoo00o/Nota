@@ -31,8 +31,10 @@ class NoteDataSource {
     await deleteAllTempNotes();
   }
 
-  /// Returns a new incremented note counter and also saves the update. This needs to be synchronized so that the counter
-  /// is unique and it cant happen that 2 calls get the same counter!!!
+  /// Returns a new incremented server note counter and also saves the update. This needs to be synchronized so that the
+  /// counter is unique and it cant happen that 2 calls get the same counter!!!
+  ///
+  /// This will always be higher than 0!
   Future<int> getNewNoteCounter() async {
     return _counterLock.synchronized(() async {
       int noteCounter = await localDataSource.getNoteCounter();

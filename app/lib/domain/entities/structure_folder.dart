@@ -70,21 +70,33 @@ class StructureFolder extends StructureItem {
   /// Adds a deep copy of the [child] with the [directParent] set to [this].
   ///
   /// If [sortAfterwards] is true, then this will sort the children afterwards.
-  void addChild(StructureItem child, {bool sortAfterwards = true}) {
-    _children.add(StructureItem.deepCopy(child, newDirectParent: this, changeParentOfChildren: true));
+  ///
+  /// This also returns the reference to the new deep copied child which is stored inside of the children!
+  StructureItem addChild(StructureItem child, {bool sortAfterwards = true}) {
+    final StructureItem newChild = StructureItem.deepCopy(child, newDirectParent: this, changeParentOfChildren: true);
+    _children.add(newChild);
     if (sortAfterwards) {
       sortChildren();
     }
+    return newChild;
   }
 
   /// Removes the child at the [position].
-  /// Can throw [ErrorCodes.INVALID_PARAMS] and sorts the children.
+  /// Can throw [ErrorCodes.INVALID_PARAMS].
   void removeChild(int position) {
     if (position >= _children.length) {
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
     _children.removeAt(position);
-    sortChildren();
+  }
+
+  /// Removes the own [oldChild] reference of the children list.
+  /// Can throw [ErrorCodes.INVALID_PARAMS] if it was not found.
+  void removeChildRef(StructureItem oldChild) {
+    final bool removed = _children.remove(oldChild);
+    if (removed == false) {
+      throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
+    }
   }
 
   /// Replaces the child at the [position] with a deep copy of [newChild] with the [directParent] set to [this].

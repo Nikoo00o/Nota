@@ -72,7 +72,7 @@ Future<void> initializeGetIt() async {
         appConfig: sl(),
       ));
   sl.registerLazySingleton<AppSettingsRepository>(() => AppSettingsRepositoryImpl(localDataSource: sl(), appConfig: sl()));
-  sl.registerLazySingleton<NoteStructureRepository>(() => NoteStructureRepositoryImpl());
+  sl.registerLazySingleton<NoteStructureRepository>(() => NoteStructureRepositoryImpl(localDataSource: sl()));
 
   sl.registerLazySingleton<SharedFetchCurrentSessionToken>(
       () => FetchCurrentSessionToken(accountRepository: sl(), appConfig: sl()));
@@ -123,11 +123,11 @@ Future<void> initializeGetIt() async {
       ));
 
   sl.registerLazySingleton<ChangeCurrentStructureItem>(() => ChangeCurrentStructureItem(
-      noteStructureRepository: sl(),
-      getCurrentStructureItem: sl(),
-      updateNoteStructure: sl(),
-      storeNoteEncrypted: sl(),
-  ));
+        noteStructureRepository: sl(),
+        getCurrentStructureItem: sl(),
+        updateNoteStructure: sl(),
+        storeNoteEncrypted: sl(),
+      ));
 
   sl.registerLazySingleton<SessionService>(() => SessionService());
   sl.registerLazySingleton<DialogService>(() => DialogService());

@@ -65,7 +65,7 @@ class FetchNewNoteStructure extends UseCase<void, NoParams> {
     final List<String> path = decryptedName.split(StructureItem.delimiter);
 
     if (path.length == 1) {
-      // directly add note
+      // directly add note. the directParent will be set by addChild
       targetFolder.addChild(StructureNote(
         name: decryptedName,
         directParent: null,
@@ -81,13 +81,13 @@ class FetchNewNoteStructure extends UseCase<void, NoParams> {
       StructureFolder? subFolder = targetFolder.getDirectFolderByName(subFolderName, deepCopy: false);
 
       if (subFolder == null) {
-        // create folder if it does not exist
+        // create folder if it does not exist. the directParent will be set by addChild
         targetFolder.addChild(StructureFolder(
           name: subFolderName,
           directParent: null,
           canBeModified: true,
           children: List<StructureItem>.empty(growable: true),
-          sorting: NoteSorting.BY_NAME,
+          sorting: targetFolder.sorting,
           changeParentOfChildren: true,
         ));
 
