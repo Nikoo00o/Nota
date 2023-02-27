@@ -41,10 +41,11 @@ abstract class StructureItem extends Entity {
   static String get delimiter => SharedConfig.noteStructureDelimiter;
 
   /// The path is platform independent and will be: "[directParent.path] + [delimiter] + [name]".
-  ///
   /// Important: this will not include the root, or recent folder!!!
   ///
   /// This is equal to the decrypted file name of a note.
+  ///
+  /// For "root" it will only be "root" and for "recent" it will only be recent!
   String get path {
     if (directParent != null && directParent!.isRoot == false && directParent!.isRecent == false) {
       return directParent!.getPathForChildName(name);
@@ -70,6 +71,8 @@ abstract class StructureItem extends Entity {
 
   /// Returns either the [directParent] if the top most parent is "root", or otherwise it directly returns the "recent"
   /// folder and not the direct parent!
+  ///
+  /// This is only null for top level folders and those can also not navigate to their parents!
   StructureFolder? getParent() {
     final StructureFolder topMost = topMostParent;
     if (topMost.isRecent) {

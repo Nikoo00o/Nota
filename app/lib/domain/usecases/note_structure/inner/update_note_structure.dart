@@ -19,12 +19,17 @@ import 'package:shared/domain/usecases/usecase.dart';
 ///
 /// This also updates the [NoteStructureRepository.currentItem] reference to a matching item from either recent, or root
 /// by using either the old current item, or the [UpdateNoteStructureParams.originalItem] for comparison!
+/// The top most parent (root vs recent) will always get matched only from the current item if it is not null and not from
+/// the original.
 ///
-/// The [UpdateNoteStructureParams.originalItem] should be retrieved from [GetOriginalStructureItem].
+/// The [UpdateNoteStructureParams.originalItem] should be retrieved from [GetOriginalStructureItem] and it will always
+/// have [NoteStructureRepository.root] as its top most parent.
 ///
-/// If "recent" is the parent and the item is a folder, then it will always navigate to the recent folder. Otherwise for
-/// root the folder path gets compared. For notes the id will be compared in both cases.
+/// If "recent" is the top most parent of the current item and the item is a folder, then it will always navigate to the
+/// recent folder. Otherwise for root as top most parent the folder path gets compared. For notes the id will be compared
+/// in both cases.
 /// Per default if both current item and original item are null, then the resulting item will be "recent".
+/// If the current item is not available anymore, it will navigate to the parent folder!
 ///
 /// This is called at the end of each use case that changes the structure like [CreateStructureItem],
 /// [MoveCurrentStructureItem], [ChangeCurrentStructureItem], [DeleteCurrentStructureItem] and [FetchNewNoteStructure].
@@ -66,51 +71,76 @@ class UpdateNoteStructure extends UseCase<void, UpdateNoteStructureParams> {
   }
 
   void _updateCurrentItem(StructureItem? originalItem) {
-    StructureItem? current = originalItem?? noteStructureRepository.currentItem; // either use the original item
-    // replacement, or the old current item to search a match.
+    final StructureItem? currentItem = noteStructureRepository.currentItem;
+    StructureItem? compareItem = originalItem ?? currentItem; // prefer the original item for
+    // comparison if it is set and otherwise use the current item.
 
-    // find a matching note
-    if (current is StructureNote) {
-      final StructureNote? newItem =
-          noteStructureRepository.getNoteById(noteId: current.id, useRootAsParent: current.topMostParent.isRecent == false);
-      if (newItem != null) {
-        current = newItem; // not deleted note
-      } else {
-        current = current.getParent(); // returns either direct parent of the "root" tree, or "recent" itself
-        Logger.verbose("The current note had to be changed to the parent:\n$current");
-      }
-    }
+    if (compareItem == null) {
+      noteStructureRepository.currentItem = noteStructureRepository.recent!;
+      Logger.debug("Updated the current item to the default recent"); // special case if there was no current item set before
+    } else {
+      final StructureFolder topLevelFolder = _getTopLevelFolder(currentItem: currentItem, originalItem: originalItem);
+      StructureItem? newCurrentItem;
 
-    if (current is StructureFolder) {
-      if (current.isRecent) {
-        current = noteStructureRepository.recent;
-      } else {
-        // find a matching parent folder for the "root" tree
-        while (current!.directParent != null) {
-          final StructureFolder? newItem = noteStructureRepository.getFolderByPath(current.path, deepCopy: false);
-          if (newItem != null) {
-            current = newItem; // find a not deleted folder higher up
-            break;
-          } else {
-            current = current.directParent; // will never be in recent, so this is allowed
-            Logger.verbose("The current folder had to be changed to the parent:\n$current");
-          }
+      // try to find compare item, or any parent of it
+      while (newCurrentItem == null && compareItem != null) {
+        newCurrentItem = _findMatchingItem(folderToSearch: topLevelFolder, compareItem: compareItem);
+        if (newCurrentItem == null) {
+          Logger.debug("Could not find ${compareItem.path} so far. Continuing with parent."); // also compare parents,
+          // because the item might have been deleted (and then it should jump to the parent)
+          compareItem = compareItem.getParent();
         }
       }
+
+      if (newCurrentItem == null) {
+        noteStructureRepository.currentItem = topLevelFolder; // the compare item and its parents was not found in the top
+        // level folder
+        Logger.debug("Updated the current item to the top level folder:\n$topLevelFolder");
+      } else {
+        noteStructureRepository.currentItem = newCurrentItem;
+        Logger.debug("Found a match to update the current item:\n$newCurrentItem");
+      }
     }
+  }
 
-    // per default if current is null, it should always be the recent folder
-    current ??= noteStructureRepository.recent;
+  /// Returns a reference to matching top level folder ("root, or "recent") by first checking the [currentItem] if its not
+  /// null, then checking the [originalItem] if its not null and otherwise returning [NoteStructureRepository.recent].
+  StructureFolder _getTopLevelFolder({required StructureItem? currentItem, required StructureItem? originalItem}) {
+    //first check current item, then original item
+    if (currentItem != null) {
+      if (currentItem.topMostParent.isRecent) {
+        return noteStructureRepository.recent!;
+      } else if (currentItem.topMostParent.isRoot) {
+        return noteStructureRepository.root!;
+      }
+    } else if (originalItem != null) {
+      if (originalItem.topMostParent.isRecent) {
+        return noteStructureRepository.recent!;
+      } else if (originalItem.topMostParent.isRoot) {
+        return noteStructureRepository.root!;
+      }
+    }
+    return noteStructureRepository.recent!; //otherwise the default is always recent
+  }
 
-    // set item
-    noteStructureRepository.currentItem = current;
-    Logger.debug("Updated the current item to:\n$current");
+  /// Finds the item in [folderToSearch] that matches the [compareItem].
+  ///
+  /// The matching compares paths for folders and note ids for notes!
+  StructureItem? _findMatchingItem({required StructureFolder folderToSearch, required StructureItem compareItem}) {
+    if (compareItem is StructureNote) {
+      return folderToSearch.getNoteById(compareItem.id);
+    } else if (compareItem is StructureFolder) {
+      return folderToSearch.getFolderByPath(compareItem.path, deepCopy: false);
+    }
+    throw UnimplementedError();
   }
 }
 
 /// The [originalItem] is optional to move the [NoteStructureRepository.currentItem] to a matching item in its own parent
 /// folder structure! Otherwise the old current item will bef used for comparison!
-class UpdateNoteStructureParams{
+///
+/// The top most parent of the [originalItem] will be ignored if the [NoteStructureRepository.currentItem] is not null.
+class UpdateNoteStructureParams {
   final StructureItem? originalItem;
 
   const UpdateNoteStructureParams({
