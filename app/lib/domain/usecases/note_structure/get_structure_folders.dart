@@ -6,10 +6,11 @@ import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
 /// This returns a a list of deep copies of the top level note structure folders (first "root" and second element "recent").
-///
-/// But the parent folder references for the children are not changed
+/// But the parent folder references for the children are not changed!
 ///
 /// This should be used to build the menu items for navigating to the folders.
+///
+/// This can not be used to modify the note structure!
 ///
 /// This can call the use case [FetchNewNoteStructure] if there is no note structure cached.
 ///
@@ -26,15 +27,13 @@ class GetCurrentStructureFolders extends UseCase<List<StructureFolder>, NoParams
   @override
   Future<List<StructureFolder>> execute(NoParams params) async {
     if (noteStructureRepository.root == null) {
-      await fetchNewNoteStructure.call(NoParams());
+      await fetchNewNoteStructure.call(const NoParams());
     }
 
-    final List<StructureFolder> folders = List<StructureFolder>.empty(growable: true);
+    Logger.verbose("Returned a new deep copied list of the top level folders");
 
-    folders.add(noteStructureRepository.root!.copyWith(changeParentOfChildren: false));
-    folders.add(noteStructureRepository.recent!.copyWith(changeParentOfChildren: false));
-
-    Logger.verbose("Returned a new list of the top level folders");
-    return folders;
+    return noteStructureRepository.topLevelFolders
+        .map((StructureFolder? folder) => folder!.copyWith(changeParentOfChildren: false))
+        .toList();
   }
 }

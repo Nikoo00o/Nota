@@ -3,6 +3,7 @@ import 'package:app/domain/entities/structure_note.dart';
 import 'package:shared/core/config/shared_config.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
+import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/entities/entity.dart';
 
 /// The base class for the structure notes and folders which are displayed in the main view of the gui!
@@ -100,11 +101,13 @@ abstract class StructureItem extends Entity {
   /// [StructureFolder.rootFolderNames] contain the name.
   static void throwErrorForName(String nameToValidate) {
     if (nameToValidate.isEmpty || nameToValidate.contains(StructureItem.delimiter)) {
+      Logger.error("The name $nameToValidate is empty, or it contains a ${StructureItem.delimiter}");
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
 
     if (StructureFolder.recentFolderNames.contains(nameToValidate) ||
         StructureFolder.rootFolderNames.contains(nameToValidate)) {
+      Logger.error("The name $nameToValidate is a reserved name");
       throw const ClientException(message: ErrorCodes.NAME_ALREADY_USED);
     }
   }

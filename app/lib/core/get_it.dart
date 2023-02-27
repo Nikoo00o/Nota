@@ -24,6 +24,7 @@ import 'package:app/domain/usecases/account/login/login_to_account.dart';
 import 'package:app/domain/usecases/account/save_account.dart';
 import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/get_current_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/get_original_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/get_structure_folders.dart';
 import 'package:app/domain/usecases/note_structure/update_note_structure.dart';
 import 'package:app/domain/usecases/note_transfer/fetch_new_note_structure.dart';
@@ -113,6 +114,10 @@ Future<void> initializeGetIt() async {
         getLoggedInAccount: sl(),
       ));
   sl.registerLazySingleton<UpdateNoteStructure>(() => UpdateNoteStructure(noteStructureRepository: sl()));
+  sl.registerLazySingleton<GetOriginalStructureItem>(() => GetOriginalStructureItem(
+      noteStructureRepository: sl(),
+      fetchNewNoteStructure: sl(),
+  ));
   sl.registerLazySingleton<GetCurrentStructureItem>(() => GetCurrentStructureItem(
         noteStructureRepository: sl(),
         fetchNewNoteStructure: sl(),
@@ -124,7 +129,7 @@ Future<void> initializeGetIt() async {
 
   sl.registerLazySingleton<ChangeCurrentStructureItem>(() => ChangeCurrentStructureItem(
         noteStructureRepository: sl(),
-        getCurrentStructureItem: sl(),
+        getOriginalStructureItem: sl(),
         updateNoteStructure: sl(),
         storeNoteEncrypted: sl(),
       ));

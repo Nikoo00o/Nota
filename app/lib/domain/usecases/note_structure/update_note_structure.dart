@@ -11,8 +11,14 @@ import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
-/// This updates the [NoteStructureRepository.currentItem] and the [NoteStructureRepository.recent] references of by
-/// retrieving them from [NoteStructureRepository.root].
+/// This newly creates the [NoteStructureRepository.recent] as a deep copy of [NoteStructureRepository.root]!
+///
+/// This also updates the [NoteStructureRepository.currentItem] reference to a matching item from either recent, or root
+/// by using either the old current item, or the [UpdateNoteStructureParams.originalItem] for comparison!
+///
+/// If "recent" is the parent and the item is a folder, then it will always navigate to the recent folder. Otherwise for
+/// root the folder path gets compared. For notes the id will be compared in both cases.
+/// Per default if both current item and original item are null, then the resulting item will be "recent".
 ///
 /// This is called at the end of each use case that changes the structure like [CreateStructureItem],
 /// [MoveCurrentStructureItem], [ChangeCurrentStructureItem], [DeleteCurrentStructureItem] and [FetchNewNoteStructure].
@@ -21,20 +27,20 @@ import 'package:shared/domain/usecases/usecase.dart';
 ///
 /// [FetchNewNoteStructure] must be have been called at least once before, otherwise this throws
 /// [ErrorCodes.INVALID_PARAMS] if  [NoteStructureRepository.root] is null!
-class UpdateNoteStructure extends UseCase<void, NoParams> {
+class UpdateNoteStructure extends UseCase<void, UpdateNoteStructureParams> {
   final NoteStructureRepository noteStructureRepository;
 
   const UpdateNoteStructure({required this.noteStructureRepository});
 
   @override
-  Future<void> execute(NoParams params) async {
+  Future<void> execute(UpdateNoteStructureParams params) async {
     if (noteStructureRepository.root == null) {
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
 
     _updateRecentNotes();
 
-    _updateCurrentItem();
+    _updateCurrentItem(params.originalItem);
   }
 
   void _updateRecentNotes() {
@@ -52,8 +58,9 @@ class UpdateNoteStructure extends UseCase<void, NoParams> {
     Logger.debug("Updated the recent notes to:\n${noteStructureRepository.recent}");
   }
 
-  void _updateCurrentItem() {
-    StructureItem? current = noteStructureRepository.currentItem;
+  void _updateCurrentItem(StructureItem? originalItem) {
+    StructureItem? current = originalItem?? noteStructureRepository.currentItem; // either use the original item
+    // replacement, or the old current item to search a match.
 
     // find a matching note
     if (current is StructureNote) {
@@ -92,4 +99,14 @@ class UpdateNoteStructure extends UseCase<void, NoParams> {
     noteStructureRepository.currentItem = current;
     Logger.debug("Updated the current item to:\n$current");
   }
+}
+
+/// The [originalItem] is optional to move the [NoteStructureRepository.currentItem] to a matching item in its own parent
+/// folder structure! Otherwise the old current item will bef used for comparison!
+class UpdateNoteStructureParams{
+  final StructureItem? originalItem;
+
+  const UpdateNoteStructureParams({
+    required this.originalItem,
+  });
 }

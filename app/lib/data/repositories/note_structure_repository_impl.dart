@@ -12,6 +12,9 @@ class NoteStructureRepositoryImpl extends NoteStructureRepository {
   });
 
   @override
+  List<StructureFolder?> get topLevelFolders => <StructureFolder?>[root, recent];
+
+  @override
   StructureNote? getNoteById({required int noteId, required bool useRootAsParent}) {
     if (useRootAsParent) {
       return root?.getNoteById(noteId);

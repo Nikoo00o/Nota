@@ -24,6 +24,13 @@ abstract class NoteStructureRepository {
   /// After the use case [UpdateNoteStructure], this will never be null! By default this starts at [recent].
   StructureItem? currentItem;
 
+  /// Returns a list of references to the top level folders with the following indices:
+  ///
+  /// [0] = [root]
+  ///
+  /// [1] = [recent]
+  List<StructureFolder?> get topLevelFolders;
+
   /// Can return null if the [noteId] was not contained. Otherwise it returns the matching note with the id.
   ///
   /// If [useRootAsParent] is true, then the top most parent will be [root], otherwise the direct parent will always be

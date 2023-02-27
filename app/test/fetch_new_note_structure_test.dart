@@ -58,7 +58,7 @@ void _testWithoutAccount() {
   });
 
   test("same throw with no account and get current structure item", () async {
-    expect(() async => sl<GetCurrentStructureItem>().call(GetCurrentStructureItemParams(deepCopy: true)),
+    expect(() async => sl<GetCurrentStructureItem>().call(const NoParams()),
         throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.CLIENT_NO_ACCOUNT)));
   });
 
@@ -75,7 +75,7 @@ void _testWithAccount() {
   });
 
   test("update note without fetch new structure should throw ", () async {
-    expect(() async => sl<UpdateNoteStructure>().call(NoParams()),
+    expect(() async => sl<UpdateNoteStructure>().call(const UpdateNoteStructureParams(originalItem: null)),
         throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.INVALID_PARAMS)));
   });
 
@@ -102,7 +102,7 @@ Future<void> _testSimpleNoteStructure({required bool callFetchNewStructure}) asy
     await sl<FetchNewNoteStructure>().call(NoParams());
   }
 
-  final StructureItem item = await sl<GetCurrentStructureItem>().call(GetCurrentStructureItemParams(deepCopy: true));
+  final StructureItem item = await sl<GetCurrentStructureItem>().call(const NoParams());
   final List<StructureFolder> folders = await sl<GetCurrentStructureFolders>().call(NoParams());
 
   expect(folders[0].isRoot, true, reason: "root true");
@@ -209,7 +209,7 @@ void _testChanges() {
 
     await sl<FetchNewNoteStructure>().call(NoParams());
     final StructureItem currentItem =
-        await sl<GetCurrentStructureItem>().call(GetCurrentStructureItemParams(deepCopy: true));
+        await sl<GetCurrentStructureItem>().call(const NoParams());
     expect(currentItem.path, "dir1/a_third");
   });
 
@@ -220,7 +220,7 @@ void _testChanges() {
 
     await sl<FetchNewNoteStructure>().call(NoParams());
     final StructureItem currentItem =
-        await sl<GetCurrentStructureItem>().call(GetCurrentStructureItemParams(deepCopy: true));
+        await sl<GetCurrentStructureItem>().call(const NoParams());
     expect(currentItem.path, "dir1/a_third");
   });
 
@@ -247,7 +247,7 @@ void _testChanges() {
     sl<NoteStructureRepository>().currentItem = folders[0].getChild(2);
 
     await sl<FetchNewNoteStructure>().call(NoParams());
-    StructureItem currentItem = await sl<GetCurrentStructureItem>().call(GetCurrentStructureItemParams(deepCopy: true));
+    StructureItem currentItem = await sl<GetCurrentStructureItem>().call(const NoParams());
     folders = await sl<GetCurrentStructureFolders>().call(NoParams());
 
     expect(currentItem.path, "first", reason: "name should match");
@@ -255,7 +255,7 @@ void _testChanges() {
 
     sl<NoteStructureRepository>().currentItem = folders[1].getChild(4); // switch current item to child of recent
     await sl<FetchNewNoteStructure>().call(NoParams());
-    currentItem = await sl<GetCurrentStructureItem>().call(GetCurrentStructureItemParams(deepCopy: true));
+    currentItem = await sl<GetCurrentStructureItem>().call(const NoParams());
     folders = await sl<GetCurrentStructureFolders>().call(NoParams());
 
     expect(currentItem.path, "first", reason: "name should still match");
