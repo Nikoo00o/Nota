@@ -170,7 +170,7 @@ Future<void> _testComplexStructure() async {
   expect(recent.getChild(0).name, "fourth", reason: "first child is most recent");
   expect(recent.getChild(4).name, "first", reason: "last child is oldest");
 
-  expect(recent.getChild(0).directParent, deepestFolder,
+  expect(recent.getChild(0).directParent?.path, deepestFolder.path,
       reason: "fourth should have correct direct parent folder for recent");
   expect(recent.getChild(0).getParent(), recent, reason: "but the getParent() should return recent as the top most folder");
 
@@ -232,7 +232,9 @@ void _testChanges() {
     final StructureNote? n1 = root.getNoteById(-5);
     final StructureNote? n2 = recent.getNoteById(-5);
 
-    expect(n1, n2, reason: "Should be same note");
+    expect(n1?.path, n2?.path, reason: "notes should have same path");
+    expect(n1?.id, n2?.id, reason: "notes should have same id");
+    expect(n1?.topMostParent, isNot(n2?.topMostParent), reason: "but notes should have different top level parent");
     expect(n1?.path, "dir1/dir3/fourth", reason: "should be the correct note");
 
     final StructureFolder? f1 = root.getFolderByPath("dir1/dir3", deepCopy: true);

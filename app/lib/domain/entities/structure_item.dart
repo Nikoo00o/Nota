@@ -8,7 +8,11 @@ import 'package:shared/domain/entities/entity.dart';
 
 /// The base class for the structure notes and folders which are displayed in the main view of the gui!
 ///
-/// For equality this does not use the reference to the parent folder and instead uses the [path] of the parent!
+/// For equality this does not use the reference to the parent folder and instead uses the [path] of the parent and the
+/// top most parent name! The operator== should be used to compare if "references" are the same within a folder structure.
+///
+/// If you want to know if the item itself has the same values as another, then compare [StructureNote] by comparing the id
+/// and [StructureFolder] by comparing the path instead!
 abstract class StructureItem extends Entity {
   /// The decrypted name of this item (folder, or file) without the parent path.
   ///
@@ -35,6 +39,7 @@ abstract class StructureItem extends Entity {
   }) : super(<String, Object?>{
           "name": name,
           "parentPath": directParent?.path,
+          "topMostParent": directParent?.topMostParent.name,
           ...additionalProperties,
         });
 
