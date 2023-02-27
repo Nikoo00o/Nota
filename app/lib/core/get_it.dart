@@ -49,10 +49,8 @@ final GetIt sl = GetIt.instance;
 /// Some registrations are done with the abstract type instead of the implementation type, like for example:
 /// [SharedFetchCurrentSessionToken] for [FetchCurrentSessionToken] and [AccountRepository] for [AccountRepositoryImpl].
 ///
-/// Also initializes the logger first. The next call after this should be: [LocalDataSource.init]
+/// You should always initialize the logger before!!! The next call after this should be: [LocalDataSource.init]
 Future<void> initializeGetIt() async {
-  Logger.initLogger(AppLogger(logLevel: LogLevel.VERBOSE));
-
   sl.registerLazySingleton<AppConfig>(() => AppConfig());
   sl.registerLazySingleton<RestClient>(
       () => RestClient(sharedConfig: _config(), fetchSessionTokenCallback: fetchCurrentSessionToken));

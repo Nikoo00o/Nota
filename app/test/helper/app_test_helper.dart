@@ -28,10 +28,11 @@ late DialogServiceMock dialogServiceMock;
 
 /// The [serverPort] also needs to be unique across the app and server tests. Afterwards you can replace more app
 /// implementations with mocks!
-Future<void> createCommonTestObjects({required int serverPort}) async {
-  await server.createCommonTestObjects(serverPort: serverPort); // init the server test helper objects
+Future<void> createCommonTestObjects({required int serverPort, LogLevel logLevel = LogLevel.VERBOSE}) async {
+  await server.createCommonTestObjects(serverPort: serverPort, logLevel: logLevel); // init the server test helper objects
+  // this will also init the dart console logger
+
   await initializeGetIt(); // init the app singletons
-  Logger.initLogger(Logger(logLevel: LogLevel.VERBOSE)); // reset logger to the default dart console prints
   SecurityUtilsExtension.replaceArgonWrapper(ArgonWrapperMock()); // pure dart hashing mock
 
   sl.allowReassignment = true; // replace some implementations with the mocks!

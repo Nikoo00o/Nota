@@ -21,7 +21,8 @@ final GetIt sl = GetIt.instance;
 ///
 /// Some registrations are done with the abstract type instead of the implementation type.
 ///
-/// Also initializes the logger first. The next calls after this should be: [LocalDataSource.init] and [NoteDataSource.init]!
+/// You should always initialize the logger first!!! The next calls after this should be: [LocalDataSource.init] and
+/// [NoteDataSource.init]!
 Future<void> initializeGetIt() async {
     Logger.initLogger(Logger(logLevel: LogLevel.VERBOSE));
 

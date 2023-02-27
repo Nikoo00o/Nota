@@ -40,7 +40,7 @@ class Logger {
   /// Has to be called at the start of the main function to enable logging with a subclass of Logger
   static void initLogger(Logger instance) {
     if (_instance != null) {
-      verbose("Overriding old logger instance");
+      verbose("Overriding old logger instance $_instance with $instance");
     }
     _instance = instance;
   }
@@ -130,6 +130,12 @@ class Logger {
         break;
     }
     return colour;
+  }
+
+
+  @override
+  String toString() {
+    return '$runtimeType{logLevel: $logLevel}';
   }
 
   /// Can be overridden in the subclass to log the final log message string into the console in different ways.
