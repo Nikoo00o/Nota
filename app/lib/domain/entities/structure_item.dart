@@ -52,7 +52,7 @@ abstract class StructureItem extends Entity {
   ///
   /// For "root" it will only be "root" and for "recent" it will only be recent!
   String get path {
-    if (directParent != null && directParent!.isRoot == false && directParent!.isRecent == false) {
+    if (directParent != null) {
       return directParent!.getPathForChildName(name);
     }
     return name;

@@ -20,7 +20,7 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// This also updates the [NoteStructureRepository.currentItem] reference to a matching item from either recent, or root
 /// by using either the old current item, or the [UpdateNoteStructureParams.originalItem] for comparison!
 /// The top most parent (root vs recent) will always get matched only from the current item if it is not null and not from
-/// the original.
+/// the original. This can be changed with the param [UpdateNoteStructureParams.resetCurrentItem].
 ///
 /// The [UpdateNoteStructureParams.originalItem] should be retrieved from [GetOriginalStructureItem] and it will always
 /// have [NoteStructureRepository.root] as its top most parent.
@@ -51,6 +51,11 @@ class UpdateNoteStructure extends UseCase<void, UpdateNoteStructureParams> {
     }
 
     _updateRecentNotes();
+
+    if (params.resetCurrentItem) {
+      noteStructureRepository.currentItem = null; // depending on the params reset the current item, so that the top most
+      // parent of the originalItem will be used for comparison!
+    }
 
     _updateCurrentItem(params.originalItem);
   }
@@ -140,10 +145,23 @@ class UpdateNoteStructure extends UseCase<void, UpdateNoteStructureParams> {
 /// folder structure! Otherwise the old current item will bef used for comparison!
 ///
 /// The top most parent of the [originalItem] will be ignored if the [NoteStructureRepository.currentItem] is not null.
+///
+/// If [resetCurrentItem] is true, then the [NoteStructureRepository.currentItem] will be set to null before and then the
+/// top most parent will depend on the [originalItem] instead! But if this is the case, then the [originalItem] should not
+/// be null!
 class UpdateNoteStructureParams {
   final StructureItem? originalItem;
 
-  const UpdateNoteStructureParams({
+  final bool resetCurrentItem;
+
+  UpdateNoteStructureParams({
     required this.originalItem,
-  });
+    this.resetCurrentItem = false,
+  }) {
+    if (resetCurrentItem && originalItem == null) {
+      Logger.warn("Called UpdateNoteStructure with resetCurrentItem, but no original item");
+    }
+    assert(resetCurrentItem == false || originalItem != null,
+        "Called UpdateNoteStructure with resetCurrentItem, but no original item");
+  }
 }

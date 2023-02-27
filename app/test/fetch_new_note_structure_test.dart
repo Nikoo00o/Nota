@@ -75,7 +75,7 @@ void _testWithAccount() {
   });
 
   test("update note without fetch new structure should throw ", () async {
-    expect(() async => sl<UpdateNoteStructure>().call(const UpdateNoteStructureParams(originalItem: null)),
+    expect(() async => sl<UpdateNoteStructure>().call(UpdateNoteStructureParams(originalItem: null)),
         throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.INVALID_PARAMS)));
   });
 

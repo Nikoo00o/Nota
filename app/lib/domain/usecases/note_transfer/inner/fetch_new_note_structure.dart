@@ -60,7 +60,7 @@ class FetchNewNoteStructure extends UseCase<void, NoParams> {
 
     Logger.info("Fetched the new note structure for root:\n${noteStructureRepository.root}");
 
-    await updateNoteStructure.call(const UpdateNoteStructureParams(originalItem: null)); // update note structure
+    await updateNoteStructure.call(UpdateNoteStructureParams(originalItem: null)); // update note structure
   }
 
   void _addNote(NoteInfo note, StructureFolder targetFolder, String decryptedName) {

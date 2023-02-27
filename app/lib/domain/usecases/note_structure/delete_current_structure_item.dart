@@ -59,6 +59,6 @@ class DeleteCurrentStructureItem extends UseCase<void, NoParams> {
 
     Logger.info("Deleted the following item:\n$item");
     // update the note structure at the end. the current item will automatically jump to the parent
-    await updateNoteStructure.call(const UpdateNoteStructureParams(originalItem: null));
+    await updateNoteStructure.call(UpdateNoteStructureParams(originalItem: null));
   }
 }
