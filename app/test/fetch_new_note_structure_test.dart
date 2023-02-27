@@ -241,4 +241,24 @@ void _testChanges() {
     expect(f1, f2, reason: "Should be same folder");
     expect(f1?.path, "dir1/dir3", reason: "should be the correct folder");
   });
+
+  test("the parent of note should still get correctly matched to root, or recent after updating", () async {
+    List<StructureFolder> folders = await sl<GetCurrentStructureFolders>().call(NoParams());
+    sl<NoteStructureRepository>().currentItem = folders[0].getChild(2);
+
+    await sl<FetchNewNoteStructure>().call(NoParams());
+    StructureItem currentItem = await sl<GetCurrentStructureItem>().call(GetCurrentStructureItemParams(deepCopy: true));
+    folders = await sl<GetCurrentStructureFolders>().call(NoParams());
+
+    expect(currentItem.path, "first", reason: "name should match");
+    expect(currentItem.directParent, folders[0], reason: "parent should be root first");
+
+    sl<NoteStructureRepository>().currentItem = folders[1].getChild(4); // switch current item to child of recent
+    await sl<FetchNewNoteStructure>().call(NoParams());
+    currentItem = await sl<GetCurrentStructureItem>().call(GetCurrentStructureItemParams(deepCopy: true));
+    folders = await sl<GetCurrentStructureFolders>().call(NoParams());
+
+    expect(currentItem.path, "first", reason: "name should still match");
+    expect(currentItem.directParent, folders[1], reason: "parent should be recent now");
+  });
 }

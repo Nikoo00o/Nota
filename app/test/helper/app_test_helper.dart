@@ -60,12 +60,16 @@ Future<void> createSomeTestNotes() async {
   final Uint8List content = Uint8List.fromList(utf8.encode("123"));
   await sl<StoreNoteEncrypted>()
       .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "first", decryptedContent: content));
+  await Future<void>.delayed(const Duration(milliseconds: 10));
   await sl<StoreNoteEncrypted>()
       .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir1/second", decryptedContent: content));
+  await Future<void>.delayed(const Duration(milliseconds: 10));
   await sl<StoreNoteEncrypted>()
       .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir2/second", decryptedContent: content));
+  await Future<void>.delayed(const Duration(milliseconds: 10));
   await sl<StoreNoteEncrypted>()
       .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir1/a_third", decryptedContent: content));
+  await Future<void>.delayed(const Duration(milliseconds: 10));
   await sl<StoreNoteEncrypted>()
       .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir1/dir3/fourth", decryptedContent: content));
 }
