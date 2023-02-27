@@ -58,6 +58,12 @@ class ErrorCodes {
 
   /// Invalid parameters, or values were used
   static const String INVALID_PARAMS = "error.invalid.params";
+
+  /// The folder name was already used by another child of the same parent
+  static const String NAME_ALREADY_USED = "error.name.already.used";
+
+  /// The structure item cant be modified
+  static const String CANT_BE_MODIFIED = "error.cant.be.modified";
 }
 
 // todo: add translation strings

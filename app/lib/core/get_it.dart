@@ -22,6 +22,7 @@ import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/account/login/get_required_login_status.dart';
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
 import 'package:app/domain/usecases/account/save_account.dart';
+import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/get_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/get_structure_folders.dart';
 import 'package:app/domain/usecases/note_structure/update_note_structure.dart';
@@ -48,10 +49,8 @@ final GetIt sl = GetIt.instance;
 /// Some registrations are done with the abstract type instead of the implementation type, like for example:
 /// [SharedFetchCurrentSessionToken] for [FetchCurrentSessionToken] and [AccountRepository] for [AccountRepositoryImpl].
 ///
-/// Also initializes the logger first. The next call after this should be: [LocalDataSource.init]
+/// You should always initialize the logger before!!! The next call after this should be: [LocalDataSource.init]
 Future<void> initializeGetIt() async {
-  Logger.initLogger(AppLogger(logLevel: LogLevel.VERBOSE));
-
   sl.registerLazySingleton<AppConfig>(() => AppConfig());
   sl.registerLazySingleton<RestClient>(
       () => RestClient(sharedConfig: _config(), fetchSessionTokenCallback: fetchCurrentSessionToken));
@@ -73,7 +72,7 @@ Future<void> initializeGetIt() async {
         appConfig: sl(),
       ));
   sl.registerLazySingleton<AppSettingsRepository>(() => AppSettingsRepositoryImpl(localDataSource: sl(), appConfig: sl()));
-  sl.registerLazySingleton<NoteStructureRepository>(() => NoteStructureRepositoryImpl());
+  sl.registerLazySingleton<NoteStructureRepository>(() => NoteStructureRepositoryImpl(localDataSource: sl()));
 
   sl.registerLazySingleton<SharedFetchCurrentSessionToken>(
       () => FetchCurrentSessionToken(accountRepository: sl(), appConfig: sl()));
@@ -121,6 +120,13 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<GetCurrentStructureFolders>(() => GetCurrentStructureFolders(
         noteStructureRepository: sl(),
         fetchNewNoteStructure: sl(),
+      ));
+
+  sl.registerLazySingleton<ChangeCurrentStructureItem>(() => ChangeCurrentStructureItem(
+        noteStructureRepository: sl(),
+        getCurrentStructureItem: sl(),
+        updateNoteStructure: sl(),
+        storeNoteEncrypted: sl(),
       ));
 
   sl.registerLazySingleton<SessionService>(() => SessionService());

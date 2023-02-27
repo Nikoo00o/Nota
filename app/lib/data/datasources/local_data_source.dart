@@ -26,6 +26,8 @@ abstract class LocalDataSource {
 
   static const String LOCALE = "LOCALE";
 
+  static const String CLIENT_NOTE_COUNTER = "CLIENT_NOTE_COUNTER";
+
   /// Must be called first in the main function to initialize hive to the [getApplicationDocumentsDirectory].
   Future<void> init();
 
@@ -90,6 +92,18 @@ abstract class LocalDataSource {
 
   Future<void> setLocale(Locale locale) async {
     await write(key: LOCALE, value: locale.languageCode, secure: false);
+  }
+
+  Future<int?> getClientNoteCounter() async {
+    final String? value = await read(key: CLIENT_NOTE_COUNTER, secure: false);
+    if (value == null) {
+      return null;
+    }
+    return int.parse(value);
+  }
+
+  Future<void> setClientNoteCounter(int clientNoteCounter) async {
+    await write(key: CLIENT_NOTE_COUNTER, value: clientNoteCounter.toString(), secure: false);
   }
 
   /// Needs to be overridden in the subclasses.

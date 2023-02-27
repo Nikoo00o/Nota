@@ -56,7 +56,7 @@ bool initialized = false;
 /// the [serverPort] must be different for each test file, so that they can be run at the same time!
 ///
 /// The [serverPort] also gets used to assign different test data folders to each test file!
-Future<void> createCommonTestObjects({required int serverPort}) async {
+Future<void> createCommonTestObjects({required int serverPort, LogLevel logLevel = LogLevel.VERBOSE}) async {
   serverConfigMock = ServerConfigMock(serverPortOverride: serverPort);
 
   localDataSource = LocalDataSourceImpl(serverConfig: serverConfigMock);
@@ -95,7 +95,7 @@ Future<void> createCommonTestObjects({required int serverPort}) async {
 
   initialized = true;
 
-  await _setup();
+  await _setup(logLevel);
 }
 
 Future<ServerAccount?> _fetchAuthenticatedAccountCallback(String sessionToken) =>
@@ -104,8 +104,8 @@ Future<ServerAccount?> _fetchAuthenticatedAccountCallback(String sessionToken) =
 Future<SessionToken?> _fetchCurrentSessionToken() =>
     fetchCurrentSessionTokenMock.call(NoParams());
 
-Future<void> _setup() async {
-  Logger.initLogger(Logger(logLevel: LogLevel.VERBOSE)); // the logger must always be initialized first
+Future<void> _setup(LogLevel logLevel) async {
+  Logger.initLogger(Logger(logLevel: logLevel)); // the logger must always be initialized first
 
   // modifies the resource path to depend on the test port, so its unique for each test
   final String baseTestPath = FileUtils.getLocalFilePath("test${Platform.pathSeparator}data");

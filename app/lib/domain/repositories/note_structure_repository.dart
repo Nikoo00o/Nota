@@ -33,5 +33,10 @@ abstract class NoteStructureRepository {
   /// Returns the folder matching to the path and otherwise null if its not found.
   ///
   /// This will always use [root] as the top most parent!
-  StructureFolder? getFolderByPath(String path);
+  StructureFolder? getFolderByPath(String path, {required bool deepCopy});
+
+  /// This returns a new unique decremented client note counter.
+  ///
+  /// This will always be below 0!
+  Future<int> getNewClientNoteCounter();
 }

@@ -3,6 +3,7 @@ import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
+import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/get_current_structure_item.dart';
 import 'package:app/domain/usecases/note_transfer/fetch_new_note_structure.dart';
 import 'package:shared/core/constants/error_codes.dart';
@@ -10,15 +11,16 @@ import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
-/// This updates the current note and the "recent" directory of the [NoteStructureRepository]
+/// This updates the [NoteStructureRepository.currentItem] and the [NoteStructureRepository.recent] references of by
+/// retrieving them from [NoteStructureRepository.root].
 ///
 /// This is called at the end of each use case that changes the structure like [CreateStructureItem],
-/// [MoveStructureItem], [RenameCurrentStructureItem], [DeleteStructureItem] and [FetchNewNoteStructure].
+/// [MoveCurrentStructureItem], [ChangeCurrentStructureItem], [DeleteCurrentStructureItem] and [FetchNewNoteStructure].
 ///
-/// Afterwards [GetCurrentStructureItem] should be called to return a new copy of the [currentItem]!
+/// Afterwards [GetCurrentStructureItem] should be called to return a new copy of the [NoteStructureRepository.currentItem]!
 ///
-/// [FetchNewNoteStructure] must be called before, otherwise this throws [ErrorCodes.INVALID_PARAMS] if
-/// [NoteStructureRepository.root] is null!
+/// [FetchNewNoteStructure] must be have been called at least once before, otherwise this throws
+/// [ErrorCodes.INVALID_PARAMS] if  [NoteStructureRepository.root] is null!
 class UpdateNoteStructure extends UseCase<void, NoParams> {
   final NoteStructureRepository noteStructureRepository;
 
@@ -61,6 +63,7 @@ class UpdateNoteStructure extends UseCase<void, NoParams> {
         current = newItem; // not deleted note
       } else {
         current = current.getParent(); // returns either direct parent of the "root" tree, or "recent" itself
+        Logger.verbose("The current note had to be changed to the parent:\n$current");
       }
     }
 
@@ -70,12 +73,13 @@ class UpdateNoteStructure extends UseCase<void, NoParams> {
       } else {
         // find a matching parent folder for the "root" tree
         while (current!.directParent != null) {
-          final StructureFolder? newItem = noteStructureRepository.getFolderByPath(current.path);
+          final StructureFolder? newItem = noteStructureRepository.getFolderByPath(current.path, deepCopy: false);
           if (newItem != null) {
             current = newItem; // find a not deleted folder higher up
             break;
           } else {
             current = current.directParent; // will never be in recent, so this is allowed
+            Logger.verbose("The current folder had to be changed to the parent:\n$current");
           }
         }
       }
