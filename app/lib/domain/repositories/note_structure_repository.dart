@@ -21,6 +21,14 @@ abstract class NoteStructureRepository {
   /// This should not be used to modify the structure items!
   StructureFolder? recent;
 
+  /// This is also a top level folder that will be created as a deep copy of the notes of [root] like [recent], but here
+  /// the sub folders will not include any files and all sub folders are non modifiable.
+  /// This will only be used for the move use cases to select a new target parent folder.
+  StructureFolder? moveSelection;
+
+  /// This is the cached source item for the move use cases which will be moved to the selected item on completion!
+  StructureItem? moveItemSrc;
+
   /// This will always be a reference to a child (either note, or folder) of either [root], or [recent].
   ///
   /// The direct parent will always be a folder and the top most parent will be [root], or [recent].
@@ -33,6 +41,10 @@ abstract class NoteStructureRepository {
   /// [0] = [root]
   ///
   /// [1] = [recent]
+  ///
+  /// [2] = [moveSelection]
+  ///
+  /// The [moveSelection] should not be included inside of the menu in the ui.
   List<StructureFolder?> get topLevelFolders;
 
   /// Can return null if the [noteId] was not contained. Otherwise it returns the matching note with the id.

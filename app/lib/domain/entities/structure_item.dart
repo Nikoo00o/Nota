@@ -86,6 +86,9 @@ abstract class StructureItem extends Entity {
     return directParent;
   }
 
+  /// Returns if this item is a top level folder by returning if the [directParent] is null.
+  bool get isTopLevel => directParent == null;
+
   /// Returns a deep copy of the [item] (recursively copy all sub folders and items).
   ///
   ///  If [changeParentOfChildren] is true, then the [directParent] of the children will be changed to this new copy!
@@ -93,12 +96,23 @@ abstract class StructureItem extends Entity {
   /// If [newDirectParent] is not null, it changes the [directParent] of the new returned item to [newDirectParent].
   ///
   /// This calls [StructureNote.copyWith] and [StructureFolder.copyWith].
-  static StructureItem deepCopy(StructureItem item,
-      {StructureFolder? newDirectParent, required bool changeParentOfChildren}) {
+  ///
+  /// If [newRecursiveCanBeModified] is not null, then the [canBeModified] will be updated for all children recursively!
+  static StructureItem deepCopy(
+    StructureItem item, {
+    StructureFolder? newDirectParent,
+    required bool changeParentOfChildren,
+    bool? newRecursiveCanBeModified,
+  }) {
     if (item is StructureFolder) {
-      return item.copyWith(newDirectParent: newDirectParent, changeParentOfChildren: changeParentOfChildren);
+      return item.copyWith(
+        newDirectParent: newDirectParent,
+        changeParentOfChildren: changeParentOfChildren,
+        newCanBeModified: newRecursiveCanBeModified,
+        changeCanBeModifiedOfChildrenRecursively: newRecursiveCanBeModified != null,
+      );
     } else if (item is StructureNote) {
-      return item.copyWith(newDirectParent: newDirectParent);
+      return item.copyWith(newDirectParent: newDirectParent, newCanBeModified: newRecursiveCanBeModified);
     }
     throw UnimplementedError();
   }

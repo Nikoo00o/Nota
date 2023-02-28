@@ -6,7 +6,8 @@ import 'package:app/domain/repositories/note_structure_repository.dart';
 import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/create_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
-import 'package:app/domain/usecases/note_structure/get_current_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/finish_move_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/inner/get_original_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/move_current_structure_item.dart';
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
@@ -32,13 +33,13 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// If the current item is not available anymore, it will navigate to the parent folder!
 ///
 /// This is called at the end of each use case that changes the structure like [CreateStructureItem],
-/// [MoveCurrentStructureItem], [ChangeCurrentStructureItem], [DeleteCurrentStructureItem] and [FetchNewNoteStructure].
+/// [FinishMoveStructureItem], [ChangeCurrentStructureItem], [DeleteCurrentStructureItem] and [FetchNewNoteStructure].
 ///
 /// Afterwards [GetCurrentStructureItem] should be called again by the ui to return a new copy of the
 /// [NoteStructureRepository.currentItem]!
 ///
 /// [FetchNewNoteStructure] must be have been called at least once before, otherwise this throws
-/// [ErrorCodes.INVALID_PARAMS] if  [NoteStructureRepository.root] is null!
+/// [ErrorCodes.INVALID_PARAMS] if [NoteStructureRepository.root] is null!
 class UpdateNoteStructure extends UseCase<void, UpdateNoteStructureParams> {
   final NoteStructureRepository noteStructureRepository;
 
@@ -52,12 +53,17 @@ class UpdateNoteStructure extends UseCase<void, UpdateNoteStructureParams> {
 
     _updateRecentNotes();
 
+    _updateMoveSelection();
+
     if (params.resetCurrentItem) {
       noteStructureRepository.currentItem = null; // depending on the params reset the current item, so that the top most
       // parent of the originalItem will be used for comparison!
     }
 
     _updateCurrentItem(params.originalItem);
+
+    // todo: maybe send an event to the bloc here (and also in the navigate use cases) instead of updating it manually
+    //  after calling this use case with a call to [GetCurrentStructureItem]
   }
 
   void _updateRecentNotes() {
@@ -73,6 +79,22 @@ class UpdateNoteStructure extends UseCase<void, UpdateNoteStructureParams> {
     noteStructureRepository.recent!.replaceChildren(notes);
 
     Logger.debug("Updated the recent notes to:\n${noteStructureRepository.recent}");
+  }
+
+  void _updateMoveSelection() {
+    // first make a deep copy of root, change top most folder and the modifiable bool
+    noteStructureRepository.moveSelection = noteStructureRepository.root!.copyWith(
+      newName: StructureFolder.moveFolderNames.first,
+      newSorting: NoteSorting.BY_NAME,
+      changeParentOfChildren: true,
+      newCanBeModified: false,
+      changeCanBeModifiedOfChildrenRecursively: true,
+    );
+
+    // then remove all notes from the move selection
+    noteStructureRepository.moveSelection!.removeAllNotes();
+
+    Logger.debug("Updated the move selection to:\n${noteStructureRepository.moveSelection}");
   }
 
   void _updateCurrentItem(StructureItem? originalItem) {
@@ -117,13 +139,19 @@ class UpdateNoteStructure extends UseCase<void, UpdateNoteStructureParams> {
         return noteStructureRepository.recent!;
       } else if (currentItem.topMostParent.isRoot) {
         return noteStructureRepository.root!;
+      } else if (currentItem.topMostParent.isMove) {
+        return noteStructureRepository.moveSelection!;
       }
+      Logger.warn("The current item was not null, but did not have a top level folder:\n$currentItem");
     } else if (originalItem != null) {
       if (originalItem.topMostParent.isRecent) {
         return noteStructureRepository.recent!;
       } else if (originalItem.topMostParent.isRoot) {
         return noteStructureRepository.root!;
+      } else if (originalItem.topMostParent.isMove) {
+        return noteStructureRepository.moveSelection!;
       }
+      Logger.warn("The original item was not null, but did not have a top level folder:\n$currentItem");
     }
     return noteStructureRepository.recent!; //otherwise the default is always recent
   }

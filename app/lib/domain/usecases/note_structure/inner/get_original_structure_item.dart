@@ -6,9 +6,9 @@ import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/create_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
-import 'package:app/domain/usecases/note_structure/get_current_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/finish_move_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/inner/update_note_structure.dart';
-import 'package:app/domain/usecases/note_structure/move_current_structure_item.dart';
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
@@ -23,8 +23,8 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// [UpdateNoteStructure] after you are done with your modifications with the original item reference, so that the current
 /// item will be updated!
 ///
-/// This is called at the end of each use case that changes the structure like [CreateStructureItem],
-/// [MoveCurrentStructureItem], [ChangeCurrentStructureItem], [DeleteCurrentStructureItem]
+/// This is called at the start of each use case that changes the structure like [CreateStructureItem],
+/// [FinishMoveStructureItem], [ChangeCurrentStructureItem], [DeleteCurrentStructureItem]
 ///
 /// For read only access, use [GetCurrentStructureItem]!
 ///

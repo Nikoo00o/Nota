@@ -8,11 +8,15 @@ import 'package:shared/core/utils/logger/logger.dart';
 class StructureFolder extends StructureItem {
   /// The reserved names for the "root" top level folder.
   /// Contains the translation key first and then the translation values for all languages!
-  static List<String> rootFolderNames = <String>["notes.root", "Root", "Stammordner"];
+  static List<String> rootFolderNames = <String>["notes.root", "root", "stammordner"];
 
   /// The reserved names for the "recent notes" top level folder.
   /// Contains the translation key first and then the translation values for all languages!
-  static List<String> recentFolderNames = <String>["notes.recent", "Recent Notes", "Zuletzt Bearbeitet"];
+  static List<String> recentFolderNames = <String>["notes.recent", "recent notes", "zuletzt bearbeitet"];
+
+  /// The reserved names for the "move notes" top level folder.
+  /// Contains the translation key first and then the translation values for all languages!
+  static List<String> moveFolderNames = <String>["notes.move", "select target folder", "zielordner auswählen"];
 
   /// The folders and files within this folder.
   ///
@@ -26,6 +30,9 @@ class StructureFolder extends StructureItem {
   ///
   /// If [changeParentOfChildren] is [true], then the individual children elements will also have their [directParent]
   /// changed to [this]!!!
+  ///
+  /// If [changeCanBeModifiedOfChildrenRecursively] is true then all copies of the [children] will get the updated value of
+  /// [canBeModified].
   factory StructureFolder({
     required String name,
     required StructureFolder? directParent,
@@ -33,6 +40,7 @@ class StructureFolder extends StructureItem {
     required List<StructureItem> children,
     required NoteSorting sorting,
     required bool changeParentOfChildren,
+    bool changeCanBeModifiedOfChildrenRecursively = false,
   }) {
     final StructureFolder folder = StructureFolder._internal(
       name: name,
@@ -205,6 +213,14 @@ class StructureFolder extends StructureItem {
     return notes;
   }
 
+  /// Removes all notes recursively from this folder and all sub folders.
+  void removeAllNotes() {
+    _children.removeWhere((StructureItem item) => item is StructureNote);
+    for (final StructureItem child in _children) {
+      (child as StructureFolder).removeAllNotes();
+    }
+  }
+
   /// If [recursive] is true, all sub folders will also be sorted!
   void sortChildren({bool recursive = false}) {
     if (sorting == NoteSorting.BY_NAME) {
@@ -221,9 +237,9 @@ class StructureFolder extends StructureItem {
     }
   }
 
-  /// Returns "[path] + [delimiter] + [name]".
+  /// Returns "[path] + [delimiter] + [name]" for non top level folders. Otherwise it just returns the [name].
   String getPathForChildName(String name) {
-    if (isRoot == false && isRecent == false) {
+    if (isTopLevel == false) {
       return "$path${StructureItem.delimiter}$name";
     }
     return name;
@@ -231,9 +247,11 @@ class StructureFolder extends StructureItem {
 
   int get amountOfChildren => _children.length;
 
-  bool get isRoot => rootFolderNames.contains(name);
+  bool get isRoot => rootFolderNames.contains(name.toLowerCase());
 
-  bool get isRecent => recentFolderNames.contains(name);
+  bool get isRecent => recentFolderNames.contains(name.toLowerCase());
+
+  bool get isMove => moveFolderNames.contains(name.toLowerCase());
 
   /// Compares 2 structure items in alphabetical order
   static int _sortByName(StructureItem first, StructureItem second) =>
@@ -265,6 +283,9 @@ class StructureFolder extends StructureItem {
   /// This also calls [StructureItem.deepCopy].
   ///
   /// This can throw an [ErrorCodes.INVALID_PARAMS] when [isRecent] and [changeParentOfChildren] is true!
+  ///
+  /// If [changeCanBeModifiedOfChildrenRecursively] is true and [newCanBeModified] is not null, then all copies of the
+  /// children will get the updated value.
   StructureFolder copyWith({
     String? newName,
     StructureFolder? newDirectParent,
@@ -272,6 +293,7 @@ class StructureFolder extends StructureItem {
     List<StructureItem>? newChildren,
     NoteSorting? newSorting,
     required bool changeParentOfChildren,
+    bool changeCanBeModifiedOfChildrenRecursively = false,
   }) {
     if (isRecent && changeParentOfChildren) {
       Logger.error("CopyWith called on recent with changeParentOfChildren enabled:\ $this");
@@ -284,6 +306,7 @@ class StructureFolder extends StructureItem {
       children: newChildren ?? _children,
       sorting: newSorting ?? sorting,
       changeParentOfChildren: changeParentOfChildren,
+      changeCanBeModifiedOfChildrenRecursively: changeCanBeModifiedOfChildrenRecursively && newCanBeModified != null,
     );
   }
 }

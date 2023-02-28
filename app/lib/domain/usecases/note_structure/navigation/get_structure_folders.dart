@@ -32,8 +32,10 @@ class GetCurrentStructureFolders extends UseCase<List<StructureFolder>, NoParams
 
     Logger.verbose("Returned a new deep copied list of the top level folders");
 
-    return noteStructureRepository.topLevelFolders
-        .map((StructureFolder? folder) => folder!.copyWith(changeParentOfChildren: false))
-        .toList();
+    return noteStructureRepository.topLevelFolders.map((StructureFolder? folder) {
+      final bool changeParentOfChildren = folder!.isRecent == false; // don't change the parent of children of recent,
+      // because recent has the notes as direct children which have their folder structure as direct parents!
+      return folder.copyWith(changeParentOfChildren: changeParentOfChildren);
+    }).toList();
   }
 }

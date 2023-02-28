@@ -16,7 +16,7 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// folder, or a note (which would also get a new client note id and an empty content). It will then navigate to the newly
 /// created item!
 ///
-/// If the item is not a [NoteStructureRepository.currentItem], then this will throw [ErrorCodes.INVALID_PARAMS].
+/// If the [NoteStructureRepository.currentItem] is not a [StructureFolder], then this will throw [ErrorCodes.INVALID_PARAMS].
 /// If the current item is [NoteStructureRepository.recent], or a folder in recent and the [CreateStructureItemParams.isFolder]
 /// is true, then it will throw [ErrorCodes.INVALID_PARAMS] as well.
 ///
@@ -31,7 +31,7 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// This calls the use cases [GetOriginalStructureItem], [StoreNoteEncrypted] and [UpdateNoteStructure] and can throw the
 /// exceptions of them!
 ///
-/// The name should be retrieved with a dialog before calling this use case.
+/// The new name should be retrieved with a dialog from the ui before calling this use case.
 class CreateStructureItem extends UseCase<void, CreateStructureItemParams> {
   final NoteStructureRepository noteStructureRepository;
   final GetOriginalStructureItem getOriginalStructureItem;
