@@ -56,6 +56,7 @@ void main() {
     // todo: add more tests for different configurations and also for errors!!!
     // included tests to create folders, to create files. inside root vs inside recent, etc...
     // create a note directly from root dir vs from deeper folder
+    // IMPORTANT: this also applies to the other tests inside of the folder structure_changes
 
     test("creating a new note inside of a subfolder from root", () async {
       sl<NoteStructureRepository>().currentItem = sl<NoteStructureRepository>().root!.getChild(0); // dir1

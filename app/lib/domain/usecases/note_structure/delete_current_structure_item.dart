@@ -10,9 +10,6 @@ import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
-// todo: in tests also check if the current file will get moved correctly when folder is deleted, or file (also for root
-//  vs recent)
-
 /// This deletes the [NoteStructureRepository.currentItem] (note, or folder) and navigates it to the parent folder!.
 /// If the item is a folder, then it also removes all children.
 ///
