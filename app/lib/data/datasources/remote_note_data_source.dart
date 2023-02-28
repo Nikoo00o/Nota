@@ -1,4 +1,4 @@
-import 'package:app/domain/usecases/account/fetch_current_session_token.dart';
+import 'package:app/domain/usecases/account/inner/fetch_current_session_token.dart';
 import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';

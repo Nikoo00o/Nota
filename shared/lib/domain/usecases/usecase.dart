@@ -2,7 +2,7 @@ import 'package:shared/core/utils/logger/logger.dart';
 
 /// Helper class to use for use cases that don't have any parameters
 class NoParams {
-  NoParams();
+  const NoParams();
 }
 
 /// Base class for all use cases with the generic [ReturnType] and [CallParams] parameters.

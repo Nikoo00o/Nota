@@ -9,7 +9,7 @@ import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
 import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
-import 'package:app/domain/usecases/note_transfer/store_note_encrypted.dart';
+import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
 import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -39,7 +39,7 @@ void main() {
     test("no logged in account should throw", () async {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
       expect(() async {
-        await sl<TransferNotes>().call(NoParams());
+        await sl<TransferNotes>().call(const NoParams());
       }, throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.ACCOUNT_WRONG_PASSWORD)),
           reason: "no file");
     });
@@ -49,7 +49,7 @@ void main() {
       final DateTime firstTime = account.noteInfoList.first.lastEdited;
 
       dialogServiceMock.confirmedOverride = true; // should confirm the note transfer
-      await sl<TransferNotes>().call(NoParams()); // first transfer to upload note
+      await sl<TransferNotes>().call(const NoParams()); // first transfer to upload note
 
       // change note name to something else, but the server should have the newer version
       account.noteInfoList[0] = account.noteInfoList.first.copyWith(
@@ -59,7 +59,7 @@ void main() {
       final bool deleted = await sl<NoteTransferRepository>().deleteNote(noteId: 1);
       expect(deleted, true, reason: "note file should be deleted"); // only delete the note file
 
-      await sl<TransferNotes>().call(NoParams()); //next transfer to download note
+      await sl<TransferNotes>().call(const NoParams()); //next transfer to download note
 
       expect(account.noteInfoList.length, 1, reason: "account should have 1 note");
       expect(
@@ -77,7 +77,7 @@ void main() {
       final ClientAccount account = await _loginAndCreateNote();
 
       dialogServiceMock.confirmedOverride = true; // dont cancel the first note transfer
-      await sl<TransferNotes>().call(NoParams()); // first transfer to upload note
+      await sl<TransferNotes>().call(const NoParams()); // first transfer to upload note
 
       final DateTime newTime = DateTime.now().subtract(const Duration(hours: 1));
       // change note name to something else, but the server should have the newer version
@@ -89,7 +89,7 @@ void main() {
       expect(deleted, true, reason: "note file should be deleted"); // only delete the note file
 
       dialogServiceMock.confirmedOverride = false; // should cancel the note transfer
-      await sl<TransferNotes>().call(NoParams()); //next transfer to download note
+      await sl<TransferNotes>().call(const NoParams()); //next transfer to download note
 
       expect(account.noteInfoList.length, 1, reason: "account should have 1 note");
       expect(
@@ -107,10 +107,10 @@ void main() {
     test("Should do nothing without notes", () async {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
       await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
-      final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
+      final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
 
       dialogServiceMock.confirmedOverride = true; // dont cancel
-      await sl<TransferNotes>().call(NoParams());
+      await sl<TransferNotes>().call(const NoParams());
 
       expect(account.noteInfoList.isEmpty, true, reason: "account should have no notes");
     });
@@ -119,13 +119,13 @@ void main() {
       final ClientAccount account = await _loginAndCreateNote();
 
       dialogServiceMock.confirmedOverride = true; // should confirm the note transfer
-      await sl<TransferNotes>().call(NoParams()); // first transfer to upload note
+      await sl<TransferNotes>().call(const NoParams()); // first transfer to upload note
 
       // newer version on client
       final DateTime nextTime = await sl<StoreNoteEncrypted>().call(ChangeNoteEncryptedParams(
           noteId: 1, decryptedName: "invalid", decryptedContent: Uint8List.fromList(utf8.encode("file"))));
 
-      await sl<TransferNotes>().call(NoParams()); //next transfer to upload note again
+      await sl<TransferNotes>().call(const NoParams()); //next transfer to upload note again
 
       expect(account.noteInfoList.length, 1, reason: "account should have 1 note");
       expect(
@@ -144,9 +144,9 @@ void main() {
       final DateTime firstTime = account.noteInfoList.first.lastEdited;
 
       dialogServiceMock.confirmedOverride = true; // should confirm the note transfer
-      await sl<TransferNotes>().call(NoParams()); // first transfer to upload note
+      await sl<TransferNotes>().call(const NoParams()); // first transfer to upload note
 
-      await sl<TransferNotes>().call(NoParams()); //next transfer to download note
+      await sl<TransferNotes>().call(const NoParams()); //next transfer to download note
 
       expect(account.noteInfoList.length, 1, reason: "account should have 1 note");
       expect(
@@ -166,14 +166,14 @@ void main() {
     final DateTime firstTime = account.noteInfoList.first.lastEdited;
 
     dialogServiceMock.confirmedOverride = true; // should confirm the note transfer
-    await sl<TransferNotes>().call(NoParams()); // first transfer to upload note
+    await sl<TransferNotes>().call(const NoParams()); // first transfer to upload note
 
     account.userName = "dontCacheData"; // pretend that this is someone else, so that the logout does not cache!
-    await sl<LogoutOfAccount>().call(NoParams()); //resets the account
+    await sl<LogoutOfAccount>().call(const NoParams()); //resets the account
     await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
-    account = await sl<GetLoggedInAccount>().call(NoParams()); //refresh account because of logout
+    account = await sl<GetLoggedInAccount>().call(const NoParams()); //refresh account because of logout
 
-    await sl<TransferNotes>().call(NoParams()); //next transfer to download note
+    await sl<TransferNotes>().call(const NoParams()); //next transfer to download note
 
     expect(account.noteInfoList.length, 1, reason: "account should have 1 note");
     expect(
@@ -191,10 +191,10 @@ void main() {
     final ClientAccount account = await _loginAndCreateNote();
 
     dialogServiceMock.confirmedOverride = true; // should confirm the note transfer
-    await sl<TransferNotes>().call(NoParams()); // first transfer to upload note
+    await sl<TransferNotes>().call(const NoParams()); // first transfer to upload note
 
     final DateTime secondTime = await sl<StoreNoteEncrypted>().call(DeleteNoteEncryptedParams(noteId: 1)); //delete note
-    await sl<TransferNotes>().call(NoParams()); //next transfer to send deleted note
+    await sl<TransferNotes>().call(const NoParams()); //next transfer to send deleted note
 
     expect(account.noteInfoList.length, 1, reason: "account should have 1 note");
     expect(account.noteInfoList.first.encFileName, "", reason: "name should be empty");
@@ -209,10 +209,10 @@ void main() {
     final ClientAccount account = await _loginAndCreateNote();
 
     dialogServiceMock.confirmedOverride = true; // should confirm the note transfer
-    await sl<TransferNotes>().call(NoParams()); // first transfer to upload note
+    await sl<TransferNotes>().call(const NoParams()); // first transfer to upload note
 
     final DateTime secondTime = await sl<StoreNoteEncrypted>().call(DeleteNoteEncryptedParams(noteId: 1)); //delete note
-    await sl<TransferNotes>().call(NoParams()); //next transfer to send deleted note
+    await sl<TransferNotes>().call(const NoParams()); //next transfer to send deleted note
 
     expect(account.noteInfoList.length, 1, reason: "account should have 1 note");
     expect(account.noteInfoList.first.encFileName, "", reason: "name should be empty");
@@ -228,7 +228,7 @@ void main() {
     final DateTime secondTime = await sl<StoreNoteEncrypted>().call(DeleteNoteEncryptedParams(noteId: -1)); //delete note
 
     dialogServiceMock.confirmedOverride = true; // should confirm the note transfer
-    await sl<TransferNotes>().call(NoParams()); // first transfer to upload note
+    await sl<TransferNotes>().call(const NoParams()); // first transfer to upload note
 
     expect(account.noteInfoList.length, 1, reason: "account should have 1 note");
     expect(account.noteInfoList.first.encFileName, "", reason: "name should be empty");
@@ -244,27 +244,27 @@ void main() {
     dialogServiceMock.confirmedOverride = true; // should confirm the note transfers
     final String oldName = account.noteInfoList.first.encFileName;
 
-    await sl<TransferNotes>().call(NoParams()); // first transfer the note and logout while caching
-    await sl<LogoutOfAccount>().call(NoParams());
+    await sl<TransferNotes>().call(const NoParams()); // first transfer the note and logout while caching
+    await sl<LogoutOfAccount>().call(const NoParams());
 
     final DateTime deleteTime = DateTime.now(); //then login again and delete the note
     await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
-    account = await sl<GetLoggedInAccount>().call(NoParams()); //refresh account because of logout
+    account = await sl<GetLoggedInAccount>().call(const NoParams()); //refresh account because of logout
     account.noteInfoList[0] = account.noteInfoList.first.copyWith(newEncFileName: "", newLastEdited: deleteTime);
 
-    await sl<TransferNotes>().call(NoParams()); // transfer the deleted note to the server
+    await sl<TransferNotes>().call(const NoParams()); // transfer the deleted note to the server
 
     account.userName = "dontCacheData"; // pretend that this is someone else, so that the logout does not cache!
-    await sl<LogoutOfAccount>().call(NoParams());
+    await sl<LogoutOfAccount>().call(const NoParams());
     await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
-    account = await sl<GetLoggedInAccount>().call(NoParams()); //refresh account because of logout and get the old cached
+    account = await sl<GetLoggedInAccount>().call(const NoParams()); //refresh account because of logout and get the old cached
     // data
 
     expect(account.noteInfoList.length, 1, reason: "first account should have 1 note");
     expect(account.noteInfoList.first.encFileName, oldName, reason: "first name should be the old name");
     await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1)); // and the file should also exist
 
-    await sl<TransferNotes>().call(NoParams()); // now from this transfer the note should get deleted
+    await sl<TransferNotes>().call(const NoParams()); // now from this transfer the note should get deleted
 
     expect(account.noteInfoList.length, 1, reason: "account should still have 1 note");
     expect(account.noteInfoList.first.encFileName, "", reason: "but name should be empty");
@@ -283,22 +283,22 @@ void main() {
     // modify the note as if it was deleted
     account.noteInfoList[0] = account.noteInfoList.first.copyWith(newEncFileName: "", newLastEdited: deletedTime);
 
-    await sl<TransferNotes>().call(NoParams()); // first transfer the deleted note and logout without caching
+    await sl<TransferNotes>().call(const NoParams()); // first transfer the deleted note and logout without caching
     account.userName = "dontCacheData";
-    await sl<LogoutOfAccount>().call(NoParams());
+    await sl<LogoutOfAccount>().call(const NoParams());
 
     await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
-    account = await sl<GetLoggedInAccount>().call(NoParams()); //refresh account because of logout
+    account = await sl<GetLoggedInAccount>().call(const NoParams()); //refresh account because of logout
 
-    await sl<TransferNotes>().call(NoParams()); // transfer the deleted note to the server
+    await sl<TransferNotes>().call(const NoParams()); // transfer the deleted note to the server
 
     account.userName = "dontCacheData"; // pretend that this is someone else, so that the logout does not cache!
-    await sl<LogoutOfAccount>().call(NoParams());
+    await sl<LogoutOfAccount>().call(const NoParams());
     await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
-    account = await sl<GetLoggedInAccount>().call(NoParams()); //refresh account because of logout
+    account = await sl<GetLoggedInAccount>().call(const NoParams()); //refresh account because of logout
 
     expect(account.noteInfoList.length, 0, reason: "account has no note before");
-    await sl<TransferNotes>().call(NoParams()); // this transfer should now get the deleted note data
+    await sl<TransferNotes>().call(const NoParams()); // this transfer should now get the deleted note data
 
     expect(account.noteInfoList.length, 1, reason: "account should have 1 note");
     expect(account.noteInfoList.first.encFileName, "", reason: "name should be empty");
@@ -315,6 +315,6 @@ Future<ClientAccount> _loginAndCreateNote() async {
   await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
   await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
       noteId: -1, decryptedName: "name", decryptedContent: Uint8List.fromList(utf8.encode("test"))));
-  final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
+  final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
   return account;
 }

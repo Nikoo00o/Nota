@@ -15,7 +15,7 @@ import 'package:app/domain/repositories/note_transfer_repository.dart';
 import 'package:app/domain/usecases/account/change/change_account_password.dart';
 import 'package:app/domain/usecases/account/change/change_auto_login.dart';
 import 'package:app/domain/usecases/account/change/logout_of_account.dart';
-import 'package:app/domain/usecases/account/fetch_current_session_token.dart';
+import 'package:app/domain/usecases/account/inner/fetch_current_session_token.dart';
 import 'package:app/domain/usecases/account/get_auto_login.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/login/create_account.dart';
@@ -23,12 +23,18 @@ import 'package:app/domain/usecases/account/login/get_required_login_status.dart
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
 import 'package:app/domain/usecases/account/save_account.dart';
 import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
-import 'package:app/domain/usecases/note_structure/get_current_structure_item.dart';
-import 'package:app/domain/usecases/note_structure/get_structure_folders.dart';
-import 'package:app/domain/usecases/note_structure/update_note_structure.dart';
-import 'package:app/domain/usecases/note_transfer/fetch_new_note_structure.dart';
+import 'package:app/domain/usecases/note_structure/create_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/finish_move_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/inner/get_original_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/navigation/get_structure_folders.dart';
+import 'package:app/domain/usecases/note_structure/inner/update_note_structure.dart';
+import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
+import 'package:app/domain/usecases/note_structure/start_move_structure_item.dart';
+import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
-import 'package:app/domain/usecases/note_transfer/store_note_encrypted.dart';
+import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
 import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:app/services/session_service.dart';
@@ -113,6 +119,10 @@ Future<void> initializeGetIt() async {
         getLoggedInAccount: sl(),
       ));
   sl.registerLazySingleton<UpdateNoteStructure>(() => UpdateNoteStructure(noteStructureRepository: sl()));
+  sl.registerLazySingleton<GetOriginalStructureItem>(() => GetOriginalStructureItem(
+        noteStructureRepository: sl(),
+        fetchNewNoteStructure: sl(),
+      ));
   sl.registerLazySingleton<GetCurrentStructureItem>(() => GetCurrentStructureItem(
         noteStructureRepository: sl(),
         fetchNewNoteStructure: sl(),
@@ -124,15 +134,41 @@ Future<void> initializeGetIt() async {
 
   sl.registerLazySingleton<ChangeCurrentStructureItem>(() => ChangeCurrentStructureItem(
         noteStructureRepository: sl(),
-        getCurrentStructureItem: sl(),
+        getOriginalStructureItem: sl(),
         updateNoteStructure: sl(),
         storeNoteEncrypted: sl(),
       ));
+  sl.registerLazySingleton<DeleteCurrentStructureItem>(() => DeleteCurrentStructureItem(
+        getOriginalStructureItem: sl(),
+        updateNoteStructure: sl(),
+        storeNoteEncrypted: sl(),
+      ));
+  sl.registerLazySingleton<CreateStructureItem>(() => CreateStructureItem(
+        noteStructureRepository: sl(),
+        getOriginalStructureItem: sl(),
+        updateNoteStructure: sl(),
+        storeNoteEncrypted: sl(),
+      ));
+  sl.registerLazySingleton<StartMoveStructureItem>(() => StartMoveStructureItem(
+        noteStructureRepository: sl(),
+        getCurrentStructureItem: sl(),
+      ));
+  sl.registerLazySingleton<FinishMoveStructureItem>(() => FinishMoveStructureItem(
+        noteStructureRepository: sl(),
+        getOriginalStructureItem: sl(),
+        updateNoteStructure: sl(),
+        getCurrentStructureItem: sl(),
+        storeNoteEncrypted: sl(),
+      ));
+  sl.registerLazySingleton<NavigateToItem>(() => NavigateToItem(
+      noteStructureRepository: sl(),
+      fetchNewNoteStructure: sl(),
+  ));
 
   sl.registerLazySingleton<SessionService>(() => SessionService());
   sl.registerLazySingleton<DialogService>(() => DialogService());
 }
 
-Future<SessionToken?> fetchCurrentSessionToken() => sl<SharedFetchCurrentSessionToken>().call(NoParams());
+Future<SessionToken?> fetchCurrentSessionToken() => sl<SharedFetchCurrentSessionToken>().call(const NoParams());
 
 AppConfig _config() => sl<AppConfig>();

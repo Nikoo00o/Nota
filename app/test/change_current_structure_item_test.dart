@@ -13,12 +13,12 @@ import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
 import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
-import 'package:app/domain/usecases/note_structure/get_current_structure_item.dart';
-import 'package:app/domain/usecases/note_structure/get_structure_folders.dart';
-import 'package:app/domain/usecases/note_structure/update_note_structure.dart';
-import 'package:app/domain/usecases/note_transfer/fetch_new_note_structure.dart';
+import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/navigation/get_structure_folders.dart';
+import 'package:app/domain/usecases/note_structure/inner/update_note_structure.dart';
+import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
-import 'package:app/domain/usecases/note_transfer/store_note_encrypted.dart';
+import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
 import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared/core/constants/error_codes.dart';
@@ -49,7 +49,7 @@ void main() {
     setUp(() async {
       await loginToTestAccount();
       await createSomeTestNotes();
-      await sl<FetchNewNoteStructure>().call(NoParams());
+      await sl<FetchNewNoteStructure>().call(const NoParams());
     });
 
     _testErrors();
@@ -90,7 +90,7 @@ void _testErrors() {
         sl<NoteStructureRepository>().root!.getAllNotes()[4]; // index 1 is fourth, index 4 is first
     expect(
         () async =>
-            sl<ChangeCurrentStructureItem>().call(ChangeCurrentFolderParam(newName: StructureFolder.rootFolderNames.first)),
+            sl<ChangeCurrentStructureItem>().call(ChangeCurrentFolderParam(newName: StructureItem.rootFolderNames.first)),
         throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.NAME_ALREADY_USED)));
   });
 
@@ -126,18 +126,20 @@ void _testValid() {
     expect(current.path, "dir1/dir3/fourthNew", reason: "path should match");
     expect(current.lastModified.isAfter(oldTime), true, reason: "should be newer");
 
-    final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
+    final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
     expect(current.path,
         SecurityUtils.decryptString(account.noteInfoList.last.encFileName, base64UrlEncode(account.decryptedDataKey!)),
         reason: "enc file name should match");
 
     final List<int> bytes = await sl<LoadNoteContent>().call(LoadNoteContentParams(noteId: current.id));
     expect(bytes, utf8.encode("123"), reason: "bytes should match");
+
+    expect(sl<NoteStructureRepository>().recent!.getChild(0).path, "dir1/dir3/fourthNew",
+        reason: "recent should be updated");
   });
 
   test("change a deeper folder", () async {
-    sl<NoteStructureRepository>().currentItem =
-    sl<NoteStructureRepository>().root!.getAllNotes()[1].directParent; // dir3
+    sl<NoteStructureRepository>().currentItem = sl<NoteStructureRepository>().root!.getAllNotes()[1].directParent; // dir3
     final DateTime oldTime = DateTime.now();
     await Future<void>.delayed(const Duration(milliseconds: 25));
 
@@ -148,7 +150,41 @@ void _testValid() {
     expect(currentNote.path, "dir1/dir3New/fourth", reason: "path should match");
     expect(currentNote.lastModified.isAfter(oldTime), true, reason: "should be newer");
 
-    final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
+    final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
+    expect(currentNote.path,
+        SecurityUtils.decryptString(account.noteInfoList.last.encFileName, base64UrlEncode(account.decryptedDataKey!)),
+        reason: "enc file name should match");
+
+    final List<int> bytes = await sl<LoadNoteContent>().call(LoadNoteContentParams(noteId: currentNote.id));
+    expect(bytes, utf8.encode("123"), reason: "bytes should match");
+
+    expect(sl<NoteStructureRepository>().recent!.getChild(0).path, "dir1/dir3New/fourth",
+        reason: "recent should be updated");
+  });
+
+  test("change a note of recent", () async {
+    // set current item to child of recent
+    sl<NoteStructureRepository>().currentItem = sl<NoteStructureRepository>().recent!.getChild(0);
+    final DateTime oldTime = DateTime.now();
+    await Future<void>.delayed(const Duration(milliseconds: 25));
+    // change the item
+    await sl<ChangeCurrentStructureItem>().call(const ChangeCurrentNoteParam(newName: "fourthNew"));
+
+    // get current item again which should be the updated recent child from before
+    final StructureNote currentNote = (await sl<GetCurrentStructureItem>().call(const NoParams())) as StructureNote;
+    expect(currentNote.path, "dir1/dir3/fourthNew", reason: "path should match");
+    expect(currentNote.lastModified.isAfter(oldTime), true, reason: "should be newer");
+    expect(currentNote.topMostParent, sl<NoteStructureRepository>().recent, reason: "should still have recent as parent");
+
+    final StructureFolder rootFolder =
+        sl<NoteStructureRepository>().getFolderByPath("dir1/dir3", deepCopy: false) as StructureFolder;
+
+    expect(rootFolder.getChild(0).path, currentNote.path, reason: "the item in root should have an equal path");
+    expect(rootFolder.getChild(0).topMostParent, isNot(currentNote.topMostParent),
+        reason: "but a different top level parent");
+
+    // the locally stored stuff should still match
+    final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
     expect(currentNote.path,
         SecurityUtils.decryptString(account.noteInfoList.last.encFileName, base64UrlEncode(account.decryptedDataKey!)),
         reason: "enc file name should match");
@@ -156,7 +192,6 @@ void _testValid() {
     final List<int> bytes = await sl<LoadNoteContent>().call(LoadNoteContentParams(noteId: currentNote.id));
     expect(bytes, utf8.encode("123"), reason: "bytes should match");
   });
-
 }
 
 Future<void> _defaultNoteTest(String newName, Uint8List? newContent) async {
@@ -171,7 +206,7 @@ Future<void> _defaultNoteTest(String newName, Uint8List? newContent) async {
   expect(current.path, newName, reason: "path should match");
   expect(current.lastModified.isAfter(oldTime), true, reason: "should be newer");
 
-  final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
+  final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
   expect(current.path,
       SecurityUtils.decryptString(account.noteInfoList.first.encFileName, base64UrlEncode(account.decryptedDataKey!)),
       reason: "enc file name should match");

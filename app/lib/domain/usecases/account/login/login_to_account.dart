@@ -46,7 +46,7 @@ class LoginToAccount extends UseCase<void, LoginParams> {
     // creates the account if not already exists. also sets username and password hash to params
     ClientAccount account = await _getMatchingAccount(params, passwordHash);
 
-    final RequiredLoginStatus loginStatus = await getRequiredLoginStatus(NoParams());
+    final RequiredLoginStatus loginStatus = await getRequiredLoginStatus(const NoParams());
     // login, or compare password hash
     if (params is RemoteLoginParams) {
       if (loginStatus != RequiredLoginStatus.REMOTE) {

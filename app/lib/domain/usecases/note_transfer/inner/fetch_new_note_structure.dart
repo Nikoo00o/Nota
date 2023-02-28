@@ -6,9 +6,10 @@ import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
-import 'package:app/domain/usecases/note_structure/get_current_structure_item.dart';
-import 'package:app/domain/usecases/note_structure/get_structure_folders.dart';
-import 'package:app/domain/usecases/note_structure/update_note_structure.dart';
+import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/inner/get_original_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/navigation/get_structure_folders.dart';
+import 'package:app/domain/usecases/note_structure/inner/update_note_structure.dart';
 import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/entities/note_info.dart';
@@ -17,7 +18,8 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// This refreshes the cached note structure by loading a new structure from the locally saved account data. This
 /// overrides the [NoteStructureRepository.root] variable.
 ///
-/// This is called by the use cases [TransferNotes], [GetCurrentStructureItem] and [GetCurrentStructureFolders].
+/// This is called by the use cases [TransferNotes], [GetOriginalStructureItem], [GetCurrentStructureItem] and
+/// [GetCurrentStructureFolders].
 ///
 /// This calls the use case [UpdateNoteStructure].
 ///
@@ -35,10 +37,10 @@ class FetchNewNoteStructure extends UseCase<void, NoParams> {
 
   @override
   Future<void> execute(NoParams params) async {
-    final ClientAccount account = await getLoggedInAccount.call(NoParams());
+    final ClientAccount account = await getLoggedInAccount.call(const NoParams());
 
     noteStructureRepository.root = StructureFolder(
-      name: StructureFolder.rootFolderNames.first,
+      name: StructureItem.rootFolderNames.first,
       directParent: null,
       canBeModified: false,
       children: List<StructureItem>.empty(growable: true),
@@ -58,7 +60,7 @@ class FetchNewNoteStructure extends UseCase<void, NoParams> {
 
     Logger.info("Fetched the new note structure for root:\n${noteStructureRepository.root}");
 
-    await updateNoteStructure.call(NoParams()); // update note structure
+    await updateNoteStructure.call(UpdateNoteStructureParams(originalItem: null)); // update note structure
   }
 
   void _addNote(NoteInfo note, StructureFolder targetFolder, String decryptedName) {

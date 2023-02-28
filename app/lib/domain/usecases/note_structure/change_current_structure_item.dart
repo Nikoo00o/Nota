@@ -3,9 +3,9 @@ import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
-import 'package:app/domain/usecases/note_structure/get_current_structure_item.dart';
-import 'package:app/domain/usecases/note_structure/update_note_structure.dart';
-import 'package:app/domain/usecases/note_transfer/store_note_encrypted.dart';
+import 'package:app/domain/usecases/note_structure/inner/get_original_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/inner/update_note_structure.dart';
+import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
@@ -31,24 +31,24 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// If the [NoteStructureRepository.currentItem] is not modifiable, or if it does not have a parent then this will throw
 /// [ErrorCodes.CANT_BE_MODIFIED]. So it should not be set to [NoteStructureRepository.root], or [NoteStructureRepository.recent]!
 ///
-/// This calls the use cases [GetCurrentStructureItem], [StoreNoteEncrypted] and [UpdateNoteStructure] and can throw the
+/// This calls the use cases [GetOriginalStructureItem], [StoreNoteEncrypted] and [UpdateNoteStructure] and can throw the
 /// exceptions of them!
 class ChangeCurrentStructureItem extends UseCase<void, ChangeCurrentStructureItemParams> {
   final NoteStructureRepository noteStructureRepository;
-  final GetCurrentStructureItem getCurrentStructureItem;
+  final GetOriginalStructureItem getOriginalStructureItem;
   final UpdateNoteStructure updateNoteStructure;
   final StoreNoteEncrypted storeNoteEncrypted;
 
   const ChangeCurrentStructureItem({
     required this.noteStructureRepository,
-    required this.getCurrentStructureItem,
+    required this.getOriginalStructureItem,
     required this.updateNoteStructure,
     required this.storeNoteEncrypted,
   });
 
   @override
   Future<void> execute(ChangeCurrentStructureItemParams params) async {
-    final StructureItem item = await getCurrentStructureItem.call(GetCurrentStructureItemParams(deepCopy: false));
+    final StructureItem item = await getOriginalStructureItem.call(const NoParams());
     late final StructureItem result;
 
     if (hasNoChangesOrHasErrors(params, item)) {
@@ -60,6 +60,7 @@ class ChangeCurrentStructureItem extends UseCase<void, ChangeCurrentStructureIte
       final StructureFolder? folderWithName = item.directParent!.getDirectFolderByName(params.newName, deepCopy: false);
 
       if (folderWithName != null) {
+        Logger.error("There already is a folder with the name:\n$folderWithName");
         throw const ClientException(message: ErrorCodes.NAME_ALREADY_USED);
       }
 
@@ -71,13 +72,10 @@ class ChangeCurrentStructureItem extends UseCase<void, ChangeCurrentStructureIte
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
 
-    // important: also update the current item. without this a rename of a folder would make the current item jump to the
-    // parent folder
-    noteStructureRepository.currentItem = result;
-
-    Logger.info("Updated the following item with the params $params:\n$item");
-    // update the note structure at the end
-    await updateNoteStructure.call(NoParams());
+    Logger.info("Changed the old item:\n$item\nto the new item:$result");
+    // update the note structure at the end. important: also update the current item. without this a rename of a folder
+    // would make the current item jump to the parent folder!
+    await updateNoteStructure.call(UpdateNoteStructureParams(originalItem: result));
   }
 
   Future<StructureItem> _changeFolder(StructureFolder folder, String newName) async {
@@ -115,13 +113,15 @@ class ChangeCurrentStructureItem extends UseCase<void, ChangeCurrentStructureIte
     if (newPath == null) {
       Logger.verbose("Only updated note content for ${note.path} with time $newTime");
     } else {
-      Logger.verbose("Updated the note path to $newPath with time $newTime");
+      Logger.verbose("Updated the note path to $newPath with time $newTime and ${newContent == null ? "no" : "new"} "
+          "content");
     }
     return newNote;
   }
 
   bool hasNoChangesOrHasErrors(ChangeCurrentStructureItemParams params, StructureItem item) {
     if (item.canBeModified == false || item.directParent == null) {
+      Logger.error("The item can not be modified:\n$item");
       throw const ClientException(message: ErrorCodes.CANT_BE_MODIFIED);
     }
     StructureItem.throwErrorForName(params.newName);

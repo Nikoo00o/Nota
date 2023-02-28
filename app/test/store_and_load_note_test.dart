@@ -7,7 +7,7 @@ import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
 import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
-import 'package:app/domain/usecases/note_transfer/store_note_encrypted.dart';
+import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
@@ -118,7 +118,7 @@ void main() {
           noteId: -1, decryptedName: "name", decryptedContent: Uint8List.fromList(utf8.encode("test"))));
       await sl<StoreNoteEncrypted>().call(DeleteNoteEncryptedParams(noteId: -1));
 
-      final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
+      final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
       expect(account.noteInfoList.first.isDeleted, true, reason: "note should be marked as deleted");
 
       expect(() async {
@@ -135,7 +135,7 @@ void main() {
       await sl<StoreNoteEncrypted>().call(ChangeNoteEncryptedParams(
           noteId: -1, decryptedName: "diff", decryptedContent: Uint8List.fromList(utf8.encode("bytes"))));
 
-      final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
+      final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
       final List<int> bytes = await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: -1));
       expect("diff",
           SecurityUtils.decryptString(account.noteInfoList.first.encFileName, base64UrlEncode(account.decryptedDataKey!)),
@@ -172,7 +172,7 @@ void main() {
      final DateTime time = await sl<StoreNoteEncrypted>()
           .call(ChangeNoteEncryptedParams(noteId: -1, decryptedName: null, decryptedContent: Uint8List(0)));
 
-      final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
+      final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
       final List<int> bytes = await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: -1));
       expect("name",
           SecurityUtils.decryptString(account.noteInfoList.first.encFileName, base64UrlEncode(account.decryptedDataKey!)),
@@ -190,7 +190,7 @@ void main() {
       final DateTime time = await sl<StoreNoteEncrypted>()
           .call(ChangeNoteEncryptedParams(noteId: -1, decryptedName: "file", decryptedContent: null));
 
-      final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
+      final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
       final List<int> bytes = await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: -1));
       expect("file",
           SecurityUtils.decryptString(account.noteInfoList.first.encFileName, base64UrlEncode(account.decryptedDataKey!)),

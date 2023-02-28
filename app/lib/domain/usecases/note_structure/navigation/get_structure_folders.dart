@@ -1,15 +1,16 @@
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
-import 'package:app/domain/usecases/note_transfer/fetch_new_note_structure.dart';
+import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
 /// This returns a a list of deep copies of the top level note structure folders (first "root" and second element "recent").
-///
-/// But the parent folder references for the children are not changed
+/// But the parent folder references for the children are not changed!
 ///
 /// This should be used to build the menu items for navigating to the folders.
+///
+/// This can not be used to modify the note structure!
 ///
 /// This can call the use case [FetchNewNoteStructure] if there is no note structure cached.
 ///
@@ -26,15 +27,15 @@ class GetCurrentStructureFolders extends UseCase<List<StructureFolder>, NoParams
   @override
   Future<List<StructureFolder>> execute(NoParams params) async {
     if (noteStructureRepository.root == null) {
-      await fetchNewNoteStructure.call(NoParams());
+      await fetchNewNoteStructure.call(const NoParams());
     }
 
-    final List<StructureFolder> folders = List<StructureFolder>.empty(growable: true);
+    Logger.verbose("Returned a new deep copied list of the top level folders");
 
-    folders.add(noteStructureRepository.root!.copyWith(changeParentOfChildren: false));
-    folders.add(noteStructureRepository.recent!.copyWith(changeParentOfChildren: false));
-
-    Logger.verbose("Returned a new list of the top level folders");
-    return folders;
+    return noteStructureRepository.topLevelFolders.map((StructureFolder? folder) {
+      final bool changeParentOfChildren = folder!.isRecent == false; // don't change the parent of children of recent,
+      // because recent has the notes as direct children which have their folder structure as direct parents!
+      return folder.copyWith(changeParentOfChildren: changeParentOfChildren);
+    }).toList();
   }
 }

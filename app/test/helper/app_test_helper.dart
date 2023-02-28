@@ -10,7 +10,7 @@ import 'package:app/domain/repositories/account_repository.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
-import 'package:app/domain/usecases/note_transfer/store_note_encrypted.dart';
+import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:shared/core/enums/log_level.dart';
 import 'package:shared/core/utils/logger/logger.dart';
@@ -56,6 +56,43 @@ Future<void> testCleanup() async {
 /// Makes it so that the account is reloaded from the mock local data source the next time in the [AccountRepository]!
 Future<ClientAccount?> clearAccountCache() async => sl<AccountRepository>().getAccount(forceLoad: true);
 
+Future<ClientAccount> loginToTestAccount() async {
+  await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
+  await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+  final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
+  return account;
+}
+
+/// For recent the notes are ordered as followed:
+///
+/// fourth
+///
+/// a_third
+///
+/// second (in dir2)
+///
+/// second(in dir1)
+///
+/// first.
+///
+///
+/// For root the notes are ordered like:
+///
+/// dir1
+///
+/// ------ a_third
+///
+/// ------ dir3
+///
+/// ------ -------- fourth
+///
+/// ------ second
+///
+/// dir2
+///
+/// ------ second
+///
+/// first.
 Future<void> createSomeTestNotes() async {
   int counter = -1;
   final Uint8List content = Uint8List.fromList(utf8.encode("123"));
@@ -73,11 +110,6 @@ Future<void> createSomeTestNotes() async {
   await Future<void>.delayed(const Duration(milliseconds: 10));
   await sl<StoreNoteEncrypted>()
       .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir1/dir3/fourth", decryptedContent: content));
-}
 
-Future<ClientAccount> loginToTestAccount() async {
-  await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-  await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
-  final ClientAccount account = await sl<GetLoggedInAccount>().call(NoParams());
-  return account;
+  await sl<LocalDataSource>().setClientNoteCounter(counter); // important: update counter
 }
