@@ -113,7 +113,8 @@ class ChangeCurrentStructureItem extends UseCase<void, ChangeCurrentStructureIte
     if (newPath == null) {
       Logger.verbose("Only updated note content for ${note.path} with time $newTime");
     } else {
-      Logger.verbose("Updated the note path to $newPath with time $newTime");
+      Logger.verbose("Updated the note path to $newPath with time $newTime and ${newContent == null ? "no" : "new"} "
+          "content");
     }
     return newNote;
   }

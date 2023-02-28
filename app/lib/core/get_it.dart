@@ -157,6 +157,7 @@ Future<void> initializeGetIt() async {
         getOriginalStructureItem: sl(),
         updateNoteStructure: sl(),
         getCurrentStructureItem: sl(),
+        storeNoteEncrypted: sl(),
       ));
 
   sl.registerLazySingleton<SessionService>(() => SessionService());
