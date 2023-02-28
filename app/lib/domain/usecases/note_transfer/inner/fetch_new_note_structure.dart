@@ -40,7 +40,7 @@ class FetchNewNoteStructure extends UseCase<void, NoParams> {
     final ClientAccount account = await getLoggedInAccount.call(const NoParams());
 
     noteStructureRepository.root = StructureFolder(
-      name: StructureFolder.rootFolderNames.first,
+      name: StructureItem.rootFolderNames.first,
       directParent: null,
       canBeModified: false,
       children: List<StructureItem>.empty(growable: true),

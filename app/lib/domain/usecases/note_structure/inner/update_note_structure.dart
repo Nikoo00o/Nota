@@ -68,7 +68,7 @@ class UpdateNoteStructure extends UseCase<void, UpdateNoteStructureParams> {
   void _updateRecentNotes() {
     // first make a deep copy of root and change the top most folder to recent
     noteStructureRepository.recent = noteStructureRepository.root!.copyWith(
-      newName: StructureFolder.recentFolderNames.first,
+      newName: StructureItem.recentFolderNames.first,
       newSorting: NoteSorting.BY_DATE,
       changeParentOfChildren: true,
     );
@@ -83,7 +83,7 @@ class UpdateNoteStructure extends UseCase<void, UpdateNoteStructureParams> {
   void _updateMoveSelection() {
     // first make a deep copy of root, change top most folder and the modifiable bool
     noteStructureRepository.moveSelection = noteStructureRepository.root!.copyWith(
-      newName: StructureFolder.moveFolderNames.first,
+      newName: StructureItem.moveFolderNames.first,
       newSorting: NoteSorting.BY_NAME,
       changeParentOfChildren: true,
       newCanBeModified: false,

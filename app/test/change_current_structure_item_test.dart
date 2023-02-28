@@ -90,7 +90,7 @@ void _testErrors() {
         sl<NoteStructureRepository>().root!.getAllNotes()[4]; // index 1 is fourth, index 4 is first
     expect(
         () async =>
-            sl<ChangeCurrentStructureItem>().call(ChangeCurrentFolderParam(newName: StructureFolder.rootFolderNames.first)),
+            sl<ChangeCurrentStructureItem>().call(ChangeCurrentFolderParam(newName: StructureItem.rootFolderNames.first)),
         throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.NAME_ALREADY_USED)));
   });
 

@@ -6,17 +6,6 @@ import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
 class StructureFolder extends StructureItem {
-  /// The reserved names for the "root" top level folder.
-  /// Contains the translation key first and then the translation values for all languages!
-  static List<String> rootFolderNames = <String>["notes.root", "root", "stammordner"];
-
-  /// The reserved names for the "recent notes" top level folder.
-  /// Contains the translation key first and then the translation values for all languages!
-  static List<String> recentFolderNames = <String>["notes.recent", "recent notes", "zuletzt bearbeitet"];
-
-  /// The reserved names for the "move notes" top level folder.
-  /// Contains the translation key first and then the translation values for all languages!
-  static List<String> moveFolderNames = <String>["notes.move", "select target folder", "zielordner auswählen"];
 
   /// The folders and files within this folder.
   ///
@@ -246,12 +235,6 @@ class StructureFolder extends StructureItem {
   }
 
   int get amountOfChildren => _children.length;
-
-  bool get isRoot => rootFolderNames.contains(name.toLowerCase());
-
-  bool get isRecent => recentFolderNames.contains(name.toLowerCase());
-
-  bool get isMove => moveFolderNames.contains(name.toLowerCase());
 
   /// Compares 2 structure items in alphabetical order
   static int _sortByName(StructureItem first, StructureItem second) =>

@@ -14,6 +14,18 @@ import 'package:shared/domain/entities/entity.dart';
 /// If you want to know if the item itself has the same values as another, then compare [StructureNote] by comparing the id
 /// and [StructureFolder] by comparing the path instead!
 abstract class StructureItem extends Entity {
+  /// The reserved names for the "root" top level folder.
+  /// Contains the translation key first and then the translation values for all languages!
+  static List<String> rootFolderNames = <String>["notes.root", "root", "stammordner"];
+
+  /// The reserved names for the "recent notes" top level folder.
+  /// Contains the translation key first and then the translation values for all languages!
+  static List<String> recentFolderNames = <String>["notes.recent", "recent notes", "zuletzt bearbeitet"];
+
+  /// The reserved names for the "move notes" top level folder.
+  /// Contains the translation key first and then the translation values for all languages!
+  static List<String> moveFolderNames = <String>["notes.move", "select target folder", "zielordner auswählen"];
+
   /// The decrypted name of this item (folder, or file) without the parent path.
   ///
   /// This does not include a file extension!
@@ -74,6 +86,12 @@ abstract class StructureItem extends Entity {
     return root;
   }
 
+  bool get isRoot => rootFolderNames.contains(name.toLowerCase());
+
+  bool get isRecent => recentFolderNames.contains(name.toLowerCase());
+
+  bool get isMove => moveFolderNames.contains(name.toLowerCase());
+
   /// Returns either the [directParent] if the top most parent is "root", or otherwise it directly returns the "recent"
   /// folder and not the direct parent!
   ///
@@ -127,8 +145,7 @@ abstract class StructureItem extends Entity {
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
 
-    if (StructureFolder.recentFolderNames.contains(nameToValidate) ||
-        StructureFolder.rootFolderNames.contains(nameToValidate)) {
+    if (recentFolderNames.contains(nameToValidate) || rootFolderNames.contains(nameToValidate)) {
       Logger.error("The name $nameToValidate is a reserved name");
       throw const ClientException(message: ErrorCodes.NAME_ALREADY_USED);
     }

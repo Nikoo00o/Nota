@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:shared/core/enums/log_level.dart';
 import 'package:shared/core/utils/logger/log_colour.dart';
 import 'package:shared/core/utils/logger/log_message.dart';
