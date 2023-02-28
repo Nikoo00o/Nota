@@ -78,7 +78,7 @@ class StoreNoteEncrypted extends UseCase<DateTime, StoreNoteEncryptedParams> {
   Future<void> _create(StoreNoteEncryptedParams params, ClientAccount account, DateTime now) async {
     final bool containsNote = account.getNoteById(params.noteId) != null;
     if (containsNote) {
-      Logger.error("The note file to be created was already contained in the account");
+      Logger.error("The note file to be created with the id ${params.noteId} was already contained in the account");
       throw const FileException(message: ErrorCodes.FILE_NOT_FOUND);
     }
 

@@ -60,6 +60,9 @@ class StringUtils {
   static void _printInnerList(StringBuffer buffer, String value) {
     final List<String> lines = value.split("\n");
     buffer.writeln(lines.first);
+    if(lines.length==1){
+      return; // empty lists
+    }
     for (int i = 1; i < lines.length - 1; ++i) {
       buffer.writeln("    ${lines.elementAt(i)}");
     }

@@ -13,6 +13,7 @@ import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
 import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/create_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_folders.dart';
 import 'package:app/domain/usecases/note_structure/inner/update_note_structure.dart';
@@ -50,6 +51,35 @@ void main() {
       await loginToTestAccount();
       await createSomeTestNotes();
       await sl<FetchNewNoteStructure>().call(const NoParams());
+    });
+
+    // todo: add more tests for different configurations and also for errors!!!
+    // included tests to create folders, to create files. inside root vs inside recent, etc...
+    // create a note directly from root dir vs from deeper folder
+
+    test("creating a new note inside of a subfolder from root", () async {
+      sl<NoteStructureRepository>().currentItem = sl<NoteStructureRepository>().root!.getChild(0); // dir1
+
+      await sl<CreateStructureItem>().call(const CreateStructureItemParams(name: "fifth", isFolder: false));
+      final StructureItem current = await sl<GetCurrentStructureItem>().call(const NoParams());
+
+      expect(current.path, "dir1/fifth", reason: "path of the new note should match");
+
+      final StructureFolder dir1 = sl<NoteStructureRepository>().root!.getChild(0) as StructureFolder;
+      expect(dir1.amountOfChildren, 4, reason: "root dir1 should now have 4 children");
+      expect(dir1.getChild(2).path, current.path, reason: "the path of the child of dir1 should match");
+      expect((dir1.getChild(2) as StructureNote).id, (current as StructureNote).id, reason: "and the note id as well");
+      expect(current.directParent?.path, dir1.path, reason: "and the parent reference should also match");
+
+      final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
+      expect(current.path,
+          SecurityUtils.decryptString(account.noteInfoList.last.encFileName, base64UrlEncode(account.decryptedDataKey!)),
+          reason: "enc file name should match");
+
+      final List<int> bytes = await sl<LoadNoteContent>().call(LoadNoteContentParams(noteId: current.id));
+      expect(bytes, utf8.encode(""), reason: "bytes should be empty");
+
+      expect(sl<NoteStructureRepository>().recent!.getChild(0).path, "dir1/fifth", reason: "recent should be updated");
     });
   });
 }

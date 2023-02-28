@@ -97,8 +97,11 @@ class CreateStructureItem extends UseCase<void, CreateStructureItemParams> {
     final int noteId = await noteStructureRepository.getNewClientNoteCounter();
 
     // then create note in local storage
-    final DateTime timeStamp = await storeNoteEncrypted
-        .call(CreateNoteEncryptedParams(noteId: noteId, decryptedName: newName, decryptedContent: Uint8List(0)));
+    final DateTime timeStamp = await storeNoteEncrypted.call(CreateNoteEncryptedParams(
+      noteId: noteId,
+      decryptedName: currentFolder.getPathForChildName(newName),
+      decryptedContent: Uint8List(0),
+    ));
 
     // then update note in structure
     return currentFolder.addChild(StructureNote(
