@@ -9,7 +9,6 @@ import 'package:app/domain/usecases/note_structure/delete_current_structure_item
 import 'package:app/domain/usecases/note_structure/finish_move_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/inner/get_original_structure_item.dart';
-import 'package:app/domain/usecases/note_structure/move_current_structure_item.dart';
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';

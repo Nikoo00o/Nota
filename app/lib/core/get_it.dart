@@ -23,10 +23,14 @@ import 'package:app/domain/usecases/account/login/get_required_login_status.dart
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
 import 'package:app/domain/usecases/account/save_account.dart';
 import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/create_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/finish_move_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/inner/get_original_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_folders.dart';
 import 'package:app/domain/usecases/note_structure/inner/update_note_structure.dart';
+import 'package:app/domain/usecases/note_structure/start_move_structure_item.dart';
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
 import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
@@ -115,9 +119,9 @@ Future<void> initializeGetIt() async {
       ));
   sl.registerLazySingleton<UpdateNoteStructure>(() => UpdateNoteStructure(noteStructureRepository: sl()));
   sl.registerLazySingleton<GetOriginalStructureItem>(() => GetOriginalStructureItem(
-      noteStructureRepository: sl(),
-      fetchNewNoteStructure: sl(),
-  ));
+        noteStructureRepository: sl(),
+        fetchNewNoteStructure: sl(),
+      ));
   sl.registerLazySingleton<GetCurrentStructureItem>(() => GetCurrentStructureItem(
         noteStructureRepository: sl(),
         fetchNewNoteStructure: sl(),
@@ -132,6 +136,27 @@ Future<void> initializeGetIt() async {
         getOriginalStructureItem: sl(),
         updateNoteStructure: sl(),
         storeNoteEncrypted: sl(),
+      ));
+  sl.registerLazySingleton<DeleteCurrentStructureItem>(() => DeleteCurrentStructureItem(
+        getOriginalStructureItem: sl(),
+        updateNoteStructure: sl(),
+        storeNoteEncrypted: sl(),
+      ));
+  sl.registerLazySingleton<CreateStructureItem>(() => CreateStructureItem(
+        noteStructureRepository: sl(),
+        getOriginalStructureItem: sl(),
+        updateNoteStructure: sl(),
+        storeNoteEncrypted: sl(),
+      ));
+  sl.registerLazySingleton<StartMoveStructureItem>(() => StartMoveStructureItem(
+        noteStructureRepository: sl(),
+        getCurrentStructureItem: sl(),
+      ));
+  sl.registerLazySingleton<FinishMoveStructureItem>(() => FinishMoveStructureItem(
+        noteStructureRepository: sl(),
+        getOriginalStructureItem: sl(),
+        updateNoteStructure: sl(),
+        getCurrentStructureItem: sl(),
       ));
 
   sl.registerLazySingleton<SessionService>(() => SessionService());
