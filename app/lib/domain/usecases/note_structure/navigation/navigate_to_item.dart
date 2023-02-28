@@ -1,7 +1,6 @@
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
-import 'package:app/domain/usecases/note_structure/get_current_structure_item.dart';
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
@@ -41,10 +40,10 @@ class NavigateToItem extends UseCase<void, NavigateToItemParams> {
         throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
       }
     } else if (params is NavigateToItemParamsTopLevel) {
-      if (params.parentIndex < noteStructureRepository.topLevelFolders.length) {
-        newItem = noteStructureRepository.topLevelFolders.elementAt(params.parentIndex);
+      if (params.topLevelIndex < noteStructureRepository.topLevelFolders.length) {
+        newItem = noteStructureRepository.topLevelFolders.elementAt(params.topLevelIndex);
       } else {
-        Logger.error("The parent index ${params.parentIndex} was too high");
+        Logger.error("The parent index ${params.topLevelIndex} was too high");
         throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
       }
     } else if (params is NavigateToItemParamsParent) {
@@ -85,9 +84,9 @@ class NavigateToItemParamsParent extends NavigateToItemParams {
 
 /// Navigates to the specific top level item at the specified index.
 ///
-/// Throws [ErrorCodes.INVALID_PARAMS] if the [parentIndex] was equal, or higher than the amount of top level items.
+/// Throws [ErrorCodes.INVALID_PARAMS] if the [topLevelIndex] was equal, or higher than the amount of top level items.
 class NavigateToItemParamsTopLevel extends NavigateToItemParams {
-  final int parentIndex;
+  final int topLevelIndex;
 
-  const NavigateToItemParamsTopLevel({required this.parentIndex});
+  const NavigateToItemParamsTopLevel({required this.topLevelIndex});
 }
