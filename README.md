@@ -3,9 +3,9 @@
 ## About the Project
 - Nota is a Cross-Platform Note-Taking App designed to work both offline locally, or synchronized with a server across 
   all devices 
-- The users notes will be securely encrypted and the server stores them, but can't decrypt them
-- The notes can be accessed in a folder like structure
-- Currently the app is still in development
+- the users notes will be securely encrypted and the server stores them, but can't decrypt them
+- the notes can be accessed in a folder like structure
+- currently the app is still in development
 
 ## Building The Project
 
@@ -81,6 +81,8 @@ flutter build ipa --release           # ios
 
 - navigate to the `nota/server` folder with the terminal and run `dart test`, or just start the "All Server Tests" run
   configuration
+- the default log level for the tests can be changed inside of the file `nota/server/test/helper/server_test_helper.dart` in
+  the method `createCommonTestObjects`
 
 ### App
 
@@ -89,5 +91,7 @@ flutter build ipa --release           # ios
 - the tests of the app also directly use the server tests for the real server responses instead of mocks!
   - because of this, the app tests also don't have to care about the server errors, because they are already tested in
     the server tests
+- the default log level for the tests can be changed inside of the file `nota/app/test/helper/app_test_helper.dart` in 
+the method `createCommonTestObjects`
 
 <!--- // todo: screenshots of the app should follow here -->
