@@ -11,8 +11,6 @@ import 'package:server/domain/entities/server_account.dart';
 import 'package:server/domain/usecases/fetch_authenticated_account.dart';
 import 'package:server/domain/usecases/start_note_server.dart';
 import 'package:server/domain/usecases/stop_nota_server.dart';
-import 'package:shared/core/enums/log_level.dart';
-import 'package:shared/core/utils/logger/logger.dart';
 
 /// Returns the GetIt service locator / singleton instance
 final GetIt sl = GetIt.instance;
@@ -24,9 +22,10 @@ final GetIt sl = GetIt.instance;
 /// You should always initialize the logger first!!! The next calls after this should be: [LocalDataSource.init] and
 /// [NoteDataSource.init]!
 Future<void> initializeGetIt() async {
-    Logger.initLogger(Logger(logLevel: LogLevel.VERBOSE));
-
+  // core elements
   sl.registerLazySingleton<ServerConfig>(() => ServerConfig());
+
+  // data layer (data sources + repositories)
   sl.registerLazySingleton<RestServer>(
       () => RestServer(fetchAuthenticatedAccountCallback: _fetchAuthenticatedAccountCallback));
 
@@ -47,6 +46,7 @@ Future<void> initializeGetIt() async {
         noteRepository: sl(),
       ));
 
+  // use cases
   sl.registerLazySingleton<StartNotaServer>(() => StartNotaServer(
         serverConfig: sl(),
         serverRepository: sl(),

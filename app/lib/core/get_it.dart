@@ -57,7 +57,10 @@ final GetIt sl = GetIt.instance;
 ///
 /// You should always initialize the logger before!!! The next call after this should be: [LocalDataSource.init]
 Future<void> initializeGetIt() async {
+  // core elements
   sl.registerLazySingleton<AppConfig>(() => AppConfig());
+
+  // data layer (data sources + repositories)
   sl.registerLazySingleton<RestClient>(
       () => RestClient(sharedConfig: _config(), fetchSessionTokenCallback: fetchCurrentSessionToken));
 
@@ -80,6 +83,7 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<AppSettingsRepository>(() => AppSettingsRepositoryImpl(localDataSource: sl(), appConfig: sl()));
   sl.registerLazySingleton<NoteStructureRepository>(() => NoteStructureRepositoryImpl(localDataSource: sl()));
 
+  // domain layer (use cases)
   sl.registerLazySingleton<SharedFetchCurrentSessionToken>(
       () => FetchCurrentSessionToken(accountRepository: sl(), appConfig: sl()));
   sl.registerLazySingleton<CreateAccount>(() => CreateAccount(accountRepository: sl(), appConfig: sl()));
@@ -161,12 +165,15 @@ Future<void> initializeGetIt() async {
         storeNoteEncrypted: sl(),
       ));
   sl.registerLazySingleton<NavigateToItem>(() => NavigateToItem(
-      noteStructureRepository: sl(),
-      fetchNewNoteStructure: sl(),
-  ));
+        noteStructureRepository: sl(),
+        fetchNewNoteStructure: sl(),
+      ));
 
+  // services
   sl.registerLazySingleton<SessionService>(() => SessionService());
   sl.registerLazySingleton<DialogService>(() => DialogService());
+
+  // presentation layer (blocs)
 }
 
 Future<SessionToken?> fetchCurrentSessionToken() => sl<SharedFetchCurrentSessionToken>().call(const NoParams());
