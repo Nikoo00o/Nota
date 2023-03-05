@@ -14,20 +14,24 @@ import 'package:tuple/tuple.dart';
 
 Future<void> main(List<String> arguments) async {
   Logger.initLogger(AppLogger(logLevel: LogLevel.VERBOSE));
-  FlutterCryptography.enable(); // enable flutter cryptography for better performance
-  DArgon2Flutter.init(); // enable flutter argon2 for better performance
-  WidgetsFlutterBinding.ensureInitialized();
-  await initializeGetIt();
-  _initErrorCallbacks();
-  await sl<LocalDataSource>().init();
+  try {
+    FlutterCryptography.enable(); // enable flutter cryptography for better performance
+    DArgon2Flutter.init(); // enable flutter argon2 for better performance
+    WidgetsFlutterBinding.ensureInitialized();
+    await initializeGetIt();
+    _initErrorCallbacks();
+    await sl<LocalDataSource>().init();
 
-  runApp(
-    const MaterialApp(
-      home: Scaffold(
-        body: Text("Test"),
+    runApp(
+      const MaterialApp(
+        home: Scaffold(
+          body: Text("Test"),
+        ),
       ),
-    ),
-  );
+    );
+  } catch (e, s) {
+    Logger.error("critical error starting the app", e, s);
+  }
 }
 
 void _initErrorCallbacks() {

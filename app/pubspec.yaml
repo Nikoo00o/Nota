@@ -9,11 +9,15 @@ environment:
   flutter: ^3.7.5
 
 dependencies:
+  flutter:
+    sdk: flutter
   shared: # shared code
     path: ../shared
 
   cupertino_icons: ^1.0.2 # default icons
+  meta: ^1.8.0 # annotations like immutable
   get_it: ^7.2.0 # service locator
+  flutter_bloc: ^8.1.2 # BLoC state management
   tuple: ^2.0.0 # tuples
   path_provider: ^2.0.12 # application directory path
   hive: ^2.2.3 # nosql database
