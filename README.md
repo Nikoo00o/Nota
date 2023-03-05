@@ -27,6 +27,9 @@
 dart compile exe server/lib/main.dart
 ```
 
+- of course the trusted tls/ssl certificates have to be put into a folder named "notaRes" which has to be put next to the 
+  exe!
+
 #### App 
 
 - first navigate into the `nota/app`folder and then use one of the following depending on the platform

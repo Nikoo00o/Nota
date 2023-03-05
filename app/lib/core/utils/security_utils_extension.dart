@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:app/core/utils/argon_wrapper.dart';
 import 'package:cryptography/cryptography.dart';
-import 'package:dargon2_flutter/dargon2_flutter.dart';
 import 'package:shared/core/config/shared_config.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/security_utils.dart';
