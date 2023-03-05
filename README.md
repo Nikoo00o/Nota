@@ -18,6 +18,9 @@
 
 ### Building Release Versions 
 
+- when building the release version, you should set the `acceptSelfSignedCertificates` config option to `false` inside of 
+  the app and use a trusted tls/ssl certificate instead of a self signed certificate!
+
 #### Server
 
 ```
