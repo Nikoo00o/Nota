@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Service used to navigate to another page with its route
 class NavigationService {
-  /// The navigator key used to access the navigator widget of the material app!
+  /// The navigator key used to access the navigator widget and its state!
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   /// navigate to the new page with the route [routeName].

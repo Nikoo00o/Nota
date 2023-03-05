@@ -7,7 +7,6 @@ version: 1.0.0+1
 environment:
   sdk: '>=2.19.2 <3.0.0'
 
-
 dependencies:
   collection: ^1.17.0 # deep collection equality
   equatable: ^2.0.5 # comparing objects

@@ -1,5 +1,7 @@
-import 'package:app/presentation/widgets/base_page/page_event.dart';
-import 'package:app/presentation/widgets/base_page/page_state.dart';
+import 'package:app/core/get_it.dart';
+import 'package:app/presentation/widgets/base_pages/page_event.dart';
+import 'package:app/presentation/widgets/base_pages/page_state.dart';
+import 'package:app/services/dialog_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// An abstract super class that can be used for the blocs of pages / widgets to handle the business logic and interact
@@ -69,12 +71,12 @@ abstract class PageBloc<Event extends PageEvent, State extends PageState> extend
     super.on((E event, Emitter<State> emit) async {
       try {
         if (enableLoadingDialog) {
-          // show loading dialog
+          sl<DialogService>().showLoadingDialog();
         }
         await handler(event, emit);
       } finally {
         if (enableLoadingDialog) {
-          // hide loading dialog
+          sl<DialogService>().hideLoadingDialog();
         }
       }
     }, transformer: transformer);

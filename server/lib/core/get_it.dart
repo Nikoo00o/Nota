@@ -3,10 +3,10 @@ import 'package:server/core/config/server_config.dart';
 import 'package:server/data/datasources/account_data_source.dart.dart';
 import 'package:server/data/datasources/local_data_source.dart';
 import 'package:server/data/datasources/note_data_source.dart';
+import 'package:server/data/datasources/rest_server.dart';
 import 'package:server/data/repositories/account_repository.dart';
 import 'package:server/data/repositories/note_repository.dart';
 import 'package:server/data/repositories/server_repository.dart';
-import 'package:server/data/datasources/rest_server.dart';
 import 'package:server/domain/entities/server_account.dart';
 import 'package:server/domain/usecases/fetch_authenticated_account.dart';
 import 'package:server/domain/usecases/start_note_server.dart';
@@ -14,6 +14,9 @@ import 'package:server/domain/usecases/stop_nota_server.dart';
 
 /// Returns the GetIt service locator / singleton instance
 final GetIt sl = GetIt.instance;
+
+/// Alias for [sl]
+GetIt get getIt => sl;
 
 /// Initializes all singletons (also the lazy ones).
 ///

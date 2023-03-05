@@ -24,4 +24,13 @@ class DialogServiceMock extends DialogService {
 
   @override
   void hideDialog() {}
+
+  @override
+  void hideLoadingDialog() {}
+
+  @override
+  bool get isDialogVisible => false;
+
+  @override
+  bool get isLoading => false;
 }

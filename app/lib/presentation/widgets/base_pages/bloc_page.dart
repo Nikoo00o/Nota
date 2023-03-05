@@ -1,21 +1,28 @@
 import 'package:app/core/get_it.dart';
-import 'package:app/presentation/widgets/base_page/page_bloc.dart';
-import 'package:app/presentation/widgets/base_page/page_event.dart';
-import 'package:app/presentation/widgets/base_page/page_state.dart';
+import 'package:app/presentation/widgets/base_pages/page_base.dart';
+import 'package:app/presentation/widgets/base_pages/page_bloc.dart';
+import 'package:app/presentation/widgets/base_pages/page_event.dart';
+import 'package:app/presentation/widgets/base_pages/page_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// An abstract super class that can be used for the pages which are used with a bloc. You can also add another abstract
 /// super class for pages without a bloc and a shared abstract super class which both extend from!
 ///
-/// The [build] method is overridden to return both [buildPartWithNoState] and [buildPartWithState] added together. Those
-/// methods can be overridden to build the page. You can also override [buildBlocProvider] if the created bloc needs any
-/// parameter, or needs to add an init event. For even better performance, you could look to override [buildBlocBuilder]
-/// itself!
+/// The [build] method is overridden to return both [buildPartWithNoState] and [buildPartWithState] added together.
+/// Those two methods should be overridden in the subclass to build the page.
+///
+/// You can also override [buildBlocProvider] if the created bloc needs any parameter, or needs to add an init event. For
+/// even better performance, you could look to override [buildBlocBuilder] itself!
 ///
 /// The Template types are first [Bloc], then [State].
-abstract class BlocPage<Bloc extends PageBloc<PageEvent, State>, State extends PageState> extends StatelessWidget {
-  const BlocPage({super.key});
+abstract class BlocPage<Bloc extends PageBloc<PageEvent, State>, State extends PageState> extends PageBase {
+  const BlocPage({
+    super.key,
+    super.backGroundImage,
+    super.backgroundColour,
+    super.pagePadding,
+  });
 
   /// Builds the bloc provider and creates the bloc. By default it will just return the singleton of the type of the Bloc
   /// from [sl], but this can be overridden to also include parameters, etc.
@@ -64,7 +71,7 @@ abstract class BlocPage<Bloc extends PageBloc<PageEvent, State>, State extends P
 
   @override
   Widget build(BuildContext context) {
-    return buildBlocProvider(buildPartWithNoState(context, buildBlocBuilder()));
+    return buildPage(context, buildBlocProvider(buildPartWithNoState(context, buildBlocBuilder())));
   }
 
   /// Returns current bloc of page without listening to it, so that events can be added, or navigation can be done, etc.
