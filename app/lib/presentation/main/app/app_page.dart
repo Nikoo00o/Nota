@@ -1,6 +1,5 @@
 import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/locales.dart';
-import 'package:app/core/constants/routes.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/presentation/main/app/app_bloc.dart';
 import 'package:app/presentation/main/app/app_state.dart';
@@ -36,6 +35,7 @@ class App extends StatelessWidget {
         builder: (BuildContext context, AppState state) {
           return MaterialApp(
             title: appConfig.appTitle,
+            theme: appConfig.theme,
             debugShowCheckedModeBanner: false,
             supportedLocales: Locales.supportedLocales,
             locale: state.locale,
@@ -69,7 +69,10 @@ class App extends StatelessWidget {
     return Container(
       color: appConfig.theme.colorScheme.background,
       child: SafeArea(
-        child: CustomNavigator(navigationService: navigationService),
+        child: CustomNavigator(
+          navigationService: navigationService,
+          appConfig: appConfig,
+        ),
       ),
     );
   }
