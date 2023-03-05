@@ -7,6 +7,9 @@ class LogMessage {
   final Object? error;
   final StackTrace? stackTrace;
 
+  /// Only print these first stack trace lines and not spam the log with the full stack trace
+  static const int stackTraceLines = 15;
+
   const LogMessage({
     this.message,
     required this.level,
@@ -34,7 +37,10 @@ class LogMessage {
       buffer.write("\nException: $error");
     }
     if (stackTrace != null) {
-      buffer.write("\nStackTrace: $stackTrace");
+      final String stackTraceText = stackTrace!.toString();
+      stackTraceText.split("\n").take(stackTraceLines).forEach((String line) {
+        buffer.write("\n$line");
+      });
     }
     return buffer.toString();
   }

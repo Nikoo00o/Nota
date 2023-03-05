@@ -36,8 +36,12 @@ import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure
 import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
 import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
 import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
+import 'package:app/presentation/main/app/app_bloc.dart';
+import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/services/dialog_service.dart';
+import 'package:app/services/navigation_service.dart';
 import 'package:app/services/session_service.dart';
+import 'package:app/services/translation_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared/core/enums/log_level.dart';
@@ -50,6 +54,9 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// Returns the GetIt service locator / singleton instance
 final GetIt sl = GetIt.instance;
 
+/// Alias for [sl]
+GetIt get getIt => sl;
+
 /// Initializes all singletons (also the lazy ones).
 ///
 /// Some registrations are done with the abstract type instead of the implementation type, like for example:
@@ -57,7 +64,10 @@ final GetIt sl = GetIt.instance;
 ///
 /// You should always initialize the logger before!!! The next call after this should be: [LocalDataSource.init]
 Future<void> initializeGetIt() async {
+  // core elements
   sl.registerLazySingleton<AppConfig>(() => AppConfig());
+
+  // data layer (data sources + repositories)
   sl.registerLazySingleton<RestClient>(
       () => RestClient(sharedConfig: _config(), fetchSessionTokenCallback: fetchCurrentSessionToken));
 
@@ -80,6 +90,7 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<AppSettingsRepository>(() => AppSettingsRepositoryImpl(localDataSource: sl(), appConfig: sl()));
   sl.registerLazySingleton<NoteStructureRepository>(() => NoteStructureRepositoryImpl(localDataSource: sl()));
 
+  // domain layer (use cases)
   sl.registerLazySingleton<SharedFetchCurrentSessionToken>(
       () => FetchCurrentSessionToken(accountRepository: sl(), appConfig: sl()));
   sl.registerLazySingleton<CreateAccount>(() => CreateAccount(accountRepository: sl(), appConfig: sl()));
@@ -161,12 +172,25 @@ Future<void> initializeGetIt() async {
         storeNoteEncrypted: sl(),
       ));
   sl.registerLazySingleton<NavigateToItem>(() => NavigateToItem(
-      noteStructureRepository: sl(),
-      fetchNewNoteStructure: sl(),
-  ));
+        noteStructureRepository: sl(),
+        fetchNewNoteStructure: sl(),
+      ));
 
+  // services
   sl.registerLazySingleton<SessionService>(() => SessionService());
-  sl.registerLazySingleton<DialogService>(() => DialogService());
+  sl.registerLazySingleton<DialogService>(() => DialogServiceImpl(dialogOverlayBloc: sl()));
+  sl.registerLazySingleton<NavigationService>(() => NavigationService());
+  sl.registerLazySingleton<TranslationService>(() => TranslationService(appSettingsRepository: sl()));
+
+  // presentation layer (blocs)
+
+  // important: the next two blocs are singletons and no factory functions, because they are used within the app and are
+  // only created once!
+  sl.registerLazySingleton<AppBloc>(() => AppBloc(translationService: sl()));
+  sl.registerLazySingleton<DialogOverlayBloc>(() => DialogOverlayBloc());
+
+  // the blocs below are factory functions, because they should be newly created each time the user navigates to the page!
+
 }
 
 Future<SessionToken?> fetchCurrentSessionToken() => sl<SharedFetchCurrentSessionToken>().call(const NoParams());
