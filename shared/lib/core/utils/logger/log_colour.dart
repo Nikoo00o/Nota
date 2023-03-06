@@ -1,18 +1,21 @@
 /// In rgb format
 class LogColour {
-  /// Red
+  /// Red: 0 to 255
   final int r;
 
-  /// Green
+  /// Green: 0 to 255
   final int g;
 
-  /// Blue
+  /// Blue: 0 to 255
   final int b;
 
   const LogColour(this.r, this.g, this.b);
 
   @override
   String toString() {
-    return "\x1b[38;2;$r;$g;${b}m";
+    if(r >= 255 && g >= 255 && b >= 255){
+      return "\x1B[0m";
+    }
+    return "\x1B[38;2;$r;$g;${b}m";
   }
 }
