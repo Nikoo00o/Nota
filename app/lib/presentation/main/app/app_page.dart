@@ -1,7 +1,7 @@
 import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/locales.dart';
-import 'package:app/core/constants/routes.dart';
 import 'package:app/core/get_it.dart';
+import 'package:app/domain/usecases/account/change/activate_screen_saver.dart';
 import 'package:app/presentation/main/app/app_bloc.dart';
 import 'package:app/presentation/main/app/app_state.dart';
 import 'package:app/presentation/main/app/widgets/app_observer.dart';
@@ -20,12 +20,14 @@ class App extends StatelessWidget {
   final NavigationService navigationService;
   final DialogService dialogService;
   final SessionService sessionService;
+  final ActivateScreenSaver activateScreenSaver;
 
   const App({
     required this.appConfig,
     required this.navigationService,
     required this.dialogService,
     required this.sessionService,
+    required this.activateScreenSaver,
   });
 
   @override
@@ -36,6 +38,7 @@ class App extends StatelessWidget {
         builder: (BuildContext context, AppState state) {
           return MaterialApp(
             title: appConfig.appTitle,
+            theme: appConfig.theme,
             debugShowCheckedModeBanner: false,
             supportedLocales: Locales.supportedLocales,
             locale: state.locale,
@@ -57,6 +60,8 @@ class App extends StatelessWidget {
     return AppObserver(
       dialogService: dialogService,
       sessionService: sessionService,
+      appConfig: appConfig,
+      activateScreenSaver: activateScreenSaver,
       child: DialogOverlayPage(
         navigationService: navigationService,
         child: _buildPage(context, state),
@@ -64,12 +69,15 @@ class App extends StatelessWidget {
     );
   }
 
-  /// Builds the page with the navigator and a background colour and the safe area!
+  /// Builds the page with the navigator and a background color and the safe area!
   Widget _buildPage(BuildContext context, AppState state) {
     return Container(
       color: appConfig.theme.colorScheme.background,
       child: SafeArea(
-        child: CustomNavigator(navigationService: navigationService),
+        child: CustomNavigator(
+          navigationService: navigationService,
+          appConfig: appConfig,
+        ),
       ),
     );
   }

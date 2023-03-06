@@ -1,5 +1,5 @@
 import 'package:shared/core/enums/log_level.dart';
-import 'package:shared/core/utils/logger/log_colour.dart';
+import 'package:shared/core/utils/logger/log_color.dart';
 import 'package:shared/core/utils/logger/log_message.dart';
 import 'package:synchronized/synchronized.dart';
 
@@ -9,15 +9,15 @@ import 'package:synchronized/synchronized.dart';
 ///
 /// Before the static methods of the logger are used, the instance needs to be initialized with [initLogger]!
 ///
-/// Subclasses can also override [logToStorage] if the logs should be stored, or [addColourForConsole] to add different
-/// colour strings to the log messages in the console.
+/// Subclasses can also override [logToStorage] if the logs should be stored, or [addColorForConsole] to add different
+/// color strings to the log messages in the console.
 class Logger {
-  static const LogColour VERBOSE_COLOUR = LogColour(128, 191, 255); // light blue
-  static const LogColour DEBUG_COLOUR = LogColour(166, 77, 255); // magenta
-  static const LogColour INFO_COLOUR = LogColour(128, 255, 128); // light green
-  static const LogColour WARN_COLOUR = LogColour(255, 255, 0); // yellow
-  static const LogColour ERROR_COLOUR = LogColour(255, 0, 0); // red
-  static const LogColour _RESET_COLOUR = LogColour(255, 255, 255); // white
+  static const LogColor VERBOSE_COLOR = LogColor(128, 191, 255); // light blue
+  static const LogColor DEBUG_COLOR = LogColor(166, 77, 255); // magenta
+  static const LogColor INFO_COLOR = LogColor(128, 255, 128); // light green
+  static const LogColor WARN_COLOR = LogColor(255, 255, 0); // yellow
+  static const LogColor ERROR_COLOR = LogColor(255, 0, 0); // red
+  static const LogColor _RESET_COLOR = LogColor(255, 255, 255); // white
 
   static const int consoleBufferSize = 1000;
 
@@ -97,9 +97,9 @@ class Logger {
 
   String convertLogMessageToConsole(LogMessage logMessage) {
     final StringBuffer output = StringBuffer();
-    output.write(addColourForConsole(logMessage.level).toString());
+    output.write(addColorForConsole(logMessage.level).toString());
     output.write(logMessage.toString());
-    output.write(_RESET_COLOUR.toString());
+    output.write(_RESET_COLOR.toString());
     return output.toString();
   }
 
@@ -107,27 +107,27 @@ class Logger {
   List<String> _wrapLog(String log) =>
       RegExp(".{1,$consoleBufferSize}").allMatches(log).map((Match match) => match.group(0)!).toList();
 
-  /// This can also be overridden in a subclass to provide different [LogColour]'s for the [LogLevel]
-  LogColour addColourForConsole(LogLevel level) {
-    LogColour? colour;
+  /// This can also be overridden in a subclass to provide different [LogColor]'s for the [LogLevel]
+  LogColor addColorForConsole(LogLevel level) {
+    LogColor? color;
     switch (level) {
       case LogLevel.ERROR:
-        colour = ERROR_COLOUR;
+        color = ERROR_COLOR;
         break;
       case LogLevel.WARN:
-        colour = WARN_COLOUR;
+        color = WARN_COLOR;
         break;
       case LogLevel.INFO:
-        colour = INFO_COLOUR;
+        color = INFO_COLOR;
         break;
       case LogLevel.DEBUG:
-        colour = DEBUG_COLOUR;
+        color = DEBUG_COLOR;
         break;
       case LogLevel.VERBOSE:
-        colour = VERBOSE_COLOUR;
+        color = VERBOSE_COLOR;
         break;
     }
-    return colour;
+    return color;
   }
 
 

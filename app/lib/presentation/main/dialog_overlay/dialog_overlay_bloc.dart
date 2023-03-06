@@ -2,6 +2,7 @@ import 'package:app/core/enums/dialog_status.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_event.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared/core/utils/logger/logger.dart';
 
 class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
   DialogStatus dialogStatus = DialogStatus.HIDDEN;
@@ -21,6 +22,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
   }
 
   Future<void> _handleHideDialog(HideDialog event, Emitter<DialogOverlayState> emit) async {
+    Logger.verbose("hiding dialog");
     dialogStatus = DialogStatus.HIDDEN;
     dialogTextKeyParams = null;
     navigationCallback = null;
@@ -28,6 +30,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
   }
 
   Future<void> _handleShowLoadingDialog(ShowLoadingDialog event, Emitter<DialogOverlayState> emit) async {
+    Logger.verbose("showing loading dialog for ${event.dialogTextKey}");
     dialogStatus = DialogStatus.LOADING;
     dialogTextKey = event.dialogTextKey ?? "";
     dialogTextKeyParams = event.dialogTextKeyParams;
@@ -36,6 +39,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
   }
 
   Future<void> _handleShowErrorDialog(ShowErrorDialog event, Emitter<DialogOverlayState> emit) async {
+    Logger.verbose("showing error dialog for ${event.dialogTextKey}");
     dialogStatus = DialogStatus.ERROR;
     dialogTextKey = event.dialogTextKey;
     dialogTextKeyParams = event.dialogTextKeyParams;
@@ -44,6 +48,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
   }
 
   Future<void> _handleShowConfirmDialog(ShowConfirmDialog event, Emitter<DialogOverlayState> emit) async {
+    Logger.verbose("showing confirm dialog for ${event.dialogTextKey}");
     dialogStatus = DialogStatus.CONFIRM;
     dialogTextKey = event.dialogTextKey;
     dialogTextKeyParams = event.dialogTextKeyParams;

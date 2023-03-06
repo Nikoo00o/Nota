@@ -9,6 +9,9 @@ abstract class DialogService {
   void showErrorDialog(String dialogTextKey, {List<String>? dialogTextKeyParams});
 
   /// Non blocking
+  void showInfoDialog(String dialogTextKey, {List<String>? dialogTextKeyParams});
+
+  /// Non blocking
   void showLoadingDialog({String? dialogTextKey, List<String>? dialogTextKeyParams});
 
   /// Shows a dialog with the [dialogTextKey] as description text if not null and otherwise a default "Confirm" message.
@@ -49,6 +52,11 @@ class DialogServiceImpl extends DialogService {
   }
 
   @override
+  void showInfoDialog(String dialogTextKey, {List<String>? dialogTextKeyParams}) {
+    dialogOverlayBloc.add(ShowErrorDialog(dialogTextKey, dialogTextKeyParams)); //todo: add in dialog service + bloc
+  }
+
+  @override
   void showLoadingDialog({String? dialogTextKey, List<String>? dialogTextKeyParams}) {
     dialogOverlayBloc.add(ShowLoadingDialog(dialogTextKey, dialogTextKeyParams));
   }
@@ -69,12 +77,12 @@ class DialogServiceImpl extends DialogService {
 
   @override
   void hideDialog() {
-    dialogOverlayBloc.add(HideDialog());
+    dialogOverlayBloc.add(const HideDialog());
   }
 
   @override
   void hideLoadingDialog() {
-    dialogOverlayBloc.add(HideDialog());
+    dialogOverlayBloc.add(const HideDialog());
     //todo: add dialog counter for loading dialog, etc
   }
 

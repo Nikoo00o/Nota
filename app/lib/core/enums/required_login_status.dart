@@ -1,3 +1,4 @@
+/// Which type of login is required
 enum RequiredLoginStatus {
   /// A full server side login with username+password is needed
   REMOTE,

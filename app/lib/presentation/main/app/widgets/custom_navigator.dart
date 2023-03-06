@@ -1,5 +1,9 @@
+import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/routes.dart';
 import 'package:app/presentation/main/app/widgets/page_route_animation.dart';
+import 'package:app/presentation/pages/login/login_page.dart';
+import 'package:app/presentation/pages/note_selection/note_selection_page.dart';
+import 'package:app/presentation/pages/settings/settings_page.dart';
 import 'package:app/presentation/widgets/base_pages/page_base.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:flutter/material.dart';
@@ -9,18 +13,28 @@ import 'package:shared/core/utils/logger/logger.dart';
 /// [_getPageForRoute]!
 class CustomNavigator extends StatelessWidget {
   final NavigationService navigationService;
+  final AppConfig appConfig;
 
-  const CustomNavigator({required this.navigationService});
+  const CustomNavigator({required this.navigationService, required this.appConfig});
 
   // todo: return all pages for the routes here!
   Widget _getPageForRoute(String? routeName, Object? arguments) {
-    return Scaffold(body: Center(child: Text("no page found for route: $routeName")));
+    switch (routeName) {
+      case Routes.login:
+        return LoginPage();
+      case Routes.notes:
+        return const NoteSelectionPage();
+      case Routes.settings:
+        return const SettingsPage();
+      default:
+        return Scaffold(body: Center(child: Text("no page found for route: $routeName")));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Navigator(
-      initialRoute: Routes.login,
+      initialRoute: Routes.firstRoute,
       key: navigationService.navigatorKey,
       observers: <NavigatorObserver>[_CustomNavigatorObserver()],
       onGenerateRoute: (RouteSettings settings) {

@@ -37,6 +37,7 @@ class RestClient {
     if (sharedConfig.acceptSelfSignedCertificates) {
       httpClient.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
     }
+    httpClient.connectionTimeout = sharedConfig.connectionTimeout;
     client = IOClient(httpClient);
   }
 

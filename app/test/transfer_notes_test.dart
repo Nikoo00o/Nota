@@ -106,7 +106,7 @@ void main() {
 
     test("Should do nothing without notes", () async {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-      await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+      await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
       final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
 
       dialogServiceMock.confirmedOverride = true; // dont cancel
@@ -169,8 +169,8 @@ void main() {
     await sl<TransferNotes>().call(const NoParams()); // first transfer to upload note
 
     account.userName = "dontCacheData"; // pretend that this is someone else, so that the logout does not cache!
-    await sl<LogoutOfAccount>().call(const NoParams()); //resets the account
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false)); //resets the account
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     account = await sl<GetLoggedInAccount>().call(const NoParams()); //refresh account because of logout
 
     await sl<TransferNotes>().call(const NoParams()); //next transfer to download note
@@ -245,18 +245,18 @@ void main() {
     final String oldName = account.noteInfoList.first.encFileName;
 
     await sl<TransferNotes>().call(const NoParams()); // first transfer the note and logout while caching
-    await sl<LogoutOfAccount>().call(const NoParams());
+    await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
 
     final DateTime deleteTime = DateTime.now(); //then login again and delete the note
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     account = await sl<GetLoggedInAccount>().call(const NoParams()); //refresh account because of logout
     account.noteInfoList[0] = account.noteInfoList.first.copyWith(newEncFileName: "", newLastEdited: deleteTime);
 
     await sl<TransferNotes>().call(const NoParams()); // transfer the deleted note to the server
 
     account.userName = "dontCacheData"; // pretend that this is someone else, so that the logout does not cache!
-    await sl<LogoutOfAccount>().call(const NoParams());
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     account = await sl<GetLoggedInAccount>().call(const NoParams()); //refresh account because of logout and get the old cached
     // data
 
@@ -285,16 +285,16 @@ void main() {
 
     await sl<TransferNotes>().call(const NoParams()); // first transfer the deleted note and logout without caching
     account.userName = "dontCacheData";
-    await sl<LogoutOfAccount>().call(const NoParams());
+    await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
 
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     account = await sl<GetLoggedInAccount>().call(const NoParams()); //refresh account because of logout
 
     await sl<TransferNotes>().call(const NoParams()); // transfer the deleted note to the server
 
     account.userName = "dontCacheData"; // pretend that this is someone else, so that the logout does not cache!
-    await sl<LogoutOfAccount>().call(const NoParams());
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     account = await sl<GetLoggedInAccount>().call(const NoParams()); //refresh account because of logout
 
     expect(account.noteInfoList.length, 0, reason: "account has no note before");
@@ -312,7 +312,7 @@ void main() {
 
 Future<ClientAccount> _loginAndCreateNote() async {
   await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-  await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+  await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
   await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
       noteId: -1, decryptedName: "name", decryptedContent: Uint8List.fromList(utf8.encode("test"))));
   final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());

@@ -14,22 +14,24 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// This logs the user into the app and decrypts the [ClientAccount.decryptedDataKey] and stores it in memory, or also in
 /// the storage if [ClientAccount.storeDecryptedDataKey] is set.
 ///
-/// The login can either be only local inside of the app, or remote to the server depending on if the [LoginParams]
-/// are [RemoteLoginParams], or [LocalLoginParams].
+/// The login can either be only local inside of the app, or remote to the server depending on if the [LoginToAccountParams]
+/// are [LoginToAccountParamsRemote], or [LoginToAccountParamsLocal].
 /// First call [GetRequiredLoginStatus] to determine the correct login status!
 ///
-/// A login with [RemoteLoginParams] can throw the exceptions of [AccountRepository.login] and already updates the session
-/// token and encrypted data key of the client.
+/// A login with [LoginToAccountParamsRemote] can throw the exceptions of [AccountRepository.login] and already updates
+/// the session token and encrypted data key of the client.
 ///
-/// A login with [LocalLoginParams] needs a stored account and can throw a [ClientException] with
-/// [ErrorCodes.ACCOUNT_WRONG_PASSWORD], or [ErrorCodes.CLIENT_NO_ACCOUNT] if the wrong [LoginParams] are used, or if no
-/// account is stored.
+/// A login with [LoginToAccountParamsLocal] needs a stored account and can throw a [ClientException] with
+/// [ErrorCodes.ACCOUNT_WRONG_PASSWORD], or [ErrorCodes.CLIENT_NO_ACCOUNT] if the wrong [LoginToAccountParams] are used,
+/// or if no account is stored.
 ///
 ///
-/// Without the [LocalLoginParams], offline editing would not be possible!
+/// Without the [LoginToAccountParamsLocal], offline editing would not be possible!
 ///
 /// This also restores old note info lists stored on the device if multiple accounts are used!
-class LoginToAccount extends UseCase<void, LoginParams> {
+///
+/// Input validation of the params is done by the bloc!
+class LoginToAccount extends UseCase<void, LoginToAccountParams> {
   final AccountRepository accountRepository;
   final AppConfig appConfig;
   final GetRequiredLoginStatus getRequiredLoginStatus;
@@ -37,7 +39,7 @@ class LoginToAccount extends UseCase<void, LoginParams> {
   const LoginToAccount({required this.accountRepository, required this.appConfig, required this.getRequiredLoginStatus});
 
   @override
-  Future<void> execute(LoginParams params) async {
+  Future<void> execute(LoginToAccountParams params) async {
     // get the new password hash for comparison and the new user key for decrypting the encrypted data key
     final String passwordHash = await SecurityUtilsExtension.hashStringSecure(params.password, appConfig.passwordHashSalt);
     final String userKey = await SecurityUtilsExtension.hashStringSecure(params.password, appConfig.userKeySalt);
@@ -48,12 +50,12 @@ class LoginToAccount extends UseCase<void, LoginParams> {
 
     final RequiredLoginStatus loginStatus = await getRequiredLoginStatus(const NoParams());
     // login, or compare password hash
-    if (params is RemoteLoginParams) {
+    if (params is LoginToAccountParamsRemote) {
       if (loginStatus != RequiredLoginStatus.REMOTE) {
         throw const ClientException(message: ErrorCodes.CLIENT_NO_ACCOUNT);
       }
       account = await accountRepository.login(); //login and update the account (updates session token and enc data key)
-    } else if (params is LocalLoginParams) {
+    } else if (params is LoginToAccountParamsLocal) {
       if (loginStatus != RequiredLoginStatus.LOCAL) {
         throw const ClientException(message: ErrorCodes.CLIENT_NO_ACCOUNT);
       }
@@ -71,7 +73,7 @@ class LoginToAccount extends UseCase<void, LoginParams> {
     // update the accounts login status
     account.needsServerSideLogin = false;
 
-    if (params is RemoteLoginParams) {
+    if (params is LoginToAccountParamsRemote) {
       await _tryToReuseNotes(account); // see if the account had some notes cached that should be used
     }
 
@@ -91,8 +93,8 @@ class LoginToAccount extends UseCase<void, LoginParams> {
 
   /// For remote login, the username and [passwordHash] will be set to the account.
   /// A newly created account for remote login will also be stored locally.
-  Future<ClientAccount> _getMatchingAccount(LoginParams params, String passwordHash) async {
-    if (params is RemoteLoginParams) {
+  Future<ClientAccount> _getMatchingAccount(LoginToAccountParams params, String passwordHash) async {
+    if (params is LoginToAccountParamsRemote) {
       ClientAccount? account = await accountRepository.getAccount();
       if (account == null) {
         Logger.warn("There was no account stored before the login");
@@ -104,27 +106,27 @@ class LoginToAccount extends UseCase<void, LoginParams> {
       }
 
       return account;
-    } else if (params is LocalLoginParams) {
+    } else if (params is LoginToAccountParamsLocal) {
       return accountRepository.getAccountAndThrowIfNull();
     }
     throw UnimplementedError();
   }
 }
 
-abstract class LoginParams {
+abstract class LoginToAccountParams {
   /// This is the plain text password and no hash, etc!
   final String password;
 
-  const LoginParams({required this.password});
+  const LoginToAccountParams({required this.password});
 }
 
-class RemoteLoginParams extends LoginParams {
+class LoginToAccountParamsRemote extends LoginToAccountParams {
   /// The username which is needed for a login request to the server
   final String username;
 
-  const RemoteLoginParams({required super.password, required this.username});
+  const LoginToAccountParamsRemote({required super.password, required this.username});
 }
 
-class LocalLoginParams extends LoginParams {
-  const LocalLoginParams({required super.password});
+class LoginToAccountParamsLocal extends LoginToAccountParams {
+  const LoginToAccountParamsLocal({required super.password});
 }

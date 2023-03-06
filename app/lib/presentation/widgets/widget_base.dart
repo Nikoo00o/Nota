@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 abstract class WidgetBase extends StatelessWidget {
   const WidgetBase({super.key});
 
-  /// returns the theme data
+  /// Returns the theme data. The [ThemeData.colorScheme] contains the colors used inside of the app.
   ThemeData theme(BuildContext context) => Theme.of(context);
 
   /// Translates a translation [key] for the current locale.

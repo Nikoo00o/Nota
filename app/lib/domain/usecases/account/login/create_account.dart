@@ -12,6 +12,8 @@ import 'package:shared/domain/usecases/usecase.dart';
 
 /// This creates a new account in the storage and on the server.
 /// It can throw the exceptions of [AccountRepository.createNewAccount]
+///
+/// Input validation of the params is done by the bloc!
 class CreateAccount extends UseCase<void, CreateAccountParams> {
   final AccountRepository accountRepository;
   final AppConfig appConfig;

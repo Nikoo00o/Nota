@@ -1,26 +1,31 @@
 import 'package:app/core/config/app_config.dart';
+import 'package:app/core/constants/routes.dart';
 import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/repositories/account_repository.dart';
+import 'package:app/services/navigation_service.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
 /// This logs the user out of the app and clears the keys and sets the account to null, but keeps the encrypted note data
-/// for later use and caches the note info for the account!
+/// for later use and caches the note info for the account! After this, a remote login is needed!
 ///
 /// Important: because this resets the account, references to the old should be updated afterwards, so they are not used
 /// anymore!!!
 ///
-/// This can throw a [ClientException] with [ErrorCodes.CLIENT_NO_ACCOUNT]
-class LogoutOfAccount extends UseCase<void, NoParams> {
+/// This can throw a [ClientException] with [ErrorCodes.CLIENT_NO_ACCOUNT].
+///
+/// This can automatically navigate to the login page depending on the [LogoutOfAccountParams].
+class LogoutOfAccount extends UseCase<void, LogoutOfAccountParams> {
   final AccountRepository accountRepository;
+  final NavigationService navigationService;
   final AppConfig appConfig;
 
-  const LogoutOfAccount({required this.accountRepository, required this.appConfig});
+  const LogoutOfAccount({required this.accountRepository, required this.navigationService, required this.appConfig});
 
   @override
-  Future<void> execute(NoParams params) async {
+  Future<void> execute(LogoutOfAccountParams params) async {
     final ClientAccount account = await accountRepository.getAccountAndThrowIfNull();
 
     // cache note info list for the account
@@ -42,5 +47,15 @@ class LogoutOfAccount extends UseCase<void, NoParams> {
     await accountRepository.saveAccount(null);
 
     Logger.info("Logged out of the account ${account.userName}");
+
+    if (params.navigateToLoginPage) {
+      navigationService.navigateTo(Routes.login);
+    }
   }
+}
+
+class LogoutOfAccountParams {
+  final bool navigateToLoginPage;
+
+  const LogoutOfAccountParams({required this.navigateToLoginPage});
 }
