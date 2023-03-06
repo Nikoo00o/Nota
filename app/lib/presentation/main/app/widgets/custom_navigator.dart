@@ -28,7 +28,7 @@ class CustomNavigator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Navigator(
-      initialRoute: Routes.login,
+      initialRoute: Routes.firstRoute,
       key: navigationService.navigatorKey,
       observers: <NavigatorObserver>[_CustomNavigatorObserver()],
       onGenerateRoute: (RouteSettings settings) {

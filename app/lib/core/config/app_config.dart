@@ -13,4 +13,8 @@ class AppConfig extends SharedConfig {
   /// The theme of the app including the colors, etc
   ThemeData get theme => ThemeData.dark(useMaterial3: true);
 
+  /// If the app was in the background for this amount of time, then a new local login with the password will be needed if
+  /// the accounts auto login setting is set to false!
+  Duration get screenSaverTimeout => const Duration(seconds: 30);
+
 }

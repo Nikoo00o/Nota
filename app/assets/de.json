@@ -1,4 +1,5 @@
 {
   "empty": "",
-  "empty.param.1": "{0}"
+  "empty.param.1": "{0}",
+  "error.unknown": "Unbekannter Fehler"
 }

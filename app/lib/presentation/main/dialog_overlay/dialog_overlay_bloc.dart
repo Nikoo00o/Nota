@@ -30,7 +30,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
   }
 
   Future<void> _handleShowLoadingDialog(ShowLoadingDialog event, Emitter<DialogOverlayState> emit) async {
-    Logger.verbose("showing loading dialog");
+    Logger.verbose("showing loading dialog for ${event.dialogTextKey}");
     dialogStatus = DialogStatus.LOADING;
     dialogTextKey = event.dialogTextKey ?? "";
     dialogTextKeyParams = event.dialogTextKeyParams;
@@ -39,7 +39,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
   }
 
   Future<void> _handleShowErrorDialog(ShowErrorDialog event, Emitter<DialogOverlayState> emit) async {
-    Logger.verbose("showing error dialog");
+    Logger.verbose("showing error dialog for ${event.dialogTextKey}");
     dialogStatus = DialogStatus.ERROR;
     dialogTextKey = event.dialogTextKey;
     dialogTextKeyParams = event.dialogTextKeyParams;
@@ -48,7 +48,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
   }
 
   Future<void> _handleShowConfirmDialog(ShowConfirmDialog event, Emitter<DialogOverlayState> emit) async {
-    Logger.verbose("showing confirm dialog");
+    Logger.verbose("showing confirm dialog for ${event.dialogTextKey}");
     dialogStatus = DialogStatus.CONFIRM;
     dialogTextKey = event.dialogTextKey;
     dialogTextKeyParams = event.dialogTextKeyParams;

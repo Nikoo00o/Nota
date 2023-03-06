@@ -20,7 +20,9 @@ class LoginPageBloc extends PageBloc<LoginPageEvent, LoginPageState> {
   final LogoutOfAccount logoutOfAccount;
   final DialogService dialogService;
   final NavigationService navigationService;
-  late RequiredLoginStatus loginStatus;
+
+  late RequiredLoginStatus _loginStatus;
+  bool _createNewAccount = false;
 
   LoginPageBloc({
     required this.getRequiredLoginStatus,
@@ -29,7 +31,7 @@ class LoginPageBloc extends PageBloc<LoginPageEvent, LoginPageState> {
     required this.logoutOfAccount,
     required this.dialogService,
     required this.navigationService,
-  }) : super(initialState: LoginPageState(null));
+  }) : super(initialState: const LoginPageLocalState());
 
   @override
   void registerEventHandlers() {
@@ -38,14 +40,15 @@ class LoginPageBloc extends PageBloc<LoginPageEvent, LoginPageState> {
     on<LoginPageEventLocalLogin>(_handleLocalLogin);
     on<LoginPageEventCreate>(_handleCreate);
     on<LoginPageEventChangeAccount>(_handleChangeAccount);
+    on<LoginPageEventSwitchCreation>(_handleSwitchCreation);
   }
 
   Future<void> _handleInitialise(LoginPageEventInitialise event, Emitter<LoginPageState> emit) async {
-    loginStatus = await getRequiredLoginStatus(const NoParams());
-    if (loginStatus == RequiredLoginStatus.NONE) {
+    _loginStatus = await getRequiredLoginStatus(const NoParams());
+    if (_loginStatus == RequiredLoginStatus.NONE) {
       _navigateToNextPage();
     }
-    emit(LoginPageState(loginStatus));
+    emit(_buildState());
   }
 
   Future<void> _handleRemoteLogin(LoginPageEventRemoteLogin event, Emitter<LoginPageState> emit) async {
@@ -63,7 +66,7 @@ class LoginPageBloc extends PageBloc<LoginPageEvent, LoginPageState> {
   }
 
   Future<void> _handleCreate(LoginPageEventCreate event, Emitter<LoginPageState> emit) async {
-    if (_validateInput(password: event.password, username: event.username)) {
+    if (_validateInput(password: event.password, username: event.username, confirmPassword: event.confirmPassword)) {
       await createAccount(CreateAccountParams(username: event.username, password: event.password));
       dialogService.showInfoDialog("page.login.account.created");
     }
@@ -74,30 +77,31 @@ class LoginPageBloc extends PageBloc<LoginPageEvent, LoginPageState> {
     add(const LoginPageEventInitialise());
   }
 
+  Future<void> _handleSwitchCreation(LoginPageEventSwitchCreation event, Emitter<LoginPageState> emit) async {
+    _createNewAccount = event.isCreateAccount;
+    emit(_buildState());
+  }
+
+  LoginPageState _buildState() {
+    if (_createNewAccount) {
+      return const LoginPageCreateState();
+    }
+    if (_loginStatus == RequiredLoginStatus.REMOTE) {
+      return const LoginPageRemoteState();
+    }
+    return const LoginPageLocalState();
+  }
+
   void _navigateToNextPage() {
     navigationService.navigateTo(Routes.notes);
   }
 
-  /// Returns if the input was valid
-  bool _validateInput({String? username, required String password}) {
-    if (username?.isNotEmpty ?? true && password.isNotEmpty) {
-      if(_checkPassword(password) == false){
-        Logger.error("The password was not secure");
-        dialogService.showErrorDialog("page.login.unsecure.password");
-        return false;
-      }
+  bool _validateInput({String? username, required String password, String? confirmPassword}) {
+    if ((username?.isNotEmpty ?? true) && password.isNotEmpty && (confirmPassword?.isNotEmpty ?? true)) {
       return true;
     }
-    Logger.error("The username, or password field was empty");
+    Logger.error("One of the login page input fields was empty");
     dialogService.showErrorDialog("page.login.empty.params");
     return false;
   }
-
-  /// The password should contain at least 4 characters and it should contain at least one lowercase letter, one uppercase
-  /// letter and one number
-  bool _checkPassword(String password) =>
-      password.length >= 4 &&
-      RegExp(r"[A-Z]").hasMatch(password) &&
-      RegExp(r"[a-z]").hasMatch(password) &&
-      RegExp(r"\d").hasMatch(password);
 }

@@ -24,10 +24,19 @@ class LoginPageEventLocalLogin extends LoginPageEvent {
 class LoginPageEventCreate extends LoginPageEvent {
   final String username;
   final String password;
+  final String confirmPassword;
 
-  const LoginPageEventCreate(this.username, this.password);
+  const LoginPageEventCreate({required this.username, required this.password, required this.confirmPassword});
 }
 
+/// Switch from local to remote login.
 class LoginPageEventChangeAccount extends LoginPageEvent {
   const LoginPageEventChangeAccount();
+}
+
+/// Switch from login to create account, or back.
+class LoginPageEventSwitchCreation extends LoginPageEvent {
+  final bool isCreateAccount;
+
+  const LoginPageEventSwitchCreation({required this.isCreateAccount});
 }

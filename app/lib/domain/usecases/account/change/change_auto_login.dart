@@ -5,7 +5,10 @@ import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
-/// Just changes the accounts config value [ClientAccount.storeDecryptedDataKey] and saves the account to storage again.
+/// Just changes the accounts server synchronized config value [ClientAccount.storeDecryptedDataKey] and saves the account
+/// to storage again.
+///
+/// If this is set to false, then the user needs to log in to the app again with his password on restarting the app.
 ///
 /// This can throw a [ClientException] with [ErrorCodes.CLIENT_NO_ACCOUNT]
 class ChangeAutoLogin extends UseCase<void, ChangeAutoLoginParams> {
