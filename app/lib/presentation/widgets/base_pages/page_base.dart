@@ -20,28 +20,40 @@ abstract class PageBase extends WidgetBase {
   /// default padding is (20, 5, 20, 20)
   final EdgeInsetsGeometry pagePadding;
 
+  /// If this is set to true, then a touch outside of a text input field, will reset the focus of the selected field and
+  /// hide the keyboard again.
+  final bool resetFocusOnTouch;
+
   const PageBase({
     super.key,
     this.backGroundImage,
     this.backgroundColour,
+    this.resetFocusOnTouch = true,
     EdgeInsetsGeometry? pagePadding,
   }) : pagePadding = pagePadding ?? defaultPagePadding;
 
   /// builds the page [body] expanded with a padding around it and background image, or background colour
   Widget buildPage(BuildContext context, Widget body) {
-    return Container(
-      decoration: BoxDecoration(image: _getBackground(), color: backGroundImage == null ? backgroundColour : null),
-      child: Padding(
-        padding: pagePadding,
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child: body,
-            ),
-          ],
+    return _buildGestureDetector(
+      context: context,
+      child: Container(
+        decoration: BoxDecoration(image: _getBackground(), color: backGroundImage == null ? backgroundColour : null),
+        child: Padding(
+          padding: pagePadding,
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                child: body,
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Widget _buildGestureDetector({required BuildContext context, required Widget child}) {
+    return GestureDetector(onTapDown: (TapDownDetails details) => unFocus(context), child: child);
   }
 
   DecorationImage? _getBackground() {
@@ -59,6 +71,16 @@ abstract class PageBase extends WidgetBase {
   /// push next page
   void pushPage(BuildContext context, Widget page) {
     Navigator.push<void>(context, PageRouteAnimation(child: page));
+  }
+
+  /// Clears the focus of all text input fields and hides the keyboard
+  void unFocus(BuildContext context) {
+    final FocusScopeNode currentFocus = FocusScope.of(context);
+    if(currentFocus.hasPrimaryFocus){
+      currentFocus.unfocus();
+    } else if(currentFocus.focusedChild?.hasPrimaryFocus ?? false){
+      currentFocus.focusedChild!.unfocus();
+    }
   }
 
   /// The page name for logging.

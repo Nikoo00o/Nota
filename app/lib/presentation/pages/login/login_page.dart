@@ -31,7 +31,7 @@ class LoginPage extends BlocPage<LoginPageBloc, LoginPageState> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         _buildInput(context, state),
-        const SizedBox(height: 20),
+        const SizedBox(height: 15),
         _buildButtons(context, state),
       ],
     );
@@ -89,7 +89,7 @@ class LoginPage extends BlocPage<LoginPageBloc, LoginPageState> {
           onPressed: () => _firstButtonPressed(context, state),
           child: Text(translate(firstButtonKey)),
         ),
-        const SizedBox(height: 15),
+        const SizedBox(height: 20),
         FilledButton.tonal(
           onPressed: () => _secondButtonPressed(context, state),
           child: Text(translate(_getSecondButtonKey(state))),
@@ -112,6 +112,7 @@ class LoginPage extends BlocPage<LoginPageBloc, LoginPageState> {
   }
 
   void _firstButtonPressed(BuildContext context, LoginPageState state) {
+    unFocus(context);
     if (state is LoginPageCreateState) {
       currentBloc(context).add(LoginPageEventCreate(
           username: usernameController.text,
@@ -125,6 +126,7 @@ class LoginPage extends BlocPage<LoginPageBloc, LoginPageState> {
   }
 
   void _secondButtonPressed(BuildContext context, LoginPageState state) {
+    unFocus(context);
     if (state is LoginPageCreateState) {
       currentBloc(context).add(const LoginPageEventSwitchCreation(isCreateAccount: false));
     } else if (state is LoginPageRemoteState) {
