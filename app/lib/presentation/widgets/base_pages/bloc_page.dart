@@ -1,4 +1,5 @@
 import 'package:app/core/get_it.dart';
+import 'package:app/presentation/widgets/base_pages/no_bloc_page.dart';
 import 'package:app/presentation/widgets/base_pages/page_base.dart';
 import 'package:app/presentation/widgets/base_pages/page_bloc.dart';
 import 'package:app/presentation/widgets/base_pages/page_event.dart';
@@ -6,8 +7,10 @@ import 'package:app/presentation/widgets/base_pages/page_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// An abstract super class that can be used for the pages which are used with a bloc. You can also add another abstract
-/// super class for pages without a bloc and a shared abstract super class which both extend from!
+
+
+/// This is an abstract super class that can be used for the pages which are used with a bloc. For pages without a bloc,
+/// use [NoBlocPage]. If you want to use a simple class like that one for blocs, consider using [].
 ///
 /// The [build] method is overridden to return both [buildPartWithNoState] and [buildPartWithState] added together.
 /// Those two methods should be overridden in the subclass to build the page.
@@ -75,7 +78,7 @@ abstract class BlocPage<Bloc extends PageBloc<PageEvent, State>, State extends P
 
   @override
   Widget build(BuildContext context) {
-    return buildPage(context, buildBlocProvider(buildPartWithNoState(context, buildBlocBuilder())));
+    return buildBlocProvider(buildPartWithNoState(context, buildBlocBuilder()));
   }
 
   /// Returns current bloc of page without listening to it, so that events can be added, or navigation can be done, etc.

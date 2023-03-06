@@ -2,10 +2,10 @@ import 'package:app/core/get_it.dart';
 import 'package:app/presentation/pages/login/login_bloc.dart';
 import 'package:app/presentation/pages/login/login_event.dart';
 import 'package:app/presentation/pages/login/login_state.dart';
-import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
+import 'package:app/presentation/widgets/base_pages/simple_bloc_page.dart';
 import 'package:flutter/material.dart';
 
-class LoginPage extends BlocPage<LoginPageBloc, LoginPageState> {
+class LoginPage extends SimpleBlocPage<LoginPageBloc, LoginPageState> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController passwordConfirmController = TextEditingController();
@@ -18,22 +18,29 @@ class LoginPage extends BlocPage<LoginPageBloc, LoginPageState> {
   }
 
   @override
-  Widget buildPartWithNoState(BuildContext context, Widget partWithState) {
+  Widget buildBody(BuildContext context, LoginPageState state) {
     // todo: add menu inside of the scaffold and also add app bar ! maybe add a icon here as well
-    return Scaffold(
-      body: SingleChildScrollView(child: partWithState),
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          _buildInput(context, state),
+          const SizedBox(height: 15),
+          _buildButtons(context, state),
+        ],
+      ),
     );
   }
 
   @override
-  Widget buildPartWithState(BuildContext context, LoginPageState state) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        _buildInput(context, state),
-        const SizedBox(height: 15),
-        _buildButtons(context, state),
-      ],
+  PreferredSizeWidget? buildAppBar(BuildContext context, LoginPageState state) {
+    return AppBar(
+      title: Text(
+        translate(getPageTitle(state)),
+        style: TextStyle(color: theme(context).colorScheme.onPrimaryContainer),
+      ),
+      centerTitle: false,
+      backgroundColor: theme(context).colorScheme.primaryContainer,
     );
   }
 
@@ -87,6 +94,7 @@ class LoginPage extends BlocPage<LoginPageBloc, LoginPageState> {
       children: <Widget>[
         FilledButton(
           onPressed: () => _firstButtonPressed(context, state),
+          style: ButtonStyle(backgroundColor: MaterialStateProperty.all(theme(context).colorScheme.primary)),
           child: Text(translate(firstButtonKey)),
         ),
         const SizedBox(height: 20),
@@ -96,6 +104,19 @@ class LoginPage extends BlocPage<LoginPageBloc, LoginPageState> {
         ),
       ],
     );
+  }
+
+  String getPageTitle(LoginPageState state) {
+    if (state is LoginPageCreateState) {
+      return "page.login.title.create";
+    }
+    if (state is LoginPageRemoteState) {
+      return "page.login.title.remote.login";
+    }
+    if (state is LoginPageLocalState) {
+      return "page.login.title.local.login";
+    }
+    throw UnimplementedError();
   }
 
   String _getSecondButtonKey(LoginPageState state) {

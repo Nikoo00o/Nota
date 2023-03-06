@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 /// Use one of the subclasses [BlocPage], or [NoBlocPage] and not this class.
 ///
-/// This is only the abstract base class.
+/// This is only the abstract base class to provide common member variables.
 abstract class PageBase extends WidgetBase {
   /// The default page padding
   static const EdgeInsets defaultPagePadding = EdgeInsets.fromLTRB(8, 8, 8, 8);
@@ -32,31 +32,7 @@ abstract class PageBase extends WidgetBase {
     EdgeInsetsGeometry? pagePadding,
   }) : pagePadding = pagePadding ?? defaultPagePadding;
 
-  /// builds the page [body] expanded with a padding around it and background image, or background colour
-  Widget buildPage(BuildContext context, Widget body) {
-    return _buildGestureDetector(
-      context: context,
-      child: Container(
-        decoration: BoxDecoration(image: _getBackground(), color: backGroundImage == null ? backgroundColour : null),
-        child: Padding(
-          padding: pagePadding,
-          child: Column(
-            children: <Widget>[
-              Expanded(
-                child: body,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGestureDetector({required BuildContext context, required Widget child}) {
-    return GestureDetector(onTapDown: (TapDownDetails details) => unFocus(context), child: child);
-  }
-
-  DecorationImage? _getBackground() {
+  DecorationImage? getBackground() {
     if (backGroundImage != null) {
       return DecorationImage(image: backGroundImage!, fit: BoxFit.cover);
     }
@@ -76,9 +52,9 @@ abstract class PageBase extends WidgetBase {
   /// Clears the focus of all text input fields and hides the keyboard
   void unFocus(BuildContext context) {
     final FocusScopeNode currentFocus = FocusScope.of(context);
-    if(currentFocus.hasPrimaryFocus){
+    if (currentFocus.hasPrimaryFocus) {
       currentFocus.unfocus();
-    } else if(currentFocus.focusedChild?.hasPrimaryFocus ?? false){
+    } else if (currentFocus.focusedChild?.hasPrimaryFocus ?? false) {
       currentFocus.focusedChild!.unfocus();
     }
   }
