@@ -24,17 +24,29 @@ class AppTheme {
   /// if a dark, or light theme should be created from the colors.
   final Brightness brightness;
 
+  /// Used for all most important key components across the UI (FAB, tint of elevated surface, etc).
+  ///
+  /// In addition to the color "primary", you can also access "onPrimary" for text on a primary background color. And the
+  /// same pair is provided an additional time with "primaryContainer" with a different color tone for UI elements needing
+  /// less emphasis.
+  ///
+  /// "primaryContainer" will be brighter than the "primary" color inside of a light theme and darker inside of  a dark
+  /// theme. This of course also applies to the other colors as well.
   final Color basePrimaryColor;
 
+  /// Used for less prominent components in the UI (filter chips).
   final Color baseSecondaryColor;
 
+  /// Used as a contrast to balance primary and secondary colors, or bring attention to an element.
   final Color baseTertiaryColor;
 
+  /// Used for the surface and background (mostly black, or white).
   final Color baseNeutralColor;
 
   /// If this is null, then the [baseNeutralColor] will be used instead.
   final Color? baseNeutralVariantColor;
 
+  /// Used for errors (mostly some shade of red)
   final Color baseErrorColor;
 
   /// Depending on the [brightness] either a dark, or light theme will be created with the following material key colors.
@@ -52,10 +64,11 @@ class AppTheme {
 
   /// Returns the theme data for this theme with the generated [ColorScheme].
   ThemeData getTheme() {
-    return ThemeData(colorScheme: _getColorScheme());
+    return ThemeData(colorScheme: getColorScheme());
   }
 
-  ColorScheme _getColorScheme() {
+  /// Returns the parsed [ColorScheme] from the base material colors.
+  ColorScheme getColorScheme() {
     final bool isDark = brightness == Brightness.dark;
     final MaterialColor primary = convertColour(basePrimaryColor);
 

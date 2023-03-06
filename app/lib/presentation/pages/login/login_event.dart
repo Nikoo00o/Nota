@@ -1,42 +1,42 @@
 import 'package:app/presentation/widgets/base_pages/page_event.dart';
 
-abstract class LoginPageEvent extends PageEvent {
-  const LoginPageEvent();
+abstract class LoginEvent extends PageEvent {
+  const LoginEvent();
 }
 
-class LoginPageEventInitialise extends LoginPageEvent {
-  const LoginPageEventInitialise();
+class LoginEventInitialise extends LoginEvent {
+  const LoginEventInitialise();
 }
 
-class LoginPageEventRemoteLogin extends LoginPageEvent {
+class LoginEventRemoteLogin extends LoginEvent {
   final String username;
   final String password;
 
-  const LoginPageEventRemoteLogin(this.username, this.password);
+  const LoginEventRemoteLogin(this.username, this.password);
 }
 
-class LoginPageEventLocalLogin extends LoginPageEvent {
+class LoginEventLocalLogin extends LoginEvent {
   final String password;
 
-  const LoginPageEventLocalLogin(this.password);
+  const LoginEventLocalLogin(this.password);
 }
 
-class LoginPageEventCreate extends LoginPageEvent {
+class LoginEventCreate extends LoginEvent {
   final String username;
   final String password;
   final String confirmPassword;
 
-  const LoginPageEventCreate({required this.username, required this.password, required this.confirmPassword});
+  const LoginEventCreate({required this.username, required this.password, required this.confirmPassword});
 }
 
 /// Switch from local to remote login.
-class LoginPageEventChangeAccount extends LoginPageEvent {
-  const LoginPageEventChangeAccount();
+class LoginEventChangeAccount extends LoginEvent {
+  const LoginEventChangeAccount();
 }
 
 /// Switch from login to create account, or back.
-class LoginPageEventSwitchCreation extends LoginPageEvent {
+class LoginEventSwitchCreation extends LoginEvent {
   final bool isCreateAccount;
 
-  const LoginPageEventSwitchCreation({required this.isCreateAccount});
+  const LoginEventSwitchCreation({required this.isCreateAccount});
 }

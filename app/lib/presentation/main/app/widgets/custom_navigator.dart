@@ -2,6 +2,8 @@ import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/routes.dart';
 import 'package:app/presentation/main/app/widgets/page_route_animation.dart';
 import 'package:app/presentation/pages/login/login_page.dart';
+import 'package:app/presentation/pages/note_selection/note_selection_page.dart';
+import 'package:app/presentation/pages/settings/settings_page.dart';
 import 'package:app/presentation/widgets/base_pages/page_base.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +22,10 @@ class CustomNavigator extends StatelessWidget {
     switch (routeName) {
       case Routes.login:
         return LoginPage();
+      case Routes.notes:
+        return const NoteSelectionPage();
+      case Routes.settings:
+        return const SettingsPage();
       default:
         return Scaffold(body: Center(child: Text("no page found for route: $routeName")));
     }

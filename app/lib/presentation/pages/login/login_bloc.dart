@@ -13,7 +13,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
-class LoginPageBloc extends PageBloc<LoginPageEvent, LoginPageState> {
+class LoginBloc extends PageBloc<LoginEvent, LoginState> {
   final GetRequiredLoginStatus getRequiredLoginStatus;
   final CreateAccount createAccount;
   final LoginToAccount loginToAccount;
@@ -24,26 +24,26 @@ class LoginPageBloc extends PageBloc<LoginPageEvent, LoginPageState> {
   late RequiredLoginStatus _loginStatus;
   bool _createNewAccount = false;
 
-  LoginPageBloc({
+  LoginBloc({
     required this.getRequiredLoginStatus,
     required this.createAccount,
     required this.loginToAccount,
     required this.logoutOfAccount,
     required this.dialogService,
     required this.navigationService,
-  }) : super(initialState: const LoginPageLocalState());
+  }) : super(initialState: const LoginLocalState());
 
   @override
   void registerEventHandlers() {
-    on<LoginPageEventInitialise>(_handleInitialise);
-    on<LoginPageEventRemoteLogin>(_handleRemoteLogin);
-    on<LoginPageEventLocalLogin>(_handleLocalLogin);
-    on<LoginPageEventCreate>(_handleCreate);
-    on<LoginPageEventChangeAccount>(_handleChangeAccount);
-    on<LoginPageEventSwitchCreation>(_handleSwitchCreation);
+    on<LoginEventInitialise>(_handleInitialise);
+    on<LoginEventRemoteLogin>(_handleRemoteLogin);
+    on<LoginEventLocalLogin>(_handleLocalLogin);
+    on<LoginEventCreate>(_handleCreate);
+    on<LoginEventChangeAccount>(_handleChangeAccount);
+    on<LoginEventSwitchCreation>(_handleSwitchCreation);
   }
 
-  Future<void> _handleInitialise(LoginPageEventInitialise event, Emitter<LoginPageState> emit) async {
+  Future<void> _handleInitialise(LoginEventInitialise event, Emitter<LoginState> emit) async {
     _loginStatus = await getRequiredLoginStatus(const NoParams());
     if (_loginStatus == RequiredLoginStatus.NONE) {
       _navigateToNextPage();
@@ -51,45 +51,45 @@ class LoginPageBloc extends PageBloc<LoginPageEvent, LoginPageState> {
     emit(_buildState());
   }
 
-  Future<void> _handleRemoteLogin(LoginPageEventRemoteLogin event, Emitter<LoginPageState> emit) async {
+  Future<void> _handleRemoteLogin(LoginEventRemoteLogin event, Emitter<LoginState> emit) async {
     if (_validateInput(password: event.password, username: event.username)) {
       await loginToAccount(LoginToAccountParamsRemote(password: event.password, username: event.username));
       _navigateToNextPage();
     }
   }
 
-  Future<void> _handleLocalLogin(LoginPageEventLocalLogin event, Emitter<LoginPageState> emit) async {
+  Future<void> _handleLocalLogin(LoginEventLocalLogin event, Emitter<LoginState> emit) async {
     if (_validateInput(password: event.password)) {
       await loginToAccount(LoginToAccountParamsLocal(password: event.password));
       _navigateToNextPage();
     }
   }
 
-  Future<void> _handleCreate(LoginPageEventCreate event, Emitter<LoginPageState> emit) async {
+  Future<void> _handleCreate(LoginEventCreate event, Emitter<LoginState> emit) async {
     if (_validateInput(password: event.password, username: event.username, confirmPassword: event.confirmPassword)) {
       await createAccount(CreateAccountParams(username: event.username, password: event.password));
       dialogService.showInfoDialog("page.login.account.created");
     }
   }
 
-  Future<void> _handleChangeAccount(LoginPageEventChangeAccount event, Emitter<LoginPageState> emit) async {
+  Future<void> _handleChangeAccount(LoginEventChangeAccount event, Emitter<LoginState> emit) async {
     await logoutOfAccount(const LogoutOfAccountParams(navigateToLoginPage: false));
-    add(const LoginPageEventInitialise());
+    add(const LoginEventInitialise());
   }
 
-  Future<void> _handleSwitchCreation(LoginPageEventSwitchCreation event, Emitter<LoginPageState> emit) async {
+  Future<void> _handleSwitchCreation(LoginEventSwitchCreation event, Emitter<LoginState> emit) async {
     _createNewAccount = event.isCreateAccount;
     emit(_buildState());
   }
 
-  LoginPageState _buildState() {
+  LoginState _buildState() {
     if (_createNewAccount) {
-      return const LoginPageCreateState();
+      return const LoginCreateState();
     }
     if (_loginStatus == RequiredLoginStatus.REMOTE) {
-      return const LoginPageRemoteState();
+      return const LoginRemoteState();
     }
-    return const LoginPageLocalState();
+    return const LoginLocalState();
   }
 
   void _navigateToNextPage() {

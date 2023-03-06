@@ -5,35 +5,39 @@ import 'package:app/presentation/pages/login/login_state.dart';
 import 'package:app/presentation/widgets/base_pages/simple_bloc_page.dart';
 import 'package:flutter/material.dart';
 
-class LoginPage extends SimpleBlocPage<LoginPageBloc, LoginPageState> {
+class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController passwordConfirmController = TextEditingController();
 
-  LoginPage() : super(pagePadding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0));
+  LoginPage() : super();
 
   @override
-  LoginPageBloc createBloc(BuildContext context) {
-    return sl<LoginPageBloc>()..add(const LoginPageEventInitialise());
+  LoginBloc createBloc(BuildContext context) {
+    return sl<LoginBloc>()..add(const LoginEventInitialise());
   }
 
   @override
-  Widget buildBody(BuildContext context, LoginPageState state) {
+  Widget buildBody(BuildContext context, LoginState state) {
     // todo: add menu inside of the scaffold and also add app bar ! maybe add a icon here as well
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          _buildInput(context, state),
-          const SizedBox(height: 15),
-          _buildButtons(context, state),
-        ],
+    return Scrollbar(
+      scrollbarOrientation: ScrollbarOrientation.right,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            _buildInput(context, state),
+            const SizedBox(height: 15),
+            _buildButtons(context, state),
+          ],
+        ),
       ),
     );
   }
 
   @override
-  PreferredSizeWidget? buildAppBar(BuildContext context, LoginPageState state) {
+  PreferredSizeWidget? buildAppBar(BuildContext context, LoginState state) {
     return AppBar(
       title: Text(
         translate(getPageTitle(state)),
@@ -44,12 +48,12 @@ class LoginPage extends SimpleBlocPage<LoginPageBloc, LoginPageState> {
     );
   }
 
-  Widget _buildInput(BuildContext context, LoginPageState state) {
+  Widget _buildInput(BuildContext context, LoginState state) {
     const double space = 15; //height between fields
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
-        if (state is LoginPageRemoteState || state is LoginPageCreateState)
+        if (state is LoginRemoteState || state is LoginCreateState)
           TextFormField(
             controller: usernameController,
             validator: _usernameValidator,
@@ -59,7 +63,7 @@ class LoginPage extends SimpleBlocPage<LoginPageBloc, LoginPageState> {
               border: const OutlineInputBorder(),
             ),
           ),
-        if (state is LoginPageRemoteState || state is LoginPageCreateState) const SizedBox(height: space),
+        if (state is LoginRemoteState || state is LoginCreateState) const SizedBox(height: space),
         TextFormField(
           controller: passwordController,
           validator: _passwordValidator,
@@ -70,8 +74,8 @@ class LoginPage extends SimpleBlocPage<LoginPageBloc, LoginPageState> {
             border: const OutlineInputBorder(),
           ),
         ),
-        if (state is LoginPageCreateState) const SizedBox(height: space),
-        if (state is LoginPageCreateState)
+        if (state is LoginCreateState) const SizedBox(height: space),
+        if (state is LoginCreateState)
           TextFormField(
             controller: passwordConfirmController,
             validator: _passwordConfirmValidator,
@@ -86,15 +90,14 @@ class LoginPage extends SimpleBlocPage<LoginPageBloc, LoginPageState> {
     );
   }
 
-  Widget _buildButtons(BuildContext context, LoginPageState state) {
-    final String firstButtonKey = state is LoginPageCreateState ? "page.login.create" : "page.login.login";
+  Widget _buildButtons(BuildContext context, LoginState state) {
+    final String firstButtonKey = state is LoginCreateState ? "page.login.create" : "page.login.login";
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         FilledButton(
           onPressed: () => _firstButtonPressed(context, state),
-          style: ButtonStyle(backgroundColor: MaterialStateProperty.all(theme(context).colorScheme.primary)),
           child: Text(translate(firstButtonKey)),
         ),
         const SizedBox(height: 20),
@@ -106,54 +109,54 @@ class LoginPage extends SimpleBlocPage<LoginPageBloc, LoginPageState> {
     );
   }
 
-  String getPageTitle(LoginPageState state) {
-    if (state is LoginPageCreateState) {
+  String getPageTitle(LoginState state) {
+    if (state is LoginCreateState) {
       return "page.login.title.create";
     }
-    if (state is LoginPageRemoteState) {
+    if (state is LoginRemoteState) {
       return "page.login.title.remote.login";
     }
-    if (state is LoginPageLocalState) {
+    if (state is LoginLocalState) {
       return "page.login.title.local.login";
     }
     throw UnimplementedError();
   }
 
-  String _getSecondButtonKey(LoginPageState state) {
-    if (state is LoginPageCreateState) {
+  String _getSecondButtonKey(LoginState state) {
+    if (state is LoginCreateState) {
       return "page.login.instead.login";
     }
-    if (state is LoginPageRemoteState) {
+    if (state is LoginRemoteState) {
       return "page.login.instead.create";
     }
-    if (state is LoginPageLocalState) {
+    if (state is LoginLocalState) {
       return "page.login.change.account";
     }
     throw UnimplementedError();
   }
 
-  void _firstButtonPressed(BuildContext context, LoginPageState state) {
+  void _firstButtonPressed(BuildContext context, LoginState state) {
     unFocus(context);
-    if (state is LoginPageCreateState) {
-      currentBloc(context).add(LoginPageEventCreate(
+    if (state is LoginCreateState) {
+      currentBloc(context).add(LoginEventCreate(
           username: usernameController.text,
           password: passwordController.text,
           confirmPassword: passwordConfirmController.text));
-    } else if (state is LoginPageRemoteState) {
-      currentBloc(context).add(LoginPageEventRemoteLogin(usernameController.text, passwordController.text));
-    } else if (state is LoginPageLocalState) {
-      currentBloc(context).add(LoginPageEventLocalLogin(passwordController.text));
+    } else if (state is LoginRemoteState) {
+      currentBloc(context).add(LoginEventRemoteLogin(usernameController.text, passwordController.text));
+    } else if (state is LoginLocalState) {
+      currentBloc(context).add(LoginEventLocalLogin(passwordController.text));
     }
   }
 
-  void _secondButtonPressed(BuildContext context, LoginPageState state) {
+  void _secondButtonPressed(BuildContext context, LoginState state) {
     unFocus(context);
-    if (state is LoginPageCreateState) {
-      currentBloc(context).add(const LoginPageEventSwitchCreation(isCreateAccount: false));
-    } else if (state is LoginPageRemoteState) {
-      currentBloc(context).add(const LoginPageEventSwitchCreation(isCreateAccount: true));
-    } else if (state is LoginPageLocalState) {
-      currentBloc(context).add(const LoginPageEventChangeAccount());
+    if (state is LoginCreateState) {
+      currentBloc(context).add(const LoginEventSwitchCreation(isCreateAccount: false));
+    } else if (state is LoginRemoteState) {
+      currentBloc(context).add(const LoginEventSwitchCreation(isCreateAccount: true));
+    } else if (state is LoginLocalState) {
+      currentBloc(context).add(const LoginEventChangeAccount());
     }
   }
 

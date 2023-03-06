@@ -1,19 +1,18 @@
-import 'package:app/core/enums/required_login_status.dart';
 import 'package:app/presentation/widgets/base_pages/page_state.dart';
 
-abstract class LoginPageState extends PageState {
-  const LoginPageState() : super(const <String, Object?>{});
+abstract class LoginState extends PageState {
+  const LoginState() : super(const <String, Object?>{});
 }
 
-class LoginPageRemoteState extends LoginPageState {
-  const LoginPageRemoteState();
+class LoginRemoteState extends LoginState {
+  const LoginRemoteState();
 }
 
-class LoginPageLocalState extends LoginPageState {
-  const LoginPageLocalState();
+class LoginLocalState extends LoginState {
+  const LoginLocalState();
 }
 
-class LoginPageCreateState extends LoginPageState {
-  const LoginPageCreateState();
+class LoginCreateState extends LoginState {
+  const LoginCreateState();
 }
 
