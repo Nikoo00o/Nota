@@ -9,6 +9,7 @@ import 'package:app/presentation/pages/login/login_state.dart';
 import 'package:app/presentation/widgets/base_pages/page_bloc.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
@@ -23,6 +24,11 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
 
   late RequiredLoginStatus _loginStatus;
   bool _createNewAccount = false;
+
+  // controllers are set by ui and only used for clearing
+  late final TextEditingController usernameController;
+  late final TextEditingController passwordController;
+  late final TextEditingController passwordConfirmController;
 
   LoginBloc({
     required this.getRequiredLoginStatus,
@@ -48,6 +54,7 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
     if (_loginStatus == RequiredLoginStatus.NONE) {
       _navigateToNextPage();
     }
+    _clearTextInputFields();
     emit(_buildState());
   }
 
@@ -68,7 +75,9 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
   Future<void> _handleCreate(LoginEventCreate event, Emitter<LoginState> emit) async {
     if (_validateInput(password: event.password, username: event.username, confirmPassword: event.confirmPassword)) {
       await createAccount(CreateAccountParams(username: event.username, password: event.password));
-      dialogService.showInfoDialog("page.login.account.created");
+      dialogService.showInfoDialog("page.login.account.created", dialogTextKeyParams: <String>[event.username]);
+      _createNewAccount = false;
+      add(const LoginEventInitialise());
     }
   }
 
@@ -79,7 +88,7 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
 
   Future<void> _handleSwitchCreation(LoginEventSwitchCreation event, Emitter<LoginState> emit) async {
     _createNewAccount = event.isCreateAccount;
-    emit(_buildState());
+    add(const LoginEventInitialise());
   }
 
   LoginState _buildState() {
@@ -103,5 +112,11 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
     Logger.error("One of the login page input fields was empty");
     dialogService.showErrorDialog("page.login.empty.params");
     return false;
+  }
+
+  void _clearTextInputFields() {
+    usernameController.clear();
+    passwordController.clear();
+    passwordConfirmController.clear();
   }
 }

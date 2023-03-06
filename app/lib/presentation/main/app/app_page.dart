@@ -69,7 +69,7 @@ class App extends StatelessWidget {
     );
   }
 
-  /// Builds the page with the navigator and a background colour and the safe area!
+  /// Builds the page with the navigator and a background color and the safe area!
   Widget _buildPage(BuildContext context, AppState state) {
     return Container(
       color: appConfig.theme.colorScheme.background,

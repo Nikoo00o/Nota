@@ -4,6 +4,7 @@ import 'package:app/presentation/pages/login/login_event.dart';
 import 'package:app/presentation/pages/login/login_state.dart';
 import 'package:app/presentation/widgets/base_pages/simple_bloc_page.dart';
 import 'package:flutter/material.dart';
+import 'package:shared/core/utils/logger/logger.dart';
 
 class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
   final TextEditingController usernameController = TextEditingController();
@@ -14,7 +15,11 @@ class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
 
   @override
   LoginBloc createBloc(BuildContext context) {
-    return sl<LoginBloc>()..add(const LoginEventInitialise());
+    final LoginBloc bloc = sl<LoginBloc>();
+    bloc.usernameController = usernameController;
+    bloc.passwordController = passwordController;
+    bloc.passwordConfirmController = passwordConfirmController;
+    return bloc..add(const LoginEventInitialise());
   }
 
   @override
@@ -50,43 +55,49 @@ class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
 
   Widget _buildInput(BuildContext context, LoginState state) {
     const double space = 15; //height between fields
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[
-        if (state is LoginRemoteState || state is LoginCreateState)
-          TextFormField(
-            controller: usernameController,
-            validator: _usernameValidator,
-            decoration: InputDecoration(
-              labelText: translate("page.login.name"),
-              isDense: true,
-              border: const OutlineInputBorder(),
+    return Form(
+      autovalidateMode: AutovalidateMode.always,
+      onChanged: () {
+        Form.of(primaryFocus!.context!).save();
+      },
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          if (state is LoginRemoteState || state is LoginCreateState)
+            TextFormField(
+              controller: usernameController,
+              validator: _usernameValidator,
+              decoration: InputDecoration(
+                labelText: translate("page.login.name"),
+                isDense: true,
+                border: const OutlineInputBorder(),
+              ),
             ),
-          ),
-        if (state is LoginRemoteState || state is LoginCreateState) const SizedBox(height: space),
-        TextFormField(
-          controller: passwordController,
-          validator: _passwordValidator,
-          obscureText: true,
-          decoration: InputDecoration(
-            labelText: translate("page.login.password"),
-            isDense: true,
-            border: const OutlineInputBorder(),
-          ),
-        ),
-        if (state is LoginCreateState) const SizedBox(height: space),
-        if (state is LoginCreateState)
+          if (state is LoginRemoteState || state is LoginCreateState) const SizedBox(height: space),
           TextFormField(
-            controller: passwordConfirmController,
-            validator: _passwordConfirmValidator,
+            controller: passwordController,
+            validator: _passwordValidator,
             obscureText: true,
             decoration: InputDecoration(
-              labelText: translate("page.login.password.confirm"),
+              labelText: translate("page.login.password"),
               isDense: true,
               border: const OutlineInputBorder(),
             ),
           ),
-      ],
+          if (state is LoginCreateState) const SizedBox(height: space),
+          if (state is LoginCreateState)
+            TextFormField(
+              controller: passwordConfirmController,
+              validator: _passwordConfirmValidator,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: translate("page.login.password.confirm"),
+                isDense: true,
+                border: const OutlineInputBorder(),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -162,14 +173,11 @@ class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
 
   /// Returns error message, or null
   String? _usernameValidator(String? input) {
-    if (input != null && input.isEmpty) {
-      return translate("page.login.empty.user");
-    }
     return null;
   }
 
   String? _passwordValidator(String? input) {
-    if (input != null) {
+    if (input != null && input.isNotEmpty) {
       if (_checkPassword(input) == false) {
         return translate("page.login.unsecure.password");
       }
@@ -178,8 +186,10 @@ class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
   }
 
   String? _passwordConfirmValidator(String? input) {
-    if (input != null && input != passwordController.text) {
-      return translate("page.login.no.password.match");
+    if (input != null && input.isNotEmpty) {
+      if (input != passwordController.text) {
+        return translate("page.login.no.password.match");
+      }
     }
     return null;
   }

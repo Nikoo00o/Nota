@@ -50,7 +50,7 @@ class AppTheme {
   final Color baseErrorColor;
 
   /// Depending on the [brightness] either a dark, or light theme will be created with the following material key colors.
-  /// The individual colours will be set after converting the colors into material colors from the following schemes:
+  /// The individual colors will be set after converting the colors into material colors from the following schemes:
   /// https://m3.material.io/styles/color/the-color-system/tokens#7961fcaf-1342-4fea-a613-b87ddd4434ff
   const AppTheme({
     required this.brightness,
@@ -70,13 +70,13 @@ class AppTheme {
   /// Returns the parsed [ColorScheme] from the base material colors.
   ColorScheme getColorScheme() {
     final bool isDark = brightness == Brightness.dark;
-    final MaterialColor primary = convertColour(basePrimaryColor);
+    final MaterialColor primary = convertColor(basePrimaryColor);
 
-    final MaterialColor secondary = convertColour(baseSecondaryColor);
-    final MaterialColor tertiary = convertColour(baseTertiaryColor);
-    final MaterialColor neutral = convertColour(baseNeutralColor);
-    final MaterialColor neutralVariant = convertColour(baseNeutralVariantColor ?? baseNeutralColor);
-    final MaterialColor error = convertColour(baseErrorColor);
+    final MaterialColor secondary = convertColor(baseSecondaryColor);
+    final MaterialColor tertiary = convertColor(baseTertiaryColor);
+    final MaterialColor neutral = convertColor(baseNeutralColor);
+    final MaterialColor neutralVariant = convertColor(baseNeutralVariantColor ?? baseNeutralColor);
+    final MaterialColor error = convertColor(baseErrorColor);
 
     if (isDark) {
       return ColorScheme(
@@ -143,7 +143,7 @@ class AppTheme {
   /// [900] is the material color tone [10].
   /// [50] is the material color tone [95].
   /// [10] is the material color tone [99].
-  static MaterialColor convertColour(Color color) {
+  static MaterialColor convertColor(Color color) {
     final Map<int, Color> colorMap = <int, Color>{
       0: _tintColor(color, 1.0),
       10: _tintColor(color, 0.98),
@@ -168,10 +168,10 @@ class AppTheme {
   static Color _shadeColor(Color color, double factor) =>
       Color.fromRGBO(_shade(color.red, factor), _shade(color.green, factor), _shade(color.blue, factor), 1);
 
-  /// makes colour brighter
+  /// makes color brighter
   static int _tint(int value, double factor) => _bounds(value + ((255 - value) * factor).round());
 
-  /// makes colour darker
+  /// makes color darker
   static int _shade(int value, double factor) => _bounds(value - (value * factor).round());
 
   /// between 0 and 255 .

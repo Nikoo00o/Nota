@@ -24,7 +24,7 @@ abstract class BlocPage<Bloc extends PageBloc<PageEvent, State>, State extends P
   const BlocPage({
     super.key,
     super.backGroundImage,
-    super.backgroundColour,
+    super.backgroundColor,
     super.pagePadding,
   });
 

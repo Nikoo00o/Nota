@@ -9,7 +9,7 @@ abstract class NoBlocPage extends PageBase {
   const NoBlocPage({
     super.key,
     super.backGroundImage,
-    super.backgroundColour,
+    super.backgroundColor,
     super.pagePadding,
   });
 
@@ -18,7 +18,7 @@ abstract class NoBlocPage extends PageBase {
     return buildPage(context, buildBody(context));
   }
 
-  /// builds the page [body] expanded with a padding around it and background image, or background colour.
+  /// builds the page [body] expanded with a padding around it and background image, or background color.
   ///
   /// Everything will be build inside of a [Scaffold] which can also use [buildAppBar] and
   /// [buildMenuDrawer].
@@ -27,7 +27,7 @@ abstract class NoBlocPage extends PageBase {
       onTapDown: (TapDownDetails details) => unFocus(context),
       child: Scaffold(
         body: Container(
-          decoration: BoxDecoration(image: getBackground(), color: backGroundImage == null ? backgroundColour : null),
+          decoration: BoxDecoration(image: getBackground(), color: backGroundImage == null ? backgroundColor : null),
           child: Padding(
             padding: pagePadding,
             child: Column(

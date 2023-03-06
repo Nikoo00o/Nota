@@ -1,5 +1,5 @@
 /// In rgb format
-class LogColour {
+class LogColor {
   /// Red: 0 to 255
   final int r;
 
@@ -9,7 +9,7 @@ class LogColour {
   /// Blue: 0 to 255
   final int b;
 
-  const LogColour(this.r, this.g, this.b);
+  const LogColor(this.r, this.g, this.b);
 
   @override
   String toString() {

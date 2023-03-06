@@ -15,7 +15,7 @@ abstract class PageBase extends WidgetBase {
   final AssetImage? backGroundImage;
 
   /// only shown if background image is not shown
-  final Color? backgroundColour;
+  final Color? backgroundColor;
 
   /// default padding is (20, 5, 20, 20)
   final EdgeInsetsGeometry pagePadding;
@@ -27,7 +27,7 @@ abstract class PageBase extends WidgetBase {
   const PageBase({
     super.key,
     this.backGroundImage,
-    this.backgroundColour,
+    this.backgroundColor,
     this.resetFocusOnTouch = true,
     EdgeInsetsGeometry? pagePadding,
   }) : pagePadding = pagePadding ?? defaultPagePadding;
