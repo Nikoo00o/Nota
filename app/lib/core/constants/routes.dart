@@ -4,7 +4,7 @@ import 'package:app/presentation/main/app/widgets/custom_navigator.dart';
 class Routes {
   static const String login = "login";
 
-  static const String notes = "notes";
+  static const String notes = "note_selection";
 
   static const String settings = "settings";
 }

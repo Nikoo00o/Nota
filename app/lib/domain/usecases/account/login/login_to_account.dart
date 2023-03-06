@@ -29,6 +29,8 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// Without the [LoginToAccountParamsLocal], offline editing would not be possible!
 ///
 /// This also restores old note info lists stored on the device if multiple accounts are used!
+///
+/// Input validation of the params is done by the bloc!
 class LoginToAccount extends UseCase<void, LoginToAccountParams> {
   final AccountRepository accountRepository;
   final AppConfig appConfig;
