@@ -8,6 +8,9 @@ class DialogServiceMock extends DialogService {
   void showErrorDialog(String dialogTextKey, {List<String>? dialogTextKeyParams}) {}
 
   @override
+  void showInfoDialog(String dialogTextKey, {List<String>? dialogTextKeyParams}) {}
+
+  @override
   void showLoadingDialog({String? dialogTextKey, List<String>? dialogTextKeyParams}) {}
 
   @override

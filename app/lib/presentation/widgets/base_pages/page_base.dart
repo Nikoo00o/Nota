@@ -33,8 +33,12 @@ abstract class PageBase extends WidgetBase {
       decoration: BoxDecoration(image: _getBackground(), color: backGroundImage == null ? backgroundColour : null),
       child: Padding(
         padding: pagePadding,
-        child: Expanded(
-          child: body,
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: body,
+            ),
+          ],
         ),
       ),
     );

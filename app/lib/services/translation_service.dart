@@ -44,7 +44,7 @@ class TranslationService {
       await appSettingsRepository.setLocale(newLocale);
       await init();
 
-      sl<AppBloc>().add(AppEventUpdateLocale(newLocale)); // update the app and force a rebuild. direct access, because the
+      sl<AppBloc>().add(UpdateLocale(newLocale)); // update the app and force a rebuild. direct access, because the
       // app bloc depends on the translation service to get the current locale (and that would lead to a loop).
       Logger.info("Updated the locale to $newLocale");
     } else {

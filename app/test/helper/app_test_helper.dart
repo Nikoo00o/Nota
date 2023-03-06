@@ -58,7 +58,7 @@ Future<ClientAccount?> clearAccountCache() async => sl<AccountRepository>().getA
 
 Future<ClientAccount> loginToTestAccount() async {
   await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-  await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+  await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
   final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
   return account;
 }

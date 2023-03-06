@@ -88,7 +88,7 @@ void _testLoginToAccount() {
 
     expect(() async {
       // this changes the cached account
-      await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "11111111"));
+      await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "11111111"));
     }, throwsA(predicate((Object e) => e is ServerException && e.message == ErrorCodes.ACCOUNT_WRONG_PASSWORD)));
     await Future<void>.delayed(const Duration(milliseconds: 100)); // wait for the async expect!
 
@@ -101,43 +101,43 @@ void _testLoginToAccount() {
   test("Logging in to an account remotely with a wrong username", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
     expect(() async {
-      await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test2", password: "password1"));
+      await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test2", password: "password1"));
     }, throwsA(predicate((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_UNKNOWN_ACCOUNT)));
   });
 
   test("Logging in to an account locally with a wrong password", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     await clearAccountCache();
     expect(() async {
-      await sl<LoginToAccount>().call(const LocalLoginParams(password: "password2"));
+      await sl<LoginToAccount>().call(const LoginToAccountParamsLocal(password: "password2"));
     }, throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.ACCOUNT_WRONG_PASSWORD)));
   });
 
   test("Logging in to an account locally when remote was needed", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
     expect(() async {
-      await sl<LoginToAccount>().call(const LocalLoginParams(password: "password2"));
+      await sl<LoginToAccount>().call(const LoginToAccountParamsLocal(password: "password2"));
     }, throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.CLIENT_NO_ACCOUNT)));
   });
 
   test("Logging in to an account remotely when local was needed", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     expect(() async {
-      await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+      await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     }, throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.CLIENT_NO_ACCOUNT)));
   });
 
   test("login remote with no stored account", () async {
     expect(() async {
-      await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+      await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     }, throwsA(predicate((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_UNKNOWN_ACCOUNT)));
   });
 
   test("login locally with no stored account", () async {
     expect(() async {
-      await sl<LoginToAccount>().call(const LocalLoginParams(password: "password1"));
+      await sl<LoginToAccount>().call(const LoginToAccountParamsLocal(password: "password1"));
     }, throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.CLIENT_NO_ACCOUNT)));
   });
 
@@ -164,7 +164,7 @@ Future<ClientAccount> _remoteLogin(String username, String password) async {
   RequiredLoginStatus loginStatus = await sl<GetRequiredLoginStatus>().call(const NoParams());
   expect(loginStatus, RequiredLoginStatus.REMOTE, reason: "before it should require a remote login");
 
-  await sl<LoginToAccount>().call(RemoteLoginParams(username: username, password: password));
+  await sl<LoginToAccount>().call(LoginToAccountParamsRemote(username: username, password: password));
   final ClientAccount cachedAccount = await sl<AccountRepository>().getAccountAndThrowIfNull();
   loginStatus = await sl<GetRequiredLoginStatus>().call(const NoParams());
 
@@ -180,7 +180,7 @@ Future<ClientAccount> _localLogin(String password) async {
   expect(storedAccount.isLoggedIn, false, reason: "should no longer be logged in");
   expect(loginStatus, RequiredLoginStatus.LOCAL, reason: "now it should require a local login");
 
-  await sl<LoginToAccount>().call(LocalLoginParams(password: password));
+  await sl<LoginToAccount>().call(LoginToAccountParamsLocal(password: password));
   loginStatus = await sl<GetRequiredLoginStatus>().call(const NoParams());
 
   // the changes should also be applied to the account reference without having to load it again
@@ -193,7 +193,7 @@ Future<ClientAccount> _localLogin(String password) async {
 void _testAutoLogin() {
   test("testing auto login", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
 
     bool hasAutoLogin = await sl<GetAutoLogin>().call(const NoParams());
     expect(hasAutoLogin, false, reason: "default should be no auto login");
@@ -216,13 +216,13 @@ void _testAutoLogin() {
 void _testLogoutOfAccount() {
   test("Logout of an account", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
 
     final List<NoteInfo> notes = <NoteInfo>[NoteInfoModel(id: -1, encFileName: "test", lastEdited: DateTime.now())];
     final ClientAccount cachedAccount = await sl<AccountRepository>().getAccountAndThrowIfNull();
     cachedAccount.noteInfoList = notes;
 
-    await sl<LogoutOfAccount>().call(const NoParams());
+    await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
 
     final ClientAccount? cachedAccountAfterwards = await sl<AccountRepository>().getAccount();
     final ClientAccount? storedAccount = await sl<AccountRepository>().getAccount(forceLoad: true);
@@ -238,58 +238,58 @@ void _testLogoutOfAccount() {
 
   test("Login to the same account after logout should work and have the same note info list", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
 
     final List<NoteInfo> notes = <NoteInfo>[NoteInfoModel(id: -1, encFileName: "test", lastEdited: DateTime.now())];
     final ClientAccount account = await sl<AccountRepository>().getAccountAndThrowIfNull();
     account.noteInfoList = notes;
 
-    await sl<LogoutOfAccount>().call(const NoParams());
+    await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
     await _remoteLogin("test1", "password1");
     expect(jsonEncode(account.noteInfoList), jsonEncode(notes), reason: "should still have the same note info list");
   });
 
   test("logout with no account should not work", () async {
     expect(() async {
-      await sl<LogoutOfAccount>().call(const NoParams());
+      await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
     }, throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.CLIENT_NO_ACCOUNT)));
   });
 
   test("Login to a different account after logout should restore the note info list", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
 
     final List<NoteInfo> notes = <NoteInfo>[NoteInfoModel(id: -1, encFileName: "test", lastEdited: DateTime.now())];
     final ClientAccount account = await sl<AccountRepository>().getAccountAndThrowIfNull();
     account.noteInfoList = notes;
-    await sl<LogoutOfAccount>().call(const NoParams());
+    await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
 
     //should store the old notes for the account test1
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test2", password: "password2"));
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test2", password: "password2"));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test2", password: "password2"));
     expect(account.noteInfoList.isEmpty, true, reason: "second account should have no notes");
 
-    await sl<LogoutOfAccount>().call(const NoParams());
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     expect(jsonEncode(account.noteInfoList), jsonEncode(notes), reason: "test1 should have the notes");
   });
 
   test("Login to a different account after logout should restore the note info list without a create in between", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test2", password: "password2"));
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
 
     final List<NoteInfo> notes = <NoteInfo>[NoteInfoModel(id: -1, encFileName: "test", lastEdited: DateTime.now())];
     final ClientAccount account = await sl<AccountRepository>().getAccountAndThrowIfNull();
     account.noteInfoList = notes;
-    await sl<LogoutOfAccount>().call(const NoParams());
+    await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
 
     //should store the old notes for the account test1
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test2", password: "password2"));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test2", password: "password2"));
     expect(account.noteInfoList.isEmpty, true, reason: "second account should have no notes");
 
-    await sl<LogoutOfAccount>().call(const NoParams());
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     expect(jsonEncode(account.noteInfoList), jsonEncode(notes), reason: "test1 should have the notes");
   });
 }
@@ -297,7 +297,7 @@ void _testLogoutOfAccount() {
 void _testFetchCurrentSessionToken() {
   test("Getting correct session tokens twice", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     final SessionToken? first = await fetchCurrentSessionToken();
     final SessionToken? second = await fetchCurrentSessionToken();
     expect(first?.isStillValid(), true, reason: "should be valid");
@@ -306,7 +306,7 @@ void _testFetchCurrentSessionToken() {
 
   test("Getting the same session token from server after needing to login", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     final SessionToken? first = await fetchCurrentSessionToken();
     final ClientAccount account = await sl<AccountRepository>().getAccountAndThrowIfNull();
     account.sessionToken = null;
@@ -352,7 +352,7 @@ void _testChangeAccountPassword() {
 
   test("Trying to change password with an invalid username and no session token", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     final ClientAccount account = await sl<AccountRepository>().getAccountAndThrowIfNull();
     account.userName = "invalid";
     account.sessionToken = null;
@@ -363,7 +363,7 @@ void _testChangeAccountPassword() {
 
   test("Trying to change password with an invalid password and no session token should throw error", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     final ClientAccount account = await sl<AccountRepository>().getAccountAndThrowIfNull();
     account.passwordHash = "invalid";
     account.sessionToken = null;
@@ -374,11 +374,11 @@ void _testChangeAccountPassword() {
 
   test("Change password successfully", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     final ClientAccount accountBefore = await sl<AccountRepository>().getAccountAndThrowIfNull();
     await clearAccountCache(); //make sure that the account reference is not the same, because the usecases below will
     // change the account session token, etc!
-    await sl<LoginToAccount>().call(const LocalLoginParams(password: "password1")); // refresh the decrypted data key in
+    await sl<LoginToAccount>().call(const LoginToAccountParamsLocal(password: "password1")); // refresh the decrypted data key in
     // the cache
 
     await sl<ChangeAccountPassword>().call(const ChangePasswordParams(newPassword: "newPassword3"));
@@ -395,7 +395,7 @@ void _testChangeAccountPassword() {
 
   test("Change password with no session token should also work", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     final ClientAccount account = await sl<AccountRepository>().getAccountAndThrowIfNull();
     account.sessionToken = null;
     await sl<ChangeAccountPassword>().call(const ChangePasswordParams(newPassword: "newPassword3"));
@@ -404,7 +404,7 @@ void _testChangeAccountPassword() {
 
   test("Trying to change password when some other device already changed it should not work", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "invalid"));
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "invalid"));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "invalid"));
     final ClientAccount account = await sl<AccountRepository>().getAccountAndThrowIfNull();
     account.passwordHash = "password1";
     account.sessionToken =
@@ -418,7 +418,7 @@ void _testChangeAccountPassword() {
 void _testGetLoggedInAccount() {
   test("Get logged in account should work with a logged in account and the session token should not matter", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
     expect(account.isLoggedIn, true, reason: "account should be logged in");
     expect(account.userName, "test1", reason: "and contain the correct data");
@@ -443,7 +443,7 @@ void _testGetLoggedInAccount() {
 
   test("Get logged in account should apply changes and not work without a data key", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-    await sl<LoginToAccount>().call(const RemoteLoginParams(username: "test1", password: "password1"));
+    await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
     account.clearDecryptedDataKey();
     expect(() async {

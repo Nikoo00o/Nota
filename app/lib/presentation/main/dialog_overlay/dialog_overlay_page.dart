@@ -78,7 +78,7 @@ class DialogOverlayPage extends StatelessWidget {
           ),
           child: const Text("Cancel"),
           onPressed: () {
-            currentBloc(context).add(HideDialog());
+            currentBloc(context).add(const HideDialog());
           },
         ),
         TextButton(
@@ -87,7 +87,7 @@ class DialogOverlayPage extends StatelessWidget {
           ),
           child: const Text("Apply"),
           onPressed: () {
-            currentBloc(context).add(HideDialog());
+            currentBloc(context).add(const HideDialog());
           },
         ),
       ],
@@ -108,7 +108,7 @@ class DialogOverlayPage extends StatelessWidget {
           ),
           child: const Text("Cancel"),
           onPressed: () {
-            currentBloc(context).add(HideDialog());
+            currentBloc(context).add(const HideDialog());
           },
         ),
         TextButton(
@@ -117,7 +117,7 @@ class DialogOverlayPage extends StatelessWidget {
           ),
           child: const Text("Apply"),
           onPressed: () {
-            currentBloc(context).add(HideDialog());
+            currentBloc(context).add(const HideDialog());
           },
         ),
       ],
@@ -138,7 +138,7 @@ class DialogOverlayPage extends StatelessWidget {
           ),
           child: const Text("Cancel"),
           onPressed: () {
-            currentBloc(context).add(HideDialog());
+            currentBloc(context).add(const HideDialog());
           },
         ),
         TextButton(
@@ -147,7 +147,7 @@ class DialogOverlayPage extends StatelessWidget {
           ),
           child: const Text("Apply"),
           onPressed: () {
-            currentBloc(context).add(HideDialog());
+            currentBloc(context).add(const HideDialog());
           },
         ),
       ],

@@ -17,10 +17,10 @@ class AppBloc extends Bloc<AppEvent, AppState> {
   }
 
   void registerEventHandlers() {
-    on<AppEventUpdateLocale>(_handleUpdateLocale);
+    on<UpdateLocale>(_handleUpdateLocale);
   }
 
-  void _handleUpdateLocale(AppEventUpdateLocale event, Emitter<AppState> emit) {
+  void _handleUpdateLocale(UpdateLocale event, Emitter<AppState> emit) {
     locale = event.locale;
     emit(_buildState());
   }

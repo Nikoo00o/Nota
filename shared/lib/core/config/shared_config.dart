@@ -46,4 +46,7 @@ class SharedConfig {
   ///
   /// So a token gets refreshed after the time: [sessionTokenMaxLifetime] - [sessionTokenRefreshAfterRemainingTime]
   Duration get sessionTokenRefreshAfterRemainingTime => const Duration(minutes: 10);
+
+  /// The timeout for establishing the client-server connection.
+  Duration get connectionTimeout => const Duration(seconds: 30);
 }

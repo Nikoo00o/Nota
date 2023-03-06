@@ -38,6 +38,7 @@ import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dar
 import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
 import 'package:app/presentation/main/app/app_bloc.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
+import 'package:app/presentation/pages/login/login_bloc.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:app/services/session_service.dart';
@@ -100,7 +101,8 @@ Future<void> initializeGetIt() async {
         appConfig: sl(),
         getRequiredLoginStatus: sl(),
       ));
-  sl.registerLazySingleton<LogoutOfAccount>(() => LogoutOfAccount(accountRepository: sl(), appConfig: sl()));
+  sl.registerLazySingleton<LogoutOfAccount>(
+      () => LogoutOfAccount(accountRepository: sl(), navigationService: sl(), appConfig: sl()));
   sl.registerLazySingleton<ChangeAccountPassword>(() => ChangeAccountPassword(
         accountRepository: sl(),
         appConfig: sl(),
@@ -190,7 +192,14 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<DialogOverlayBloc>(() => DialogOverlayBloc());
 
   // the blocs below are factory functions, because they should be newly created each time the user navigates to the page!
-
+  sl.registerFactory<LoginPageBloc>(() => LoginPageBloc(
+        navigationService: sl(),
+        dialogService: sl(),
+        getRequiredLoginStatus: sl(),
+        createAccount: sl(),
+        loginToAccount: sl(),
+        logoutOfAccount: sl(),
+      ));
 }
 
 Future<SessionToken?> fetchCurrentSessionToken() => sl<SharedFetchCurrentSessionToken>().call(const NoParams());
