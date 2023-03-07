@@ -52,7 +52,7 @@ class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
 
   @override
   PreferredSizeWidget? buildAppBar(BuildContext context, LoginState state) {
-    return AppBar(centerTitle: false, title: Text(translate(getPageTitle(state))));
+    return AppBar(centerTitle: false, title: Text(translate(_getPageTitle(state))));
   }
 
   Widget _buildDescription(BuildContext context, LoginState state) {
@@ -60,7 +60,7 @@ class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
       children: <Widget>[
         const NotaIcon(),
         const SizedBox(height: 20),
-        Text("Bitte loggen Sie sich in ihr Benutzerkonto ein"),
+        Text(translate(_getPageDescription(state))),
       ],
     );
   }
@@ -116,7 +116,7 @@ class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
     );
   }
 
-  String getPageTitle(LoginState state) {
+  String _getPageTitle(LoginState state) {
     if (state is LoginCreateState) {
       return "page.login.title.create";
     }
@@ -125,6 +125,19 @@ class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
     }
     if (state is LoginLocalState) {
       return "page.login.title.local.login";
+    }
+    throw UnimplementedError();
+  }
+
+  String _getPageDescription(LoginState state) {
+    if (state is LoginCreateState) {
+      return "page.login.description.create";
+    }
+    if (state is LoginRemoteState) {
+      return "page.login.description.remote.login";
+    }
+    if (state is LoginLocalState) {
+      return "page.login.description.local.login";
     }
     throw UnimplementedError();
   }

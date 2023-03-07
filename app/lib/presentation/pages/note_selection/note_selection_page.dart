@@ -44,7 +44,7 @@ class NoteSelectionPage extends SimpleBlocPage<NoteSelectionBloc, NoteSelectionS
   @override
   PreferredSizeWidget? buildAppBar(BuildContext context, NoteSelectionState state) {
     return AppBar(
-      title: Text(translate("todo")),
+      title: Text(translate("page.note_selection.title")),
       centerTitle: false,
     );
   }
@@ -54,7 +54,7 @@ class NoteSelectionPage extends SimpleBlocPage<NoteSelectionBloc, NoteSelectionS
     // todo: continue here and make own class
     return Container(
       color: theme(context).scaffoldBackgroundColor,
-      width: MediaQuery.of(context).size.width / 1.8,
+      width: MediaQuery.of(context).size.width * 3 / 4,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: const <Widget>[

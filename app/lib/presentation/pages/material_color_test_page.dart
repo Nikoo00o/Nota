@@ -139,7 +139,7 @@ class MaterialColorTestPage extends NoBlocPage {
   Widget? buildMenuDrawer(BuildContext context) {
     return Container(
       color: theme(context).scaffoldBackgroundColor,
-      width: MediaQuery.of(context).size.width / 2,
+      width: MediaQuery.of(context).size.width * 3 / 4,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: const <Widget>[
