@@ -22,10 +22,14 @@ dependencies:
   path_provider: ^2.0.12 # application directory path
   hive: ^2.2.3 # nosql database
   hive_flutter: ^1.1.0 # flutter extension for hive
-  flutter_secure_storage: ^8.0.0 # secure storage for keys in keychain, or keystore
+  flutter_secure_storage: ^8.0.0 # secure storage for keys in keychain, or keystore. NEEDS LINUX SPECIFIC SETUP!
   cryptography: 2.1.1 # basic cryptographic functions (like aes encryption)
   cryptography_flutter: ^2.0.2 # better flutter performance for base package
-  dargon2_flutter: ^3.2.0 # argon2 implementation
+  dargon2_flutter: ^3.2.0 # argon2 implementation. MIGHT NEED IOS specific setup!
+  flutter_svg: ^2.0.2 # svg images
+  flutter_native_splash: ^2.2.19 # splash screen. NEEDS IOS SPECIFIC SETUP!
+  flutter_launcher_icons: ^0.12.0 # app launcher icon
+  flutter_keyboard_visibility: ^5.4.0 # keyboard visibility callback
   localization: 2.1.0 # localization
   flutter_localizations:
     sdk: flutter
@@ -46,3 +50,41 @@ flutter:
 
   assets: # the asset folder for images and translation files
     - assets/
+
+flutter_icons: # create new launcher icons with flutter pub run flutter_launcher_icons
+  image_path: "assets/app_icon_light.png" # could also use the dark theme icon
+  android: true
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  ios: true
+  remove_alpha_ios: true # alpha is not allowed on apple app store
+  web:
+    generate: true
+    image_path: "assets/app_icon_light.png" # same as above
+  windows:
+    generate: true
+    image_path: "assets/app_icon_light.png" # same as above
+    icon_size: 48 # min:48, max:256, default: 48
+  macos:
+    generate: true
+    image_path: "assets/app_icon_light.png" # same as above
+
+flutter_native_splash: # To generate the splash screen, run: "flutter pub run flutter_native_splash:create"
+  # and then you also have to modify the ios project!
+  # currently not showing the icon on android 12
+  background_image: "assets/splash_screen_light.png"
+  background_image_dark: "assets/splash_screen_dark.png"
+
+  android_12: # IMPORTANT: WILL NOT BE SHOWN IN DEBUG MODE FROM ANDROID STUDIO
+  # The image parameter sets the splash screen icon image.  If this parameter is not specified,
+  # the app's launcher icon will be used instead.
+  # Please note that the splash screen will be clipped to a circle on the center of the screen.
+  # App icon with an icon background: This should be 960×960 pixels, and fit within a circle
+  # 640 pixels in diameter.
+  # App icon without an icon background: This should be 1152×1152 pixels, and fit within a circle
+  # 768 pixels in diameter.
+    image: "assets/app_icon_light.png"
+    image_dark: "assets/app_icon_dark.png"
+    color: "#d8d8f4"
+    color_dark: "#232477"
+    #branding: "assets/branding.png"
+    #branding_dark: "assets/branding.png"

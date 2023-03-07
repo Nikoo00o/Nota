@@ -32,11 +32,25 @@ abstract class PageBase extends WidgetBase {
     EdgeInsetsGeometry? pagePadding,
   }) : pagePadding = pagePadding ?? defaultPagePadding;
 
-  DecorationImage? getBackground() {
+  /// Returns [backGroundImage] if not its not null
+  DecorationImage? getBackgroundImage() {
     if (backGroundImage != null) {
       return DecorationImage(image: backGroundImage!, fit: BoxFit.cover);
     }
     return null;
+  }
+
+  /// Returns the [backgroundColor] if the [backGroundImage] is null, otherwise this returns null.
+  ///
+  /// If the [backgroundColor] is null, then the themes background color will be used
+  Color? getBackgroundColor(BuildContext context) {
+    if (backGroundImage != null) {
+      return null;
+    }
+    if (backgroundColor != null) {
+      return backgroundColor!;
+    }
+    return theme(context).colorScheme.background;
   }
 
   /// pop current page

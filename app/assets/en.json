@@ -1,5 +1,23 @@
 {
   "empty": "",
   "empty.param.1": "{0}",
-  "error.unknown": "Unknown Error"
+  "error.unknown": "Unknown Error",
+  "page.login.title.create": "Account Creation",
+  "page.login.title.remote.login": "Remote Login",
+  "page.login.title.local.login": "Local Login",
+  "page.login.description.create": "Create your new account credentials",
+  "page.login.description.remote.login": "Login with your user credentials",
+  "page.login.description.local.login": "Login with your password",
+  "page.login.name": "Username",
+  "page.login.password": "Password",
+  "page.login.password.confirm": "Confirm Password",
+  "page.login.create": "Create",
+  "page.login.login": "Login",
+  "page.login.change.account": "Change Account",
+  "page.login.instead.login": "Login to Account",
+  "page.login.instead.create": "Create Account",
+  "page.login.unsecure.password": "Password to unsecure",
+  "page.login.no.password.match": "Passwords do not match",
+  "page.login.empty.params": "All fields must have a value!",
+  "page.login.account.created": "Created the new account successfully"
 }

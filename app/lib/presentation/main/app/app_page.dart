@@ -14,6 +14,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'widgets/custom_scroll_behavior.dart';
+
 /// The top level widget that builds the app itself with the widget subtree
 class App extends StatelessWidget {
   final AppConfig appConfig;
@@ -40,8 +42,9 @@ class App extends StatelessWidget {
             title: appConfig.appTitle,
             theme: appConfig.theme,
             debugShowCheckedModeBanner: false,
-            supportedLocales: Locales.supportedLocales,
+            scrollBehavior: const CustomScrollBehavior(),
             locale: state.locale,
+            supportedLocales: Locales.supportedLocales,
             localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,

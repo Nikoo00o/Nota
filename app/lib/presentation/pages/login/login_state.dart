@@ -1,18 +1,23 @@
 import 'package:app/presentation/widgets/base_pages/page_state.dart';
+import 'package:flutter/material.dart';
 
 abstract class LoginState extends PageState {
-  const LoginState() : super(const <String, Object?>{});
+  final GlobalKey firstButtonKey;
+
+  LoginState({required this.firstButtonKey})
+      : super(<String, Object?>{
+          "firstButtonKey": firstButtonKey,
+        });
 }
 
 class LoginRemoteState extends LoginState {
-  const LoginRemoteState();
+  LoginRemoteState({required super.firstButtonKey});
 }
 
 class LoginLocalState extends LoginState {
-  const LoginLocalState();
+  LoginLocalState({required super.firstButtonKey});
 }
 
 class LoginCreateState extends LoginState {
-  const LoginCreateState();
+  LoginCreateState({required super.firstButtonKey});
 }
-

@@ -10,4 +10,7 @@ class Routes {
   static const String notes = "note_selection";
 
   static const String settings = "settings";
+
+  /// Test page for material colors
+  static const String material_color_test = "material_color_test";
 }

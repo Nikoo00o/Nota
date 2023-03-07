@@ -1,5 +1,23 @@
 {
   "empty": "",
   "empty.param.1": "{0}",
-  "error.unknown": "Unbekannter Fehler"
+  "error.unknown": "Unbekannter Fehler",
+  "page.login.title.create": "Account Erstellung",
+  "page.login.title.remote.login": "Server Login",
+  "page.login.title.local.login": "Lokaler Login",
+  "page.login.description.create": "Erstellen Sie ihre neuen Benutzerdaten",
+  "page.login.description.remote.login": "Loggen Sie sich mit ihren Benutzerdaten ein",
+  "page.login.description.local.login": "Loggen Sie sich mit ihrem Passwort ein",
+  "page.login.name": "Benutzername",
+  "page.login.password": "Passwort",
+  "page.login.password.confirm": "Passwort bestätigen",
+  "page.login.create": "Erstellen",
+  "page.login.login": "Einloggen",
+  "page.login.change.account": "Account wechseln",
+  "page.login.instead.login": "In Account einloggen",
+  "page.login.instead.create": "Neuen Account erstellen",
+  "page.login.unsecure.password": "Passwort ist zu unsicher",
+  "page.login.no.password.match": "Passwörter stimmen nicht überein",
+  "page.login.empty.params": "Alle Felder müssen ausgefüllt sein!",
+  "page.login.account.created": "Neuen Account erfolgreich erstellt"
 }

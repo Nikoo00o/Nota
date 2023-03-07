@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/enums/required_login_status.dart';
 import 'package:app/domain/usecases/account/change/logout_of_account.dart';
@@ -11,6 +13,7 @@ import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
@@ -29,6 +32,9 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
   late final TextEditingController usernameController;
   late final TextEditingController passwordController;
   late final TextEditingController passwordConfirmController;
+  late final ScrollController scrollController;
+
+  StreamSubscription<bool>? keyboardSubscription;
 
   LoginBloc({
     required this.getRequiredLoginStatus,
@@ -37,7 +43,7 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
     required this.logoutOfAccount,
     required this.dialogService,
     required this.navigationService,
-  }) : super(initialState: const LoginLocalState());
+  }) : super(initialState: LoginLocalState(firstButtonKey: GlobalKey()));
 
   @override
   void registerEventHandlers() {
@@ -55,6 +61,7 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
       _navigateToNextPage();
     }
     _clearTextInputFields();
+    _setupAutoScroll();
     emit(_buildState());
   }
 
@@ -93,12 +100,13 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
 
   LoginState _buildState() {
     if (_createNewAccount) {
-      return const LoginCreateState();
+      // the global key will never change, because it is only created once and then always copied
+      return LoginCreateState(firstButtonKey: state.firstButtonKey);
     }
     if (_loginStatus == RequiredLoginStatus.REMOTE) {
-      return const LoginRemoteState();
+      return LoginRemoteState(firstButtonKey: state.firstButtonKey);
     }
-    return const LoginLocalState();
+    return LoginLocalState(firstButtonKey: state.firstButtonKey);
   }
 
   void _navigateToNextPage() {
@@ -118,5 +126,34 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
     usernameController.clear();
     passwordController.clear();
     passwordConfirmController.clear();
+  }
+
+  @mustCallSuper
+  @override
+  Future<void> close() async {
+    // override close to cleanup subscription
+    await keyboardSubscription?.cancel();
+    keyboardSubscription = null;
+    return super.close();
+  }
+
+  /// Creates the callback to automatically scroll to the first button when the keyboard opens
+  void _setupAutoScroll() {
+    if (keyboardSubscription == null) {
+      final KeyboardVisibilityController keyboardVisibilityController = KeyboardVisibilityController();
+      keyboardSubscription = keyboardVisibilityController.onChange.listen((bool visible) {
+        if (visible) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Scrollable.ensureVisible(
+              state.firstButtonKey.currentContext!,
+              duration: const Duration(milliseconds: 250), // duration for scrolling time
+              curve: Curves.easeInOutCubic,
+              alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+            );
+            //scrollController.jumpTo(value)
+          });
+        }
+      });
+    }
   }
 }
