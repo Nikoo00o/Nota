@@ -1,6 +1,10 @@
+import 'package:app/core/config/app_config.dart';
 import 'package:app/core/config/app_theme.dart';
+import 'package:app/core/constants/assets.dart';
+import 'package:app/core/get_it.dart';
 import 'package:app/presentation/widgets/base_pages/no_bloc_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class MaterialColorTestPage extends NoBlocPage {
   const MaterialColorTestPage() : super(pagePadding: const EdgeInsets.fromLTRB(0, 0, 0, 0));
@@ -124,6 +128,60 @@ class MaterialColorTestPage extends NoBlocPage {
                 );
               },
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// This should be returned directly from the "build" method, because it only shows the splash screen as full screen!
+  Widget _buildSplashScreen(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: <Widget>[
+          SizedBox.expand(
+            child: Container(
+              color: theme(context).colorScheme.primaryContainer,
+              child: SvgPicture.asset(
+                Assets.note_bloc,
+                colorFilter: ColorFilter.mode(theme(context).colorScheme.onPrimaryContainer, BlendMode.srcIn),
+              ),
+            ),
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              const SizedBox(height: 8),
+              Opacity(
+                opacity: 0.85,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(100),
+                        color: theme(context).colorScheme.background,
+                      ),
+                      child: SvgPicture.asset(
+                        Assets.nota_letter_logo,
+                        height: 220,
+                        colorFilter: ColorFilter.mode(theme(context).colorScheme.primary, BlendMode.srcIn),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 15),
+              Opacity(
+                opacity: 1,
+                child: Text(
+                  sl<AppConfig>().appTitle,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: theme(context).colorScheme.primary, fontSize: 80),
+                ),
+              ),
+            ],
           ),
         ],
       ),

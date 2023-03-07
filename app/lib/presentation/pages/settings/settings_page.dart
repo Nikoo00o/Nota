@@ -31,12 +31,8 @@ class SettingsPage extends SimpleBlocPage<SettingsBloc, SettingsState> {
   @override
   PreferredSizeWidget? buildAppBar(BuildContext context, SettingsState state) {
     return AppBar(
-      title: Text(
-        translate("page.settings.title"),
-        style: TextStyle(color: theme(context).colorScheme.onPrimaryContainer),
-      ),
+      title: Text(translate("page.settings.title")),
       centerTitle: false,
-      backgroundColor: theme(context).colorScheme.primaryContainer,
     );
   }
 

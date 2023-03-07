@@ -4,7 +4,7 @@ import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_event.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_state.dart';
 import 'package:app/presentation/widgets/base_pages/simple_bloc_page.dart';
-import 'package:app/presentation/widgets/nota_icon.dart';
+import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:flutter/material.dart';
 
@@ -35,8 +35,58 @@ class NoteSelectionPage extends SimpleBlocPage<NoteSelectionBloc, NoteSelectionS
           child: Text("to color test"),
         ),
         FilledButton(
-          onPressed: () {},
+          onPressed: () {
+            sl<DialogService>().showErrorDialog("Error");
+          },
           child: Text("test error dialog"),
+        ),
+        FilledButton(
+          onPressed: () {
+            sl<DialogService>().showInfoDialog("Info");
+          },
+          child: Text("test info dialog"),
+        ),
+        FilledButton(
+          onPressed: () {
+            sl<DialogService>().showLoadingDialog(dialogTextKey: "Loading");
+          },
+          child: Text("test loading dialog"),
+        ),
+        FilledButton(
+          onPressed: () {
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text("TEST DIALOG ERROR"),
+                    content: const Text('A dialog is a type of modal window that\n'
+                        'appears in front of app content to\n'
+                        'provide critical information, or prompt\n'
+                        'for a decision to be made.'),
+                    actions: <Widget>[
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          textStyle: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        child: const Text("Cancel"),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          textStyle: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        child: const Text("Apply"),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                });
+          },
+          child: Text("default"),
         ),
       ],
     );
