@@ -12,7 +12,7 @@ class AppConfig extends SharedConfig {
   String get appTitle => "Nota";
 
   /// The theme of the app including the colors, etc
-  ThemeData get theme => AppTheme.newTheme(darkTheme: false);
+  ThemeData get theme => AppTheme.newTheme(darkTheme: true);
 
   /// If the app was in the background for this amount of time, then a new local login with the password will be needed if
   /// the accounts auto login setting is set to false!

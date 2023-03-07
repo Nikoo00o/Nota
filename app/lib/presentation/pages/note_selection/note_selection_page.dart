@@ -4,6 +4,7 @@ import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_event.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_state.dart';
 import 'package:app/presentation/widgets/base_pages/simple_bloc_page.dart';
+import 'package:app/presentation/widgets/nota_icon.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:flutter/material.dart';
 

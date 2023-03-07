@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:ui';
 import 'package:app/core/constants/locales.dart';
 import 'package:app/core/get_it.dart';
@@ -23,13 +24,16 @@ class TranslationService {
 
   TranslationService({required this.appSettingsRepository});
 
+  /// The path to the "assets/" dir
+  static String get _basePath => "assets${Platform.pathSeparator}";
+
   /// must be called at the beginning of the app to load the translated values.
   ///
   /// This is also called by [setLocale].
   Future<void> init() async {
     final Locale locale = await appSettingsRepository.getCurrentLocale();
     _locale = locale;
-    final String jsonString = await rootBundle.loadString("assets/${locale.languageCode}.json");
+    final String jsonString = await rootBundle.loadString("$_basePath${locale.languageCode}.json");
 
     final Map<String, dynamic> jsonMap = json.decode(jsonString) as Map<String, dynamic>;
     _keys = jsonMap.map((String key, dynamic value) {
