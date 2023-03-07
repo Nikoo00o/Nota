@@ -3,12 +3,16 @@ import 'package:app/presentation/pages/login/login_bloc.dart';
 import 'package:app/presentation/pages/login/login_event.dart';
 import 'package:app/presentation/pages/login/login_state.dart';
 import 'package:app/presentation/widgets/base_pages/simple_bloc_page.dart';
+import 'package:app/presentation/widgets/custom_outlined_button.dart';
+import 'package:app/presentation/widgets/custom_text_form_field.dart';
+import 'package:app/presentation/widgets/nota_icon.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController passwordConfirmController = TextEditingController();
+  final ScrollController scrollController = ScrollController();
 
   LoginPage() : super();
 
@@ -18,23 +22,29 @@ class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
     bloc.usernameController = usernameController;
     bloc.passwordController = passwordController;
     bloc.passwordConfirmController = passwordConfirmController;
+    bloc.scrollController = scrollController;
     return bloc..add(const LoginEventInitialise());
   }
 
   @override
   Widget buildBody(BuildContext context, LoginState state) {
-    // todo: add menu inside of the scaffold and also add app bar ! maybe add a icon here as well
-    return Scrollbar(
-      scrollbarOrientation: ScrollbarOrientation.right,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            _buildInput(context, state),
-            const SizedBox(height: 15),
-            _buildButtons(context, state),
-          ],
+    return Center(
+      child: Scrollbar(
+        scrollbarOrientation: ScrollbarOrientation.right,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          padding: const EdgeInsets.fromLTRB(40, 10, 40, 0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              _buildDescription(context, state),
+              const SizedBox(height: 25),
+              _buildInput(context, state),
+              const SizedBox(height: 25),
+              _buildButtons(context, state),
+              const SizedBox(height: 25),
+            ],
+          ),
         ),
       ),
     );
@@ -45,6 +55,16 @@ class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
     return AppBar(centerTitle: false, title: Text(translate(getPageTitle(state))));
   }
 
+  Widget _buildDescription(BuildContext context, LoginState state) {
+    return Column(
+      children: <Widget>[
+        const NotaIcon(),
+        const SizedBox(height: 20),
+        Text("Bitte loggen Sie sich in ihr Benutzerkonto ein"),
+      ],
+    );
+  }
+
   Widget _buildInput(BuildContext context, LoginState state) {
     const double space = 15; //height between fields
     return Form(
@@ -53,37 +73,23 @@ class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           if (state is LoginRemoteState || state is LoginCreateState)
-            TextFormField(
+            CustomTextFormField(
               controller: usernameController,
               validator: _usernameValidator,
-              decoration: InputDecoration(
-                labelText: translate("page.login.name"),
-                isDense: true,
-                border: const OutlineInputBorder(),
-              ),
+              textKey: "page.login.name",
             ),
           if (state is LoginRemoteState || state is LoginCreateState) const SizedBox(height: space),
-          TextFormField(
+          CustomTextFormField(
             controller: passwordController,
             validator: _passwordValidator,
-            obscureText: true,
-            decoration: InputDecoration(
-              labelText: translate("page.login.password"),
-              isDense: true,
-              border: const OutlineInputBorder(),
-            ),
+            textKey: "page.login.password",
           ),
           if (state is LoginCreateState) const SizedBox(height: space),
           if (state is LoginCreateState)
-            TextFormField(
+            CustomTextFormField(
               controller: passwordConfirmController,
               validator: _passwordConfirmValidator,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: translate("page.login.password.confirm"),
-                isDense: true,
-                border: const OutlineInputBorder(),
-              ),
+              textKey: "page.login.password.confirm",
             ),
         ],
       ),
@@ -98,16 +104,13 @@ class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
       children: <Widget>[
         FilledButton(
           onPressed: () => _firstButtonPressed(context, state),
+          key: state.firstButtonKey,
           child: Text(translate(firstButtonKey)),
         ),
-        const SizedBox(height: 20),
-        FilledButton(
+        const SizedBox(height: 10),
+        CustomOutlinedButton(
           onPressed: () => _secondButtonPressed(context, state),
-          style: ButtonStyle(
-            backgroundColor: MaterialStateProperty.all(theme(context).colorScheme.secondary),
-            foregroundColor: MaterialStateProperty.all(theme(context).colorScheme.onSecondary),
-          ),
-          child: Text(translate(_getSecondButtonKey(state))),
+          textKey: _getSecondButtonKey(state),
         ),
       ],
     );

@@ -29,6 +29,7 @@ dependencies:
   flutter_svg: ^2.0.2 # svg images
   flutter_native_splash: ^2.2.19 # splash screen
   flutter_launcher_icons: ^0.12.0 # app launcher icon
+  flutter_keyboard_visibility: ^5.4.0 # keyboard visibility callback
   localization: 2.1.0 # localization
   flutter_localizations:
     sdk: flutter

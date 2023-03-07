@@ -14,9 +14,9 @@ class AppTheme {
     // complementary double split colors
     return AppTheme(
       brightness: darkTheme ? Brightness.dark : Brightness.light,
-      basePrimaryColor: const Color(0xff0004EB),
-      baseSecondaryColor: const Color(0xff0C85EB),
-      baseTertiaryColor: const Color(0xff810CEB),
+      basePrimaryColor: const Color(0xff4100FA),
+      baseSecondaryColor: const Color(0xff6B86FB),
+      baseTertiaryColor: const Color(0xffCC52FA),
       baseNeutralColor: const Color(0xff878787),
       baseErrorColor: Colors.red[800]!,
     ).getTheme();

@@ -9,10 +9,10 @@ class AppConfig extends SharedConfig {
 
   Locale get defaultLocale => Locales.en;
 
-  String get appTitle => "nota";
+  String get appTitle => "Nota";
 
   /// The theme of the app including the colors, etc
-  ThemeData get theme => AppTheme.newTheme(darkTheme: true);
+  ThemeData get theme => AppTheme.newTheme(darkTheme: false);
 
   /// If the app was in the background for this amount of time, then a new local login with the password will be needed if
   /// the accounts auto login setting is set to false!
