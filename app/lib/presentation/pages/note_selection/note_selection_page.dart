@@ -17,36 +17,50 @@ class NoteSelectionPage extends SimpleBlocPage<NoteSelectionBloc, NoteSelectionS
 
   @override
   Widget buildBody(BuildContext context, NoteSelectionState state) {
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          FilledButton(
-            onPressed: () {
-              sl<NavigationService>().navigateTo(Routes.settings);
-            },
-            child: Text("navigate to settings "),
-          ),
-          FilledButton(
-            onPressed: () {
-
-            },
-            child: Text("Dialog test 1 "),
-          ),
-        ],
-      ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        FilledButton(
+          onPressed: () {
+            sl<NavigationService>().navigateTo(Routes.settings);
+          },
+          child: Text("to settings"),
+        ),
+        FilledButton(
+          onPressed: () {
+            sl<NavigationService>().navigateTo(Routes.material_color_test);
+          },
+          child: Text("to color test"),
+        ),
+        FilledButton(
+          onPressed: () {},
+          child: Text("test error dialog"),
+        ),
+      ],
     );
   }
 
   @override
   PreferredSizeWidget? buildAppBar(BuildContext context, NoteSelectionState state) {
     return AppBar(
-      title: Text(
-        translate("page.settings.title"),
-        style: TextStyle(color: theme(context).colorScheme.onPrimaryContainer),
-      ),
+      title: Text(translate("todo")),
       centerTitle: false,
-      backgroundColor: theme(context).colorScheme.primaryContainer,
+    );
+  }
+
+  @override
+  Widget? buildMenuDrawer(BuildContext context, NoteSelectionState state) {
+    // todo: continue here and make own class
+    return Container(
+      color: theme(context).scaffoldBackgroundColor,
+      width: MediaQuery.of(context).size.width / 1.8,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const <Widget>[
+          Text("page.menu.title"),
+        ],
+      ),
     );
   }
 

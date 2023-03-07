@@ -40,10 +40,11 @@ abstract class SimpleBlocPage<Bloc extends PageBloc<PageEvent, State>, State ext
       onTapDown: (TapDownDetails details) => unFocus(context),
       child: Scaffold(
         body: Container(
-          decoration: BoxDecoration(image: getBackground(), color: backGroundImage == null ? backgroundColor : null),
+          decoration: BoxDecoration(image: getBackgroundImage(), color: getBackgroundColor(context)),
           child: Padding(
             padding: pagePadding,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 Expanded(child: body),
               ],

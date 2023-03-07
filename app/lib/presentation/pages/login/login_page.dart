@@ -4,7 +4,6 @@ import 'package:app/presentation/pages/login/login_event.dart';
 import 'package:app/presentation/pages/login/login_state.dart';
 import 'package:app/presentation/widgets/base_pages/simple_bloc_page.dart';
 import 'package:flutter/material.dart';
-import 'package:shared/core/utils/logger/logger.dart';
 
 class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
   final TextEditingController usernameController = TextEditingController();
@@ -43,23 +42,13 @@ class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
 
   @override
   PreferredSizeWidget? buildAppBar(BuildContext context, LoginState state) {
-    return AppBar(
-      title: Text(
-        translate(getPageTitle(state)),
-        style: TextStyle(color: theme(context).colorScheme.onPrimaryContainer),
-      ),
-      centerTitle: false,
-      backgroundColor: theme(context).colorScheme.primaryContainer,
-    );
+    return AppBar(centerTitle: false, title: Text(translate(getPageTitle(state))));
   }
 
   Widget _buildInput(BuildContext context, LoginState state) {
     const double space = 15; //height between fields
     return Form(
       autovalidateMode: AutovalidateMode.always,
-      onChanged: () {
-        Form.of(primaryFocus!.context!).save();
-      },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
@@ -112,8 +101,12 @@ class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
           child: Text(translate(firstButtonKey)),
         ),
         const SizedBox(height: 20),
-        FilledButton.tonal(
+        FilledButton(
           onPressed: () => _secondButtonPressed(context, state),
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all(theme(context).colorScheme.secondary),
+            foregroundColor: MaterialStateProperty.all(theme(context).colorScheme.onSecondary),
+          ),
           child: Text(translate(_getSecondButtonKey(state))),
         ),
       ],

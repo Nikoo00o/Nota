@@ -9,14 +9,15 @@ import 'package:flutter/material.dart';
 ///
 /// The generated theme will be provided inside of [getTheme].
 class AppTheme {
-  /// Returns the theme with the given colors
-  static ThemeData get theme {
+  /// Returns a dark, or light theme with the defined colors!
+  static ThemeData newTheme({required bool darkTheme}) {
+    // complementary double split colors
     return AppTheme(
-      brightness: Brightness.dark,
-      basePrimaryColor: const Color.fromRGBO(0, 35, 110, 1),
-      baseSecondaryColor: const Color.fromRGBO(0, 150, 240, 1),
-      baseTertiaryColor: const Color.fromRGBO(80, 220, 160, 1),
-      baseNeutralColor: Colors.grey[850]!,
+      brightness: darkTheme ? Brightness.dark : Brightness.light,
+      basePrimaryColor: const Color(0xff0004EB),
+      baseSecondaryColor: const Color(0xff0C85EB),
+      baseTertiaryColor: const Color(0xff810CEB),
+      baseNeutralColor: const Color(0xff878787),
       baseErrorColor: Colors.red[800]!,
     ).getTheme();
   }
@@ -71,7 +72,6 @@ class AppTheme {
   ColorScheme getColorScheme() {
     final bool isDark = brightness == Brightness.dark;
     final MaterialColor primary = convertColor(basePrimaryColor);
-
     final MaterialColor secondary = convertColor(baseSecondaryColor);
     final MaterialColor tertiary = convertColor(baseTertiaryColor);
     final MaterialColor neutral = convertColor(baseNeutralColor);

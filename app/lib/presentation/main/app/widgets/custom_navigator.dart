@@ -2,6 +2,7 @@ import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/routes.dart';
 import 'package:app/presentation/main/app/widgets/page_route_animation.dart';
 import 'package:app/presentation/pages/login/login_page.dart';
+import 'package:app/presentation/pages/material_color_test_page.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_page.dart';
 import 'package:app/presentation/pages/settings/settings_page.dart';
 import 'package:app/presentation/widgets/base_pages/page_base.dart';
@@ -26,6 +27,8 @@ class CustomNavigator extends StatelessWidget {
         return const NoteSelectionPage();
       case Routes.settings:
         return const SettingsPage();
+      case Routes.material_color_test:
+        return const MaterialColorTestPage();
       default:
         return Scaffold(body: Center(child: Text("no page found for route: $routeName")));
     }
