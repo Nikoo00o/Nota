@@ -18,117 +18,72 @@ class MaterialColorTestPage extends NoBlocPage {
           Theme(
             data: AppTheme.newTheme(darkTheme: true),
             child: Builder(
-              builder: (BuildContext context) {
-                return Container(
-                  color: theme(context).colorScheme.background,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      const SizedBox(height: 5),
-                      FilledButton(
-                        onPressed: () {},
-                        child: const Text("primary"),
-                      ),
-                      FilledButton(
-                        onPressed: () {},
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(theme(context).colorScheme.primaryContainer),
-                          foregroundColor: MaterialStateProperty.all(theme(context).colorScheme.onPrimaryContainer),
-                        ),
-                        child: const Text("primary container"),
-                      ),
-                      FilledButton(
-                        onPressed: () {},
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(theme(context).colorScheme.secondary),
-                          foregroundColor: MaterialStateProperty.all(theme(context).colorScheme.onSecondary),
-                        ),
-                        child: const Text("secondary"),
-                      ),
-                      FilledButton.tonal(
-                        onPressed: () {},
-                        child: const Text("secondary container"),
-                      ),
-                      FilledButton(
-                        onPressed: () {},
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(theme(context).colorScheme.tertiary),
-                          foregroundColor: MaterialStateProperty.all(theme(context).colorScheme.onTertiary),
-                        ),
-                        child: const Text("tertiary"),
-                      ),
-                      FilledButton(
-                        onPressed: () {},
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(theme(context).colorScheme.tertiaryContainer),
-                          foregroundColor: MaterialStateProperty.all(theme(context).colorScheme.onTertiaryContainer),
-                        ),
-                        child: const Text("tertiary container"),
-                      ),
-                      const SizedBox(height: 5),
-                    ],
-                  ),
-                );
-              },
+              builder: (BuildContext context) => _buildButtons(context),
             ),
           ),
           Theme(
             data: AppTheme.newTheme(darkTheme: false),
             child: Builder(
-              builder: (BuildContext context) {
-                return Container(
-                  color: theme(context).colorScheme.background,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      const SizedBox(height: 5),
-                      FilledButton(
-                        onPressed: () {},
-                        child: const Text("primary"),
-                      ),
-                      FilledButton(
-                        onPressed: () {},
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(theme(context).colorScheme.primaryContainer),
-                          foregroundColor: MaterialStateProperty.all(theme(context).colorScheme.onPrimaryContainer),
-                        ),
-                        child: const Text("primary container"),
-                      ),
-                      FilledButton(
-                        onPressed: () {},
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(theme(context).colorScheme.secondary),
-                          foregroundColor: MaterialStateProperty.all(theme(context).colorScheme.onSecondary),
-                        ),
-                        child: const Text("secondary"),
-                      ),
-                      FilledButton.tonal(
-                        onPressed: () {},
-                        child: const Text("secondary container"),
-                      ),
-                      FilledButton(
-                        onPressed: () {},
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(theme(context).colorScheme.tertiary),
-                          foregroundColor: MaterialStateProperty.all(theme(context).colorScheme.onTertiary),
-                        ),
-                        child: const Text("tertiary"),
-                      ),
-                      FilledButton(
-                        onPressed: () {},
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(theme(context).colorScheme.tertiaryContainer),
-                          foregroundColor: MaterialStateProperty.all(theme(context).colorScheme.onTertiaryContainer),
-                        ),
-                        child: const Text("tertiary container"),
-                      ),
-                      const SizedBox(height: 5),
-                    ],
-                  ),
-                );
-              },
+              builder: (BuildContext context) => _buildButtons(context),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildButtons(BuildContext context) {
+    return Container(
+      color: colorBackground(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          const SizedBox(height: 5),
+          FilledButton(
+            onPressed: () {},
+            child: const Text("primary"),
+          ),
+          FilledButton(
+            onPressed: () {},
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(colorPrimaryContainer(context)),
+              foregroundColor: MaterialStateProperty.all(colorOnPrimaryContainer(context)),
+            ),
+            child: const Text("primary container"),
+          ),
+          FilledButton(
+            onPressed: () {},
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(colorSecondary(context)),
+              foregroundColor: MaterialStateProperty.all(colorOnSecondary(context)),
+            ),
+            child: const Text("secondary"),
+          ),
+          FilledButton(
+            onPressed: () {},
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(colorSecondaryContainer(context)),
+              foregroundColor: MaterialStateProperty.all(colorOnSecondaryContainer(context)),
+            ),
+            child: const Text("secondary container"),
+          ),
+          FilledButton(
+            onPressed: () {},
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(colorTertiary(context)),
+              foregroundColor: MaterialStateProperty.all(colorOnTertiary(context)),
+            ),
+            child: const Text("tertiary"),
+          ),
+          FilledButton(
+            onPressed: () {},
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(colorTertiaryContainer(context)),
+              foregroundColor: MaterialStateProperty.all(colorOnTertiaryContainer(context)),
+            ),
+            child: const Text("tertiary container"),
+          ),
+          const SizedBox(height: 5),
         ],
       ),
     );
@@ -141,10 +96,10 @@ class MaterialColorTestPage extends NoBlocPage {
         children: <Widget>[
           SizedBox.expand(
             child: Container(
-              color: theme(context).colorScheme.primaryContainer,
+              color: colorPrimaryContainer(context),
               child: SvgPicture.asset(
                 Assets.note_bloc,
-                colorFilter: ColorFilter.mode(theme(context).colorScheme.onPrimaryContainer, BlendMode.srcIn),
+                colorFilter: ColorFilter.mode(colorOnPrimaryContainer(context), BlendMode.srcIn),
               ),
             ),
           ),
@@ -161,12 +116,12 @@ class MaterialColorTestPage extends NoBlocPage {
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(100),
-                        color: theme(context).colorScheme.background,
+                        color: colorBackground(context),
                       ),
                       child: SvgPicture.asset(
                         Assets.nota_letter_logo,
                         height: 220,
-                        colorFilter: ColorFilter.mode(theme(context).colorScheme.primary, BlendMode.srcIn),
+                        colorFilter: ColorFilter.mode(colorPrimary(context), BlendMode.srcIn),
                       ),
                     ),
                   ],
@@ -178,7 +133,7 @@ class MaterialColorTestPage extends NoBlocPage {
                 child: Text(
                   sl<AppConfig>().appTitle,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: theme(context).colorScheme.primary, fontSize: 80),
+                  style: TextStyle(color: colorPrimary(context), fontSize: 80),
                 ),
               ),
             ],

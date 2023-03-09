@@ -5,9 +5,6 @@ import 'package:flutter/material.dart';
 abstract class WidgetBase extends StatelessWidget {
   const WidgetBase({super.key});
 
-  /// Returns the theme data. The [ThemeData.colorScheme] contains the colors used inside of the app.
-  ThemeData theme(BuildContext context) => Theme.of(context);
-
   /// Translates a translation [key] for the current locale.
   ///
   /// Placeholders are replaced with [keyParams].
@@ -15,4 +12,76 @@ abstract class WidgetBase extends StatelessWidget {
     return sl<TranslationService>().translate(key, keyParams: keyParams); // direct access, because every widget should
     // not contain a reference to the translation service
   }
+
+  /// Returns the theme data. The [ThemeData.colorScheme] contains the colors used inside of the app.
+  ThemeData theme(BuildContext context) => Theme.of(context);
+
+  /// This is not directly from the color scheme. instead it is generated from it!
+  Color colorScaffoldBackground(BuildContext context) => theme(context).scaffoldBackgroundColor;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorPrimary(BuildContext context) => theme(context).colorScheme.primary;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorOnPrimary(BuildContext context) => theme(context).colorScheme.onPrimary;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorPrimaryContainer(BuildContext context) => theme(context).colorScheme.primaryContainer;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorOnPrimaryContainer(BuildContext context) => theme(context).colorScheme.onPrimaryContainer;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorSecondary(BuildContext context) => theme(context).colorScheme.secondary;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorOnSecondary(BuildContext context) => theme(context).colorScheme.onSecondary;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorSecondaryContainer(BuildContext context) => theme(context).colorScheme.secondaryContainer;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorOnSecondaryContainer(BuildContext context) => theme(context).colorScheme.onSecondaryContainer;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorTertiary(BuildContext context) => theme(context).colorScheme.tertiary;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorOnTertiary(BuildContext context) => theme(context).colorScheme.onTertiary;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorTertiaryContainer(BuildContext context) => theme(context).colorScheme.tertiaryContainer;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorOnTertiaryContainer(BuildContext context) => theme(context).colorScheme.onTertiaryContainer;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorSurface(BuildContext context) => theme(context).colorScheme.surface;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorOnSurface(BuildContext context) => theme(context).colorScheme.onSurface;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorSurfaceVariant(BuildContext context) => theme(context).colorScheme.surfaceVariant;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorOnSurfaceVariant(BuildContext context) => theme(context).colorScheme.onSurfaceVariant;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorBackground(BuildContext context) => theme(context).colorScheme.background;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorOnBackground(BuildContext context) => theme(context).colorScheme.onBackground;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorError(BuildContext context) => theme(context).colorScheme.error;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorOnError(BuildContext context) => theme(context).colorScheme.onError;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorErrorContainer(BuildContext context) => theme(context).colorScheme.errorContainer;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorOnErrorContainer(BuildContext context) => theme(context).colorScheme.onErrorContainer;
 }

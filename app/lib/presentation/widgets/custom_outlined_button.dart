@@ -23,7 +23,7 @@ class CustomOutlinedButton extends WidgetBase {
 
   @override
   Widget build(BuildContext context) {
-    final Color colorToUse = color ?? theme(context).colorScheme.primary;
+    final Color colorToUse = color ?? colorPrimary(context);
     return OutlinedButton(
       onPressed: onPressed,
       style: ButtonStyle(

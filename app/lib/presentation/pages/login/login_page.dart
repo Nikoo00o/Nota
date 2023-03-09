@@ -86,7 +86,7 @@ class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
               ),
               TextSpan(
                 text: translate("empty.param.1", keyParams: <String>[state.username]),
-                style: TextStyle(color: theme(context).colorScheme.secondary, fontSize: 17),
+                style: TextStyle(color: colorSecondary(context), fontSize: 17),
               ),
             ],
           ),
