@@ -1,9 +1,10 @@
 import 'package:shared/core/config/sensitive_data.dart';
+import 'package:shared/keygen/file_key_gen.dart';
 
 class SharedConfig {
   /// The amount of bytes used to generate keys for this app.
   /// This is static and should not change in the different projects, or during development
-  static const int keyBytes = 32;
+  static int get keyBytes => FileKeyGen.keyBytes;
 
   /// This is used as a part of [getServerUrl].
   int get serverPort => 8191;
