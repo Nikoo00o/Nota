@@ -50,7 +50,7 @@ abstract class PageBase extends WidgetBase {
     if (backgroundColor != null) {
       return backgroundColor!;
     }
-    return colorBackground(context);
+    return colorScaffoldBackground(context);
   }
 
   /// pop current page

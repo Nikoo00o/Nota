@@ -18,13 +18,13 @@ class MaterialColorTestPage extends NoBlocPage {
           Theme(
             data: AppTheme.newTheme(darkTheme: true),
             child: Builder(
-              builder: (BuildContext context) => _buildButtons(context),
+              builder: (BuildContext context) => _buildButtons(context, "dark"),
             ),
           ),
           Theme(
             data: AppTheme.newTheme(darkTheme: false),
             child: Builder(
-              builder: (BuildContext context) => _buildButtons(context),
+              builder: (BuildContext context) => _buildButtons(context, "light"),
             ),
           ),
         ],
@@ -32,16 +32,18 @@ class MaterialColorTestPage extends NoBlocPage {
     );
   }
 
-  Widget _buildButtons(BuildContext context) {
+  /// Also builds container with background color
+  Widget _buildButtons(BuildContext context, String theme) {
     return Container(
-      color: colorBackground(context),
+      padding: const EdgeInsets.fromLTRB(50, 0, 50, 0),
+      color: colorScaffoldBackground(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           const SizedBox(height: 5),
           FilledButton(
             onPressed: () {},
-            child: const Text("primary"),
+            child: Text("primary $theme"),
           ),
           FilledButton(
             onPressed: () {},
@@ -49,7 +51,7 @@ class MaterialColorTestPage extends NoBlocPage {
               backgroundColor: MaterialStateProperty.all(colorPrimaryContainer(context)),
               foregroundColor: MaterialStateProperty.all(colorOnPrimaryContainer(context)),
             ),
-            child: const Text("primary container"),
+            child: Text("primary container $theme"),
           ),
           FilledButton(
             onPressed: () {},
@@ -57,7 +59,7 @@ class MaterialColorTestPage extends NoBlocPage {
               backgroundColor: MaterialStateProperty.all(colorSecondary(context)),
               foregroundColor: MaterialStateProperty.all(colorOnSecondary(context)),
             ),
-            child: const Text("secondary"),
+            child: Text("secondary $theme"),
           ),
           FilledButton(
             onPressed: () {},
@@ -65,7 +67,7 @@ class MaterialColorTestPage extends NoBlocPage {
               backgroundColor: MaterialStateProperty.all(colorSecondaryContainer(context)),
               foregroundColor: MaterialStateProperty.all(colorOnSecondaryContainer(context)),
             ),
-            child: const Text("secondary container"),
+            child: Text("secondary container $theme"),
           ),
           FilledButton(
             onPressed: () {},
@@ -73,7 +75,7 @@ class MaterialColorTestPage extends NoBlocPage {
               backgroundColor: MaterialStateProperty.all(colorTertiary(context)),
               foregroundColor: MaterialStateProperty.all(colorOnTertiary(context)),
             ),
-            child: const Text("tertiary"),
+            child: Text("tertiary $theme"),
           ),
           FilledButton(
             onPressed: () {},
@@ -81,7 +83,7 @@ class MaterialColorTestPage extends NoBlocPage {
               backgroundColor: MaterialStateProperty.all(colorTertiaryContainer(context)),
               foregroundColor: MaterialStateProperty.all(colorOnTertiaryContainer(context)),
             ),
-            child: const Text("tertiary container"),
+            child: Text("tertiary container $theme"),
           ),
           const SizedBox(height: 5),
         ],
