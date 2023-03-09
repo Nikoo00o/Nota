@@ -6,7 +6,7 @@ version: 1.0.0+1
 
 environment:
   sdk: '>=2.19.2 <3.0.0'
-  flutter: ^3.7.5
+  flutter: ^3.7.7
 
 dependencies:
   flutter:
@@ -19,12 +19,12 @@ dependencies:
   get_it: ^7.2.0 # service locator
   flutter_bloc: ^8.1.2 # BLoC state management
   tuple: ^2.0.0 # tuples
-  path_provider: ^2.0.12 # application directory path
+  path_provider: ^2.0.13 # application directory path
   hive: ^2.2.3 # nosql database
   hive_flutter: ^1.1.0 # flutter extension for hive
   flutter_secure_storage: ^8.0.0 # secure storage for keys in keychain, or keystore. NEEDS LINUX SPECIFIC SETUP!
-  cryptography: 2.1.1 # basic cryptographic functions (like aes encryption)
-  cryptography_flutter: ^2.0.2 # better flutter performance for base package
+  cryptography: 2.4.0 # basic cryptographic functions (like aes encryption)
+  cryptography_flutter: ^2.2.0 # better flutter performance for base package
   dargon2_flutter: ^3.2.0 # argon2 implementation. MIGHT NEED IOS specific setup!
   flutter_svg: ^2.0.2 # svg images
   flutter_native_splash: ^2.2.19 # splash screen. NEEDS IOS SPECIFIC SETUP!
@@ -35,7 +35,7 @@ dependencies:
     sdk: flutter
 
 dev_dependencies:
-  test: ^1.16.0 # dart test package
+  test: ^1.22.0 # dart test package
   flutter_test: # flutter test package
     sdk: flutter
 

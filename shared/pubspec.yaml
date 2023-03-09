@@ -14,9 +14,9 @@ dependencies:
   http: ^0.13.5 # http client
   hive: ^2.2.3 # nosql database
   convert: ^3.1.1 # hex conversion
-  cryptography: ^2.1.1 # basic cryptographic functions (like aes encryption)
+  cryptography: ^2.4.0 # basic cryptographic functions (like aes encryption)
   synchronized: ^3.0.1 # locks for concurrent access
 
 dev_dependencies:
   flutter_lints: ^2.0.1  # linter rules
-  test: ^1.16.0 # dart test package
+  test: ^1.23.1 # dart test package
