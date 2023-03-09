@@ -147,7 +147,7 @@ Future<void> cleanupTestFilesAndServer({required bool deleteTestFolderAfterwards
 
 ServerAccountModel getTestAccount(int testNumber) {
   return ServerAccountModel(
-    userName: "userName$testNumber",
+    username: "username$testNumber",
     passwordHash: "passwordHash$testNumber",
     sessionToken: null,
     encryptedDataKey: "encryptedDataKey$testNumber",
@@ -161,7 +161,7 @@ Future<ServerAccountModel> createTestAccount(int testNumber) async {
     endpoint: Endpoints.ACCOUNT_CREATE,
     bodyData: CreateAccountRequest(
       createAccountToken: serverConfigMock.createAccountToken,
-      userName: account.userName,
+      username: account.username,
       passwordHash: account.passwordHash,
       encryptedDataKey: account.encryptedDataKey,
     ).toJson(),
@@ -173,7 +173,7 @@ Future<AccountLoginResponse> loginToTestAccount(int testNumber) async {
   final Map<String, dynamic> json = await restClient.sendJsonRequest(
     endpoint: Endpoints.ACCOUNT_LOGIN,
     bodyData: AccountLoginRequest(
-      userName: getTestAccount(testNumber).userName,
+      username: getTestAccount(testNumber).username,
       passwordHash: getTestAccount(testNumber).passwordHash,
     ).toJson(),
   );

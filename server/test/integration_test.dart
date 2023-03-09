@@ -264,7 +264,7 @@ Future<AccountLoginResponse> _loginToAccount(ServerAccountModel account) async {
   final Map<String, dynamic> json = await restClient.sendJsonRequest(
     endpoint: Endpoints.ACCOUNT_LOGIN,
     bodyData: AccountLoginRequest(
-      userName: account.userName,
+      username: account.username,
       passwordHash: account.passwordHash,
     ).toJson(),
   );

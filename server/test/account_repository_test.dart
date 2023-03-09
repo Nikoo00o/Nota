@@ -49,7 +49,7 @@ void _testCreateAccounts() {
         endpoint: Endpoints.ACCOUNT_CREATE,
         bodyData: const CreateAccountRequest(
           createAccountToken: "123",
-          userName: "123",
+          username: "123",
           passwordHash: "123",
           encryptedDataKey: "123",
         ).toJson(),
@@ -63,7 +63,7 @@ void _testCreateAccounts() {
         endpoint: Endpoints.ACCOUNT_CREATE,
         bodyData: const CreateAccountRequest(
           createAccountToken: "",
-          userName: "123",
+          username: "123",
           passwordHash: "123",
           encryptedDataKey: "123",
         ).toJson(),
@@ -77,7 +77,7 @@ void _testCreateAccounts() {
         endpoint: Endpoints.ACCOUNT_CREATE,
         bodyData: CreateAccountRequest(
           createAccountToken: serverConfigMock.createAccountToken,
-          userName: "",
+          username: "",
           passwordHash: "",
           encryptedDataKey: "",
         ).toJson(),
@@ -87,9 +87,9 @@ void _testCreateAccounts() {
 
   test("create a new account testUser1 successfully which should be returned from the local data source", () async {
     await createTestAccount(0);
-    final ServerAccountModel? account = await localDataSource.loadAccount(getTestAccount(0).userName);
+    final ServerAccountModel? account = await localDataSource.loadAccount(getTestAccount(0).username);
     expect(account, getTestAccount(0), reason: "first account should match");
-    final ServerAccount? sameAccount = await accountRepository.getAccountByUserName(getTestAccount(0).userName);
+    final ServerAccount? sameAccount = await accountRepository.getAccountByUserName(getTestAccount(0).username);
     expect(account, sameAccount, reason: "second account should be the same");
   });
 
@@ -119,7 +119,7 @@ void _testLoginToAccounts() {
     expect(() async {
       await restClient.sendRequest(
         endpoint: Endpoints.ACCOUNT_LOGIN,
-        bodyData: const AccountLoginRequest(userName: "", passwordHash: "").toJson(),
+        bodyData: const AccountLoginRequest(username: "", passwordHash: "").toJson(),
       );
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
   });
@@ -128,7 +128,7 @@ void _testLoginToAccounts() {
     expect(() async {
       await restClient.sendRequest(
         endpoint: Endpoints.ACCOUNT_LOGIN,
-        bodyData: const AccountLoginRequest(userName: "unknownUsername", passwordHash: "unknownPassword").toJson(),
+        bodyData: const AccountLoginRequest(username: "unknownUsername", passwordHash: "unknownPassword").toJson(),
       );
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_UNKNOWN_ACCOUNT));
   });
@@ -137,7 +137,7 @@ void _testLoginToAccounts() {
     expect(() async {
       await restClient.sendRequest(
         endpoint: Endpoints.ACCOUNT_LOGIN,
-        bodyData: AccountLoginRequest(userName: getTestAccount(0).userName, passwordHash: "unknownPassword").toJson(),
+        bodyData: AccountLoginRequest(username: getTestAccount(0).username, passwordHash: "unknownPassword").toJson(),
       );
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.ACCOUNT_WRONG_PASSWORD));
   });
@@ -147,7 +147,7 @@ void _testLoginToAccounts() {
 
 void _testSessionTokens() {
   test("a valid login request should return a login response with the correct session token", () async {
-    final ServerAccountModel? account = await localDataSource.loadAccount(getTestAccount(0).userName);
+    final ServerAccountModel? account = await localDataSource.loadAccount(getTestAccount(0).username);
     expect(account, isNot(null));
     account!.sessionToken = await accountRepository.createNewSessionToken();
     await localDataSource.saveAccount(account); // update the account on the server with a concrete session token
@@ -187,14 +187,14 @@ void _testSessionTokens() {
     expect(response1.sessionToken, isNot(response2.sessionToken));
   });
 
-  test("after login the account should be able to be accessed by userName from the cache and contain a valid session token",
+  test("after login the account should be able to be accessed by username from the cache and contain a valid session token",
       () async {
     await loginToTestAccount(0);
-    final ServerAccount? account = await accountRepository.getAccountByUserName(getTestAccount(0).userName);
+    final ServerAccount? account = await accountRepository.getAccountByUserName(getTestAccount(0).username);
     expect(
       account,
       predicate((ServerAccount? account) =>
-          account != null && account.userName == getTestAccount(0).userName && account.isSessionTokenStillValid()),
+          account != null && account.username == getTestAccount(0).username && account.isSessionTokenStillValid()),
     );
   });
 
@@ -207,7 +207,7 @@ void _testSessionTokens() {
       account,
       predicate((ServerAccount? account) =>
           account != null &&
-          account.userName == getTestAccount(0).userName &&
+          account.username == getTestAccount(0).username &&
           account.sessionToken == response.sessionToken),
     );
   });
@@ -230,7 +230,7 @@ void _testSessionTokens() {
     expect(response1.sessionToken, response2.sessionToken);
     await Future<void>.delayed(const Duration(milliseconds: 80));
     await null;
-    final ServerAccount? account = await accountRepository.getAccountByUserName(getTestAccount(0).userName);
+    final ServerAccount? account = await accountRepository.getAccountByUserName(getTestAccount(0).username);
     expect(response1.sessionToken, account?.sessionToken);
   });
 
@@ -243,7 +243,7 @@ void _testSessionTokens() {
     final AccountLoginResponse response2 = await loginToTestAccount(0);
     expect(response1.sessionToken, isNot(response2.sessionToken), reason: "Both responses should contain a different token");
     await Future<void>.delayed(const Duration(milliseconds: 80));
-    final ServerAccount? account = await accountRepository.getAccountByUserName(getTestAccount(0).userName);
+    final ServerAccount? account = await accountRepository.getAccountByUserName(getTestAccount(0).username);
     expect(response2.sessionToken, isNot(account?.sessionToken), reason: "The account should contain a different token");
     final ServerAccount? noAccount = await accountRepository.getAccountBySessionToken(response1.sessionToken.token);
     expect(noAccount, null);
@@ -329,7 +329,7 @@ void _testChangePassword() {
       changedAccount,
       predicate((ServerAccount? account) =>
           account != null &&
-          account.userName == getTestAccount(0).userName &&
+          account.username == getTestAccount(0).username &&
           account.encryptedDataKey == "${getTestAccount(0).encryptedDataKey}_changed"),
     );
   });

@@ -79,7 +79,7 @@ class NoteRepository {
         noteUpdates = await compareClientAndServerNotes(request.clientNotes, serverAccount.noteInfoList); // security: check
         // if note ids from the client really belong to the account
       } on BaseException catch (e) {
-        Logger.error("Error starting note transfer because of invalid note ids for: ${serverAccount.userName}");
+        Logger.error("Error starting note transfer because of invalid note ids for: ${serverAccount.username}");
         return RestCallbackResult.withErrorCode(e.message ?? ""); // [ErrorCodes.SERVER_INVALID_REQUEST_VALUES]
       }
 
@@ -91,7 +91,7 @@ class NoteRepository {
       _noteTransfers[response.transferToken] = NoteTransfer(serverAccount: serverAccount, noteUpdates: response.noteUpdates);
 
       Logger.info("Created the new note transfer ${response.transferToken} for "
-          "${serverAccount.userName} with ${response.noteUpdates}");
+          "${serverAccount.username} with ${response.noteUpdates}");
       // the client can now update name and ids and delete notes and then send/receive data. or it can cancel the transfer.
       return RestCallbackResult.withResponse(response);
     });
@@ -112,7 +112,7 @@ class NoteRepository {
 
     if (transferToken.isEmpty) {
       // security: check if the transfer token belongs to a transaction of this account
-      Logger.error("Error downloading note, because the transfer token was invalid from ${serverAccount.userName}");
+      Logger.error("Error downloading note, because the transfer token was invalid from ${serverAccount.username}");
       return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN);
     }
 
@@ -148,7 +148,7 @@ class NoteRepository {
     final String transferToken = _getValidTransferToken(params, serverAccount);
 
     if (transferToken.isEmpty) {
-      Logger.error("Error uploading note, because the transfer token was invalid from ${serverAccount.userName}");
+      Logger.error("Error uploading note, because the transfer token was invalid from ${serverAccount.username}");
       return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN);
     }
     if (params.rawBytes?.isEmpty ?? true) {
@@ -186,7 +186,7 @@ class NoteRepository {
       final String transferToken = _getValidTransferToken(params, serverAccount);
 
       if (transferToken.isEmpty) {
-        Logger.error("Error finishing note transfer, because the transfer token was invalid from ${serverAccount.userName}");
+        Logger.error("Error finishing note transfer, because the transfer token was invalid from ${serverAccount.username}");
         return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN);
       }
 
@@ -208,7 +208,7 @@ class NoteRepository {
       }
 
       final String logAction = request.shouldCancel ? "cancelled" : "completed";
-      Logger.info("Note file transfer $transferToken was $logAction from account ${serverAccount.userName}");
+      Logger.info("Note file transfer $transferToken was $logAction from account ${serverAccount.username}");
       return RestCallbackResult();
     });
   }
@@ -241,7 +241,7 @@ class NoteRepository {
 
   /// Cancels every transfer for the [account]
   Future<void> _cancelAllTransfers(ServerAccount account) async {
-    Logger.debug("Cancelling all transfers for ${account.userName}");
+    Logger.debug("Cancelling all transfers for ${account.username}");
     final List<String> transfersToCancel = List<String>.empty(growable: true);
     for (final iterator in _noteTransfers.entries) {
       final String transferToken = iterator.key;
@@ -434,7 +434,7 @@ class NoteRepository {
         transferToken.isEmpty ||
         _noteTransfers.containsKey(transferToken) == false ||
         _noteTransfers[transferToken]!.serverAccount != serverAccount) {
-      Logger.warn("Got an invalid transfer token $transferToken from ${serverAccount.userName}");
+      Logger.warn("Got an invalid transfer token $transferToken from ${serverAccount.username}");
       return "";
     }
     return transferToken;
@@ -450,7 +450,7 @@ class NoteRepository {
     final Iterable<NoteUpdate> iterator =
         noteTransfer.noteUpdates.where((NoteUpdate noteUpdate) => noteUpdate.serverId == id || noteUpdate.clientId == id);
     if (iterator.isEmpty) {
-      Logger.warn("Got an invalid id $id from ${noteTransfer.serverAccount.userName}");
+      Logger.warn("Got an invalid id $id from ${noteTransfer.serverAccount.username}");
       return 0;
     } else if (iterator.first.noteTransferStatus.clientNeedsUpdate && (params.rawBytes?.isNotEmpty ?? false)) {
       Logger.warn("The client uploaded bytes to override a note for which the server had a newer time stamp in the "

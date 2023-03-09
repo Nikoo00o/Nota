@@ -84,10 +84,10 @@ class LoginToAccount extends UseCase<void, LoginToAccountParams> {
   }
 
   Future<void> _tryToReuseNotes(ClientAccount account) async {
-    final List<NoteInfo>? oldNotes = await accountRepository.getOldNotesForAccount(account.userName);
+    final List<NoteInfo>? oldNotes = await accountRepository.getOldNotesForAccount(account.username);
     if (oldNotes != null) {
       account.noteInfoList = oldNotes;
-      Logger.verbose("Loaded previous notes\n$oldNotes\nfor the new account ${account.userName}");
+      Logger.verbose("Loaded previous notes\n$oldNotes\nfor the new account ${account.username}");
     }
   }
 
@@ -98,10 +98,10 @@ class LoginToAccount extends UseCase<void, LoginToAccountParams> {
       ClientAccount? account = await accountRepository.getAccount();
       if (account == null) {
         Logger.warn("There was no account stored before the login");
-        account = ClientAccount.defaultValues(userName: params.username, passwordHash: passwordHash);
+        account = ClientAccount.defaultValues(username: params.username, passwordHash: passwordHash);
         await accountRepository.saveAccount(account);
       } else {
-        account.userName = params.username;
+        account.username = params.username;
         account.passwordHash = passwordHash;
       }
 

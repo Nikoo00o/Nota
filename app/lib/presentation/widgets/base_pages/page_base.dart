@@ -42,7 +42,7 @@ abstract class PageBase extends WidgetBase {
 
   /// Returns the [backgroundColor] if the [backGroundImage] is null, otherwise this returns null.
   ///
-  /// If the [backgroundColor] is null, then the themes background color will be used
+  /// If the [backgroundColor] is null, then the themes background color will be used (not scaffold background color)!
   Color? getBackgroundColor(BuildContext context) {
     if (backGroundImage != null) {
       return null;
@@ -50,7 +50,7 @@ abstract class PageBase extends WidgetBase {
     if (backgroundColor != null) {
       return backgroundColor!;
     }
-    return theme(context).colorScheme.background;
+    return colorBackground(context);
   }
 
   /// pop current page

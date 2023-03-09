@@ -69,11 +69,11 @@ abstract class LocalDataSource {
       return <String, List<NoteInfoModel>>{};
     }
     final Map<String, dynamic> json = jsonDecode(jsonString) as Map<String, dynamic>;
-    return json.map((String userName, dynamic value) {
+    return json.map((String username, dynamic value) {
       final List<dynamic> dynList = value as List<dynamic>;
       final List<NoteInfoModel> notes =
           dynList.map((dynamic map) => NoteInfoModel.fromJson(map as Map<String, dynamic>)).toList();
-      return MapEntry<String, List<NoteInfoModel>>(userName, notes);
+      return MapEntry<String, List<NoteInfoModel>>(username, notes);
     });
   }
 

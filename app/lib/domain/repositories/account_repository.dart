@@ -47,8 +47,8 @@ abstract class AccountRepository {
   Future<ClientAccount> updatePasswordOnServer({required String newPasswordHash, required String newEncryptedDataKey});
 
   /// Returns the old notes from the account, or null if none were stored
-  Future<List<NoteInfo>?> getOldNotesForAccount(String userName);
+  Future<List<NoteInfo>?> getOldNotesForAccount(String username);
 
   /// Saves the old notes for the account, so that they can be reused
-  Future<void> saveNotesForOldAccount(String userName, List<NoteInfo> notes);
+  Future<void> saveNotesForOldAccount(String username, List<NoteInfo> notes);
 }

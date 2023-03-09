@@ -12,11 +12,19 @@ class CustomTextFormField extends WidgetBase {
   /// The text key used for translating a value.
   final String textKey;
 
+  /// Params for [textKey]
+  final List<String>? textKeyParams;
+
+  /// Used for passwords
+  final bool obscureText;
+
   const CustomTextFormField({
     super.key,
     this.controller,
     this.validator,
+    this.obscureText = false,
     required this.textKey,
+    this.textKeyParams,
   });
 
   @override
@@ -24,9 +32,9 @@ class CustomTextFormField extends WidgetBase {
     return TextFormField(
       controller: controller,
       validator: validator,
-      obscureText: true,
+      obscureText: obscureText,
       decoration: InputDecoration(
-        labelText: translate(textKey),
+        labelText: translate(textKey, keyParams: textKeyParams),
         isDense: true,
         border: const OutlineInputBorder(),
       ),

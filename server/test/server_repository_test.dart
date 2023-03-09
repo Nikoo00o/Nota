@@ -63,7 +63,7 @@ const Endpoint sessionTokenEndpoint =
 const Endpoint differentTestsEndpoint = Endpoint(apiPath: "test/different/tests/endpoint", httpMethod: HttpMethod.POST);
 
 final ServerAccountModel validAccount = ServerAccountModel(
-    userName: "validAccount",
+    username: "validAccount",
     passwordHash: "validPassword",
     sessionToken: SessionTokenModel(token: "validToken", validTo: DateTime.now().add(const Duration(hours: 1))),
     noteInfoList: const <NoteInfo>[],
@@ -89,7 +89,7 @@ void initSessionTokenEndpoint() {
   restServer.addCallback(
     callback: RestCallback(
       endpoint: sessionTokenEndpoint,
-      callback: (_) => RestCallbackResult(jsonResult: <String, dynamic>{"test": validAccount.userName}),
+      callback: (_) => RestCallbackResult(jsonResult: <String, dynamic>{"test": validAccount.username}),
     ),
   );
 }
@@ -295,7 +295,7 @@ void _testWithSessionTokens() {
     final Map<String, dynamic> response = await restClient.sendJsonRequest(
       endpoint: sessionTokenEndpoint,
     );
-    expect(response["test"], validAccount.userName);
+    expect(response["test"], validAccount.username);
   });
 
   test("a post request with an empty session token should throw a missing session token exception", () async {

@@ -40,8 +40,8 @@ class AccountRepository {
   /// Returns cached, or stored account and also updates the cache.
   ///
   /// Also makes sure that the base64 encoded session token is not already contained in the cached accounts.
-  Future<ServerAccount?> getAccountByUserName(String userName) async {
-    return _lock.synchronized(() async => accountDataSource.getAccountByUsername(userName));
+  Future<ServerAccount?> getAccountByUserName(String username) async {
+    return _lock.synchronized(() async => accountDataSource.getAccountByUsername(username));
   }
 
   /// Should return a matching account if the session token is valid and otherwise null.
@@ -103,30 +103,30 @@ class AccountRepository {
   Future<RestCallbackResult> handleCreateAccountRequest(RestCallbackParams params) async {
     return _lock.synchronized(() async {
       final CreateAccountRequest request = CreateAccountRequest.fromJson(params.jsonBody!);
-      if (request.userName.isEmpty || request.passwordHash.isEmpty || request.encryptedDataKey.isEmpty) {
-        Logger.error("Error creating account, because the request is empty: ${request.userName}");
+      if (request.username.isEmpty || request.passwordHash.isEmpty || request.encryptedDataKey.isEmpty) {
+        Logger.error("Error creating account, because the request is empty: ${request.username}");
         return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_REQUEST_VALUES);
       }
 
       if (request.createAccountToken != serverConfig.createAccountToken) {
-        Logger.error("Error creating account, because the account token is invalid: ${request.userName}");
+        Logger.error("Error creating account, because the account token is invalid: ${request.username}");
         return RestCallbackResult(statusCode: HttpStatus.unauthorized);
       }
 
-      final ServerAccountModel? oldAccount = await accountDataSource.getAccountByUsername(request.userName);
+      final ServerAccountModel? oldAccount = await accountDataSource.getAccountByUsername(request.username);
       if (oldAccount != null) {
-        Logger.error("Error creating account, because it already exists: ${request.userName}");
+        Logger.error("Error creating account, because it already exists: ${request.username}");
         return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_ACCOUNT_ALREADY_EXISTS);
       }
 
       await accountDataSource.storeAccount(ServerAccountModel(
-        userName: request.userName,
+        username: request.username,
         passwordHash: request.passwordHash,
         sessionToken: null,
         noteInfoList: const <NoteInfo>[],
         encryptedDataKey: request.encryptedDataKey,
       ));
-      Logger.info("Created new Account: ${request.userName}");
+      Logger.info("Created new Account: ${request.username}");
       return RestCallbackResult(statusCode: HttpStatus.ok);
     });
   }
@@ -137,18 +137,18 @@ class AccountRepository {
   Future<RestCallbackResult> handleLoginToAccountRequest(RestCallbackParams params) async {
     return _lock.synchronized(() async {
       final AccountLoginRequest request = AccountLoginRequest.fromJson(params.jsonBody!);
-      if (request.userName.isEmpty || request.passwordHash.isEmpty) {
-        Logger.error("Error logging in to account, because the request is empty: ${request.userName}");
+      if (request.username.isEmpty || request.passwordHash.isEmpty) {
+        Logger.error("Error logging in to account, because the request is empty: ${request.username}");
         return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_REQUEST_VALUES);
       }
 
-      ServerAccountModel? account = await accountDataSource.getAccountByUsername(request.userName); // get account
+      ServerAccountModel? account = await accountDataSource.getAccountByUsername(request.username); // get account
 
       if (account == null) {
-        Logger.error("Error logging in to account, because the userName was not found: ${request.userName}");
+        Logger.error("Error logging in to account, because the username was not found: ${request.username}");
         return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_UNKNOWN_ACCOUNT);
       } else if (account.passwordHash != request.passwordHash) {
-        Logger.error("Error logging in to account, because the password was incorrect: ${request.userName}");
+        Logger.error("Error logging in to account, because the password was incorrect: ${request.username}");
         return RestCallbackResult.withErrorCode(ErrorCodes.ACCOUNT_WRONG_PASSWORD);
       }
 
@@ -160,7 +160,7 @@ class AccountRepository {
         encryptedDataKey: account.encryptedDataKey,
       );
 
-      Logger.info("Logged into account: ${request.userName} with the session token: ${account.sessionToken}");
+      Logger.info("Logged into account: ${request.username} with the session token: ${account.sessionToken}");
       return RestCallbackResult.withResponse(response);
     });
   }
@@ -173,7 +173,7 @@ class AccountRepository {
 
       final AccountChangePasswordRequest request = AccountChangePasswordRequest.fromJson(params.jsonBody!);
       if (request.newPasswordHash.isEmpty || request.newEncryptedDataKey.isEmpty) {
-        Logger.error("Error changing password for account, because the request is empty: ${account.userName}");
+        Logger.error("Error changing password for account, because the request is empty: ${account.username}");
         return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_REQUEST_VALUES);
       }
       
@@ -185,7 +185,7 @@ class AccountRepository {
       final AccountChangePasswordResponse response = AccountChangePasswordResponse(
         sessionToken: SessionTokenModel.fromSessionToken(account.sessionToken!),
       );
-      Logger.info("Changed the password for the account ${account.userName}");
+      Logger.info("Changed the password for the account ${account.username}");
       return RestCallbackResult.withResponse(response);
     });
   }

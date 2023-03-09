@@ -38,11 +38,11 @@ class CreateAccount extends UseCase<void, CreateAccountParams> {
     // update the account with the new values, or create a new one
     if (account != null) {
       assert(account.isLoggedIn == false && account.needsServerSideLogin == true, "A stored account is always logged out");
-      account.userName = params.username;
+      account.username = params.username;
       account.passwordHash = passwordHash;
     } else {
       Logger.verbose("This is the first created account on this device");
-      account = ClientAccount.defaultValues(userName: params.username, passwordHash: passwordHash);
+      account = ClientAccount.defaultValues(username: params.username, passwordHash: passwordHash);
     }
 
     // set the encrypted data key base64 encoded

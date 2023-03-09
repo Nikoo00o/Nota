@@ -30,8 +30,8 @@ class LogoutOfAccount extends UseCase<void, LogoutOfAccountParams> {
 
     // cache note info list for the account
     if (account.noteInfoList.isNotEmpty) {
-      Logger.verbose("Storing the notes\n${account.noteInfoList}\nfor later use for the account ${account.userName}");
-      await accountRepository.saveNotesForOldAccount(account.userName, account.noteInfoList);
+      Logger.verbose("Storing the notes\n${account.noteInfoList}\nfor later use for the account ${account.username}");
+      await accountRepository.saveNotesForOldAccount(account.username, account.noteInfoList);
       account.noteInfoList.clear();
     }
 
@@ -46,7 +46,7 @@ class LogoutOfAccount extends UseCase<void, LogoutOfAccountParams> {
     // clear the cached and stored account
     await accountRepository.saveAccount(null);
 
-    Logger.info("Logged out of the account ${account.userName}");
+    Logger.info("Logged out of the account ${account.username}");
 
     if (params.navigateToLoginPage) {
       navigationService.navigateTo(Routes.login);

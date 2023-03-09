@@ -17,7 +17,7 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// Important: if this throws a [ServerException] with [ErrorCodes.ACCOUNT_WRONG_PASSWORD], then the password of
 /// the account was changed on another device and you should navigate to the login page.
 ///
-/// This uses the userName and passwordHash of the account and it also changes sessionToken and encryptionDataKey!
+/// This uses the username and passwordHash of the account and it also changes sessionToken and encryptionDataKey!
 class FetchCurrentSessionToken extends SharedFetchCurrentSessionToken {
   final AccountRepository accountRepository;
 

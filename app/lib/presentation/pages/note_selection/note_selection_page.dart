@@ -104,7 +104,7 @@ class NoteSelectionPage extends SimpleBlocPage<NoteSelectionBloc, NoteSelectionS
   Widget? buildMenuDrawer(BuildContext context, NoteSelectionState state) {
     // todo: continue here and make own class
     return Container(
-      color: theme(context).scaffoldBackgroundColor,
+      color: colorScaffoldBackground(context),
       width: MediaQuery.of(context).size.width * 3 / 4,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

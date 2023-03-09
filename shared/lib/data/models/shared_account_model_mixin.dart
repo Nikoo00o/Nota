@@ -25,7 +25,7 @@ mixin SharedAccountModelMixin on SharedAccount {
     }
 
     return <String, dynamic>{
-      JSON_USER_NAME: userName,
+      JSON_USER_NAME: username,
       JSON_PASSWORD_HASH: passwordHash,
       JSON_SESSION_TOKEN: sessionTokenModel?.toJson(),
       JSON_ENCRYPTED_DATA_KEY: encryptedDataKey,

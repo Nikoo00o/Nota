@@ -22,12 +22,12 @@ class NotaIcon extends WidgetBase {
         SvgPicture.asset(
           Assets.nota_letter_logo,
           height: imageSize,
-          colorFilter: ColorFilter.mode(theme(context).colorScheme.primary, BlendMode.srcIn),
+          colorFilter: ColorFilter.mode(colorPrimary(context), BlendMode.srcIn),
         ),
         const SizedBox(height: 5),
         Text(
           sl<AppConfig>().appTitle,
-          style: TextStyle(color: theme(context).colorScheme.primary, fontSize: fontSize),
+          style: TextStyle(color: colorPrimary(context), fontSize: fontSize),
         ),
       ],
     );
