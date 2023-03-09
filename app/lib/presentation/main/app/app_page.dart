@@ -66,7 +66,6 @@ class App extends StatelessWidget {
       appConfig: appConfig,
       activateScreenSaver: activateScreenSaver,
       child: DialogOverlayPage(
-        navigationService: navigationService,
         child: _buildPage(context, state),
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:app/core/get_it.dart';
 import 'package:app/presentation/pages/login/login_bloc.dart';
+import 'package:app/presentation/pages/login/login_bloc_arguments.dart';
 import 'package:app/presentation/pages/login/login_event.dart';
 import 'package:app/presentation/pages/login/login_state.dart';
 import 'package:app/presentation/pages/login/widgets/login_buttons.dart';
@@ -18,7 +19,7 @@ class LoginPage extends BlocPage<LoginBloc, LoginState> {
 
   @override
   LoginBloc createBloc(BuildContext context) {
-    final LoginBloc bloc = sl<LoginBloc>();
+    final LoginBloc bloc = sl<LoginBloc>(param1: LoginBlocArguments(firstButtonScrollKey: GlobalKey()));
     bloc.usernameController = usernameController;
     bloc.passwordController = passwordController;
     bloc.passwordConfirmController = passwordConfirmController;

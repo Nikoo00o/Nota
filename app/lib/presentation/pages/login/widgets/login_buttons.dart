@@ -25,7 +25,7 @@ class LoginButtons extends BlocPageChild<LoginBloc, LoginState> {
       children: <Widget>[
         FilledButton(
           onPressed: () => _firstButtonPressed(context, state),
-          key: state.firstButtonKey,
+          key: state.firstButtonScrollKey,
           child: Text(translate(firstButtonKey)),
         ),
         const SizedBox(height: 10),

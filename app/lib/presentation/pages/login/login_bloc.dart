@@ -45,7 +45,8 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
     required this.logoutOfAccount,
     required this.dialogService,
     required this.navigationService,
-  }) : super(initialState: LoginRemoteState(firstButtonKey: GlobalKey()));
+    required GlobalKey firstButtonScrollKey,
+  }) : super(initialState: LoginRemoteState(firstButtonScrollKey: firstButtonScrollKey));
 
   @override
   void registerEventHandlers() {
@@ -108,12 +109,12 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
   LoginState _buildState({String? username}) {
     if (_createNewAccount) {
       // the global key will never change, because it is only created once and then always copied
-      return LoginCreateState(firstButtonKey: state.firstButtonKey);
+      return LoginCreateState(firstButtonScrollKey: state.firstButtonScrollKey);
     }
     if (_loginStatus == RequiredLoginStatus.REMOTE) {
-      return LoginRemoteState(firstButtonKey: state.firstButtonKey);
+      return LoginRemoteState(firstButtonScrollKey: state.firstButtonScrollKey);
     }
-    return LoginLocalState(firstButtonKey: state.firstButtonKey, username: username ?? "");
+    return LoginLocalState(firstButtonScrollKey: state.firstButtonScrollKey, username: username ?? "");
   }
 
   void _navigateToNextPage() {
@@ -152,7 +153,7 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
         if (visible) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             Scrollable.ensureVisible(
-              state.firstButtonKey.currentContext!,
+              state.firstButtonScrollKey.currentContext!,
               duration: const Duration(milliseconds: 250), // duration for scrolling time
               curve: Curves.easeInOutCubic,
               alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,

@@ -1,8 +1,8 @@
-import 'package:app/core/enums/dialog_status.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_event.dart';
 
 abstract class DialogService {
+
   const DialogService();
 
   /// Non blocking
@@ -48,17 +48,17 @@ class DialogServiceImpl extends DialogService {
 
   @override
   void showErrorDialog(String dialogTextKey, {List<String>? dialogTextKeyParams}) {
-    dialogOverlayBloc.add(ShowErrorDialog(dialogTextKey, dialogTextKeyParams));
+   // dialogOverlayBloc.add(ShowErrorDialog(dialogTextKey, dialogTextKeyParams));
   }
 
   @override
   void showInfoDialog(String dialogTextKey, {List<String>? dialogTextKeyParams}) {
-    dialogOverlayBloc.add(ShowErrorDialog(dialogTextKey, dialogTextKeyParams)); //todo: add in dialog service + bloc
+    //dialogOverlayBloc.add(ShowErrorDialog(dialogTextKey, dialogTextKeyParams)); //todo: add in dialog service + bloc
   }
 
   @override
   void showLoadingDialog({String? dialogTextKey, List<String>? dialogTextKeyParams}) {
-    dialogOverlayBloc.add(ShowLoadingDialog(dialogTextKey, dialogTextKeyParams));
+    //dialogOverlayBloc.add(ShowLoadingDialog(dialogTextKey, dialogTextKeyParams));
   }
 
   @override
@@ -70,7 +70,7 @@ class DialogServiceImpl extends DialogService {
     String? cancelTextKey,
     List<String>? cancelTextKeyParams,
   }) async {
-    dialogOverlayBloc.add(ShowConfirmDialog(dialogTextKey ?? "dialog.confirm", dialogTextKeyParams, () {}));
+    //dialogOverlayBloc.add(ShowConfirmDialog(dialogTextKey ?? "dialog.confirm", dialogTextKeyParams, () {}));
     // todo: change event, also prevent back navigation for all dialogs! this service is not fully implemented yet!!!!!
     return true;
   }
@@ -83,12 +83,11 @@ class DialogServiceImpl extends DialogService {
   @override
   void hideLoadingDialog() {
     dialogOverlayBloc.add(const HideDialog());
-    //todo: add dialog counter for loading dialog, etc
   }
 
   @override
-  bool get isDialogVisible => dialogOverlayBloc.dialogStatus != DialogStatus.HIDDEN;
+  bool get isDialogVisible => dialogOverlayBloc.isCustomDialogVisible;
 
   @override
-  bool get isLoading => dialogOverlayBloc.dialogStatus == DialogStatus.LOADING;
+  bool get isLoading => dialogOverlayBloc.isLoadingDialogVisible;
 }

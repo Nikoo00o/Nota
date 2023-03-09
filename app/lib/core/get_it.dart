@@ -40,12 +40,14 @@ import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
 import 'package:app/presentation/main/app/app_bloc.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/presentation/pages/login/login_bloc.dart';
+import 'package:app/presentation/pages/login/login_bloc_arguments.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
 import 'package:app/presentation/pages/settings/settings_bloc.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:app/services/session_service.dart';
 import 'package:app/services/translation_service.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared/data/datasources/rest_client.dart';
@@ -192,10 +194,13 @@ Future<void> initializeGetIt() async {
   // important: the next two blocs are singletons and no factory functions, because they are used within the app and are
   // only created once!
   sl.registerLazySingleton<AppBloc>(() => AppBloc(translationService: sl()));
-  sl.registerLazySingleton<DialogOverlayBloc>(() => DialogOverlayBloc());
+  sl.registerLazySingleton<DialogOverlayBloc>(() => DialogOverlayBloc(
+        dialogOverlayKey: GlobalKey(),
+        translationService: sl(),
+      ));
 
   // the blocs below are factory functions, because they should be newly created each time the user navigates to the page!
-  sl.registerFactory<LoginBloc>(() => LoginBloc(
+  sl.registerFactoryParam<LoginBloc, LoginBlocArguments, void>((LoginBlocArguments arguments, _) => LoginBloc(
         navigationService: sl(),
         dialogService: sl(),
         getRequiredLoginStatus: sl(),
@@ -203,6 +208,7 @@ Future<void> initializeGetIt() async {
         createAccount: sl(),
         loginToAccount: sl(),
         logoutOfAccount: sl(),
+        firstButtonScrollKey: arguments.firstButtonScrollKey,
       ));
   sl.registerFactory<NoteSelectionBloc>(() => NoteSelectionBloc());
   sl.registerFactory<SettingsBloc>(() => SettingsBloc(logoutOfAccount: sl()));

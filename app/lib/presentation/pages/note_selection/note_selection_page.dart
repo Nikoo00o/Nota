@@ -1,5 +1,7 @@
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/get_it.dart';
+import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
+import 'package:app/presentation/main/dialog_overlay/dialog_overlay_event.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_event.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_state.dart';
@@ -36,57 +38,68 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
         ),
         FilledButton(
           onPressed: () {
-            sl<DialogService>().showErrorDialog("Error");
+            sl<DialogOverlayBloc>().add(ShowInfoSnackBar(textKey: "some long long info text yay"));
           },
-          child: Text("test error dialog"),
+          child: Text("test snack"),
         ),
         FilledButton(
           onPressed: () {
-            sl<DialogService>().showInfoDialog("Info");
+            sl<DialogOverlayBloc>().add(ShowInfoDialog(descriptionKey: "some long description, yay"));
           },
           child: Text("test info dialog"),
         ),
         FilledButton(
-          onPressed: () {
-            sl<DialogService>().showLoadingDialog(dialogTextKey: "Loading");
+          onPressed: () async {
+            sl<DialogOverlayBloc>().add(ShowLoadingDialog());
+            await Future<void>.delayed(Duration(seconds: 4));
+            sl<DialogOverlayBloc>().add(HideLoadingDialog());
           },
           child: Text("test loading dialog"),
         ),
         FilledButton(
-          onPressed: () {
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text("TEST DIALOG ERROR"),
-                    content: const Text('A dialog is a type of modal window that\n'
-                        'appears in front of app content to\n'
-                        'provide critical information, or prompt\n'
-                        'for a decision to be made.'),
-                    actions: <Widget>[
-                      TextButton(
-                        style: TextButton.styleFrom(
-                          textStyle: Theme.of(context).textTheme.labelLarge,
-                        ),
-                        child: const Text("Cancel"),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                      TextButton(
-                        style: TextButton.styleFrom(
-                          textStyle: Theme.of(context).textTheme.labelLarge,
-                        ),
-                        child: const Text("Apply"),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  );
-                });
+          onPressed: () async {
+            sl<DialogOverlayBloc>().add(ShowInfoDialog(descriptionKey: "some long description, yay"));
+            sl<DialogOverlayBloc>().add(ShowLoadingDialog());
+            await Future<void>.delayed(Duration(seconds: 2));
+            sl<DialogOverlayBloc>().add(HideLoadingDialog());
+            await Future<void>.delayed(Duration(seconds: 2));
+            sl<DialogOverlayBloc>().add(ShowLoadingDialog());
+            await Future<void>.delayed(Duration(seconds: 2));
+            sl<DialogOverlayBloc>().add(HideDialog());
+
+            await Future<void>.delayed(Duration(seconds: 2));
+            sl<DialogOverlayBloc>().add(ShowLoadingDialog());
+            await Future<void>.delayed(Duration(seconds: 1));
+            sl<DialogOverlayBloc>().add(ShowInfoDialog(descriptionKey: "some long description, yay"));
+
+            await Future<void>.delayed(Duration(seconds: 2));
+
+            sl<DialogOverlayBloc>().add(HideDialog());
           },
-          child: Text("default"),
+          child: Text("combination"),
+        ),
+
+        FilledButton(
+          onPressed: () async {
+            showDialog<String>(
+              context: context,
+              builder: (BuildContext context) => AlertDialog(
+                title: const Text('AlertDialog Title'),
+                content: const Text('AlertDialog description'),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, 'Cancel'),
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, 'OK'),
+                    child: const Text('OK'),
+                  ),
+                ],
+              ),
+            );
+          },
+          child: Text("other"),
         ),
       ],
     );

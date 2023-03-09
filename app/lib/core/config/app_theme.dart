@@ -63,9 +63,9 @@ class AppTheme {
     required this.baseErrorColor,
   });
 
-  /// Returns the theme data for this theme with the generated [ColorScheme].
+  /// Returns the material 3 theme data for this theme with the generated [ColorScheme].
   ThemeData getTheme() {
-    return ThemeData(colorScheme: getColorScheme());
+    return ThemeData(colorScheme: getColorScheme(), useMaterial3: true);
   }
 
   /// Returns the parsed [ColorScheme] from the base material colors.

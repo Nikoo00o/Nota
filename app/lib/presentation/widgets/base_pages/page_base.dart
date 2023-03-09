@@ -87,15 +87,13 @@ abstract class PageBase extends WidgetBase {
       onTapDown: (TapDownDetails details) => unFocus(context),
       child: Scaffold(
         body: Container(
+          padding: pagePadding,
           decoration: BoxDecoration(image: getBackgroundImage(), color: getBackgroundColor(context)),
-          child: Padding(
-            padding: pagePadding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Expanded(child: body),
-              ],
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Expanded(child: body),
+            ],
           ),
         ),
         appBar: appBar,

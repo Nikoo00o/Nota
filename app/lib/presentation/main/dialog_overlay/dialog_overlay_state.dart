@@ -1,21 +1,9 @@
-import 'package:app/core/enums/dialog_status.dart';
 import 'package:app/presentation/widgets/base_pages/page_state.dart';
+import 'package:flutter/cupertino.dart';
 
 class DialogOverlayState extends PageState {
-  final DialogStatus dialogStatus;
-  final String dialogTextKey;
-  final List<String>? dialogTextKeyParams;
-  final void Function()? navigationCallback;
+  final GlobalKey dialogOverlayKey;
 
-  DialogOverlayState({
-    this.dialogStatus = DialogStatus.HIDDEN,
-    this.dialogTextKey = "",
-    this.dialogTextKeyParams,
-    this.navigationCallback,
-  }) : super(<String, dynamic>{
-          "dialogStatus": dialogStatus,
-          "dialogTextKey": dialogTextKey,
-          "dialogTextKeyParams": dialogTextKeyParams,
-          "navigationCallback": navigationCallback,
-        });
+  /// The global key is not used for comparison inside of the state, because it will not change!
+  const DialogOverlayState({required this.dialogOverlayKey}) : super(const <String, Object?>{});
 }
