@@ -67,10 +67,10 @@ abstract class WidgetBase extends StatelessWidget {
   /// Returns the color of [ThemeData.colorScheme].
   Color colorOnSurfaceVariant(BuildContext context) => theme(context).colorScheme.onSurfaceVariant;
 
-  /// Returns the color of [ThemeData.colorScheme].
+  /// Same as [colorSurface]
   Color colorBackground(BuildContext context) => theme(context).colorScheme.background;
 
-  /// Returns the color of [ThemeData.colorScheme].
+  /// Same as [colorOnSurface]
   Color colorOnBackground(BuildContext context) => theme(context).colorScheme.onBackground;
 
   /// Returns the color of [ThemeData.colorScheme].
@@ -84,4 +84,28 @@ abstract class WidgetBase extends StatelessWidget {
 
   /// Returns the color of [ThemeData.colorScheme].
   Color colorOnErrorContainer(BuildContext context) => theme(context).colorScheme.onErrorContainer;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorOutline(BuildContext context) => theme(context).colorScheme.outline;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorOutlineVariant(BuildContext context) => theme(context).colorScheme.outlineVariant;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorShadow(BuildContext context) => theme(context).colorScheme.shadow;
+
+  /// Same as [colorShadow]
+  Color colorScrim(BuildContext context) => theme(context).colorScheme.scrim;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorSurfaceTint(BuildContext context) => theme(context).colorScheme.shadow;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorInverseSurface(BuildContext context) => theme(context).colorScheme.inverseSurface;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorOnInverseSurface(BuildContext context) => theme(context).colorScheme.onInverseSurface;
+
+  /// Returns the color of [ThemeData.colorScheme].
+  Color colorInversePrimary(BuildContext context) => theme(context).colorScheme.inversePrimary;
 }

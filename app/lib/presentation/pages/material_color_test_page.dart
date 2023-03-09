@@ -13,7 +13,7 @@ class MaterialColorTestPage extends NoBlocPage {
   Widget buildBody(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Theme(
             data: AppTheme.newTheme(darkTheme: true),
@@ -35,57 +35,157 @@ class MaterialColorTestPage extends NoBlocPage {
   /// Also builds container with background color
   Widget _buildButtons(BuildContext context, String theme) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(50, 0, 50, 0),
+      padding: const EdgeInsets.fromLTRB(20, 5, 20, 5),
       color: colorScaffoldBackground(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          const SizedBox(height: 5),
-          FilledButton(
-            onPressed: () {},
-            child: Text("primary $theme"),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              FilledButton(
+                onPressed: () {},
+                child: Text("primary $theme"),
+              ),
+              FilledButton(
+                onPressed: () {},
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(colorPrimaryContainer(context)),
+                  foregroundColor: MaterialStateProperty.all(colorInverseSurface(context)),
+                ),
+                child: const Text("primary container"),
+              ),
+              FilledButton(
+                onPressed: () {},
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(colorInversePrimary(context)),
+                  foregroundColor: MaterialStateProperty.all(colorInverseSurface(context)),
+                ),
+                child: const Text("inverse"),
+              ),
+            ],
           ),
-          FilledButton(
-            onPressed: () {},
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(colorPrimaryContainer(context)),
-              foregroundColor: MaterialStateProperty.all(colorOnPrimaryContainer(context)),
-            ),
-            child: Text("primary container $theme"),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              FilledButton(
+                onPressed: () {},
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(colorSecondary(context)),
+                  foregroundColor: MaterialStateProperty.all(colorOnSecondary(context)),
+                ),
+                child: Text("secondary $theme"),
+              ),
+              FilledButton(
+                onPressed: () {},
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(colorSecondaryContainer(context)),
+                  foregroundColor: MaterialStateProperty.all(colorOnSecondaryContainer(context)),
+                ),
+                child: const Text("secondary container"),
+              ),
+            ],
           ),
-          FilledButton(
-            onPressed: () {},
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(colorSecondary(context)),
-              foregroundColor: MaterialStateProperty.all(colorOnSecondary(context)),
-            ),
-            child: Text("secondary $theme"),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              FilledButton(
+                onPressed: () {},
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(colorTertiary(context)),
+                  foregroundColor: MaterialStateProperty.all(colorOnTertiary(context)),
+                ),
+                child: Text("tertiary $theme"),
+              ),
+              FilledButton(
+                onPressed: () {},
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(colorTertiaryContainer(context)),
+                  foregroundColor: MaterialStateProperty.all(colorOnTertiaryContainer(context)),
+                ),
+                child: const Text("tertiary container"),
+              ),
+            ],
           ),
-          FilledButton(
-            onPressed: () {},
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(colorSecondaryContainer(context)),
-              foregroundColor: MaterialStateProperty.all(colorOnSecondaryContainer(context)),
-            ),
-            child: Text("secondary container $theme"),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  FilledButton(
+                    onPressed: () {},
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(colorError(context)),
+                      foregroundColor: MaterialStateProperty.all(colorOnError(context)),
+                    ),
+                    child: Text("error $theme"),
+                  ),
+                  FilledButton(
+                    onPressed: () {},
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(colorErrorContainer(context)),
+                      foregroundColor: MaterialStateProperty.all(colorOnErrorContainer(context)),
+                    ),
+                    child: const Text("error container"),
+                  ),
+                ],
+              ),
+            ],
           ),
-          FilledButton(
-            onPressed: () {},
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(colorTertiary(context)),
-              foregroundColor: MaterialStateProperty.all(colorOnTertiary(context)),
-            ),
-            child: Text("tertiary $theme"),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  FilledButton(
+                    onPressed: () {},
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(colorSurface(context)),
+                      foregroundColor: MaterialStateProperty.all(colorOnSurface(context)),
+                    ),
+                    child: Text("surface $theme"),
+                  ),
+                  FilledButton(
+                    onPressed: () {},
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(colorSurfaceVariant(context)),
+                      foregroundColor: MaterialStateProperty.all(colorOnSurfaceVariant(context)),
+                    ),
+                    child: const Text("surface variant"),
+                  ),
+                ],
+              ),
+            ],
           ),
-          FilledButton(
-            onPressed: () {},
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all(colorTertiaryContainer(context)),
-              foregroundColor: MaterialStateProperty.all(colorOnTertiaryContainer(context)),
-            ),
-            child: Text("tertiary container $theme"),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  FilledButton(
+                    onPressed: () {},
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(colorOutline(context)),
+                      foregroundColor: MaterialStateProperty.all(colorOnInverseSurface(context)),
+                    ),
+                    child: Text("outline $theme"),
+                  ),
+                  FilledButton(
+                    onPressed: () {},
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(colorOutlineVariant(context)),
+                      foregroundColor: MaterialStateProperty.all(colorOnInverseSurface(context)),
+                    ),
+                    child: const Text("outline variant "),
+                  ),
+                ],
+              ),
+            ],
           ),
-          const SizedBox(height: 5),
         ],
       ),
     );
