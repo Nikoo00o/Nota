@@ -15,6 +15,7 @@ import 'package:app/domain/usecases/account/change/activate_screen_saver.dart';
 import 'package:app/domain/usecases/account/change/change_account_password.dart';
 import 'package:app/domain/usecases/account/change/change_auto_login.dart';
 import 'package:app/domain/usecases/account/change/logout_of_account.dart';
+import 'package:app/domain/usecases/account/get_user_name.dart';
 import 'package:app/domain/usecases/account/inner/fetch_current_session_token.dart';
 import 'package:app/domain/usecases/account/get_auto_login.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
@@ -111,6 +112,7 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<GetAutoLogin>(() => GetAutoLogin(accountRepository: sl()));
   sl.registerLazySingleton<ChangeAutoLogin>(() => ChangeAutoLogin(accountRepository: sl()));
   sl.registerLazySingleton<GetLoggedInAccount>(() => GetLoggedInAccount(accountRepository: sl()));
+  sl.registerLazySingleton<GetUsername>(() => GetUsername(accountRepository: sl()));
   sl.registerLazySingleton<SaveAccount>(() => SaveAccount(accountRepository: sl()));
   sl.registerLazySingleton<ActivateScreenSaver>(() => ActivateScreenSaver(accountRepository: sl(), navigationService: sl()));
 
@@ -197,6 +199,7 @@ Future<void> initializeGetIt() async {
         navigationService: sl(),
         dialogService: sl(),
         getRequiredLoginStatus: sl(),
+        getUsername: sl(),
         createAccount: sl(),
         loginToAccount: sl(),
         logoutOfAccount: sl(),

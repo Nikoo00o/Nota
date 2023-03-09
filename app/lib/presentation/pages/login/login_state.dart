@@ -15,7 +15,10 @@ class LoginRemoteState extends LoginState {
 }
 
 class LoginLocalState extends LoginState {
-  LoginLocalState({required super.firstButtonKey});
+  /// The username of the logged in user. not used for comparison!
+  final String username;
+
+  LoginLocalState({required super.firstButtonKey, required this.username});
 }
 
 class LoginCreateState extends LoginState {

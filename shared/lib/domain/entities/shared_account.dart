@@ -12,7 +12,7 @@ import 'package:shared/domain/entities/session_token.dart';
 /// Some fields of this entity can be modified and are not final.
 class SharedAccount {
   /// Used as identifier for accounts
-  String userName;
+  String username;
 
   /// Base64 encoded hash of the user password
   String passwordHash;
@@ -30,7 +30,7 @@ class SharedAccount {
   List<NoteInfo> noteInfoList;
 
   SharedAccount({
-    required this.userName,
+    required this.username,
     required this.passwordHash,
     required this.sessionToken,
     required this.encryptedDataKey,
@@ -47,7 +47,7 @@ class SharedAccount {
     if (other is! SharedAccount) {
       return false;
     }
-    return userName == other.userName &&
+    return username == other.username &&
         passwordHash == other.passwordHash &&
         sessionToken == other.sessionToken &&
         encryptedDataKey == other.encryptedDataKey &&
@@ -56,11 +56,11 @@ class SharedAccount {
 
   @override
   int get hashCode => Object.hash(
-      userName.hashCode, passwordHash.hashCode, sessionToken.hashCode, encryptedDataKey.hashCode, noteInfoList.hashCode);
+      username.hashCode, passwordHash.hashCode, sessionToken.hashCode, encryptedDataKey.hashCode, noteInfoList.hashCode);
 
   Map<String, Object?> getProperties() {
     return <String, Object?>{
-      "userName": userName,
+      "username": username,
       "passwordHash": passwordHash,
       "sessionToken": sessionToken,
       "encryptedDataKey": encryptedDataKey,

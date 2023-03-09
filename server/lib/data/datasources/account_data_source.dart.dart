@@ -53,8 +53,8 @@ class AccountDataSource {
       account = _cachedSessionTokenAccounts[sessionToken]!;
     } else {
       // check stored accounts
-      for (final String userName in await localDataSource.getAllAccountUserNames()) {
-        final ServerAccountModel? tempAccount = await localDataSource.loadAccount(userName);
+      for (final String username in await localDataSource.getAllAccountUserNames()) {
+        final ServerAccountModel? tempAccount = await localDataSource.loadAccount(username);
         if (tempAccount?.containsSessionToken(sessionToken) ?? false) {
           account = tempAccount;
           wasLoadedFromStorage = true;
@@ -87,13 +87,13 @@ class AccountDataSource {
   /// Also makes sure that the base64 encoded session token is not already contained in the cached accounts.
   ///
   /// Does not modify the session token if its invalid except when its duplicated.
-  Future<ServerAccountModel?> getAccountByUsername(String userName) async {
+  Future<ServerAccountModel?> getAccountByUsername(String username) async {
     for (final ServerAccountModel account in _cachedSessionTokenAccounts.values) {
-      if (account.userName == userName) {
+      if (account.username == username) {
         return account; // return cached account
       }
     }
-    final ServerAccountModel? account = await localDataSource.loadAccount(userName); // return stored account
+    final ServerAccountModel? account = await localDataSource.loadAccount(username); // return stored account
     if (account != null && account.isSessionTokenStillValid()) {
       final String sessionToken = account.sessionToken!.token;
       if (_cachedSessionTokenAccounts.containsKey(sessionToken)) {
@@ -143,9 +143,9 @@ class AccountDataSource {
   Future<void> resetAllSessionTokens() async {
     Logger.debug("Clearing all session tokens");
     _cachedSessionTokenAccounts.clear();
-    final List<String> userNames = await localDataSource.getAllAccountUserNames();
-    for (final String userName in userNames) {
-      final ServerAccountModel? account = await localDataSource.loadAccount(userName);
+    final List<String> usernames = await localDataSource.getAllAccountUserNames();
+    for (final String username in usernames) {
+      final ServerAccountModel? account = await localDataSource.loadAccount(username);
       if (account != null && account.sessionToken != null) {
         account.sessionToken = null;
         await localDataSource.saveAccount(account);
@@ -204,7 +204,7 @@ class AccountDataSource {
       // save the new account in cache and update it in local storage
       _cachedSessionTokenAccounts[newSessionToken.token] = account;
       await localDataSource.saveAccount(account);
-      Logger.debug("Updated the session token for ${account.userName} from $oldSessionToken\nto $newSessionToken");
+      Logger.debug("Updated the session token for ${account.username} from $oldSessionToken\nto $newSessionToken");
     }
     return account;
   }

@@ -9,7 +9,7 @@ import 'package:shared/domain/entities/session_token.dart';
 
 class ServerAccountModel extends ServerAccount with SharedAccountModelMixin implements Model {
   ServerAccountModel({
-    required super.userName,
+    required super.username,
     required super.passwordHash,
     required super.sessionToken,
     required super.encryptedDataKey,
@@ -34,7 +34,7 @@ class ServerAccountModel extends ServerAccount with SharedAccountModelMixin impl
         noteInfoDynList.map((dynamic map) => NoteInfoModel.fromJson(map as Map<String, dynamic>)).toList();
 
     return ServerAccountModel(
-      userName: json[SharedAccountModelMixin.JSON_USER_NAME] as String,
+      username: json[SharedAccountModelMixin.JSON_USER_NAME] as String,
       passwordHash: json[SharedAccountModelMixin.JSON_PASSWORD_HASH] as String,
       sessionToken: sessionToken,
       encryptedDataKey: json[SharedAccountModelMixin.JSON_ENCRYPTED_DATA_KEY] as String,
@@ -47,7 +47,7 @@ class ServerAccountModel extends ServerAccount with SharedAccountModelMixin impl
       return entity;
     }
     return ServerAccountModel(
-      userName: entity.userName,
+      username: entity.username,
       passwordHash: entity.passwordHash,
       sessionToken: entity.sessionToken,
       encryptedDataKey: entity.encryptedDataKey,

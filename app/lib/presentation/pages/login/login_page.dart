@@ -33,7 +33,7 @@ class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
         scrollbarOrientation: ScrollbarOrientation.right,
         child: SingleChildScrollView(
           controller: scrollController,
-          padding: const EdgeInsets.fromLTRB(40, 10, 40, 0),
+          padding: const EdgeInsets.fromLTRB(40, 5, 40, 5),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
@@ -56,11 +56,46 @@ class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
   }
 
   Widget _buildDescription(BuildContext context, LoginState state) {
+    if (state is LoginLocalState) {
+      return _buildLocalDetailedDescription(context, state);
+    }
     return Column(
       children: <Widget>[
         const NotaIcon(),
-        const SizedBox(height: 20),
-        Text(translate(_getPageDescription(state))),
+        const SizedBox(height: 25),
+        Text(
+          translate(_getPageDescription(state)),
+          style: const TextStyle(fontSize: 15),
+          // textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLocalDetailedDescription(BuildContext context, LoginLocalState state) {
+    return Column(
+      children: <Widget>[
+        const NotaIcon(),
+        const SizedBox(height: 25),
+        Text.rich(
+          TextSpan(
+            style: const TextStyle(fontSize: 15),
+            children: <InlineSpan>[
+              TextSpan(
+                text: translate("page.login.description.local.login.1"),
+              ),
+              TextSpan(
+                text: translate("empty.param.1", keyParams: <String>[state.username]),
+                style: TextStyle(color: theme(context).colorScheme.secondary, fontSize: 17),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          translate("page.login.description.local.login.2"),
+          style: const TextStyle(fontSize: 15),
+        ),
       ],
     );
   }
@@ -83,6 +118,7 @@ class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
             controller: passwordController,
             validator: _passwordValidator,
             textKey: "page.login.password",
+            obscureText: true,
           ),
           if (state is LoginCreateState) const SizedBox(height: space),
           if (state is LoginCreateState)
@@ -90,6 +126,7 @@ class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
               controller: passwordConfirmController,
               validator: _passwordConfirmValidator,
               textKey: "page.login.password.confirm",
+              obscureText: true,
             ),
         ],
       ),
@@ -129,15 +166,13 @@ class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
     throw UnimplementedError();
   }
 
+  /// Does not include [LoginLocalState]
   String _getPageDescription(LoginState state) {
     if (state is LoginCreateState) {
       return "page.login.description.create";
     }
     if (state is LoginRemoteState) {
       return "page.login.description.remote.login";
-    }
-    if (state is LoginLocalState) {
-      return "page.login.description.local.login";
     }
     throw UnimplementedError();
   }

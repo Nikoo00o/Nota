@@ -14,7 +14,7 @@ class ClientAccountModel extends ClientAccount with SharedAccountModelMixin impl
   static const String JSON_NEEDS_SERVER_SIDE_LOGIN = "JSON_NEEDS_SERVER_SIDE_LOGIN";
 
   ClientAccountModel({
-    required super.userName,
+    required super.username,
     required super.passwordHash,
     required super.sessionToken,
     required super.encryptedDataKey,
@@ -51,7 +51,7 @@ class ClientAccountModel extends ClientAccount with SharedAccountModelMixin impl
     }
 
     return ClientAccountModel(
-      userName: json[SharedAccountModelMixin.JSON_USER_NAME] as String,
+      username: json[SharedAccountModelMixin.JSON_USER_NAME] as String,
       passwordHash: json[SharedAccountModelMixin.JSON_PASSWORD_HASH] as String,
       sessionToken: sessionToken,
       encryptedDataKey: json[SharedAccountModelMixin.JSON_ENCRYPTED_DATA_KEY] as String,
@@ -67,7 +67,7 @@ class ClientAccountModel extends ClientAccount with SharedAccountModelMixin impl
       return entity;
     }
     return ClientAccountModel(
-      userName: entity.userName,
+      username: entity.username,
       passwordHash: entity.passwordHash,
       sessionToken: entity.sessionToken,
       encryptedDataKey: entity.encryptedDataKey,

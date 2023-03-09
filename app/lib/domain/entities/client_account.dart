@@ -25,7 +25,7 @@ class ClientAccount extends SharedAccount {
   bool needsServerSideLogin;
 
   ClientAccount({
-    required super.userName,
+    required super.username,
     required super.passwordHash,
     required super.sessionToken,
     required super.noteInfoList,
@@ -38,11 +38,11 @@ class ClientAccount extends SharedAccount {
   /// Only sets username and password hash.
   /// [storeDecryptedDataKey] is false and [needsServerSideLogin] is true!
   factory ClientAccount.defaultValues({
-    required String userName,
+    required String username,
     required String passwordHash,
   }) {
     return ClientAccount(
-      userName: userName,
+      username: username,
       passwordHash: passwordHash,
       sessionToken: null,
       noteInfoList: <NoteInfo>[],

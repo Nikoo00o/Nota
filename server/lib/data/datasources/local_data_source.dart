@@ -24,8 +24,8 @@ abstract class LocalDataSource {
   /// Returns the stored [ServerAccountModel], or null.
   /// Only the accessed accounts will be loaded into memory.
   ///
-  Future<ServerAccountModel?> loadAccount(String userName) async {
-    final String? jsonString = await read(key: userName, databaseKey: ACCOUNT_DATABASE);
+  Future<ServerAccountModel?> loadAccount(String username) async {
+    final String? jsonString = await read(key: username, databaseKey: ACCOUNT_DATABASE);
     if (jsonString != null) {
       return ServerAccountModel.fromJson(jsonDecode(jsonString) as Map<String, dynamic>);
     }
@@ -34,7 +34,7 @@ abstract class LocalDataSource {
 
   /// Stores a new [ServerAccountModel]
   Future<void> saveAccount(ServerAccountModel account) async {
-    await write(key: account.userName, value: jsonEncode(account), databaseKey: ACCOUNT_DATABASE);
+    await write(key: account.username, value: jsonEncode(account), databaseKey: ACCOUNT_DATABASE);
   }
 
   /// Returns a list of all stored account user names!

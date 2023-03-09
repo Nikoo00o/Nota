@@ -7,6 +7,9 @@ class CustomOutlinedButton extends WidgetBase {
   /// The text key used for translating a value
   final String textKey;
 
+  /// Params for [textKey]
+  final List<String>? textKeyParams;
+
   /// If the color is null, then the primary color will be used
   final Color? color;
 
@@ -15,6 +18,7 @@ class CustomOutlinedButton extends WidgetBase {
     this.onPressed,
     required this.textKey,
     this.color,
+    this.textKeyParams,
   });
 
   @override
@@ -33,7 +37,7 @@ class CustomOutlinedButton extends WidgetBase {
         ),
         shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
       ),
-      child: Text(translate(textKey)),
+      child: Text(translate(textKey, keyParams: textKeyParams)),
     );
   }
 }

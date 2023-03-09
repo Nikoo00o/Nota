@@ -55,7 +55,7 @@ void _testCreateAccount() {
     final ClientAccount cachedAccount = await sl<AccountRepository>().getAccountAndThrowIfNull();
     await clearAccountCache();
     final ClientAccount storedAccount = await sl<AccountRepository>().getAccountAndThrowIfNull();
-    expect(cachedAccount.userName, "test1", reason: "username should match");
+    expect(cachedAccount.username, "test1", reason: "username should match");
     expect(cachedAccount, storedAccount, reason: "accounts should match");
     expect(server.accountRepository.getAccountByUserName("test1"), isNot(null), reason: "server should have account");
 
@@ -74,7 +74,7 @@ void _testCreateAccount() {
     final ClientAccount cachedAccount = await sl<AccountRepository>().getAccountAndThrowIfNull();
     await clearAccountCache();
     final ClientAccount storedAccount = await sl<AccountRepository>().getAccountAndThrowIfNull();
-    expect(cachedAccount.userName, "test2", reason: "username should match");
+    expect(cachedAccount.username, "test2", reason: "username should match");
     expect(cachedAccount, storedAccount, reason: "accounts should match");
     expect(server.accountRepository.getAccountByUserName("test1"), isNot(null), reason: "server should have account 1");
     expect(server.accountRepository.getAccountByUserName("test2"), isNot(null), reason: "and server should have account 2");
@@ -143,10 +143,10 @@ void _testLoginToAccount() {
 
   test("Logging in to an account remotely without a valid stored account", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-    await sl<AccountRepository>().saveAccount(ClientAccount.defaultValues(userName: "", passwordHash: ""));
+    await sl<AccountRepository>().saveAccount(ClientAccount.defaultValues(username: "", passwordHash: ""));
 
     final ClientAccount cachedAccount = await _remoteLogin("test1", "password1");
-    expect(cachedAccount.userName, "test1");
+    expect(cachedAccount.username, "test1");
   });
 
   test("Logging in to an account remotely and locally", () async {
@@ -324,7 +324,7 @@ void _testFetchCurrentSessionToken() {
 
   test("Trying to get session token with an invalid account stored", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-    await sl<AccountRepository>().saveAccount(ClientAccount.defaultValues(userName: "invalid", passwordHash: "invalid"));
+    await sl<AccountRepository>().saveAccount(ClientAccount.defaultValues(username: "invalid", passwordHash: "invalid"));
     expect(() async {
       await fetchCurrentSessionToken();
     }, throwsA(predicate((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_UNKNOWN_ACCOUNT)));
@@ -354,7 +354,7 @@ void _testChangeAccountPassword() {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
     await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     final ClientAccount account = await sl<AccountRepository>().getAccountAndThrowIfNull();
-    account.userName = "invalid";
+    account.username = "invalid";
     account.sessionToken = null;
     expect(() async {
       await sl<ChangeAccountPassword>().call(const ChangePasswordParams(newPassword: "newPassword3"));
@@ -421,7 +421,7 @@ void _testGetLoggedInAccount() {
     await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
     expect(account.isLoggedIn, true, reason: "account should be logged in");
-    expect(account.userName, "test1", reason: "and contain the correct data");
+    expect(account.username, "test1", reason: "and contain the correct data");
     expect(account.isSessionTokenStillValid(), true, reason: "and have a valid session token");
 
     account.sessionToken = null;

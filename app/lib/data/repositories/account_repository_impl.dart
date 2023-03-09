@@ -67,7 +67,7 @@ class AccountRepositoryImpl extends AccountRepository {
     final ClientAccount account = await getAccountAndThrowIfNull();
     await remoteAccountDataSource.createAccountRequest(CreateAccountRequest(
       createAccountToken: appConfig.createAccountToken,
-      userName: account.userName,
+      username: account.username,
       passwordHash: account.passwordHash,
       encryptedDataKey: account.encryptedDataKey,
     ));
@@ -77,7 +77,7 @@ class AccountRepositoryImpl extends AccountRepository {
   Future<ClientAccount> login() async {
     final ClientAccount account = await getAccountAndThrowIfNull();
     final AccountLoginResponse response = await remoteAccountDataSource.loginRequest(AccountLoginRequest(
-      userName: account.userName,
+      username: account.username,
       passwordHash: account.passwordHash,
     ));
     account.sessionToken = response.sessionToken;
@@ -102,15 +102,15 @@ class AccountRepositoryImpl extends AccountRepository {
   }
 
   @override
-  Future<List<NoteInfo>?> getOldNotesForAccount(String userName) async {
+  Future<List<NoteInfo>?> getOldNotesForAccount(String username) async {
     final Map<String, List<NoteInfoModel>> accounts = await localDataSource.getOldAccounts();
-    return accounts[userName];
+    return accounts[username];
   }
 
   @override
-  Future<void> saveNotesForOldAccount(String userName, List<NoteInfo> notes) async {
+  Future<void> saveNotesForOldAccount(String username, List<NoteInfo> notes) async {
     final Map<String, List<NoteInfoModel>> accounts = await localDataSource.getOldAccounts();
-    accounts[userName] = notes.map((NoteInfo note) => NoteInfoModel.fromNoteInfo(note)).toList();
+    accounts[username] = notes.map((NoteInfo note) => NoteInfoModel.fromNoteInfo(note)).toList();
     await localDataSource.saveOldAccounts(accounts);
   }
 }

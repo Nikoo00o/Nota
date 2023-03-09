@@ -168,7 +168,7 @@ void main() {
     dialogServiceMock.confirmedOverride = true; // should confirm the note transfer
     await sl<TransferNotes>().call(const NoParams()); // first transfer to upload note
 
-    account.userName = "dontCacheData"; // pretend that this is someone else, so that the logout does not cache!
+    account.username = "dontCacheData"; // pretend that this is someone else, so that the logout does not cache!
     await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false)); //resets the account
     await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     account = await sl<GetLoggedInAccount>().call(const NoParams()); //refresh account because of logout
@@ -254,7 +254,7 @@ void main() {
 
     await sl<TransferNotes>().call(const NoParams()); // transfer the deleted note to the server
 
-    account.userName = "dontCacheData"; // pretend that this is someone else, so that the logout does not cache!
+    account.username = "dontCacheData"; // pretend that this is someone else, so that the logout does not cache!
     await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
     await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     account = await sl<GetLoggedInAccount>().call(const NoParams()); //refresh account because of logout and get the old cached
@@ -284,7 +284,7 @@ void main() {
     account.noteInfoList[0] = account.noteInfoList.first.copyWith(newEncFileName: "", newLastEdited: deletedTime);
 
     await sl<TransferNotes>().call(const NoParams()); // first transfer the deleted note and logout without caching
-    account.userName = "dontCacheData";
+    account.username = "dontCacheData";
     await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
 
     await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
@@ -292,7 +292,7 @@ void main() {
 
     await sl<TransferNotes>().call(const NoParams()); // transfer the deleted note to the server
 
-    account.userName = "dontCacheData"; // pretend that this is someone else, so that the logout does not cache!
+    account.username = "dontCacheData"; // pretend that this is someone else, so that the logout does not cache!
     await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
     await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
     account = await sl<GetLoggedInAccount>().call(const NoParams()); //refresh account because of logout

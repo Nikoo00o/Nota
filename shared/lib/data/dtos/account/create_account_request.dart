@@ -11,7 +11,7 @@ class CreateAccountRequest extends AccountLoginRequest {
 
   const CreateAccountRequest({
     required this.createAccountToken,
-    required super.userName,
+    required super.username,
     required super.passwordHash,
     required this.encryptedDataKey,
   });
@@ -28,7 +28,7 @@ class CreateAccountRequest extends AccountLoginRequest {
   factory CreateAccountRequest.fromJson(Map<String, dynamic> map) {
     return CreateAccountRequest(
       createAccountToken: map[JSON_CREATE_ACCOUNT_TOKEN] as String,
-      userName: map[SharedAccountModelMixin.JSON_USER_NAME] as String,
+      username: map[SharedAccountModelMixin.JSON_USER_NAME] as String,
       passwordHash: map[SharedAccountModelMixin.JSON_PASSWORD_HASH] as String,
       encryptedDataKey: map[SharedAccountModelMixin.JSON_ENCRYPTED_DATA_KEY] as String,
     );
