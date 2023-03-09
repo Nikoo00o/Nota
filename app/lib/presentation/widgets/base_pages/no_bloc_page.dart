@@ -15,33 +15,7 @@ abstract class NoBlocPage extends PageBase {
 
   @override
   Widget build(BuildContext context) {
-    return buildPage(context, buildBody(context));
-  }
-
-  /// builds the page [body] expanded with a padding around it and background image, or background color.
-  ///
-  /// Everything will be build inside of a [Scaffold] which can also use [buildAppBar] and
-  /// [buildMenuDrawer].
-  Widget buildPage(BuildContext context, Widget body) {
-    return GestureDetector(
-      onTapDown: (TapDownDetails details) => unFocus(context),
-      child: Scaffold(
-        body: Container(
-          decoration: BoxDecoration(image: getBackgroundImage(), color: getBackgroundColor(context)),
-          child: Padding(
-            padding: pagePadding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Expanded(child: body),
-              ],
-            ),
-          ),
-        ),
-        appBar: buildAppBar(context),
-        drawer: buildMenuDrawer(context),
-      ),
-    );
+    return buildPage(context, buildBody(context), buildAppBar(context), buildMenuDrawer(context));
   }
 
   /// This can be overridden inside of a subclass to build an app bar for this page.

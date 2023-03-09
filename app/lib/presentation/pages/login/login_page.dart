@@ -2,13 +2,13 @@ import 'package:app/core/get_it.dart';
 import 'package:app/presentation/pages/login/login_bloc.dart';
 import 'package:app/presentation/pages/login/login_event.dart';
 import 'package:app/presentation/pages/login/login_state.dart';
-import 'package:app/presentation/widgets/base_pages/simple_bloc_page.dart';
+import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:app/presentation/widgets/custom_outlined_button.dart';
 import 'package:app/presentation/widgets/custom_text_form_field.dart';
 import 'package:app/presentation/widgets/nota_icon.dart';
 import 'package:flutter/material.dart';
 
-class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
+class LoginPage extends BlocPage<LoginBloc, LoginState> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController passwordConfirmController = TextEditingController();
@@ -27,7 +27,7 @@ class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
   }
 
   @override
-  Widget buildBody(BuildContext context, LoginState state) {
+  Widget buildBodyWithState(BuildContext context, LoginState state) {
     return Center(
       child: Scrollbar(
         scrollbarOrientation: ScrollbarOrientation.right,
@@ -51,7 +51,10 @@ class LoginPage extends SimpleBlocPage<LoginBloc, LoginState> {
   }
 
   @override
-  PreferredSizeWidget? buildAppBar(BuildContext context, LoginState state) {
+  PreferredSizeWidget? buildAppBar(BuildContext context) => createAppBarWithState(context);
+
+  @override
+  PreferredSizeWidget buildAppBarWithState(BuildContext context, LoginState state) {
     return AppBar(centerTitle: false, title: Text(translate(_getPageTitle(state))));
   }
 

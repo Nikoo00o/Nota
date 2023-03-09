@@ -42,7 +42,7 @@ abstract class PageBase extends WidgetBase {
 
   /// Returns the [backgroundColor] if the [backGroundImage] is null, otherwise this returns null.
   ///
-  /// If the [backgroundColor] is null, then the themes background color will be used (not scaffold background color)!
+  /// If the [backgroundColor] is null, then the themes scaffold background color will be used!
   Color? getBackgroundColor(BuildContext context) {
     if (backGroundImage != null) {
       return null;
@@ -77,4 +77,30 @@ abstract class PageBase extends WidgetBase {
   ///
   /// This needs to be overridden in the subclass
   String get pageName;
+
+  /// this is called internally and builds the page [body] expanded with a padding around it and background image, or
+  /// background color.
+  ///
+  /// Everything will be build inside of a [Scaffold] which can also uses the [appBar] and [menuDrawer].
+  Widget buildPage(BuildContext context, Widget body, PreferredSizeWidget? appBar, Widget? menuDrawer) {
+    return GestureDetector(
+      onTapDown: (TapDownDetails details) => unFocus(context),
+      child: Scaffold(
+        body: Container(
+          decoration: BoxDecoration(image: getBackgroundImage(), color: getBackgroundColor(context)),
+          child: Padding(
+            padding: pagePadding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Expanded(child: body),
+              ],
+            ),
+          ),
+        ),
+        appBar: appBar,
+        drawer: menuDrawer,
+      ),
+    );
+  }
 }
