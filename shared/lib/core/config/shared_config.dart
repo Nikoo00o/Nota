@@ -1,9 +1,10 @@
 import 'package:shared/core/config/sensitive_data.dart';
+import 'package:shared/keygen/file_key_gen.dart';
 
 class SharedConfig {
   /// The amount of bytes used to generate keys for this app.
   /// This is static and should not change in the different projects, or during development
-  static const int keyBytes = 32;
+  static int get keyBytes => FileKeyGen.keyBytes;
 
   /// Returns ".temp", or ".note"
   static String noteFileEnding({required bool isTempNote}) => isTempNote ? ".temp" : ".note";
