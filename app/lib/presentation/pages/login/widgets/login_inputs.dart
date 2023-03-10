@@ -1,3 +1,4 @@
+import 'package:app/core/utils/input_validator.dart';
 import 'package:app/presentation/pages/login/login_bloc.dart';
 import 'package:app/presentation/pages/login/login_state.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
@@ -32,7 +33,7 @@ class LoginInputs extends BlocPageChild<LoginBloc, LoginState> {
           if (state is LoginRemoteState || state is LoginCreateState) const SizedBox(height: space),
           CustomTextFormField(
             controller: passwordController,
-            validator: _passwordValidator,
+            validator: state is LoginCreateState ? _passwordValidator : null,
             textKey: "page.login.password",
             obscureText: true,
           ),
@@ -56,8 +57,8 @@ class LoginInputs extends BlocPageChild<LoginBloc, LoginState> {
 
   String? _passwordValidator(String? input) {
     if (input != null && input.isNotEmpty) {
-      if (_checkPassword(input) == false) {
-        return translate("page.login.unsecure.password");
+      if (InputValidator.validatePassword(input) == false) {
+        return translate("page.login.insecure.password");
       }
     }
     return null;
@@ -71,12 +72,4 @@ class LoginInputs extends BlocPageChild<LoginBloc, LoginState> {
     }
     return null;
   }
-
-  /// The password should contain at least 4 characters and it should contain at least one lowercase letter, one uppercase
-  /// letter and one number.
-  bool _checkPassword(String password) =>
-      password.length >= 4 &&
-      RegExp(r"[A-Z]").hasMatch(password) &&
-      RegExp(r"[a-z]").hasMatch(password) &&
-      RegExp(r"\d").hasMatch(password);
 }

@@ -1,32 +1,46 @@
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
-import 'package:app/presentation/main/dialog_overlay/dialog_overlay_event.dart';
+import 'package:flutter/material.dart';
 
+/// There are many dialog options, but you can always show a fully custom dialog with [showCustomDialog]!
+///
+/// This class only provides access to the dialog overlay bloc and can be mocked for tests!
+///
+/// For Documentation on how to use the dialogs, look at [DialogOverlayBloc].
 abstract class DialogService {
-
   const DialogService();
 
-  /// Non blocking
-  void showErrorDialog(String dialogTextKey, {List<String>? dialogTextKeyParams});
+  /// This can be used to add any of the different dialog types which inherit from [DialogOverlayEvent].
+  void show(DialogOverlayEvent params);
 
-  /// Non blocking
-  void showInfoDialog(String dialogTextKey, {List<String>? dialogTextKeyParams});
+  /// Shows the specified dialog with many optional parameter. For the [params], look at [ShowLoadingDialog].
+  void showLoadingDialog([ShowLoadingDialog? params]);
 
-  /// Non blocking
-  void showLoadingDialog({String? dialogTextKey, List<String>? dialogTextKeyParams});
+  /// Shows the specified dialog with many optional parameter. For the [params], look at [ShowCustomDialog].
+  void showCustomDialog(ShowCustomDialog params);
 
-  /// Shows a dialog with the [dialogTextKey] as description text if not null and otherwise a default "Confirm" message.
-  /// If [cancelTextKey] is null, then the dialog will only have one button.
+  /// Shows a small info [SnackBar] at the bottom of the screen. this should only be used for small status updates.
+  /// For bigger more relevant info, use [ShowInfoDialog].
   ///
-  /// Returns [true] if the [confirmTextKey] button was pressed and false if the [cancelTextKey] button was pressed.
-  /// Blocks the calling function until the user pressed a button.
-  Future<bool> showConfirmDialog({
-    String? dialogTextKey,
-    List<String>? dialogTextKeyParams,
-    required String confirmTextKey,
-    List<String>? confirmTextKeyParams,
-    String? cancelTextKey,
-    List<String>? cancelTextKeyParams,
-  });
+  /// Shows the specified dialog with many optional parameter. For the [params], look at [ShowInfoSnackBar].
+  void showInfoSnackBar(ShowInfoSnackBar params);
+
+  /// Shows an information dialog with a title, text and a confirm button. If the information is meaningless and small,
+  /// consider using [ShowInfoSnackBar] instead!
+  ///
+  /// Shows the specified dialog with many optional parameter. For the [params], look at [ShowInfoDialog].
+  void showInfoDialog(ShowInfoDialog params);
+
+  /// Shows the specified dialog with many optional parameter. For the [params], look at [ShowErrorDialog].
+  void showErrorDialog(ShowErrorDialog params);
+
+  /// Shows the specified dialog with many optional parameter. For the [params], look at [ShowConfirmDialog].
+  void showConfirmDialog(ShowConfirmDialog params);
+
+  /// Shows the specified dialog with many optional parameter. For the [params], look at [ShowInputDialog].
+  void showInputDialog(ShowInputDialog params);
+
+  /// Shows the specified dialog with many optional parameter. For the [params], look at [ShowSelectDialog].
+  void showSelectionDialog(ShowSelectDialog params);
 
   /// Hides the last dialog
   void hideDialog();
@@ -47,42 +61,58 @@ class DialogServiceImpl extends DialogService {
   const DialogServiceImpl({required this.dialogOverlayBloc});
 
   @override
-  void showErrorDialog(String dialogTextKey, {List<String>? dialogTextKeyParams}) {
-   // dialogOverlayBloc.add(ShowErrorDialog(dialogTextKey, dialogTextKeyParams));
+  void show(DialogOverlayEvent params){
+    dialogOverlayBloc.add(params);
   }
 
   @override
-  void showInfoDialog(String dialogTextKey, {List<String>? dialogTextKeyParams}) {
-    //dialogOverlayBloc.add(ShowErrorDialog(dialogTextKey, dialogTextKeyParams)); //todo: add in dialog service + bloc
+  void showLoadingDialog([ShowLoadingDialog? params]) {
+    dialogOverlayBloc.add(params ?? const ShowLoadingDialog());
   }
 
   @override
-  void showLoadingDialog({String? dialogTextKey, List<String>? dialogTextKeyParams}) {
-    //dialogOverlayBloc.add(ShowLoadingDialog(dialogTextKey, dialogTextKeyParams));
+  void showCustomDialog(ShowCustomDialog params) {
+    dialogOverlayBloc.add(params);
   }
 
   @override
-  Future<bool> showConfirmDialog({
-    String? dialogTextKey,
-    List<String>? dialogTextKeyParams,
-    required String confirmTextKey,
-    List<String>? confirmTextKeyParams,
-    String? cancelTextKey,
-    List<String>? cancelTextKeyParams,
-  }) async {
-    //dialogOverlayBloc.add(ShowConfirmDialog(dialogTextKey ?? "dialog.confirm", dialogTextKeyParams, () {}));
-    // todo: change event, also prevent back navigation for all dialogs! this service is not fully implemented yet!!!!!
-    return true;
+  void showInfoSnackBar(ShowInfoSnackBar params) {
+    dialogOverlayBloc.add(params);
+  }
+
+  @override
+  void showInfoDialog(ShowInfoDialog params) {
+    dialogOverlayBloc.add(params);
+  }
+
+  @override
+  void showErrorDialog(ShowErrorDialog params) {
+    dialogOverlayBloc.add(params);
+  }
+
+  @override
+  void showConfirmDialog(ShowConfirmDialog params) {
+    dialogOverlayBloc.add(params);
+  }
+
+  @override
+  void showInputDialog(ShowInputDialog params) {
+    dialogOverlayBloc.add(params);
+  }
+
+  @override
+  void showSelectionDialog(ShowSelectDialog params) {
+    dialogOverlayBloc.add(params);
   }
 
   @override
   void hideDialog() {
-    dialogOverlayBloc.add(const HideDialog());
+    dialogOverlayBloc.add(const HideDialog(cancelDialog: true));
   }
 
   @override
   void hideLoadingDialog() {
-    dialogOverlayBloc.add(const HideDialog());
+    dialogOverlayBloc.add(const HideLoadingDialog());
   }
 
   @override

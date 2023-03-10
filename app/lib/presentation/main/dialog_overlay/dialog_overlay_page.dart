@@ -16,7 +16,6 @@ class DialogOverlayPage extends StatelessWidget {
       child: BlocBuilder<DialogOverlayBloc, DialogOverlayState>(
         builder: (BuildContext context, DialogOverlayState state) {
           return Container(key: state.dialogOverlayKey, child: child);
-          // overlay must be here
         },
       ),
     );

@@ -1,7 +1,6 @@
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
-import 'package:app/presentation/main/dialog_overlay/dialog_overlay_event.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_event.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_state.dart';
@@ -9,6 +8,7 @@ import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:flutter/material.dart';
+import 'package:shared/core/utils/logger/logger.dart';
 
 class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> {
   const NoteSelectionPage() : super();
@@ -58,48 +58,23 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
         ),
         FilledButton(
           onPressed: () async {
-            sl<DialogOverlayBloc>().add(ShowInfoDialog(descriptionKey: "some long description, yay"));
-            sl<DialogOverlayBloc>().add(ShowLoadingDialog());
-            await Future<void>.delayed(Duration(seconds: 2));
-            sl<DialogOverlayBloc>().add(HideLoadingDialog());
-            await Future<void>.delayed(Duration(seconds: 2));
-            sl<DialogOverlayBloc>().add(ShowLoadingDialog());
-            await Future<void>.delayed(Duration(seconds: 2));
-            sl<DialogOverlayBloc>().add(HideDialog());
-
-            await Future<void>.delayed(Duration(seconds: 2));
-            sl<DialogOverlayBloc>().add(ShowLoadingDialog());
-            await Future<void>.delayed(Duration(seconds: 1));
-            sl<DialogOverlayBloc>().add(ShowInfoDialog(descriptionKey: "some long description, yay"));
-
-            await Future<void>.delayed(Duration(seconds: 2));
-
-            sl<DialogOverlayBloc>().add(HideDialog());
+            sl<DialogService>().show(ShowErrorDialog(descriptionKey: "errorrororororoor"));
           },
-          child: Text("combination"),
+          child: Text("test error dialog "),
         ),
-
         FilledButton(
           onPressed: () async {
-            showDialog<String>(
-              context: context,
-              builder: (BuildContext context) => AlertDialog(
-                title: const Text('AlertDialog Title'),
-                content: const Text('AlertDialog description'),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, 'Cancel'),
-                    child: const Text('Cancel'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, 'OK'),
-                    child: const Text('OK'),
-                  ),
-                ],
-              ),
-            );
+            sl<DialogService>().show(ShowConfirmDialog(
+              descriptionKey: "confirm this",
+              onConfirm: () {
+                Logger.verbose("CONFIRMED");
+              },
+              onCancel: () {
+                Logger.verbose("CANCELLED");
+              },
+            ));
           },
-          child: Text("other"),
+          child: Text("test confirm dialog "),
         ),
       ],
     );
@@ -120,7 +95,6 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
   Widget? buildMenuDrawer(BuildContext context) {
     // todo: continue here and make own class
     return Container(
-      color: colorScaffoldBackground(context),
       width: MediaQuery.of(context).size.width * 3 / 4,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

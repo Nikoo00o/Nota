@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/enums/required_login_status.dart';
+import 'package:app/core/utils/input_validator.dart';
 import 'package:app/domain/usecases/account/change/logout_of_account.dart';
 import 'package:app/domain/usecases/account/get_user_name.dart';
 import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/account/login/get_required_login_status.dart';
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
+import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/presentation/pages/login/login_event.dart';
 import 'package:app/presentation/pages/login/login_state.dart';
 import 'package:app/presentation/widgets/base_pages/page_bloc.dart';
@@ -89,7 +91,11 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
   Future<void> _handleCreate(LoginEventCreate event, Emitter<LoginState> emit) async {
     if (_validateInput(password: event.password, username: event.username, confirmPassword: event.confirmPassword)) {
       await createAccount(CreateAccountParams(username: event.username, password: event.password));
-      dialogService.showInfoDialog("page.login.account.created", dialogTextKeyParams: <String>[event.username]);
+      dialogService.show(ShowInfoDialog(
+        titleKey: "page.login.account.created.title",
+        descriptionKey: "page.login.account.created.description",
+        descriptionKeyParams: <String>[event.username],
+      ));
       _createNewAccount = false;
       add(const LoginEventInitialise());
     }
@@ -121,13 +127,26 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
     navigationService.navigateTo(Routes.notes);
   }
 
+  /// returns false on error
   bool _validateInput({String? username, required String password, String? confirmPassword}) {
-    if ((username?.isNotEmpty ?? true) && password.isNotEmpty && (confirmPassword?.isNotEmpty ?? true)) {
-      return true;
+    final bool fieldsAreNotEmpty =
+        (username?.isNotEmpty ?? true) && password.isNotEmpty && (confirmPassword?.isNotEmpty ?? true);
+    if (fieldsAreNotEmpty == false) {
+      Logger.error("One of the login page input fields was empty");
+      dialogService.show(const ShowErrorDialog(descriptionKey: "page.login.empty.params"));
+      return false;
     }
-    Logger.error("One of the login page input fields was empty");
-    dialogService.showErrorDialog("page.login.empty.params");
-    return false;
+    if (InputValidator.validatePassword(password) == false) {
+      Logger.error("The password was not secure enough");
+      dialogService.show(const ShowErrorDialog(descriptionKey: "page.login.insecure.password"));
+    }
+
+    if (confirmPassword != null && password !=confirmPassword) {
+      Logger.error("The passwords did not match");
+      dialogService.show(const ShowErrorDialog(descriptionKey: "page.login.no.password.match"));
+      return false;
+    }
+    return true;
   }
 
   void _clearTextInputFields() {

@@ -1,3 +1,4 @@
+import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/services/dialog_service.dart';
 
 class DialogServiceMock extends DialogService {
@@ -5,25 +6,31 @@ class DialogServiceMock extends DialogService {
   bool confirmedOverride = true;
 
   @override
-  void showErrorDialog(String dialogTextKey, {List<String>? dialogTextKeyParams}) {}
+  void show(DialogOverlayEvent params) {}
 
   @override
-  void showInfoDialog(String dialogTextKey, {List<String>? dialogTextKeyParams}) {}
+  void showLoadingDialog([ShowLoadingDialog? params]) {}
 
   @override
-  void showLoadingDialog({String? dialogTextKey, List<String>? dialogTextKeyParams}) {}
+  void showCustomDialog(ShowCustomDialog params) {}
 
   @override
-  Future<bool> showConfirmDialog({
-    String? dialogTextKey,
-    List<String>? dialogTextKeyParams,
-    required String confirmTextKey,
-    List<String>? confirmTextKeyParams,
-    String? cancelTextKey,
-    List<String>? cancelTextKeyParams,
-  }) async {
-    return confirmedOverride;
-  }
+  void showInfoSnackBar(ShowInfoSnackBar params) {}
+
+  @override
+  void showInfoDialog(ShowInfoDialog params) {}
+
+  @override
+  void showErrorDialog(ShowErrorDialog params) {}
+
+  @override
+  void showConfirmDialog(ShowConfirmDialog params) {}
+
+  @override
+  void showInputDialog(ShowInputDialog params) {}
+
+  @override
+  void showSelectionDialog(ShowSelectDialog params) {}
 
   @override
   void hideDialog() {}

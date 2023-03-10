@@ -18,7 +18,7 @@ class AppTheme {
       baseSecondaryColor: const Color(0xff3396f2),
       baseTertiaryColor: const Color(0xff49d15e),
       baseNeutralColor: const Color(0xff878787),
-      baseErrorColor: Colors.red[900]!,
+      baseErrorColor: const Color(0xffd41919),
     ).getTheme();
   }
 

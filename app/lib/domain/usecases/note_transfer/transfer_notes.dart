@@ -1,15 +1,13 @@
-import 'dart:convert';
-import 'dart:typed_data';
+import 'dart:async';
+
 import 'package:app/core/utils/security_utils_extension.dart';
 import 'package:app/domain/entities/client_account.dart';
-import 'package:app/domain/repositories/account_repository.dart';
 import 'package:app/domain/repositories/note_transfer_repository.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/save_account.dart';
+import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/services/dialog_service.dart';
-import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/enums/note_transfer_status.dart';
-import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/entities/note_info.dart';
 import 'package:shared/domain/entities/note_update.dart';
@@ -122,12 +120,17 @@ class TransferNotes extends UseCase<void, NoParams> {
       final List<String> serverChanges = await _getServerChangeFileNames(updates, account);
       Logger.debug("Got the following new server changed note names: $serverChanges");
 
-      final bool wasConfirmed = await dialogService.showConfirmDialog(
-        dialogTextKey: "note.transfer.server.change",
-        dialogTextKeyParams: serverChanges,
-        confirmTextKey: "accept",
-        cancelTextKey: "cancel",
-      );
+      final Completer<bool> completer = Completer<bool>();
+
+      dialogService.show(ShowConfirmDialog(
+        descriptionKey: "note.transfer.server.change.description",
+        descriptionKeyParams: <String>[serverChanges.join("\n")],
+        confirmButtonKey: "note.transfer.server.change.button.confirm",
+        onConfirm: () => completer.complete(true),
+        onCancel: () => completer.complete(false),
+      ));
+
+      final bool wasConfirmed = await completer.future;
 
       if (wasConfirmed == false) {
         return true;

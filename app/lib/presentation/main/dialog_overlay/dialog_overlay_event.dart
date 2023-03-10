@@ -1,6 +1,6 @@
-import 'package:app/presentation/widgets/base_pages/page_event.dart';
-import 'package:flutter/material.dart';
+part of "dialog_overlay_bloc.dart";
 
+/// For Documentation on how to use the dialogs, look at [DialogOverlayBloc].
 abstract class DialogOverlayEvent extends PageEvent {
   const DialogOverlayEvent();
 }
@@ -34,21 +34,20 @@ class ShowLoadingDialog extends DialogOverlayEvent {
   });
 }
 
-/// Shows a customized dialog with a title, a custom body [content] and a list of custom [buttons] widgets.
+/// Shows a completely customizable dialog.
 ///
-/// Remember that every button has to add a [HideDialog] event to close the dialog!
-class ShowCustomDialog extends _BaseDialog {
-  final Widget content;
-  final List<Widget> buttons;
+/// The [builder] should build an [AlertDialog] with its content and buttons. The cancel button should always be build first!
+///
+/// Remember that every button has to add a [HideDialog] event to the [DialogOverlayBloc] to close the dialog!!!!
+/// You can call the hideDialog of the dialog service for that.
+///
+/// Also important: if the user presses the back button, the [onBackPressed] will be called and you should then cancel, or
+/// hide your dialog!
+class ShowCustomDialog extends DialogOverlayEvent {
+  final WidgetBuilder builder;
+  final VoidCallback? onBackPressed;
 
-  const ShowCustomDialog({
-    required String titleKey,
-    super.titleKeyParams,
-    super.titleStyle,
-    super.titleIcon,
-    required this.content,
-    required this.buttons,
-  }) : super(titleKey: titleKey);
+  const ShowCustomDialog({required this.builder, this.onBackPressed});
 }
 
 /// Shows a small info [SnackBar] at the bottom of the screen. this should only be used for small status updates.
@@ -65,9 +64,8 @@ class ShowInfoSnackBar extends DialogOverlayEvent {
   });
 }
 
-/// Shows an information dialog with a title, text and a confirm button. If the information is meaningless and small,
-/// consider using [ShowInfoSnackBar] instead!
-class ShowInfoDialog extends _BaseDialog {
+/// Does not include the on confirm callback!
+class _ConfirmDialog extends _BaseDialog {
   final String descriptionKey;
   final List<String>? descriptionKeyParams;
   final TextStyle? descriptionStyle;
@@ -75,10 +73,7 @@ class ShowInfoDialog extends _BaseDialog {
   final List<String>? confirmButtonKeyParams;
   final ButtonStyle? confirmButtonStyle;
 
-  /// Callback that gets called when the confirm button of the dialog was pressed
-  final VoidCallback? onConfirm;
-
-  const ShowInfoDialog({
+  const _ConfirmDialog({
     super.titleKey,
     super.titleKeyParams,
     super.titleStyle,
@@ -89,7 +84,170 @@ class ShowInfoDialog extends _BaseDialog {
     this.confirmButtonKey,
     this.confirmButtonKeyParams,
     this.confirmButtonStyle,
+  });
+}
+
+/// Shows an information dialog with a title, text and a confirm button. If the information is meaningless and small,
+/// consider using [ShowInfoSnackBar] instead!
+///
+/// This is also used to display an error dialog!
+class ShowInfoDialog extends _ConfirmDialog {
+  /// Callback that gets called when the confirm button of the dialog was pressed
+  final VoidCallback? onConfirm;
+
+  const ShowInfoDialog({
+    super.titleKey,
+    super.titleKeyParams,
+    super.titleStyle,
+    super.titleIcon,
+    required super.descriptionKey,
+    super.descriptionKeyParams,
+    super.descriptionStyle,
+    super.confirmButtonKey,
+    super.confirmButtonKeyParams,
+    super.confirmButtonStyle,
     this.onConfirm,
+  });
+}
+
+/// This is the same as [ShowInfoDialog] except that you should not set the [titleStyle] and the [titleKey] will also have
+/// a different default value!
+class ShowErrorDialog extends _ConfirmDialog {
+  /// Callback that gets called when the confirm button of the dialog was pressed
+  final VoidCallback? onConfirm;
+
+  const ShowErrorDialog({
+    super.titleKey,
+    super.titleKeyParams,
+    super.titleIcon,
+    required super.descriptionKey,
+    super.descriptionKeyParams,
+    super.descriptionStyle,
+    super.confirmButtonKey,
+    super.confirmButtonKeyParams,
+    super.confirmButtonStyle,
+    this.onConfirm,
+  });
+}
+
+/// Does not include the on confirm callback!
+class _CancelDialog extends _ConfirmDialog {
+  final String? cancelButtonKey;
+  final List<String>? cancelButtonKeyParams;
+  final ButtonStyle? cancelButtonStyle;
+
+  /// Callback that gets called when the cancel button of the dialog was pressed
+  final VoidCallback? onCancel;
+
+  const _CancelDialog({
+    super.titleKey,
+    super.titleKeyParams,
+    super.titleStyle,
+    super.titleIcon,
+    required super.descriptionKey,
+    super.descriptionKeyParams,
+    super.descriptionStyle,
+    super.confirmButtonKey,
+    super.confirmButtonKeyParams,
+    super.confirmButtonStyle,
+    this.cancelButtonKey,
+    this.cancelButtonKeyParams,
+    this.cancelButtonStyle,
+    this.onCancel,
+  });
+}
+
+/// Shows a confirm dialog with a title, text and a confirm button and also a cancel button.
+class ShowConfirmDialog extends _CancelDialog {
+  /// Callback that gets called when the confirm button of the dialog was pressed
+  final VoidCallback? onConfirm;
+
+  const ShowConfirmDialog({
+    super.titleKey,
+    super.titleKeyParams,
+    super.titleStyle,
+    super.titleIcon,
+    required super.descriptionKey,
+    super.descriptionKeyParams,
+    super.descriptionStyle,
+    super.confirmButtonKey,
+    super.confirmButtonKeyParams,
+    super.confirmButtonStyle,
+    super.cancelButtonKey,
+    super.cancelButtonKeyParams,
+    super.cancelButtonStyle,
+    super.onCancel,
+    this.onConfirm,
+  });
+}
+
+/// Shows an input dialog with a title, text and a confirm button and also a cancel button.
+///
+/// Below the text will be a text input field for some input from the user. The input will be returned inside of the
+/// [onConfirm] callback!
+///
+/// You can also add a [validatorCallback] which prevents the user from clicking on the confirm button and also displays
+/// a translated error message to the user.
+class ShowInputDialog extends _CancelDialog {
+  final String? inputLabelKey;
+
+  /// Callback that gets called when the confirm button of the dialog was pressed and also contains the data the user put in
+  final FutureOr<void> Function(String) onConfirm;
+
+  /// If this callback returns null, that means that there is no error
+  final String? Function(String?)? validatorCallback;
+
+  const ShowInputDialog({
+    super.titleKey,
+    super.titleKeyParams,
+    super.titleStyle,
+    super.titleIcon,
+    required super.descriptionKey,
+    super.descriptionKeyParams,
+    super.descriptionStyle,
+    super.confirmButtonKey,
+    super.confirmButtonKeyParams,
+    super.confirmButtonStyle,
+    super.cancelButtonKey,
+    super.cancelButtonKeyParams,
+    super.cancelButtonStyle,
+    super.onCancel,
+    this.inputLabelKey,
+    required this.onConfirm,
+    this.validatorCallback,
+  });
+}
+
+/// Shows a selection dialog with a title, text and a confirm button and also a cancel button.
+///
+/// Below the text will be a list of options from the translated [selectionKeys] for which the user can choose one . The
+/// index of the selected  element will be returned inside of the [onConfirm] callback!
+///
+/// The confirm button will only be clickable if one of the elements was selected
+class ShowSelectDialog extends _CancelDialog {
+  /// The translation keys for the elements
+  final List<String> selectionKeys;
+
+  /// Callback that gets called when the confirm button of the dialog was pressed and also contains the data the user put in
+  final FutureOr<void> Function(int) onConfirm;
+
+  const ShowSelectDialog({
+    super.titleKey,
+    super.titleKeyParams,
+    super.titleStyle,
+    super.titleIcon,
+    required super.descriptionKey,
+    super.descriptionKeyParams,
+    super.descriptionStyle,
+    super.confirmButtonKey,
+    super.confirmButtonKeyParams,
+    super.confirmButtonStyle,
+    super.cancelButtonKey,
+    super.cancelButtonKeyParams,
+    super.cancelButtonStyle,
+    super.onCancel,
+    required this.selectionKeys,
+    required this.onConfirm,
   });
 }
 
@@ -97,7 +255,13 @@ class ShowInfoDialog extends _BaseDialog {
 class HideDialog extends DialogOverlayEvent {
   final Object? dataForDialog;
 
-  const HideDialog({this.dataForDialog});
+  /// If this is true, then the custom onCancel callback of the dialog will be called as well.
+  /// Otherwise it will not be called (for example internally after closing the dialog from the confirm button).
+  ///
+  /// Most of the time this will just be true!
+  final bool cancelDialog;
+
+  const HideDialog({this.dataForDialog, required this.cancelDialog});
 }
 
 /// Only hides the current loading dialog if no custom dialog is visible!

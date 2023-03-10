@@ -16,7 +16,7 @@ abstract class WidgetBase extends StatelessWidget {
   /// Returns the theme data. The [ThemeData.colorScheme] contains the colors used inside of the app.
   ThemeData theme(BuildContext context) => Theme.of(context);
 
-  /// This is not directly from the color scheme. instead it is generated from it!
+  /// This is the same as [colorBackground]
   Color colorScaffoldBackground(BuildContext context) => theme(context).scaffoldBackgroundColor;
 
   /// Returns the color of [ThemeData.colorScheme].

@@ -2,6 +2,16 @@
   "empty": "",
   "empty.param.1": "{0}",
   "error.unknown": "Unknown Error",
+  "yes": "Yes",
+  "no": "No",
+  "dialog.loading.title": "Loading",
+  "dialog.loading.description": "Please wait...",
+  "dialog.info.title": "Information",
+  "dialog.error.title": "Error",
+  "dialog.confirm.title": "Confirm",
+  "dialog.button.confirm": "Ok",
+  "dialog.button.cancel": "Cancel",
+  "page.app.should.close": "Should the App be terminated?",
   "page.login.title.create": "Account Creation",
   "page.login.title.remote.login": "Remote Login",
   "page.login.title.local.login": "Local Login",
@@ -17,8 +27,9 @@
   "page.login.change.account": "Change Account",
   "page.login.instead.login": "Login to Account",
   "page.login.instead.create": "Create Account",
-  "page.login.unsecure.password": "Password to unsecure",
+  "page.login.insecure.password": "Password to insecure",
   "page.login.no.password.match": "Passwords do not match",
   "page.login.empty.params": "All fields must have a value!",
-  "page.login.account.created": "Created the new account successfully"
+  "page.login.account.created.title": "Created Account",
+  "page.login.account.created.description": "You can now login to your new Account\n{0}"
 }
