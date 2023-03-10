@@ -1,6 +1,7 @@
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
+import 'package:app/presentation/main/menu/logged_in_menu.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_event.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_state.dart';
@@ -28,96 +29,7 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
           onPressed: () {
             sl<NavigationService>().navigateTo(Routes.settings);
           },
-          child: Text("to settings"),
-        ),
-        FilledButton(
-          onPressed: () {
-            sl<NavigationService>().navigateTo(Routes.material_color_test);
-          },
-          child: Text("to color test"),
-        ),
-        FilledButton(
-          onPressed: () {
-            sl<DialogOverlayBloc>().add(ShowInfoSnackBar(textKey: "some long long info text yay"));
-          },
-          child: Text("test snack"),
-        ),
-        FilledButton(
-          onPressed: () {
-            sl<DialogOverlayBloc>().add(ShowInfoDialog(descriptionKey: "some long description, yay"));
-          },
-          child: Text("test info dialog"),
-        ),
-        FilledButton(
-          onPressed: () async {
-            sl<DialogOverlayBloc>().add(ShowLoadingDialog());
-            await Future<void>.delayed(Duration(seconds: 4));
-            sl<DialogOverlayBloc>().add(HideLoadingDialog());
-          },
-          child: Text("test loading dialog"),
-        ),
-        FilledButton(
-          onPressed: () async {
-            sl<DialogService>().show(ShowErrorDialog(descriptionKey: "errorrororororoor"));
-          },
-          child: Text("test error dialog "),
-        ),
-        FilledButton(
-          onPressed: () async {
-            sl<DialogService>().show(ShowConfirmDialog(
-              descriptionKey: "confirm this",
-              onConfirm: () {
-                Logger.verbose("CONFIRMED");
-              },
-              onCancel: () {
-                Logger.verbose("CANCELLED");
-              },
-            ));
-          },
-          child: Text("test confirm dialog "),
-        ),
-        FilledButton(
-          onPressed: () async {
-            sl<DialogService>().show(ShowInputDialog(
-              descriptionKey: "input something",
-              onConfirm: (String data) {
-                Logger.verbose("CONFIRMED $data");
-              },
-              onCancel: () {
-                Logger.verbose("CANCELLED");
-              },
-            ));
-          },
-          child: Text("test input dialog "),
-        ),
-        FilledButton(
-          onPressed: () async {
-            sl<DialogService>().show(ShowSelectDialog(
-              selectionTranslatedStrings: <String>[
-                "first",
-                "second",
-                "third",
-                "fourth",
-                "sixth",
-                "seventhseventhseventhseventhasdd",
-                "seventh",
-                "seventh",
-                "seventh",
-                "seventh",
-                "seventh",
-                "seventh",
-                "seventh",
-              ],
-              descriptionKey: "select something",
-              onConfirm: (int index) {
-                Logger.verbose("CONFIRMED $index");
-              },
-              onCancel: () {
-                Logger.verbose("CANCELLED");
-              },
-            ));
-          },
-          child: Text("test selection dialog "),
+          child: const Text("to settings"),
         ),
       ],
     );
@@ -136,16 +48,7 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
 
   @override
   Widget? buildMenuDrawer(BuildContext context) {
-    // todo: continue here and make own class
-    return Container(
-      width: MediaQuery.of(context).size.width * 3 / 4,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: const <Widget>[
-          Text("page.menu.title"),
-        ],
-      ),
-    );
+    return const LoggedInMenu();
   }
 
   @override

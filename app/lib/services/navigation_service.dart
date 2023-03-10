@@ -41,6 +41,12 @@ class NavigationService {
     _currentRoute = "";
   }
 
+  void openMenuDrawer() {
+    //todo: key
+  }
+
+  void closeMenuDrawer() {}
+
   /// if this navigator has a previous route/page stored that it can navigate back to
   bool get canPop => navigatorKey.currentState?.canPop() ?? false;
 

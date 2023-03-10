@@ -273,7 +273,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        // the custom willpop is needed, because the dialog will be pushed with its own route and the app_observer can
+        // the custom willpop is needed, because the dialog will be pushed with its own route and the default pages can
         // only receive the close events from the default routes of the materialapp
         return WillPopScope(onWillPop: () async => _onWillPop(context), child: dialogBuilder(context));
       },

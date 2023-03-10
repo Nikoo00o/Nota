@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 ///
 /// This uses [buildPage] to build the page and the [buildBody] method should be overridden in the subclass to build the
 /// page body. The methods [buildAppBar] and [buildMenuDrawer] can also be overridden.
+///
+/// You can also override [customBackNavigation] to provide a custom back navigation.
 abstract class NoBlocPage extends PageBase {
   const NoBlocPage({
     super.key,

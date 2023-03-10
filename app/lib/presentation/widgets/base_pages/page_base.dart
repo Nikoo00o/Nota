@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/presentation/main/app/widgets/page_route_animation.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:app/presentation/widgets/base_pages/no_bloc_page.dart';
@@ -7,6 +9,9 @@ import 'package:flutter/material.dart';
 /// Use one of the subclasses [BlocPage], or [NoBlocPage] and not this class.
 ///
 /// This is only the abstract base class to provide common member variables.
+///
+/// You can also override [customBackNavigation] to provide a custom back navigation.
+/// Per default, a confirmation dialog will be opened if the app should be closed.
 abstract class PageBase extends WidgetBase {
   /// The default page padding
   static const EdgeInsets defaultPagePadding = EdgeInsets.fromLTRB(8, 8, 8, 8);
@@ -84,22 +89,35 @@ abstract class PageBase extends WidgetBase {
   ///
   /// Everything will be build inside of a [Scaffold] which can also uses the [appBar] and [menuDrawer].
   Widget buildPage(BuildContext context, Widget body, PreferredSizeWidget? appBar, Widget? menuDrawer) {
-    return GestureDetector(
-      onTapDown: (TapDownDetails details) => unFocus(context),
-      child: Scaffold(
-        body: Container(
-          padding: pagePadding,
-          decoration: BoxDecoration(image: getBackgroundImage(), color: getBackgroundColor(context)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Expanded(child: body),
-            ],
+    return WillPopScope(
+      onWillPop: () async => customBackNavigation(context),
+      child: GestureDetector(
+        onTapDown: (TapDownDetails details) => unFocus(context),
+        child: Scaffold(
+          body: Container(
+            padding: pagePadding,
+            decoration: BoxDecoration(image: getBackgroundImage(), color: getBackgroundColor(context)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Expanded(child: body),
+              ],
+            ),
           ),
+          appBar: appBar,
+          drawer: menuDrawer,
         ),
-        appBar: appBar,
-        drawer: menuDrawer,
       ),
     );
   }
+
+  /// You can override this to provide a custom back navigation from this page.
+  ///
+  /// Returns false if a custom back navigation was executed and the default back navigation from the app observer should
+  /// not be executed.
+  /// Returns true if there was no custom back navigation and the default way of showing a close app confirm dialog
+  /// should be executed.
+  ///
+  /// Per default this just returns true.
+  Future<bool> customBackNavigation(BuildContext context) async => true;
 }

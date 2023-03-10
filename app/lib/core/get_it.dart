@@ -39,6 +39,7 @@ import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dar
 import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
 import 'package:app/presentation/main/app/app_bloc.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
+import 'package:app/presentation/main/menu/menu_bloc.dart';
 import 'package:app/presentation/pages/login/login_bloc.dart';
 import 'package:app/presentation/pages/login/login_bloc_arguments.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
@@ -212,6 +213,7 @@ Future<void> initializeGetIt() async {
       ));
   sl.registerFactory<NoteSelectionBloc>(() => NoteSelectionBloc());
   sl.registerFactory<SettingsBloc>(() => SettingsBloc(logoutOfAccount: sl()));
+  sl.registerFactory<MenuBloc>(() => MenuBloc(logoutOfAccount: sl()));
 }
 
 Future<SessionToken?> fetchCurrentSessionToken() => sl<SharedFetchCurrentSessionToken>().call(const NoParams());

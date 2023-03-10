@@ -2,9 +2,11 @@ import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/routes.dart';
 import 'package:app/presentation/main/app/widgets/page_route_animation.dart';
 import 'package:app/presentation/pages/login/login_page.dart';
-import 'package:app/presentation/pages/material_color_test_page.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_page.dart';
 import 'package:app/presentation/pages/settings/settings_page.dart';
+import 'package:app/presentation/pages/test/dialog_test_page.dart';
+import 'package:app/presentation/pages/test/material_color_test_page.dart';
+import 'package:app/presentation/pages/test/splash_screen_test_page.dart';
 import 'package:app/presentation/widgets/base_pages/page_base.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +31,10 @@ class CustomNavigator extends StatelessWidget {
         return const SettingsPage();
       case Routes.material_color_test:
         return const MaterialColorTestPage();
+      case Routes.splash_screen_test:
+        return const SplashScreenTestPage();
+      case Routes.dialog_test:
+        return const DialogTestPage();
       default:
         return Scaffold(body: Center(child: Text("no page found for route: $routeName")));
     }
