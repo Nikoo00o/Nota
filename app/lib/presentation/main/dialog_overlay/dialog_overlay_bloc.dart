@@ -1,6 +1,9 @@
 import 'dart:async';
 
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_state.dart';
+import 'package:app/presentation/main/dialog_overlay/widgets/input_dialog.dart';
+import 'package:app/presentation/main/dialog_overlay/widgets/loading_dialog_content.dart';
+import 'package:app/presentation/main/dialog_overlay/widgets/selection_dialog.dart';
 import 'package:app/presentation/widgets/base_pages/page_event.dart';
 import 'package:app/services/translation_service.dart';
 import 'package:flutter/material.dart';
@@ -62,44 +65,28 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
       titleKey: event.titleKey ?? "dialog.loading.title",
       titleKeyParams: event.titleKeyParams,
       isLoadingDialog: true,
-      content: Column(
-        children: <Widget>[
-          const SizedBox(height: 20.0),
-          SizedBox(
-            height: 60.0,
-            width: 60.0,
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(_colors.onBackground),
-            ),
-          ),
-          const SizedBox(height: 30.0),
-          Text(_translate(event.descriptionKey ?? "dialog.loading.description", keyParams: event.descriptionKeyParams)),
-        ],
+      content: LoadingDialogContent(
+        descriptionKey: event.descriptionKey,
+        descriptionKeyParams: event.descriptionKeyParams,
       ),
     );
   }
 
   Future<void> _handleShowCustomDialog(ShowCustomDialog event, Emitter<DialogOverlayState> emit) async {
-    if (_isDialogAlreadyVisible(isLoadingDialog: false)) {
-      return;
-    }
-    _cancelCallback = event.onBackPressed;
-    return showDialog(
-      context: _context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return WillPopScope(onWillPop: () async => _onWillPop(context), child: event.builder(context));
-      },
-    );
+    final Object? data = await _showDialogHelper(
+        isLoadingDialog: false,
+        newCancelCallback: event.onBackPressed,
+        dialogBuilder: (BuildContext context) => event.builder(context));
+    event.onData?.call(data);
   }
 
   Future<void> _handleShowInfoSnackBar(ShowInfoSnackBar event, Emitter<DialogOverlayState> emit) async {
-    ScaffoldMessenger.of(_context).showSnackBar(SnackBar(
-      content: Text(_translate(event.textKey, keyParams: event.textKeyParams), style: event.textStyle),
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(translate(event.textKey, keyParams: event.textKeyParams), style: event.textStyle),
       action: SnackBarAction(
-        label: _translate("dialog.button.confirm"),
+        label: translate("dialog.button.confirm"),
         onPressed: () {
-          ScaffoldMessenger.of(_context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
         },
       ),
     ));
@@ -112,7 +99,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
       titleStyle: event.titleStyle,
       titleIcon: event.titleIcon,
       content: Text(
-        _translate(event.descriptionKey, keyParams: event.descriptionKeyParams),
+        translate(event.descriptionKey, keyParams: event.descriptionKeyParams),
         style: event.descriptionStyle,
       ),
       actions: <Widget>[
@@ -130,10 +117,10 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
     await _showDialog(
       titleKey: event.titleKey ?? "dialog.error.title",
       titleKeyParams: event.titleKeyParams,
-      titleStyle: TextStyle(color: _colors.error),
+      titleStyle: TextStyle(color: colors.error),
       titleIcon: event.titleIcon,
       content: Text(
-        _translate(event.descriptionKey, keyParams: event.descriptionKeyParams),
+        translate(event.descriptionKey, keyParams: event.descriptionKeyParams),
         style: event.descriptionStyle,
       ),
       actions: <Widget>[
@@ -153,8 +140,9 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
       titleKeyParams: event.titleKeyParams,
       titleStyle: event.titleStyle,
       titleIcon: event.titleIcon,
+      newCancelCallback: event.onCancel,
       content: Text(
-        _translate(event.descriptionKey, keyParams: event.descriptionKeyParams),
+        translate(event.descriptionKey, keyParams: event.descriptionKeyParams),
         style: event.descriptionStyle,
       ),
       actions: <Widget>[
@@ -170,30 +158,32 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
   }
 
   Future<void> _handleShowInputDialog(ShowInputDialog event, Emitter<DialogOverlayState> emit) async {
-    await _showDialog(
-      titleKey: event.titleKey ?? "dialog.confirm.title",
-      titleKeyParams: event.titleKeyParams,
-      titleStyle: event.titleStyle,
-      titleIcon: event.titleIcon,
-      content: Text(
-        _translate(event.descriptionKey, keyParams: event.descriptionKeyParams),
-        style: event.descriptionStyle,
-      ),
-      actions: <Widget>[
-        _buildCancelButton(event),
-        _buildTextButton(
-          textKey: event.confirmButtonKey ?? "dialog.button.confirm",
-          textKeyParams: event.confirmButtonKeyParams,
-          style: event.confirmButtonStyle,
-          onClick: () {
-            //todo: somehow connect state, see web
-          },
-        ),
-      ],
+    // the data will be null, or a String containing the input. null means that the dialog was cancelled and otherwise it
+    // was confirmed!
+    final Object? data = await _showDialogHelper(
+      isLoadingDialog: false,
+      newCancelCallback: event.onCancel,
+      dialogBuilder: (BuildContext context) => InputDialog(bloc: this, event: event),
     );
+    if (data is String) {
+      event.onConfirm(data);
+    }
+    // the on cancel callback will be called automatically
   }
 
-  Future<void> _handleShowSelectDialog(ShowSelectDialog event, Emitter<DialogOverlayState> emit) async {}
+  Future<void> _handleShowSelectDialog(ShowSelectDialog event, Emitter<DialogOverlayState> emit) async {
+    // the data will be null, or an int containing the index of the selected element. null means that the dialog was
+    // cancelled and otherwise it was confirmed!
+    final Object? data = await _showDialogHelper(
+      isLoadingDialog: false,
+      newCancelCallback: event.onCancel,
+      dialogBuilder: (BuildContext context) => SelectionDialog(bloc: this, event: event),
+    );
+    if (data is int) {
+      event.onConfirm(data);
+    }
+    // the on cancel callback will be called automatically
+  }
 
   /// Builds a default text button that closes the dialog on a button press
   TextButton _buildTextButton({
@@ -202,13 +192,15 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
     VoidCallback? onClick,
     ButtonStyle? style,
   }) {
+    final Color color = colors.tertiary;
     late final ButtonStyle textButtonStyle;
+
     if (style != null) {
       if (style.foregroundColor != null) {
-        textButtonStyle = style.copyWith(foregroundColor: MaterialStatePropertyAll<Color>(_colors.tertiary));
+        textButtonStyle = style.copyWith(foregroundColor: MaterialStatePropertyAll<Color>(color));
       }
     } else {
-      textButtonStyle = ButtonStyle(foregroundColor: MaterialStatePropertyAll<Color>(_colors.tertiary));
+      textButtonStyle = ButtonStyle(foregroundColor: MaterialStatePropertyAll<Color>(color));
     }
 
     return TextButton(
@@ -217,14 +209,13 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
         _closeDialog(cancelDialog: false);
         onClick?.call();
       },
-      child: Text(_translate(textKey, keyParams: textKeyParams)),
+      child: Text(translate(textKey, keyParams: textKeyParams)),
     );
   }
 
   /// Builds a default cancel button for the [event] for which the onCancel callback will also be called when the user
   /// navigates back!
   TextButton _buildCancelButton(_CancelDialog event) {
-    _cancelCallback = event.onCancel;
     return _buildTextButton(
       textKey: event.cancelButtonKey ?? "dialog.button.cancel",
       textKeyParams: event.cancelButtonKeyParams,
@@ -240,6 +231,9 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
   /// The alert dialog [content] will be wrapped inside of a [SingleChildScrollView].
   ///
   /// This will return [null] and not display the dialog if another dialog of the same kind is already visible!
+  ///
+  /// The [newCancelCallback] should be set for all dialogs that have a cancel button which could have a custom action.
+  /// And it will also be called when the user navigates back with the back button to close the dialog!
   Future<Object?> _showDialog({
     required String titleKey,
     List<String>? titleKeyParams,
@@ -248,26 +242,40 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
     required Widget content,
     List<Widget> actions = const <Widget>[],
     bool isLoadingDialog = false,
+    VoidCallback? newCancelCallback,
+  }) async {
+    return _showDialogHelper(
+      isLoadingDialog: isLoadingDialog,
+      newCancelCallback: newCancelCallback,
+      dialogBuilder: (BuildContext context) => AlertDialog(
+        icon: titleIcon,
+        title: Text(translate(titleKey, keyParams: titleKeyParams)),
+        titleTextStyle: titleStyle,
+        content: SingleChildScrollView(child: content),
+        actions: actions,
+      ),
+    );
+  }
+
+  /// Called from [_showDialog] and [_handleShowCustomDialog] to show the dialog. Look at [_showDialog] for details!
+  Future<Object?> _showDialogHelper({
+    required WidgetBuilder dialogBuilder,
+    required bool isLoadingDialog,
+    VoidCallback? newCancelCallback,
   }) async {
     if (_isDialogAlreadyVisible(isLoadingDialog: isLoadingDialog)) {
       return null;
     }
+    if (newCancelCallback != null) {
+      _cancelCallback = newCancelCallback;
+    }
     return showDialog(
-      context: _context,
+      context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return WillPopScope(
-          onWillPop: () async => _onWillPop(context),
-          child: AlertDialog(
-            icon: titleIcon,
-            title: Text(_translate(titleKey, keyParams: titleKeyParams)),
-            titleTextStyle: titleStyle,
-            content: SingleChildScrollView(
-              child: content,
-            ),
-            actions: actions,
-          ),
-        );
+        // the custom willpop is needed, because the dialog will be pushed with its own route and the app_observer can
+        // only receive the close events from the default routes of the materialapp
+        return WillPopScope(onWillPop: () async => _onWillPop(context), child: dialogBuilder(context));
       },
     );
   }
@@ -315,7 +323,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
           Logger.verbose("also calling the custom dialog cancel callback");
           _cancelCallback?.call();
         }
-        Navigator.of(_context).pop(dataForDialog);
+        Navigator.of(context).pop(dataForDialog);
         isCustomDialogVisible = false;
         _cancelCallback = null;
       } else {
@@ -325,7 +333,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
     // if a loading dialog is also visible, then the context must be popped twice!
     if (isLoadingDialogVisible) {
       Logger.verbose("closing loading dialog");
-      Navigator.of(_context).pop(dataForDialog);
+      Navigator.of(context).pop(dataForDialog);
       isLoadingDialogVisible = false;
     } else if (isLoadingDialog) {
       Logger.warn("tried to close loading dialog, but none was visible");
@@ -346,11 +354,13 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
     return true;
   }
 
-  String _translate(String key, {List<String>? keyParams}) {
+  String translate(String key, {List<String>? keyParams}) {
     return translationService.translate(key, keyParams: keyParams);
   }
 
-  BuildContext get _context => dialogOverlayKey.currentContext!;
+  /// The build context of the dialog widget
+  BuildContext get context => dialogOverlayKey.currentContext!;
 
-  ColorScheme get _colors => Theme.of(_context).colorScheme;
+  /// The colors of the theme
+  ColorScheme get colors => Theme.of(context).colorScheme;
 }

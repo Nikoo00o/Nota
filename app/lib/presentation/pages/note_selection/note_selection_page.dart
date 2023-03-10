@@ -76,6 +76,49 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
           },
           child: Text("test confirm dialog "),
         ),
+        FilledButton(
+          onPressed: () async {
+            sl<DialogService>().show(ShowInputDialog(
+              descriptionKey: "input something",
+              onConfirm: (String data) {
+                Logger.verbose("CONFIRMED $data");
+              },
+              onCancel: () {
+                Logger.verbose("CANCELLED");
+              },
+            ));
+          },
+          child: Text("test input dialog "),
+        ),
+        FilledButton(
+          onPressed: () async {
+            sl<DialogService>().show(ShowSelectDialog(
+              selectionTranslatedStrings: <String>[
+                "first",
+                "second",
+                "third",
+                "fourth",
+                "sixth",
+                "seventhseventhseventhseventhasdd",
+                "seventh",
+                "seventh",
+                "seventh",
+                "seventh",
+                "seventh",
+                "seventh",
+                "seventh",
+              ],
+              descriptionKey: "select something",
+              onConfirm: (int index) {
+                Logger.verbose("CONFIRMED $index");
+              },
+              onCancel: () {
+                Logger.verbose("CANCELLED");
+              },
+            ));
+          },
+          child: Text("test selection dialog "),
+        ),
       ],
     );
   }

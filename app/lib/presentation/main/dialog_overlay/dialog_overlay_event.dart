@@ -43,11 +43,16 @@ class ShowLoadingDialog extends DialogOverlayEvent {
 ///
 /// Also important: if the user presses the back button, the [onBackPressed] will be called and you should then cancel, or
 /// hide your dialog!
+///
+/// The [onData] callback will be called with the data of the [HideDialog] event if there was any data.
+///
+/// If the dialog was cancelled, this callback will also additionally receive [null] as data.
 class ShowCustomDialog extends DialogOverlayEvent {
   final WidgetBuilder builder;
   final VoidCallback? onBackPressed;
+  final FutureOr<void> Function(Object?)? onData;
 
-  const ShowCustomDialog({required this.builder, this.onBackPressed});
+  const ShowCustomDialog({required this.builder, this.onBackPressed, this.onData});
 }
 
 /// Shows a small info [SnackBar] at the bottom of the screen. this should only be used for small status updates.
@@ -187,14 +192,19 @@ class ShowConfirmDialog extends _CancelDialog {
 /// [onConfirm] callback!
 ///
 /// You can also add a [validatorCallback] which prevents the user from clicking on the confirm button and also displays
-/// a translated error message to the user.
+/// a translated error message to the user if the input string contains invalid characters.
+///
+/// An empty input string will not trigger the validator, but will also disable the confirm button.
+///
+/// The [descriptionKey] is used for an additional description above the input if its not null.
+/// The [inputLabelKey] combined with the [validatorCallback] are used to show a label around the input field.
 class ShowInputDialog extends _CancelDialog {
   final String? inputLabelKey;
 
   /// Callback that gets called when the confirm button of the dialog was pressed and also contains the data the user put in
   final FutureOr<void> Function(String) onConfirm;
 
-  /// If this callback returns null, that means that there is no error
+  /// If this callback returns null, that means that there is no error.
   final String? Function(String?)? validatorCallback;
 
   const ShowInputDialog({
@@ -202,7 +212,7 @@ class ShowInputDialog extends _CancelDialog {
     super.titleKeyParams,
     super.titleStyle,
     super.titleIcon,
-    required super.descriptionKey,
+    String? descriptionKey,
     super.descriptionKeyParams,
     super.descriptionStyle,
     super.confirmButtonKey,
@@ -215,18 +225,20 @@ class ShowInputDialog extends _CancelDialog {
     this.inputLabelKey,
     required this.onConfirm,
     this.validatorCallback,
-  });
+  }) : super(descriptionKey: descriptionKey ?? "");
 }
 
 /// Shows a selection dialog with a title, text and a confirm button and also a cancel button.
 ///
-/// Below the text will be a list of options from the translated [selectionKeys] for which the user can choose one . The
-/// index of the selected  element will be returned inside of the [onConfirm] callback!
+/// Below the text will be a list of options from the translated [selectionTranslatedStrings] for which the user
+/// can choose one . The index of the selected  element will be returned inside of the [onConfirm] callback!
+///
+/// IMPORTANT: THE [selectionTranslatedStrings] HAVE TO BE TRANSLATED VALUES and not translation keys!!!
 ///
 /// The confirm button will only be clickable if one of the elements was selected
 class ShowSelectDialog extends _CancelDialog {
   /// The translation keys for the elements
-  final List<String> selectionKeys;
+  final List<String> selectionTranslatedStrings;
 
   /// Callback that gets called when the confirm button of the dialog was pressed and also contains the data the user put in
   final FutureOr<void> Function(int) onConfirm;
@@ -246,7 +258,7 @@ class ShowSelectDialog extends _CancelDialog {
     super.cancelButtonKeyParams,
     super.cancelButtonStyle,
     super.onCancel,
-    required this.selectionKeys,
+    required this.selectionTranslatedStrings,
     required this.onConfirm,
   });
 }
