@@ -11,6 +11,7 @@
   "dialog.confirm.title": "Bestätigen",
   "dialog.button.confirm": "Ok",
   "dialog.button.cancel": "Abbrechen",
+  "dialog.logged.out": "Sie wurden aus ihrem Account ausgeloggt",
   "page.app.should.close": "Soll die App beendet werden?",
   "page.login.title.create": "Account Erstellung",
   "page.login.title.remote.login": "Server Login",

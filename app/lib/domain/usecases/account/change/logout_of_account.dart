@@ -2,6 +2,8 @@ import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/routes.dart';
 import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/repositories/account_repository.dart';
+import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
+import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
@@ -20,9 +22,15 @@ import 'package:shared/domain/usecases/usecase.dart';
 class LogoutOfAccount extends UseCase<void, LogoutOfAccountParams> {
   final AccountRepository accountRepository;
   final NavigationService navigationService;
+  final DialogService dialogService;
   final AppConfig appConfig;
 
-  const LogoutOfAccount({required this.accountRepository, required this.navigationService, required this.appConfig});
+  const LogoutOfAccount({
+    required this.accountRepository,
+    required this.navigationService,
+    required this.appConfig,
+    required this.dialogService,
+  });
 
   @override
   Future<void> execute(LogoutOfAccountParams params) async {
@@ -47,6 +55,7 @@ class LogoutOfAccount extends UseCase<void, LogoutOfAccountParams> {
     await accountRepository.saveAccount(null);
 
     Logger.info("Logged out of the account ${account.username}");
+    dialogService.showInfoSnackBar(const ShowInfoSnackBar(textKey: "dialog.logged.out"));
 
     if (params.navigateToLoginPage) {
       navigationService.navigateTo(Routes.login);

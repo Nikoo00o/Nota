@@ -11,6 +11,7 @@
   "dialog.confirm.title": "Confirm",
   "dialog.button.confirm": "Ok",
   "dialog.button.cancel": "Cancel",
+  "dialog.logged.out": "You were logged out of your Account",
   "page.app.should.close": "Should the App be terminated?",
   "page.login.title.create": "Account Creation",
   "page.login.title.remote.login": "Remote Login",

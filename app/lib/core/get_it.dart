@@ -105,7 +105,7 @@ Future<void> initializeGetIt() async {
         getRequiredLoginStatus: sl(),
       ));
   sl.registerLazySingleton<LogoutOfAccount>(
-      () => LogoutOfAccount(accountRepository: sl(), navigationService: sl(), appConfig: sl()));
+      () => LogoutOfAccount(accountRepository: sl(), navigationService: sl(), appConfig: sl(), dialogService: sl()));
   sl.registerLazySingleton<ChangeAccountPassword>(() => ChangeAccountPassword(
         accountRepository: sl(),
         appConfig: sl(),
