@@ -1,4 +1,5 @@
 import 'package:app/core/enums/note_sorting.dart';
+import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
@@ -7,8 +8,11 @@ import 'package:app/domain/usecases/note_structure/change_current_structure_item
 import 'package:app/domain/usecases/note_structure/create_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/finish_move_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/inner/add_new_structure_update_batch.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/inner/get_original_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/navigation/get_structure_folders.dart';
+import 'package:app/domain/usecases/note_structure/navigation/get_structure_updates_stream.dart';
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
@@ -39,10 +43,17 @@ import 'package:shared/domain/usecases/usecase.dart';
 ///
 /// [FetchNewNoteStructure] must be have been called at least once before, otherwise this throws
 /// [ErrorCodes.INVALID_PARAMS] if [NoteStructureRepository.root] is null!
+///
+/// This also adds a new streamed update by calling [AddNewStructureUpdateBatch] which will be received
+/// by [GetStructureUpdatesStream]!
 class UpdateNoteStructure extends UseCase<void, UpdateNoteStructureParams> {
   final NoteStructureRepository noteStructureRepository;
+  final AddNewStructureUpdateBatch addNewStructureUpdateBatch;
 
-  const UpdateNoteStructure({required this.noteStructureRepository});
+  const UpdateNoteStructure({
+    required this.noteStructureRepository,
+    required this.addNewStructureUpdateBatch,
+  });
 
   @override
   Future<void> execute(UpdateNoteStructureParams params) async {
@@ -61,8 +72,8 @@ class UpdateNoteStructure extends UseCase<void, UpdateNoteStructureParams> {
 
     _updateCurrentItem(params.originalItem);
 
-    // todo: maybe send an event to the bloc here (and also in the navigate use cases) instead of updating it manually
-    //  after calling this use case with a call to [GetCurrentStructureItem]
+    // at the end send a new update event to the ui!
+    await addNewStructureUpdateBatch.call(const NoParams());
   }
 
   void _updateRecentNotes() {
@@ -103,7 +114,7 @@ class UpdateNoteStructure extends UseCase<void, UpdateNoteStructureParams> {
 
     if (compareItem == null) {
       noteStructureRepository.currentItem = noteStructureRepository.recent!;
-      Logger.debug("Updated the current item to the default recent"); // special case if there was no current item set before
+      Logger.info("Updated the current item to the default recent"); // special case if there was no current item set before
     } else {
       final StructureFolder topLevelFolder = _getTopLevelFolder(currentItem: currentItem, originalItem: originalItem);
       StructureItem? newCurrentItem;

@@ -19,7 +19,7 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// overrides the [NoteStructureRepository.root] variable.
 ///
 /// This is called by the use cases [TransferNotes], [GetOriginalStructureItem], [GetCurrentStructureItem] and
-/// [GetCurrentStructureFolders].
+/// [GetStructureFolders].
 ///
 /// This calls the use case [UpdateNoteStructure].
 ///

@@ -117,7 +117,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
     await _showDialog(
       titleKey: event.titleKey ?? "dialog.error.title",
       titleKeyParams: event.titleKeyParams,
-      titleStyle: TextStyle(color: colors.error),
+      titleStyle: Theme.of(context).textTheme.titleLarge?.copyWith(color: colors.error),
       titleIcon: event.titleIcon,
       content: Text(
         translate(event.descriptionKey, keyParams: event.descriptionKeyParams),

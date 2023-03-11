@@ -1,5 +1,13 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:app/core/get_it.dart';
+import 'package:app/domain/entities/structure_folder.dart';
+import 'package:app/domain/entities/structure_item.dart';
+import 'package:app/domain/entities/structure_update_batch.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
+import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/navigation/get_structure_updates_stream.dart';
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -46,6 +54,44 @@ void main() {
       sl<NoteStructureRepository>().currentItem = sl<NoteStructureRepository>().root!.getChild(0);
       await sl<NavigateToItem>().call(const NavigateToItemParamsParent());
       expect(sl<NoteStructureRepository>().currentItem, sl<NoteStructureRepository>().root);
+    });
+
+    test("navigating should also update listeners", () async {
+      int listenerCallAmount = 0;
+      final StreamSubscription<StructureUpdateBatch> listener1 = await sl<GetStructureUpdatesStream>()
+          .call(GetStructureUpdatesStreamParams(callbackFunction: (StructureUpdateBatch updateBatch) {
+        // this listener drains the previous events
+        listenerCallAmount++;
+      }));
+
+      await Future<void>.delayed(const Duration(milliseconds: 50)); // wait for the old events to be drained
+      expect(listenerCallAmount, 1, reason: "called once so far");
+      StructureItem? currentCompareItem = sl<NoteStructureRepository>().root;
+
+      final StreamSubscription<StructureUpdateBatch> listener2 = await sl<GetStructureUpdatesStream>()
+          .call(GetStructureUpdatesStreamParams(callbackFunction: (StructureUpdateBatch updateBatch) {
+        // always compare the current item in the listener with the updated compare item. the listener should now receive
+        // all events
+        expect(currentCompareItem, updateBatch.currentItem, reason: "listener2 item comp");
+      }));
+
+      // this will add a new event that calls the expect
+      await sl<NavigateToItem>().call(const NavigateToItemParamsTopLevel(topLevelIndex: 0));
+
+      currentCompareItem = (currentCompareItem as StructureFolder).getChild(0);
+      await sl<NavigateToItem>().call(const NavigateToItemParamsChild(childIndex: 0));
+
+      await listener1.cancel();
+
+      currentCompareItem = (currentCompareItem as StructureFolder).getChild(1);
+      await sl<NavigateToItem>().call(const NavigateToItemParamsChild(childIndex: 1));
+
+      await listener2.cancel();
+
+      // this event should not be received as an update
+      await sl<NavigateToItem>().call(const NavigateToItemParamsChild(childIndex: 0));
+
+      expect(listenerCallAmount, 3, reason: "listener1 should have only been called 3 times");
     });
   });
 }

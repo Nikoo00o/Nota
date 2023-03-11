@@ -1,6 +1,7 @@
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
+import 'package:app/domain/usecases/note_structure/navigation/get_structure_updates_stream.dart';
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
@@ -15,11 +16,13 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// This can call the use case [FetchNewNoteStructure] if there is no note structure cached.
 ///
 /// This can throw the exceptions of [GetLoggedInAccount], but perform no additional input validation!
-class GetCurrentStructureFolders extends UseCase<List<StructureFolder>, NoParams> {
+///
+/// As an alternative, you can use [GetStructureUpdatesStream] to receive streamed updates instead!
+class GetStructureFolders extends UseCase<List<StructureFolder>, NoParams> {
   final NoteStructureRepository noteStructureRepository;
   final FetchNewNoteStructure fetchNewNoteStructure;
 
-  const GetCurrentStructureFolders({
+  const GetStructureFolders({
     required this.noteStructureRepository,
     required this.fetchNewNoteStructure,
   });

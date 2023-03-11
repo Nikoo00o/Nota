@@ -1,6 +1,9 @@
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
+import 'package:app/domain/usecases/note_structure/inner/add_new_structure_update_batch.dart';
+import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/navigation/get_structure_updates_stream.dart';
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
@@ -15,13 +18,18 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// This can call [FetchNewNoteStructure] and throw the exceptions of it!
 ///
 /// This can also throw [ErrorCodes.INVALID_PARAMS] depending on the index, or parent of the different [NavigateToItemParams]
+///
+/// This also adds a new streamed update by calling [AddNewStructureUpdateBatch] which will be received
+/// by [GetStructureUpdatesStream]!
 class NavigateToItem extends UseCase<void, NavigateToItemParams> {
   final NoteStructureRepository noteStructureRepository;
   final FetchNewNoteStructure fetchNewNoteStructure;
+  final AddNewStructureUpdateBatch addNewStructureUpdateBatch;
 
   const NavigateToItem({
     required this.noteStructureRepository,
     required this.fetchNewNoteStructure,
+    required this.addNewStructureUpdateBatch,
   });
 
   @override
@@ -56,6 +64,9 @@ class NavigateToItem extends UseCase<void, NavigateToItemParams> {
 
     noteStructureRepository.currentItem = newItem;
     Logger.debug("Navigated to the new current item path ${newItem?.path} with the parent ${newItem?.topMostParent.name}");
+
+    // at the end send a new update event to the ui!
+    await addNewStructureUpdateBatch.call(const NoParams());
   }
 }
 

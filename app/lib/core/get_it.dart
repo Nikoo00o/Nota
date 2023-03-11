@@ -27,10 +27,12 @@ import 'package:app/domain/usecases/note_structure/change_current_structure_item
 import 'package:app/domain/usecases/note_structure/create_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/finish_move_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/inner/add_new_structure_update_batch.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/inner/get_original_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_folders.dart';
 import 'package:app/domain/usecases/note_structure/inner/update_note_structure.dart';
+import 'package:app/domain/usecases/note_structure/navigation/get_structure_updates_stream.dart';
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
 import 'package:app/domain/usecases/note_structure/start_move_structure_item.dart';
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
@@ -137,7 +139,10 @@ Future<void> initializeGetIt() async {
         updateNoteStructure: sl(),
         getLoggedInAccount: sl(),
       ));
-  sl.registerLazySingleton<UpdateNoteStructure>(() => UpdateNoteStructure(noteStructureRepository: sl()));
+  sl.registerLazySingleton<UpdateNoteStructure>(() => UpdateNoteStructure(
+        noteStructureRepository: sl(),
+        addNewStructureUpdateBatch: sl(),
+      ));
   sl.registerLazySingleton<GetOriginalStructureItem>(() => GetOriginalStructureItem(
         noteStructureRepository: sl(),
         fetchNewNoteStructure: sl(),
@@ -146,9 +151,15 @@ Future<void> initializeGetIt() async {
         noteStructureRepository: sl(),
         fetchNewNoteStructure: sl(),
       ));
-  sl.registerLazySingleton<GetCurrentStructureFolders>(() => GetCurrentStructureFolders(
+  sl.registerLazySingleton<GetStructureFolders>(() => GetStructureFolders(
         noteStructureRepository: sl(),
         fetchNewNoteStructure: sl(),
+      ));
+  sl.registerLazySingleton<GetStructureUpdatesStream>(() => GetStructureUpdatesStream(
+        noteStructureRepository: sl(),
+      ));
+  sl.registerLazySingleton<AddNewStructureUpdateBatch>(() => AddNewStructureUpdateBatch(
+        noteStructureRepository: sl(),
       ));
 
   sl.registerLazySingleton<ChangeCurrentStructureItem>(() => ChangeCurrentStructureItem(
@@ -182,6 +193,7 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<NavigateToItem>(() => NavigateToItem(
         noteStructureRepository: sl(),
         fetchNewNoteStructure: sl(),
+        addNewStructureUpdateBatch: sl(),
       ));
 
   // services

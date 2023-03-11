@@ -10,7 +10,11 @@ class MenuDrawerHeader extends BlocPageChild<MenuBloc, MenuState> {
   @override
   Widget buildWithState(BuildContext context, MenuState state) {
     if (state is MenuStateInitialized) {
-      return Text(state.userName ?? "", style: TextStyle(color: colorSecondary(context), fontSize: 17));
+      return Text(
+        state.userName ?? "",
+        style: theme(context).textTheme.titleLarge?.copyWith(color: colorSecondary(context)),
+        maxLines: 2,
+      );
     }
     return const SizedBox();
   }
@@ -18,7 +22,7 @@ class MenuDrawerHeader extends BlocPageChild<MenuBloc, MenuState> {
   @override
   Widget buildWithNoState(BuildContext context, Widget partWithState) {
     return SizedBox(
-      height: 190,
+      height: 205,
       child: DrawerHeader(
         padding: const EdgeInsets.fromLTRB(5, 20, 5, 5),
         margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
