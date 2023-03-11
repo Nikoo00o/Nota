@@ -62,9 +62,15 @@ class DialogTestPage extends NoBlocPage {
           FilledButton(
             onPressed: () async {
               sl<DialogService>().show(ShowInputDialog(
-                descriptionKey: "input something",
+                descriptionKey: "input at least 4 characters",
                 onConfirm: (String data) {
                   Logger.verbose("CONFIRMED $data");
+                },
+                validatorCallback: (String? input){
+                  if(input!= null && input.length<4){
+                    return "more chars";
+                  }
+                  return null;
                 },
                 onCancel: () {
                   Logger.verbose("CANCELLED");

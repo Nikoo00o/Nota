@@ -7,6 +7,8 @@ class CustomTextFormField extends WidgetBase {
 
   /// Callback that gets ONLY called by the text form field if there is a [Form] Widget build as a parent higher up in the
   /// widget tree!!!
+  ///
+  /// This can, but will mostly not be null.
   final FormFieldValidator<String>? validator;
 
   /// The text key used for translating a value.
