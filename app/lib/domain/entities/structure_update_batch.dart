@@ -7,8 +7,10 @@ import 'package:shared/domain/entities/entity.dart';
 ///
 /// This is used in [GetStructureUpdatesStream].
 class StructureUpdateBatch extends Entity {
-  final StructureItem? currentItem;
-  final List<StructureFolder?> topLevelFolders;
+  final StructureItem currentItem;
+
+  /// The last folder will always be the move folder and it should be ignored in the ui!!!
+  final List<StructureFolder> topLevelFolders;
 
   StructureUpdateBatch({
     required this.currentItem,
@@ -17,4 +19,7 @@ class StructureUpdateBatch extends Entity {
           "currentItem": currentItem,
           "topLevelFolders": topLevelFolders,
         });
+
+  /// Returns the [topLevelFolders] that should be used for the ui and does not include the move selection folder!
+  List<StructureFolder> get menuItems => topLevelFolders.sublist(0, topLevelFolders.length - 1);
 }

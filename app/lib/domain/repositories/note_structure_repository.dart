@@ -47,7 +47,7 @@ abstract class NoteStructureRepository {
   ///
   /// [2] = [moveSelection]
   ///
-  /// The [moveSelection] should not be included inside of the menu in the ui.
+  /// The [moveSelection] is always the last folder and should not be included inside of the menu in the ui!
   List<StructureFolder?> get topLevelFolders;
 
   /// Can return null if the [noteId] was not contained. Otherwise it returns the matching note with the id.
@@ -77,5 +77,5 @@ abstract class NoteStructureRepository {
   ///
   /// This will not use the internal variables of this repository, but instead uses the parameter [newCurrentItem] and
   /// [newTopLevelFolders] which are copies of the internal ones and can directly be send to the ui!
-  Future<void> addNewStructureUpdate(StructureItem? newCurrentItem, List<StructureFolder?> newTopLevelFolders);
+  Future<void> addNewStructureUpdate(StructureItem newCurrentItem, List<StructureFolder> newTopLevelFolders);
 }
