@@ -46,6 +46,8 @@ class _SelectionDialogState extends State<SelectionDialog> {
       // wider dialog
       width: double.maxFinite,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(translate(event.descriptionKey, keyParams: event.descriptionKeyParams), style: event.descriptionStyle),
           const SizedBox(height: 10),

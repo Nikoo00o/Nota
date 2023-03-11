@@ -39,6 +39,8 @@ class _InputDialogState extends State<InputDialog> {
         // wider dialog
         width: double.maxFinite,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             if (event.descriptionKey.isNotEmpty)
               Text(translate(event.descriptionKey, keyParams: event.descriptionKeyParams), style: event.descriptionStyle),
