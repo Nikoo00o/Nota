@@ -35,5 +35,12 @@
   "page.login.no.password.match": "Passwords do not match",
   "page.login.empty.params": "All fields must have a value!",
   "page.login.account.created.title": "Created Account",
-  "page.login.account.created.description": "You can now login to your new Account\n{0}"
+  "page.login.account.created.description": "You can now login to your new Account\n{0}",
+  "menu.notes.label": "Notes",
+  "menu.lock.screen.title": "Lockscreen",
+  "menu.logout.title": "Logout",
+  "page.settings.title": "Settings",
+  "page.dialog.test.title": "Dialog Test",
+  "page.material.color.test.title": "Material Color Test",
+  "page.splash.screen.test.title": "Splash Screen Test"
 }

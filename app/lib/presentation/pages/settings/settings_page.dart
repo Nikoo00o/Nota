@@ -22,28 +22,6 @@ class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          FilledButton(
-            onPressed: () => currentBloc(context).add(const SettingsEventLogout()),
-            child: Text(translate("page.settings.logout")),
-          ),
-          FilledButton(
-            onPressed: () {
-              sl<NavigationService>().navigateTo(Routes.dialog_test);
-            },
-            child: const Text("to dialog test"),
-          ),
-          FilledButton(
-            onPressed: () {
-              sl<NavigationService>().navigateTo(Routes.splash_screen_test);
-            },
-            child: const Text("to splash screen test"),
-          ),
-          FilledButton(
-            onPressed: () {
-              sl<NavigationService>().navigateTo(Routes.material_color_test);
-            },
-            child: const Text("to color test"),
-          ),
         ],
       ),
     );
@@ -59,7 +37,7 @@ class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
 
   @override
   Widget? buildMenuDrawer(BuildContext context) {
-    return const LoggedInMenu();
+    return const LoggedInMenu(currentPageTranslationKey: "page.settings.title");
   }
 
   @override

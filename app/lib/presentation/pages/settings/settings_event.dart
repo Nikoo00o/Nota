@@ -8,6 +8,3 @@ class SettingsEventInitialise extends SettingsEvent {
   const SettingsEventInitialise();
 }
 
-class SettingsEventLogout extends SettingsEvent {
-  const SettingsEventLogout();
-}

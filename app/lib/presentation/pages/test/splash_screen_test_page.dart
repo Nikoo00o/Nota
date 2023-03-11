@@ -66,7 +66,7 @@ class SplashScreenTestPage extends NoBlocPage {
 
   @override
   Future<bool> customBackNavigation(BuildContext context) async {
-    sl<NavigationService>().navigateTo(Routes.settings);
+    sl<NavigationService>().navigateTo(Routes.notes);
     return false;
   }
 

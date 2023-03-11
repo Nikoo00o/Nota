@@ -201,12 +201,12 @@ class MaterialColorTestPage extends NoBlocPage {
 
   @override
   Widget? buildMenuDrawer(BuildContext context) {
-    return const LoggedInMenu();
+    return const LoggedInMenu(currentPageTranslationKey: "page.material.color.test.title");
   }
 
   @override
   Future<bool> customBackNavigation(BuildContext context) async {
-    sl<NavigationService>().navigateTo(Routes.settings);
+    sl<NavigationService>().navigateTo(Routes.notes);
     return false;
   }
 

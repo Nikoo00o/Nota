@@ -36,5 +36,12 @@
   "page.login.empty.params": "Alle Felder müssen ausgefüllt sein!",
   "page.login.account.created": "Neuen Account erfolgreich erstellt",
   "page.login.account.created.title": "Account erstellt",
-  "page.login.account.created.description": "Sie können sich jetzt mit ihren Daten einloggen\n{0}"
+  "page.login.account.created.description": "Sie können sich jetzt mit ihren Daten einloggen\n{0}",
+  "menu.notes.label" : "Notizen",
+  "menu.lock.screen.title" : "Sperrbildschirm",
+  "menu.logout.title": "Ausloggen",
+  "page.settings.title": "Einstellungen",
+  "page.dialog.test.title": "Dialog Test",
+  "page.material.color.test.title": "Material Color Test",
+  "page.splash.screen.test.title": "Splash Screen Test"
 }

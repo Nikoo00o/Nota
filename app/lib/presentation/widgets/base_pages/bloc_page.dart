@@ -143,16 +143,22 @@ abstract class BlocPage<Bloc extends PageBloc<PageEvent, State>, State extends P
 
   @override
   Widget build(BuildContext context) {
-    return createBlocProvider(buildPage(
-      context,
-      buildBodyWithNoState(context, createBlocBuilder(
-        builder: (BuildContext context, State state) {
-          return buildBodyWithState(context, state);
-        },
-      )),
-      buildAppBar(context),
-      buildMenuDrawer(context),
-    ));
+    return createBlocProvider(
+      Builder(builder: (BuildContext context) {
+        // important: this wrapped builder is needed, so that the buildPartWithNoState can still access the bloc to send
+        // events with the inner build context!
+        return buildPage(
+          context,
+          buildBodyWithNoState(context, createBlocBuilder(
+            builder: (BuildContext context, State state) {
+              return buildBodyWithState(context, state);
+            },
+          )),
+          buildAppBar(context),
+          buildMenuDrawer(context),
+        );
+      }),
+    );
   }
 
   /// Returns current bloc of page without listening to it, so that events can be added, or navigation can be done, etc.

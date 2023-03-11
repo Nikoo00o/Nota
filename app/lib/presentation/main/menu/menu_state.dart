@@ -6,6 +6,19 @@ class MenuState extends PageState {
 
 class MenuStateInitialized extends MenuState {
   final String? userName;
+  final String currentPageTranslationKey;
+  final List<String>? currentPageTranslationKeyParams;
+  final bool showDeveloperOptions;
 
-  MenuStateInitialized({required this.userName}) : super(<String, Object?>{"userName": userName});
+  MenuStateInitialized({
+    required this.userName,
+    required this.currentPageTranslationKey,
+    this.currentPageTranslationKeyParams,
+    required this.showDeveloperOptions,
+  }) : super(<String, Object?>{
+          "userName": userName,
+          "currentPageTranslationKey": currentPageTranslationKey,
+          "currentPageTranslationKeyParams": currentPageTranslationKeyParams,
+          "showDeveloperOptions": showDeveloperOptions,
+        });
 }
