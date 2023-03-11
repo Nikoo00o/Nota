@@ -213,7 +213,7 @@ Future<void> initializeGetIt() async {
       ));
   sl.registerFactory<NoteSelectionBloc>(() => NoteSelectionBloc());
   sl.registerFactory<SettingsBloc>(() => SettingsBloc(logoutOfAccount: sl()));
-  sl.registerFactory<MenuBloc>(() => MenuBloc(logoutOfAccount: sl()));
+  sl.registerFactory<MenuBloc>(() => MenuBloc(getUsername: sl()));
 }
 
 Future<SessionToken?> fetchCurrentSessionToken() => sl<SharedFetchCurrentSessionToken>().call(const NoParams());

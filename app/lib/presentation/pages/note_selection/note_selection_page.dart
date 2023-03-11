@@ -1,15 +1,12 @@
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/get_it.dart';
-import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/presentation/main/menu/logged_in_menu.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_event.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_state.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
-import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:flutter/material.dart';
-import 'package:shared/core/utils/logger/logger.dart';
 
 class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> {
   const NoteSelectionPage() : super();
@@ -21,6 +18,7 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
 
   @override
   Widget buildBodyWithState(BuildContext context, NoteSelectionState state) {
+    print("build");
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.stretch,

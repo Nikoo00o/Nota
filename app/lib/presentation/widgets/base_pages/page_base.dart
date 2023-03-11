@@ -69,13 +69,13 @@ abstract class PageBase extends WidgetBase with PageHelperMixin {
   ///
   /// Everything will be build inside of a [Scaffold] which can also uses the [appBar] and [menuDrawer].
   Widget buildPage(BuildContext context, Widget body, PreferredSizeWidget? appBar, Widget? menuDrawer) {
-    return GestureDetector(
-      onTapDown: (TapDownDetails details) => unFocus(context),
-      child: Scaffold(
-        body: Builder(
-          builder: (BuildContext context) {
-            return WillPopScope(
-              onWillPop: () async => _onWillPopScope(context),
+    return Scaffold(
+      body: Builder(
+        builder: (BuildContext context) {
+          return WillPopScope(
+            onWillPop: () async => _onWillPopScope(context),
+            child: GestureDetector(
+              onTap: () => unFocus(context),
               child: Container(
                 padding: pagePadding,
                 decoration: BoxDecoration(image: getBackgroundImage(), color: getBackgroundColor(context)),
@@ -86,12 +86,12 @@ abstract class PageBase extends WidgetBase with PageHelperMixin {
                   ],
                 ),
               ),
-            );
-          },
-        ),
-        appBar: appBar,
-        drawer: menuDrawer,
+            ),
+          );
+        },
       ),
+      appBar: appBar,
+      drawer: menuDrawer,
     );
   }
 

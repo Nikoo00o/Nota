@@ -1,8 +1,10 @@
 import 'package:app/core/get_it.dart';
 import 'package:app/presentation/main/menu/menu_bloc.dart';
+import 'package:app/presentation/main/menu/menu_drawer_header.dart';
 import 'package:app/presentation/main/menu/menu_event.dart';
 import 'package:app/presentation/main/menu/menu_state.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
+import 'package:app/presentation/widgets/nota_icon.dart';
 import 'package:flutter/material.dart';
 
 /// The side menu drawer that is displayed on every page except on the login page!
@@ -29,26 +31,32 @@ class LoggedInMenu extends BlocPage<MenuBloc, MenuState> {
 
   @override
   Widget buildBodyWithNoState(BuildContext context, Widget bodyWithState) {
-    return Container(
-      color: theme(context).scaffoldBackgroundColor,
-      width: MediaQuery.of(context).size.width * 3 / 4,
-      height: MediaQuery.of(context).size.height,
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          children: <Widget>[
-            const Text("Default Menu with the 'scaffoldBackgroundColor' color"),
-            const Text("AppBar has default color"),
-            const Text("The containers of the page have the 'background' color"),
-            FilledButton(
-              onPressed: () {
-                closeMenuDrawer(context);
-              },
-              child: const Text("close menu"),
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          const MenuDrawerHeader(),
+          ListTile(
+            title: const Text('Item 1'),
+            onTap: () {
+              // Update the state of the app.
+              // ...
+            },
+          ),
+          ListTile(
+            title: const Text('Item 2'),
+            onTap: () {
+              // Update the state of the app.
+              // ...
+            },
+          ),
+          Card(
+            child: ListTile(
+              title: Text('One-line with trailing widget'),
+              leading: Icon(Icons.more_vert),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
