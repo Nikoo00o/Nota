@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 ///
 /// This uses [buildPage] to build the page and the [buildBody] method should be overridden in the subclass to build the
 /// page body. The methods [buildAppBar] and [buildMenuDrawer] can also be overridden.
+///
+/// You can also override [customBackNavigation] to provide a custom back navigation.
 abstract class NoBlocPage extends PageBase {
   const NoBlocPage({
     super.key,
@@ -15,33 +17,7 @@ abstract class NoBlocPage extends PageBase {
 
   @override
   Widget build(BuildContext context) {
-    return buildPage(context, buildBody(context));
-  }
-
-  /// builds the page [body] expanded with a padding around it and background image, or background color.
-  ///
-  /// Everything will be build inside of a [Scaffold] which can also use [buildAppBar] and
-  /// [buildMenuDrawer].
-  Widget buildPage(BuildContext context, Widget body) {
-    return GestureDetector(
-      onTapDown: (TapDownDetails details) => unFocus(context),
-      child: Scaffold(
-        body: Container(
-          decoration: BoxDecoration(image: getBackgroundImage(), color: getBackgroundColor(context)),
-          child: Padding(
-            padding: pagePadding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Expanded(child: body),
-              ],
-            ),
-          ),
-        ),
-        appBar: buildAppBar(context),
-        drawer: buildMenuDrawer(context),
-      ),
-    );
+    return buildPage(context, buildBody(context), buildAppBar(context), buildMenuDrawer(context));
   }
 
   /// This can be overridden inside of a subclass to build an app bar for this page.

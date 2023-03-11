@@ -18,7 +18,7 @@ class AppTheme {
       baseSecondaryColor: const Color(0xff3396f2),
       baseTertiaryColor: const Color(0xff49d15e),
       baseNeutralColor: const Color(0xff878787),
-      baseErrorColor: Colors.red[900]!,
+      baseErrorColor: const Color(0xffd41919),
     ).getTheme();
   }
 
@@ -63,12 +63,13 @@ class AppTheme {
     required this.baseErrorColor,
   });
 
-  /// Returns the theme data for this theme with the generated [ColorScheme].
+  /// Returns the material 3 theme data for this theme with the generated [ColorScheme].
   ThemeData getTheme() {
-    return ThemeData(colorScheme: getColorScheme());
+    return ThemeData(colorScheme: getColorScheme(), useMaterial3: true);
   }
 
   /// Returns the parsed [ColorScheme] from the base material colors.
+  /// See https://m3.material.io/styles/color/the-color-system/tokens#e26e130c-fa67-48e1-81ca-d28f6e4ed398
   ColorScheme getColorScheme() {
     final bool isDark = brightness == Brightness.dark;
     final MaterialColor primary = convertColor(basePrimaryColor);
@@ -99,11 +100,17 @@ class AppTheme {
         surfaceVariant: neutralVariant.mColorTone(30)!,
         onSurfaceVariant: neutralVariant.mColorTone(80)!,
         outline: neutralVariant.mColorTone(60)!,
-        outlineVariant: neutralVariant.mColorTone(60)!,
+        outlineVariant: neutralVariant.mColorTone(30)!,
         error: error.mColorTone(80)!,
         onError: error.mColorTone(20)!,
         errorContainer: error.mColorTone(30)!,
         onErrorContainer: error.mColorTone(90)!,
+        shadow: neutral.mColorTone(0),
+        surfaceTint: primary.mColorTone(50),
+        inverseSurface: neutral.mColorTone(90),
+        onInverseSurface: neutral.mColorTone(20),
+        inversePrimary: primary.mColorTone(40),
+        scrim: neutral.mColorTone(0),
         brightness: brightness,
       );
     } else {
@@ -127,11 +134,17 @@ class AppTheme {
         surfaceVariant: neutralVariant.mColorTone(90)!,
         onSurfaceVariant: neutralVariant.mColorTone(30)!,
         outline: neutralVariant.mColorTone(50)!,
-        outlineVariant: neutralVariant.mColorTone(50)!,
+        outlineVariant: neutralVariant.mColorTone(80)!,
         error: error.mColorTone(40)!,
         onError: error.mColorTone(100)!,
         errorContainer: error.mColorTone(90)!,
         onErrorContainer: error.mColorTone(10)!,
+        shadow: neutral.mColorTone(0),
+        surfaceTint: primary.mColorTone(50),
+        inverseSurface: neutral.mColorTone(20),
+        onInverseSurface: neutral.mColorTone(95),
+        inversePrimary: primary.mColorTone(80),
+        scrim: neutral.mColorTone(0),
         brightness: brightness,
       );
     }

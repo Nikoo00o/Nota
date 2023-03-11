@@ -27,10 +27,12 @@ import 'package:app/domain/usecases/note_structure/change_current_structure_item
 import 'package:app/domain/usecases/note_structure/create_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/finish_move_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/inner/add_new_structure_update_batch.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/inner/get_original_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_folders.dart';
 import 'package:app/domain/usecases/note_structure/inner/update_note_structure.dart';
+import 'package:app/domain/usecases/note_structure/navigation/get_structure_updates_stream.dart';
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
 import 'package:app/domain/usecases/note_structure/start_move_structure_item.dart';
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
@@ -39,13 +41,16 @@ import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dar
 import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
 import 'package:app/presentation/main/app/app_bloc.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
+import 'package:app/presentation/main/menu/menu_bloc.dart';
 import 'package:app/presentation/pages/login/login_bloc.dart';
+import 'package:app/presentation/pages/login/login_bloc_arguments.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
 import 'package:app/presentation/pages/settings/settings_bloc.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:app/services/session_service.dart';
 import 'package:app/services/translation_service.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared/data/datasources/rest_client.dart';
@@ -103,7 +108,7 @@ Future<void> initializeGetIt() async {
         getRequiredLoginStatus: sl(),
       ));
   sl.registerLazySingleton<LogoutOfAccount>(
-      () => LogoutOfAccount(accountRepository: sl(), navigationService: sl(), appConfig: sl()));
+      () => LogoutOfAccount(accountRepository: sl(), navigationService: sl(), appConfig: sl(), dialogService: sl()));
   sl.registerLazySingleton<ChangeAccountPassword>(() => ChangeAccountPassword(
         accountRepository: sl(),
         appConfig: sl(),
@@ -134,7 +139,10 @@ Future<void> initializeGetIt() async {
         updateNoteStructure: sl(),
         getLoggedInAccount: sl(),
       ));
-  sl.registerLazySingleton<UpdateNoteStructure>(() => UpdateNoteStructure(noteStructureRepository: sl()));
+  sl.registerLazySingleton<UpdateNoteStructure>(() => UpdateNoteStructure(
+        noteStructureRepository: sl(),
+        addNewStructureUpdateBatch: sl(),
+      ));
   sl.registerLazySingleton<GetOriginalStructureItem>(() => GetOriginalStructureItem(
         noteStructureRepository: sl(),
         fetchNewNoteStructure: sl(),
@@ -143,9 +151,15 @@ Future<void> initializeGetIt() async {
         noteStructureRepository: sl(),
         fetchNewNoteStructure: sl(),
       ));
-  sl.registerLazySingleton<GetCurrentStructureFolders>(() => GetCurrentStructureFolders(
+  sl.registerLazySingleton<GetStructureFolders>(() => GetStructureFolders(
         noteStructureRepository: sl(),
         fetchNewNoteStructure: sl(),
+      ));
+  sl.registerLazySingleton<GetStructureUpdatesStream>(() => GetStructureUpdatesStream(
+        noteStructureRepository: sl(),
+      ));
+  sl.registerLazySingleton<AddNewStructureUpdateBatch>(() => AddNewStructureUpdateBatch(
+        noteStructureRepository: sl(),
       ));
 
   sl.registerLazySingleton<ChangeCurrentStructureItem>(() => ChangeCurrentStructureItem(
@@ -179,6 +193,7 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<NavigateToItem>(() => NavigateToItem(
         noteStructureRepository: sl(),
         fetchNewNoteStructure: sl(),
+        addNewStructureUpdateBatch: sl(),
       ));
 
   // services
@@ -192,10 +207,13 @@ Future<void> initializeGetIt() async {
   // important: the next two blocs are singletons and no factory functions, because they are used within the app and are
   // only created once!
   sl.registerLazySingleton<AppBloc>(() => AppBloc(translationService: sl()));
-  sl.registerLazySingleton<DialogOverlayBloc>(() => DialogOverlayBloc());
+  sl.registerLazySingleton<DialogOverlayBloc>(() => DialogOverlayBloc(
+        dialogOverlayKey: GlobalKey(),
+        translationService: sl(),
+      ));
 
   // the blocs below are factory functions, because they should be newly created each time the user navigates to the page!
-  sl.registerFactory<LoginBloc>(() => LoginBloc(
+  sl.registerFactoryParam<LoginBloc, LoginBlocArguments, void>((LoginBlocArguments arguments, _) => LoginBloc(
         navigationService: sl(),
         dialogService: sl(),
         getRequiredLoginStatus: sl(),
@@ -203,9 +221,11 @@ Future<void> initializeGetIt() async {
         createAccount: sl(),
         loginToAccount: sl(),
         logoutOfAccount: sl(),
+        firstButtonScrollKey: arguments.firstButtonScrollKey,
       ));
   sl.registerFactory<NoteSelectionBloc>(() => NoteSelectionBloc());
   sl.registerFactory<SettingsBloc>(() => SettingsBloc(logoutOfAccount: sl()));
+  sl.registerFactory<MenuBloc>(() => MenuBloc(getUsername: sl()));
 }
 
 Future<SessionToken?> fetchCurrentSessionToken() => sl<SharedFetchCurrentSessionToken>().call(const NoParams());

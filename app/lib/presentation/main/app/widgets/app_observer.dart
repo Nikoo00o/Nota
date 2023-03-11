@@ -1,6 +1,11 @@
+import 'dart:async';
+
 import 'package:app/core/config/app_config.dart';
+import 'package:app/core/get_it.dart';
 import 'package:app/domain/usecases/account/change/activate_screen_saver.dart';
+import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/services/dialog_service.dart';
+import 'package:app/services/navigation_service.dart';
 import 'package:app/services/session_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shared/core/utils/logger/logger.dart';
@@ -18,6 +23,7 @@ class AppObserver extends StatefulWidget {
 
   final DialogService dialogService;
   final SessionService sessionService;
+  final NavigationService navigationService;
   final AppConfig appConfig;
   final ActivateScreenSaver activateScreenSaver;
 
@@ -25,6 +31,7 @@ class AppObserver extends StatefulWidget {
     required this.child,
     required this.dialogService,
     required this.sessionService,
+    required this.navigationService,
     required this.appConfig,
     required this.activateScreenSaver,
   });
@@ -57,11 +64,27 @@ class _AppObserverState extends State<AppObserver> with WidgetsBindingObserver {
     );
   }
 
-  /// Returns false if a custom back navigation was executed.
+  /// Returns false if a custom back navigation was executed and the default pop should not happen.
   /// Returns true if the app should navigate back (in most cases terminate the app)
   Future<bool> _onWillPop(BuildContext context) async {
-    //todo: custom back navigation (maybe show confirm dialog, or hide error dialog if open, etc)
-    return true;
+    // call the custom back navigation of the page if there is a nested WillPopScope. If one is found, call that one
+    // instead of this one!
+    Logger.verbose("navigating back");
+    final bool? childHandledIt = await widget.navigationService.navigatorKey.currentState?.maybePop();
+    if (childHandledIt == true) {
+      return false;
+    }
+
+    // true if app should be closed, false if not
+    final Completer<bool> closeApp = Completer<bool>();
+    widget.dialogService.show(ShowConfirmDialog(
+      descriptionKey: "page.app.should.close",
+      confirmButtonKey: "yes",
+      cancelButtonKey: "no",
+      onConfirm: () => closeApp.complete(true),
+      onCancel: () => closeApp.complete(false),
+    ));
+    return closeApp.future;
   }
 
   @override

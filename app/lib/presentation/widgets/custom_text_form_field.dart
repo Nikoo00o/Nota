@@ -18,6 +18,8 @@ class CustomTextFormField extends WidgetBase {
   /// Used for passwords
   final bool obscureText;
 
+  final ValueChanged<String>? onChanged;
+
   const CustomTextFormField({
     super.key,
     this.controller,
@@ -25,6 +27,7 @@ class CustomTextFormField extends WidgetBase {
     this.obscureText = false,
     required this.textKey,
     this.textKeyParams,
+    this.onChanged,
   });
 
   @override
@@ -33,6 +36,7 @@ class CustomTextFormField extends WidgetBase {
       controller: controller,
       validator: validator,
       obscureText: obscureText,
+      onChanged: onChanged,
       decoration: InputDecoration(
         labelText: translate(textKey, keyParams: textKeyParams),
         isDense: true,

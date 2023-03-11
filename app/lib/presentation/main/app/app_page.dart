@@ -63,10 +63,10 @@ class App extends StatelessWidget {
     return AppObserver(
       dialogService: dialogService,
       sessionService: sessionService,
+      navigationService: navigationService,
       appConfig: appConfig,
       activateScreenSaver: activateScreenSaver,
       child: DialogOverlayPage(
-        navigationService: navigationService,
         child: _buildPage(context, state),
       ),
     );

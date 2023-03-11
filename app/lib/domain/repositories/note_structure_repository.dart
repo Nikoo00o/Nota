@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
+import 'package:app/domain/entities/structure_update_batch.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/usecases/note_structure/inner/update_note_structure.dart';
 import 'package:shared/core/constants/error_codes.dart';
@@ -62,4 +65,17 @@ abstract class NoteStructureRepository {
   ///
   /// This will always be below 0!
   Future<int> getNewClientNoteCounter();
+
+  /// This calls the [callbackFunction] every time with a new [StructureUpdateBatch] containing the [currentItem] and
+  /// [topLevelFolders] every time the [addNewStructureUpdate] is called as long as the returned listener is not cancelled.
+  ///
+  /// Because this works with a broadcast stream, a listener might not receive all events!
+  Future<StreamSubscription<StructureUpdateBatch>> listenToStructureUpdates(
+      FutureOr<void> Function(StructureUpdateBatch newUpdate) callbackFunction);
+
+  /// This adds a new event to the stream of [listenToStructureUpdates].
+  ///
+  /// This will not use the internal variables of this repository, but instead uses the parameter [newCurrentItem] and
+  /// [newTopLevelFolders] which are copies of the internal ones and can directly be send to the ui!
+  Future<void> addNewStructureUpdate(StructureItem? newCurrentItem, List<StructureFolder?> newTopLevelFolders);
 }

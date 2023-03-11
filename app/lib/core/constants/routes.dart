@@ -11,6 +11,9 @@ class Routes {
 
   static const String settings = "settings";
 
-  /// Test page for material colors
+  /// Test pages:
   static const String material_color_test = "material_color_test";
+  static const String dialog_test = "dialog_test";
+  static const String splash_screen_test = "splash_screen_test";
+
 }
