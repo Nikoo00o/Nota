@@ -16,7 +16,7 @@ class AppConfig extends SharedConfig {
 
   /// If the app was in the background for this amount of time, then a new local login with the password will be needed if
   /// the accounts auto login setting is set to false!
-  Duration get screenSaverTimeout => const Duration(seconds: 30);
+  Duration get lockscreenTimeout => const Duration(seconds: 30);
 
   /// If the developer test pages should be shown inside of the menu drawer, or not.
   bool get showDeveloperOptions => true;

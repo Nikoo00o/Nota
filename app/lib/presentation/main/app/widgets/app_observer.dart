@@ -1,8 +1,7 @@
 import 'dart:async';
 
 import 'package:app/core/config/app_config.dart';
-import 'package:app/core/get_it.dart';
-import 'package:app/domain/usecases/account/change/activate_screen_saver.dart';
+import 'package:app/domain/usecases/account/change/activate_lock_screen.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
@@ -25,7 +24,7 @@ class AppObserver extends StatefulWidget {
   final SessionService sessionService;
   final NavigationService navigationService;
   final AppConfig appConfig;
-  final ActivateScreenSaver activateScreenSaver;
+  final ActivateLockscreen activateLockscreen;
 
   const AppObserver({
     required this.child,
@@ -33,7 +32,7 @@ class AppObserver extends StatefulWidget {
     required this.sessionService,
     required this.navigationService,
     required this.appConfig,
-    required this.activateScreenSaver,
+    required this.activateLockscreen,
   });
 
   @override
@@ -112,8 +111,8 @@ class _AppObserverState extends State<AppObserver> with WidgetsBindingObserver {
   }
 
   Future<void> _onResume() async {
-    if (_pauseTime != null && DateTime.now().isAfter(_pauseTime!.add(widget.appConfig.screenSaverTimeout))) {
-      await widget.activateScreenSaver(const NoParams()); // navigate to login page for a new local login
+    if (_pauseTime != null && DateTime.now().isAfter(_pauseTime!.add(widget.appConfig.lockscreenTimeout))) {
+      await widget.activateLockscreen(const NoParams()); // navigate to login page for a new local login
       //todo: should some written note data get auto saved when minimizing the app, or should it be discarded?
     }
   }

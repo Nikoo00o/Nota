@@ -48,19 +48,22 @@ class LoggedInMenu extends BlocPage<MenuBloc, MenuState> {
   @override
   Widget buildBodyWithNoState(BuildContext context, Widget bodyWithState) {
     return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: <Widget>[
-          const MenuDrawerHeader(),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 8, 0, 8),
-            child: Text(translate("menu.notes.label"), style: theme(context).textTheme.titleMedium),
-          ),
-          const MenuItem(pageTitleKey: "page.note.selection.temp.title"),
-          const Divider(),
-          const MenuDrawerSettings(),
-          bodyWithState,
-        ],
+      child: Scrollbar(
+        scrollbarOrientation: ScrollbarOrientation.left,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            const MenuDrawerHeader(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 8, 0, 8),
+              child: Text(translate("menu.notes.label"), style: theme(context).textTheme.titleMedium),
+            ),
+            const MenuItem(pageTitleKey: "page.note.selection.temp.title"),
+            const Divider(),
+            const MenuDrawerSettings(),
+            bodyWithState,
+          ],
+        ),
       ),
     );
   }

@@ -20,7 +20,6 @@ import 'package:shared/core/utils/logger/logger.dart';
 Future<void> main(List<String> arguments) async {
   Logger.initLogger(AppLogger(logLevel: LogLevel.VERBOSE));
   try {
-    FlutterCryptography.enable(); // enable flutter cryptography for better performance
     DArgon2Flutter.init(); // enable flutter argon2 for better performance
     WidgetsFlutterBinding.ensureInitialized();
     await initializeGetIt();
@@ -34,7 +33,7 @@ Future<void> main(List<String> arguments) async {
       dialogService: sl(),
       sessionService: sl(),
       navigationService: sl(),
-      activateScreenSaver: sl(),
+      activateLockscreen: sl(),
     ));
   } catch (e, s) {
     Logger.error("critical error starting the app", e, s);

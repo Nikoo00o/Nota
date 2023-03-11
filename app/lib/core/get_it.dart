@@ -11,7 +11,7 @@ import 'package:app/domain/repositories/account_repository.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
 import 'package:app/domain/repositories/note_transfer_repository.dart';
-import 'package:app/domain/usecases/account/change/activate_screen_saver.dart';
+import 'package:app/domain/usecases/account/change/activate_lock_screen.dart';
 import 'package:app/domain/usecases/account/change/change_account_password.dart';
 import 'package:app/domain/usecases/account/change/change_auto_login.dart';
 import 'package:app/domain/usecases/account/change/logout_of_account.dart';
@@ -119,7 +119,7 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<GetLoggedInAccount>(() => GetLoggedInAccount(accountRepository: sl()));
   sl.registerLazySingleton<GetUsername>(() => GetUsername(accountRepository: sl()));
   sl.registerLazySingleton<SaveAccount>(() => SaveAccount(accountRepository: sl()));
-  sl.registerLazySingleton<ActivateScreenSaver>(() => ActivateScreenSaver(accountRepository: sl(), navigationService: sl()));
+  sl.registerLazySingleton<ActivateLockscreen>(() => ActivateLockscreen(accountRepository: sl(), navigationService: sl()));
 
   sl.registerLazySingleton<LoadNoteContent>(() => LoadNoteContent(getLoggedInAccount: sl(), noteTransferRepository: sl()));
   sl.registerLazySingleton<StoreNoteEncrypted>(() => StoreNoteEncrypted(
@@ -225,7 +225,13 @@ Future<void> initializeGetIt() async {
       ));
   sl.registerFactory<NoteSelectionBloc>(() => NoteSelectionBloc());
   sl.registerFactory<SettingsBloc>(() => SettingsBloc());
-  sl.registerFactory<MenuBloc>(() => MenuBloc(getUsername: sl(), navigationService: sl(), appConfig: sl()));
+  sl.registerFactory<MenuBloc>(() => MenuBloc(
+        getUsername: sl(),
+        navigationService: sl(),
+        appConfig: sl(),
+        logoutOfAccount: sl(),
+        activateLockscreen: sl(),
+      ));
 }
 
 Future<SessionToken?> fetchCurrentSessionToken() => sl<SharedFetchCurrentSessionToken>().call(const NoParams());

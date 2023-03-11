@@ -1,5 +1,7 @@
 import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/routes.dart';
+import 'package:app/domain/usecases/account/change/activate_lock_screen.dart';
+import 'package:app/domain/usecases/account/change/logout_of_account.dart';
 import 'package:app/domain/usecases/account/get_user_name.dart';
 import 'package:app/presentation/main/menu/menu_event.dart';
 import 'package:app/presentation/main/menu/menu_state.dart';
@@ -11,6 +13,8 @@ import 'package:shared/domain/usecases/usecase.dart';
 class MenuBloc extends PageBloc<MenuEvent, MenuState> {
   final GetUsername getUsername;
   final NavigationService navigationService;
+  final ActivateLockscreen activateLockscreen;
+  final LogoutOfAccount logoutOfAccount;
   final AppConfig appConfig;
   late String? userName;
   late String currentPageTranslationKey;
@@ -23,6 +27,8 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
     required this.getUsername,
     required this.navigationService,
     required this.appConfig,
+    required this.activateLockscreen,
+    required this.logoutOfAccount,
   }) : super(initialState: const MenuState());
 
   @override
@@ -49,8 +55,10 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
         break;
 
       case "menu.lock.screen.title":
+        await activateLockscreen(const NoParams());
         break;
       case "menu.logout.title":
+        await logoutOfAccount(const LogoutOfAccountParams(navigateToLoginPage: true));
         break;
       case "page.settings.title":
         navigationService.navigateTo(Routes.settings);

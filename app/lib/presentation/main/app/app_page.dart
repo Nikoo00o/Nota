@@ -1,7 +1,7 @@
 import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/locales.dart';
 import 'package:app/core/get_it.dart';
-import 'package:app/domain/usecases/account/change/activate_screen_saver.dart';
+import 'package:app/domain/usecases/account/change/activate_lock_screen.dart';
 import 'package:app/presentation/main/app/app_bloc.dart';
 import 'package:app/presentation/main/app/app_state.dart';
 import 'package:app/presentation/main/app/widgets/app_observer.dart';
@@ -22,14 +22,14 @@ class App extends StatelessWidget {
   final NavigationService navigationService;
   final DialogService dialogService;
   final SessionService sessionService;
-  final ActivateScreenSaver activateScreenSaver;
+  final ActivateLockscreen activateLockscreen;
 
   const App({
     required this.appConfig,
     required this.navigationService,
     required this.dialogService,
     required this.sessionService,
-    required this.activateScreenSaver,
+    required this.activateLockscreen,
   });
 
   @override
@@ -65,7 +65,7 @@ class App extends StatelessWidget {
       sessionService: sessionService,
       navigationService: navigationService,
       appConfig: appConfig,
-      activateScreenSaver: activateScreenSaver,
+      activateLockscreen: activateLockscreen,
       child: DialogOverlayPage(
         child: _buildPage(context, state),
       ),
