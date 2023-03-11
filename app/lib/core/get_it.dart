@@ -224,7 +224,7 @@ Future<void> initializeGetIt() async {
         firstButtonScrollKey: arguments.firstButtonScrollKey,
       ));
   sl.registerFactory<NoteSelectionBloc>(() => NoteSelectionBloc());
-  sl.registerFactory<SettingsBloc>(() => SettingsBloc());
+  sl.registerFactory<SettingsBloc>(() => SettingsBloc(appSettingsRepository: sl()));
   sl.registerFactory<MenuBloc>(() => MenuBloc(
         getUsername: sl(),
         navigationService: sl(),

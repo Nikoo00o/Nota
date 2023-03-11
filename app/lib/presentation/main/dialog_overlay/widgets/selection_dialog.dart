@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 class SelectionDialog extends StatefulWidget {
   final DialogOverlayBloc bloc;
   final ShowSelectDialog event;
+  final int? initialIndex;
 
   const SelectionDialog({
     required this.bloc,
     required this.event,
+    required this.initialIndex,
   });
 
   @override
@@ -15,8 +17,15 @@ class SelectionDialog extends StatefulWidget {
 }
 
 class _SelectionDialogState extends State<SelectionDialog> {
-  bool _confirmButtonEnabled = false;
+  late bool _confirmButtonEnabled;
   int? selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedIndex = widget.initialIndex;
+    _confirmButtonEnabled = selectedIndex != null;
+  }
 
   @override
   Widget build(BuildContext context) {

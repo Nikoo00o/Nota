@@ -2,6 +2,7 @@ import 'package:app/core/get_it.dart';
 import 'package:app/presentation/widgets/base_pages/page_event.dart';
 import 'package:app/presentation/widgets/base_pages/page_state.dart';
 import 'package:app/services/dialog_service.dart';
+import 'package:app/services/translation_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// An abstract super class that can be used for the blocs of pages / widgets to handle the business logic and interact
@@ -80,5 +81,13 @@ abstract class PageBloc<Event extends PageEvent, State extends PageState> extend
         }
       }
     }, transformer: transformer);
+  }
+
+  /// Translates a translation [key] for the current locale.
+  ///
+  /// Placeholders are replaced with [keyParams].
+  String translate(String key, {List<String>? keyParams}) {
+    return sl<TranslationService>().translate(key, keyParams: keyParams); // direct access, because every widget should
+    // not contain a reference to the translation service
   }
 }

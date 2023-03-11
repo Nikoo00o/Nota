@@ -243,6 +243,9 @@ class ShowSelectDialog extends _CancelDialog {
   /// Callback that gets called when the confirm button of the dialog was pressed and also contains the data the user put in
   final FutureOr<void> Function(int) onConfirm;
 
+  /// Can be set to already have one element selected at the beginning
+  final int? initialSelectedIndex;
+
   const ShowSelectDialog({
     super.titleKey,
     super.titleKeyParams,
@@ -260,6 +263,7 @@ class ShowSelectDialog extends _CancelDialog {
     super.onCancel,
     required this.selectionTranslatedStrings,
     required this.onConfirm,
+    this.initialSelectedIndex,
   });
 }
 

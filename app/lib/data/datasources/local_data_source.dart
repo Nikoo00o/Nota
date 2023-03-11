@@ -28,6 +28,8 @@ abstract class LocalDataSource {
 
   static const String CLIENT_NOTE_COUNTER = "CLIENT_NOTE_COUNTER";
 
+  static const String CONFIG_PREFIX = "CONFIG_PREFIX";
+
   /// Must be called first in the main function to initialize hive to the [getApplicationDocumentsDirectory].
   Future<void> init();
 
@@ -90,8 +92,28 @@ abstract class LocalDataSource {
     return Locale(languageCode);
   }
 
-  Future<void> setLocale(Locale locale) async {
-    await write(key: LOCALE, value: locale.languageCode, secure: false);
+  Future<void> setLocale(Locale? locale) async {
+    if (locale == null) {
+      await delete(key: LOCALE, secure: false);
+    } else {
+      await write(key: LOCALE, value: locale.languageCode, secure: false);
+    }
+  }
+
+  /// Returns the config toggle value with the [configKey].
+  ///
+  /// Per default this will return false.
+  Future<bool> getConfigValue({required String configKey}) async {
+    final String? value = await read(key: "${CONFIG_PREFIX}_$configKey", secure: false);
+    if (value == null) {
+      return false;
+    }
+    return value == "true";
+  }
+
+  /// This sets the value at the [configKey] to the [configValue] which can be retrieved with [getConfigValue].
+  Future<void> setConfigValue({required String configKey, required bool configValue}) async {
+    await write(key: "${CONFIG_PREFIX}_$configKey", value: configValue.toString(), secure: false);
   }
 
   Future<int?> getClientNoteCounter() async {

@@ -40,6 +40,11 @@
   "menu.lock.screen.title": "Lockscreen",
   "menu.logout.title": "Logout",
   "page.settings.title": "Settings",
+  "page.settings.dark.theme": "Use Dark Theme",
+  "page.settings.locale": "Choose Language",
+  "locale.en": "English",
+  "locale.de": "German",
+  "locale.system": "System setting",
   "page.dialog.test.title": "Dialog Test",
   "page.material.color.test.title": "Material Color Test",
   "page.splash.screen.test.title": "Splash Screen Test"

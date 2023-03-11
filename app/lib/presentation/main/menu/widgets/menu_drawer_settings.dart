@@ -9,9 +9,9 @@ class MenuDrawerSettings extends WidgetBase {
   Widget build(BuildContext context) {
     return Column(
       children: const <Widget>[
+        MenuItem(pageTitleKey: "page.settings.title"),
         MenuItem(pageTitleKey: "menu.lock.screen.title"),
         MenuItem(pageTitleKey: "menu.logout.title"),
-        MenuItem(pageTitleKey: "page.settings.title"),
       ],
     );
   }

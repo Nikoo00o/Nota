@@ -17,13 +17,20 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
   }
 
   @override
+  Widget buildBodyWithNoState(BuildContext context, Widget bodyWithState) {
+    return Scrollbar(
+      child: SingleChildScrollView(
+        child: bodyWithState,
+      ),
+    );
+  }
+
+  @override
   Widget buildBodyWithState(BuildContext context, NoteSelectionState state) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-
-      ],
+      children: <Widget>[],
     );
   }
 

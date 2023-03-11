@@ -21,6 +21,7 @@ class MenuItem extends BlocPageChild<MenuBloc, MenuState> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
       child: ListTile(
+        dense: true,
         contentPadding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(100)),

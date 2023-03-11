@@ -177,7 +177,11 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
     final Object? data = await _showDialogHelper(
       isLoadingDialog: false,
       newCancelCallback: event.onCancel,
-      dialogBuilder: (BuildContext context) => SelectionDialog(bloc: this, event: event),
+      dialogBuilder: (BuildContext context) => SelectionDialog(
+        bloc: this,
+        event: event,
+        initialIndex: event.initialSelectedIndex,
+      ),
     );
     if (data is int) {
       event.onConfirm(data);

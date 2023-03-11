@@ -41,6 +41,11 @@
   "menu.lock.screen.title" : "Sperrbildschirm",
   "menu.logout.title": "Ausloggen",
   "page.settings.title": "Einstellungen",
+  "page.settings.dark.theme": "Dunkles Design benutzen",
+  "page.settings.locale": "Sprache auswählen",
+  "locale.en": "Englisch",
+  "locale.de": "Deutsch",
+  "locale.system": "System-Einstellung",
   "page.dialog.test.title": "Dialog Test",
   "page.material.color.test.title": "Material Color Test",
   "page.splash.screen.test.title": "Splash Screen Test"

@@ -8,3 +8,14 @@ class SettingsEventInitialise extends SettingsEvent {
   const SettingsEventInitialise();
 }
 
+class DarkThemeChanged extends SettingsEvent {
+  final bool isDarkTheme;
+
+  const DarkThemeChanged({required this.isDarkTheme});
+}
+
+class LocaleChanged extends SettingsEvent {
+  final int index;
+
+  const LocaleChanged({required this.index});
+}
