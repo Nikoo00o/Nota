@@ -18,21 +18,29 @@ class MenuItem extends BlocPageChild<MenuBloc, MenuState> {
 
   @override
   Widget buildWithState(BuildContext context, MenuState state) {
-    return ListTile(
-      leading: _getIconForPageTitleKey() != null
-          ? Icon(
-              _getIconForPageTitleKey(),
-              size: iconSize,
-            )
-          : null,
-      minLeadingWidth: iconSize,
-      title: Text(translate(pageTitleKey, keyParams: pageTitleKeyParams)),
-      onTap: () {
-        currentBloc(context).add(MenuItemClicked(
-          targetPageTranslationKey: pageTitleKey,
-          targetPageTranslationKeyParams: pageTitleKeyParams,
-        ));
-      },
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
+      child: ListTile(
+        contentPadding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(100)),
+        ),
+        tileColor: _isCurrentPage(state) ? colorSecondaryContainer(context) : null,
+        leading: _getIconForPageTitleKey() != null
+            ? Icon(
+                _getIconForPageTitleKey(),
+                size: iconSize,
+              )
+            : null,
+        minLeadingWidth: iconSize,
+        title: Text(translate(pageTitleKey, keyParams: pageTitleKeyParams)),
+        onTap: () {
+          currentBloc(context).add(MenuItemClicked(
+            targetPageTranslationKey: pageTitleKey,
+            targetPageTranslationKeyParams: pageTitleKeyParams,
+          ));
+        },
+      ),
     );
   }
 
