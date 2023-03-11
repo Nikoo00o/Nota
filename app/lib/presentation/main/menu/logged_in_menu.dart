@@ -37,10 +37,16 @@ class LoggedInMenu extends BlocPage<MenuBloc, MenuState> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
-          children: const <Widget>[
-            Text("Default Menu with the 'scaffoldBackgroundColor' color"),
-            Text("AppBar has default color"),
-            Text("The containers of the page have the 'background' color"),
+          children: <Widget>[
+            const Text("Default Menu with the 'scaffoldBackgroundColor' color"),
+            const Text("AppBar has default color"),
+            const Text("The containers of the page have the 'background' color"),
+            FilledButton(
+              onPressed: () {
+                closeMenuDrawer(context);
+              },
+              child: const Text("close menu"),
+            ),
           ],
         ),
       ),
@@ -51,6 +57,19 @@ class LoggedInMenu extends BlocPage<MenuBloc, MenuState> {
   Widget buildBodyWithState(BuildContext context, MenuState state) {
     return Container();
   }
+
+  @override
+  void closeMenuDrawer(BuildContext context) {
+    Navigator.of(context).pop();
+  }
+
+  @override
+  void openMenuDrawer(BuildContext context) {
+    // nothing
+  }
+
+  @override
+  bool isMenuDrawerOpen(BuildContext context) => true;
 
   @override
   String get pageName => "menu";

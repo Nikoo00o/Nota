@@ -1,5 +1,6 @@
 import 'package:app/presentation/widgets/base_pages/page_bloc.dart';
 import 'package:app/presentation/widgets/base_pages/page_event.dart';
+import 'package:app/presentation/widgets/base_pages/page_helper_mixin.dart';
 import 'package:app/presentation/widgets/base_pages/page_state.dart';
 import 'package:app/presentation/widgets/widget_base.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +17,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// around the [buildWithState].
 ///
 /// The Template types are first [Bloc], then [State].
-abstract class BlocPageChild<Bloc extends PageBloc<PageEvent, State>, State extends PageState> extends WidgetBase {
+abstract class BlocPageChild<Bloc extends PageBloc<PageEvent, State>, State extends PageState> extends WidgetBase
+    with PageHelperMixin {
   const BlocPageChild({super.key});
 
   /// Builds the part of the child that does not need to listen to state changes (with a better performance).
@@ -85,14 +87,4 @@ abstract class BlocPageChild<Bloc extends PageBloc<PageEvent, State>, State exte
   /// Important: this should only be used to create widgets, etc that depend on the bloc, but its better to just directly
   /// build widgets below the [buildBlocProvider] method instead!
   Bloc listenToBloc(BuildContext context) => context.watch<Bloc>();
-
-  /// Clears the focus of all text input fields and hides the keyboard
-  void unFocus(BuildContext context) {
-    final FocusScopeNode currentFocus = FocusScope.of(context);
-    if (currentFocus.hasPrimaryFocus) {
-      currentFocus.unfocus();
-    } else if (currentFocus.focusedChild?.hasPrimaryFocus ?? false) {
-      currentFocus.focusedChild!.unfocus();
-    }
-  }
 }

@@ -1,4 +1,5 @@
 import 'package:app/core/constants/routes.dart';
+import 'package:app/presentation/main/app/widgets/page_route_animation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
@@ -25,11 +26,11 @@ class NavigationService {
     }
   }
 
-  /// pushes a new page on top of the navigator without removing other stored pages.
+  /// pushes a new page (that has no route) on top of the navigator without removing other stored pages.
   ///
   /// Also resets the [currentRoute].
   void pushPage(Widget page) {
-    navigatorKey.currentState?.push(MaterialPageRoute<Widget>(builder: (BuildContext context) => page));
+    navigatorKey.currentState?.push(PageRouteAnimation(child: page));
     _currentRoute = "";
   }
 
@@ -40,12 +41,6 @@ class NavigationService {
     }
     _currentRoute = "";
   }
-
-  void openMenuDrawer() {
-    //todo: key
-  }
-
-  void closeMenuDrawer() {}
 
   /// if this navigator has a previous route/page stored that it can navigate back to
   bool get canPop => navigatorKey.currentState?.canPop() ?? false;

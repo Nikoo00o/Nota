@@ -1,8 +1,7 @@
 import 'dart:async';
-
-import 'package:app/presentation/main/app/widgets/page_route_animation.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:app/presentation/widgets/base_pages/no_bloc_page.dart';
+import 'package:app/presentation/widgets/base_pages/page_helper_mixin.dart';
 import 'package:app/presentation/widgets/widget_base.dart';
 import 'package:flutter/material.dart';
 
@@ -12,7 +11,8 @@ import 'package:flutter/material.dart';
 ///
 /// You can also override [customBackNavigation] to provide a custom back navigation.
 /// Per default, a confirmation dialog will be opened if the app should be closed.
-abstract class PageBase extends WidgetBase {
+/// But if the menu is open, then it will be closed.
+abstract class PageBase extends WidgetBase with PageHelperMixin {
   /// The default page padding
   static const EdgeInsets defaultPagePadding = EdgeInsets.fromLTRB(8, 8, 8, 8);
 
@@ -59,26 +59,6 @@ abstract class PageBase extends WidgetBase {
     return null; // default from theme
   }
 
-  /// pop current page
-  void popPage(BuildContext context) {
-    Navigator.of(context).pop();
-  }
-
-  /// push next page
-  void pushPage(BuildContext context, Widget page) {
-    Navigator.push<void>(context, PageRouteAnimation(child: page));
-  }
-
-  /// Clears the focus of all text input fields and hides the keyboard
-  void unFocus(BuildContext context) {
-    final FocusScopeNode currentFocus = FocusScope.of(context);
-    if (currentFocus.hasPrimaryFocus) {
-      currentFocus.unfocus();
-    } else if (currentFocus.focusedChild?.hasPrimaryFocus ?? false) {
-      currentFocus.focusedChild!.unfocus();
-    }
-  }
-
   /// The page name for logging.
   ///
   /// This needs to be overridden in the subclass
@@ -89,26 +69,38 @@ abstract class PageBase extends WidgetBase {
   ///
   /// Everything will be build inside of a [Scaffold] which can also uses the [appBar] and [menuDrawer].
   Widget buildPage(BuildContext context, Widget body, PreferredSizeWidget? appBar, Widget? menuDrawer) {
-    return WillPopScope(
-      onWillPop: () async => customBackNavigation(context),
-      child: GestureDetector(
-        onTapDown: (TapDownDetails details) => unFocus(context),
-        child: Scaffold(
-          body: Container(
-            padding: pagePadding,
-            decoration: BoxDecoration(image: getBackgroundImage(), color: getBackgroundColor(context)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                Expanded(child: body),
-              ],
-            ),
-          ),
-          appBar: appBar,
-          drawer: menuDrawer,
+    return GestureDetector(
+      onTapDown: (TapDownDetails details) => unFocus(context),
+      child: Scaffold(
+        body: Builder(
+          builder: (BuildContext context) {
+            return WillPopScope(
+              onWillPop: () async => _onWillPopScope(context),
+              child: Container(
+                padding: pagePadding,
+                decoration: BoxDecoration(image: getBackgroundImage(), color: getBackgroundColor(context)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Expanded(child: body),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
+        appBar: appBar,
+        drawer: menuDrawer,
       ),
     );
+  }
+
+  Future<bool> _onWillPopScope(BuildContext context) async {
+    if (isMenuDrawerOpen(context)) {
+      closeMenuDrawer(context);
+      return false;
+    }
+    return customBackNavigation(context);
   }
 
   /// You can override this to provide a custom back navigation from this page.
@@ -119,5 +111,7 @@ abstract class PageBase extends WidgetBase {
   /// should be executed.
   ///
   /// Per default this just returns true.
+  ///
+  /// This will not be called if the menu is open, because then the menu will be closed first!
   Future<bool> customBackNavigation(BuildContext context) async => true;
 }
