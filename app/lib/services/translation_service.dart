@@ -62,7 +62,7 @@ class TranslationService {
     return key;
   }
 
-  /// Returns the current [_locale] if it is not null and was already initialized with [init].
+  /// Returns the current [_locale] if it is not null and was already initialised with [init].
   /// Otherwise this throws a [ClientException] with [ErrorCodes.FILE_NOT_FOUND].
   Locale get currentLocale {
     if (_locale == null) {

@@ -32,7 +32,7 @@ class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
 
   @override
   Widget buildBodyWithState(BuildContext context, SettingsState state) {
-    if (state is SettingsStateInitialized) {
+    if (state is SettingsStateInitialised) {
       return Column(
         children: <Widget>[
           SettingsToggleOption(

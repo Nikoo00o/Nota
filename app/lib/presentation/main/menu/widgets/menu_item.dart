@@ -46,7 +46,7 @@ class MenuItem extends BlocPageChild<MenuBloc, MenuState> {
   }
 
   bool _isCurrentPage(MenuState state) {
-    return state is MenuStateInitialized &&
+    return state is MenuStateInitialised &&
         state.currentPageTranslationKey == pageTitleKey &&
         state.currentPageTranslationKeyParams == pageTitleKeyParams;
   }

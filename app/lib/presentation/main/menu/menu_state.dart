@@ -4,13 +4,13 @@ class MenuState extends PageState {
   const MenuState([super.properties = const <String, Object?>{}]);
 }
 
-class MenuStateInitialized extends MenuState {
+class MenuStateInitialised extends MenuState {
   final String? userName;
   final String currentPageTranslationKey;
   final List<String>? currentPageTranslationKeyParams;
   final bool showDeveloperOptions;
 
-  MenuStateInitialized({
+  MenuStateInitialised({
     required this.userName,
     required this.currentPageTranslationKey,
     this.currentPageTranslationKeyParams,

@@ -85,7 +85,7 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
   Future<void> _userMenuEntryClicked() async {}
 
   MenuState _buildState() {
-    return MenuStateInitialized(
+    return MenuStateInitialised(
       userName: userName,
       currentPageTranslationKey: currentPageTranslationKey,
       currentPageTranslationKeyParams: currentPageTranslationKeyParams,

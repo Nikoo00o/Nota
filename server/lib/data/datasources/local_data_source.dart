@@ -42,7 +42,7 @@ abstract class LocalDataSource {
     return readAllKeys(databaseKey: ACCOUNT_DATABASE);
   }
 
-  /// Returns 0 if the note counter was not initialized yet
+  /// Returns 0 if the note counter was not initialised yet
   Future<int> getNoteCounter() async {
     final String? data = await read(key: NOTE_COUNTER, databaseKey: CONFIG_DATABASE);
     return int.parse(data ?? "0");

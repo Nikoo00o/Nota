@@ -4,12 +4,12 @@ class SettingsState extends PageState {
   const SettingsState([super.properties = const <String, Object?>{}]);
 }
 
-class SettingsStateInitialized extends SettingsState {
+class SettingsStateInitialised extends SettingsState {
   final bool isDarkTheme;
   final int localeIndex;
   final List<String> localeOptions;
 
-  SettingsStateInitialized({
+  SettingsStateInitialised({
     required this.isDarkTheme,
     required this.localeIndex,
     required this.localeOptions,

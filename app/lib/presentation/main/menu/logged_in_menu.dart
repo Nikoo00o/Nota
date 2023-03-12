@@ -70,7 +70,7 @@ class LoggedInMenu extends BlocPage<MenuBloc, MenuState> {
 
   @override
   Widget buildBodyWithState(BuildContext context, MenuState state) {
-    if (state is MenuStateInitialized && state.showDeveloperOptions) {
+    if (state is MenuStateInitialised && state.showDeveloperOptions) {
       return Column(
         children: const <Widget>[
           Divider(),

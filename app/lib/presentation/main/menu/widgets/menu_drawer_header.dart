@@ -9,7 +9,7 @@ class MenuDrawerHeader extends BlocPageChild<MenuBloc, MenuState> {
 
   @override
   Widget buildWithState(BuildContext context, MenuState state) {
-    if (state is MenuStateInitialized) {
+    if (state is MenuStateInitialised) {
       return Text(
         state.userName ?? "",
         style: theme(context).textTheme.titleLarge?.copyWith(color: colorSecondary(context)),

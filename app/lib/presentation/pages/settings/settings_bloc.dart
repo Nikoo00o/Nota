@@ -47,7 +47,7 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
   }
 
   Future<SettingsState> _buildState() async {
-    return SettingsStateInitialized(
+    return SettingsStateInitialised(
       isDarkTheme: await appSettingsRepository.isDarkTheme(),
       localeIndex: await _getLocaleIndex(),
       localeOptions: Locales.localeTranslationKeys,

@@ -11,7 +11,6 @@ import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:app/services/translation_service.dart';
-import 'package:cryptography_flutter/cryptography_flutter.dart';
 import 'package:dargon2_flutter/dargon2_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:shared/core/constants/error_codes.dart';
