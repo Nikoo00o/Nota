@@ -233,6 +233,7 @@ Future<void> initializeGetIt() async {
         appConfig: sl(),
         logoutOfAccount: sl(),
         activateLockscreen: sl(),
+        dialogService: sl(),
       ));
 }
 

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app/core/constants/assets.dart';
 import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_state.dart';
 import 'package:app/presentation/main/dialog_overlay/widgets/input_dialog.dart';
@@ -9,6 +10,7 @@ import 'package:app/presentation/widgets/base_pages/page_event.dart';
 import 'package:app/services/translation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
 part "dialog_overlay_event.dart";
@@ -51,6 +53,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
     on<ShowConfirmDialog>(_handleShowConfirmDialog);
     on<ShowInputDialog>(_handleShowInputDialog);
     on<ShowSelectDialog>(_handleShowSelectDialog);
+    on<ShowAboutDialog>(_handleShowAboutDialog);
   }
 
   Future<void> _handleHideDialog(HideDialog event, Emitter<DialogOverlayState> emit) async {
@@ -190,6 +193,40 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
     // the on cancel callback will be called automatically
   }
 
+  Future<void> _handleShowAboutDialog(ShowAboutDialog event, Emitter<DialogOverlayState> emit) async {
+    Logger.debug("Showing about dialog"); // special case
+    if (isLoadingDialogVisible) {
+      _closeDialog(cancelDialog: false, isLoadingDialog: true);
+    }
+    final TextStyle? style = Theme.of(context).textTheme.bodyMedium;
+    showAboutDialog(
+      context: context,
+      applicationIcon: SvgPicture.asset(
+        Assets.nota_letter_logo,
+        height: 55,
+        colorFilter: ColorFilter.mode(colors.primary, BlendMode.srcIn),
+      ),
+      applicationName: "Nota",
+      applicationVersion: 'April 2023',
+      applicationLegalese: '\u{a9} 2023 Nikoo00o',
+      children: <Widget>[
+        const SizedBox(height: 24),
+        RichText(
+          text: TextSpan(
+            children: <TextSpan>[
+              TextSpan(
+                  style: style,
+                  text: "Nota is a Cross-Platform Note-Taking App designed to work both offline locally, "
+                      "or synchronized with a server across all devices. "
+                      'For more details visit\n'),
+              TextSpan(style: style?.copyWith(color: colors.primary), text: "https://github.com/Nikoo00o/Nota"),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   /// Builds a default text button that closes the dialog on a button press
   TextButton _buildTextButton({
     required String textKey,
@@ -298,7 +335,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
         Logger.error("a base dialog is already open");
         return true;
       } else if (isLoadingDialogVisible) {
-        Logger.verbose("closing error dialog in favor of base dialog");
+        Logger.verbose("closing loading dialog in favor of base dialog");
         _closeDialog(cancelDialog: false, isLoadingDialog: true);
       }
       Logger.verbose("showing some base dialog");

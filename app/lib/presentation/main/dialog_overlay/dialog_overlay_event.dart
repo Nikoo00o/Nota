@@ -284,3 +284,7 @@ class HideDialog extends DialogOverlayEvent {
 class HideLoadingDialog extends DialogOverlayEvent {
   const HideLoadingDialog();
 }
+
+class ShowAboutDialog extends DialogOverlayEvent {
+  const ShowAboutDialog();
+}

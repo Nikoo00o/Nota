@@ -80,6 +80,9 @@ class DialogServiceMock extends DialogService {
   }
 
   @override
+  void showAboutDialog() {}
+
+  @override
   void hideDialog() {}
 
   @override

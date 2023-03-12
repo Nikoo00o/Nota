@@ -63,6 +63,8 @@ class MenuItem extends BlocPageChild<MenuBloc, MenuState> {
         return Icons.logout;
       case "page.settings.title":
         return Icons.settings;
+      case "menu.about":
+        return Icons.info;
 
       case "page.dialog.test.title":
         return Icons.question_answer;

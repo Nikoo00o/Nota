@@ -42,6 +42,9 @@ abstract class DialogService {
   /// Shows the specified dialog with many optional parameter. For the [params], look at [ShowSelectDialog].
   void showSelectionDialog(ShowSelectDialog params);
 
+  /// Shows the about dialog with the license, etc
+  void showAboutDialog();
+
   /// Hides the last dialog
   void hideDialog();
 
@@ -61,7 +64,7 @@ class DialogServiceImpl extends DialogService {
   const DialogServiceImpl({required this.dialogOverlayBloc});
 
   @override
-  void show(DialogOverlayEvent params){
+  void show(DialogOverlayEvent params) {
     dialogOverlayBloc.add(params);
   }
 
@@ -103,6 +106,11 @@ class DialogServiceImpl extends DialogService {
   @override
   void showSelectionDialog(ShowSelectDialog params) {
     dialogOverlayBloc.add(params);
+  }
+
+  @override
+  void showAboutDialog() {
+    dialogOverlayBloc.add(const ShowAboutDialog());
   }
 
   @override

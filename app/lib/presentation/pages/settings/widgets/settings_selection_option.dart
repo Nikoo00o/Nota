@@ -54,11 +54,14 @@ class SettingsSelectionOption extends WidgetBase {
       padding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
       child: ListTile(
         dense: true,
-        contentPadding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+        contentPadding: const EdgeInsets.fromLTRB(10, 0, 4, 0),
         leading: icon != null ? Icon(icon, size: iconSize) : null,
         minLeadingWidth: iconSize,
         isThreeLine: hasBigDescription,
-        title: Text(translate(context, titleKey, keyParams: titleKeyParams)),
+        title: Text(
+          translate(context, titleKey, keyParams: titleKeyParams),
+          style: theme(context).textTheme.titleMedium,
+        ),
         subtitle: descriptionKey != null
             ? Text(translate(context, descriptionKey!, keyParams: descriptionKeyParams),
                 style: theme(context).textTheme.bodySmall?.copyWith(color: colorOnSurfaceVariant(context)))

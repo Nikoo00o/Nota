@@ -6,6 +6,7 @@ import 'package:app/domain/usecases/account/get_user_name.dart';
 import 'package:app/presentation/main/menu/menu_event.dart';
 import 'package:app/presentation/main/menu/menu_state.dart';
 import 'package:app/presentation/widgets/base_pages/page_bloc.dart';
+import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared/domain/usecases/usecase.dart';
@@ -13,6 +14,7 @@ import 'package:shared/domain/usecases/usecase.dart';
 class MenuBloc extends PageBloc<MenuEvent, MenuState> {
   final GetUsername getUsername;
   final NavigationService navigationService;
+  final DialogService dialogService;
   final ActivateLockscreen activateLockscreen;
   final LogoutOfAccount logoutOfAccount;
   final AppConfig appConfig;
@@ -26,6 +28,7 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
   MenuBloc({
     required this.getUsername,
     required this.navigationService,
+    required this.dialogService,
     required this.appConfig,
     required this.activateLockscreen,
     required this.logoutOfAccount,
@@ -62,6 +65,9 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
         break;
       case "page.settings.title":
         navigationService.navigateTo(Routes.settings);
+        break;
+      case "menu.about":
+        dialogService.showAboutDialog();
         break;
 
       case "page.dialog.test.title":

@@ -37,11 +37,13 @@ class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
         children: <Widget>[
           SettingsToggleOption(
             titleKey: "page.settings.dark.theme",
+            icon: Icons.dark_mode,
             isActive: state.isDarkTheme,
             onChange: (bool value) => currentBloc(context).add(DarkThemeChanged(isDarkTheme: value)),
           ),
           SettingsSelectionOption(
             titleKey: "page.settings.locale",
+            icon: Icons.language,
             dialogTitleKey: "language",
             initialOptionIndex: state.localeIndex,
             options: state.localeOptions.map((String key) => TranslationString(key)).toList(),

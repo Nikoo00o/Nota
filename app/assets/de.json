@@ -42,6 +42,7 @@
   "menu.notes.label" : "Notizen",
   "menu.lock.screen.title" : "Sperrbildschirm",
   "menu.logout.title": "Ausloggen",
+  "menu.about": "About",
   "page.settings.title": "Einstellungen",
   "page.settings.dark.theme": "Dunkles Design benutzen",
   "page.settings.locale": "Sprache auswählen",

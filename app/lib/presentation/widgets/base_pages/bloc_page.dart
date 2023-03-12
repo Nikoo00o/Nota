@@ -7,7 +7,7 @@ import 'package:app/presentation/widgets/base_pages/page_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// This is an abstract super class that can be used for the pages which are used with a bloc.
+/// This is an abstract super class that can be used for the pages with routes which are used with a bloc.
 /// For pages without a bloc, use [NoBlocPage].
 ///
 /// You should override the methods [buildBodyWithNoState] and [buildBodyWithState] inside of your sub class to build the

@@ -1,7 +1,7 @@
 import 'package:app/presentation/widgets/base_pages/page_base.dart';
 import 'package:flutter/material.dart';
 
-/// An abstract super class used for the pages which are used without a bloc.
+/// An abstract super class used for the pages with routes which are used without a bloc.
 ///
 /// This uses [buildPage] to build the page and the [buildBody] method should be overridden in the subclass to build the
 /// page body. The methods [buildAppBar] and [buildMenuDrawer] can also be overridden.
