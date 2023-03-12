@@ -8,10 +8,12 @@ import 'package:app/presentation/main/dialog_overlay/widgets/loading_dialog_cont
 import 'package:app/presentation/main/dialog_overlay/widgets/selection_dialog.dart';
 import 'package:app/presentation/widgets/base_pages/page_event.dart';
 import 'package:app/services/translation_service.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared/core/utils/logger/logger.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 part "dialog_overlay_event.dart";
 
@@ -207,8 +209,8 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
         colorFilter: ColorFilter.mode(colors.primary, BlendMode.srcIn),
       ),
       applicationName: "Nota",
-      applicationVersion: 'April 2023',
-      applicationLegalese: '\u{a9} 2023 Nikoo00o',
+      applicationVersion: "April 2023",
+      applicationLegalese: "\u{a9} 2023 Nikoo00o",
       children: <Widget>[
         const SizedBox(height: 24),
         RichText(
@@ -219,7 +221,14 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
                   text: "Nota is a Cross-Platform Note-Taking App designed to work both offline locally, "
                       "or synchronized with a server across all devices. "
                       'For more details visit\n'),
-              TextSpan(style: style?.copyWith(color: colors.primary), text: "https://github.com/Nikoo00o/Nota"),
+              TextSpan(
+                style: style?.copyWith(color: colors.primary),
+                text: "https://github.com/Nikoo00o/Nota",
+                recognizer: TapGestureRecognizer()
+                  ..onTap = () {
+                    launchUrl(Uri.parse("https://github.com/Nikoo00o/Nota"), mode: LaunchMode.externalApplication);
+                  },
+              ),
             ],
           ),
         ),
