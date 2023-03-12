@@ -21,6 +21,7 @@ class SettingsInputOption extends SettingsOption {
   final List<String>? dialogTitleKeyParams;
   final String? dialogDescriptionKey;
   final List<String>? dialogDescriptionKeyParams;
+  final String? dialogInputLabelKey;
 
   /// can be used to limit the keyboard
   final TextInputType? keyboardType;
@@ -40,6 +41,7 @@ class SettingsInputOption extends SettingsOption {
     this.dialogTitleKeyParams,
     this.dialogDescriptionKey,
     this.dialogDescriptionKeyParams,
+    this.dialogInputLabelKey,
     this.keyboardType,
   });
 
@@ -56,6 +58,7 @@ class SettingsInputOption extends SettingsOption {
       onConfirm: onConfirm,
       validatorCallback: validatorCallback,
       keyboardType: keyboardType,
+      inputLabelKey: dialogInputLabelKey,
     ));
   }
 }

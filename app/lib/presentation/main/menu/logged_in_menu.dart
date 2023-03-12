@@ -6,6 +6,7 @@ import 'package:app/presentation/main/menu/menu_event.dart';
 import 'package:app/presentation/main/menu/menu_state.dart';
 import 'package:app/presentation/main/menu/widgets/menu_drawer_settings.dart';
 import 'package:app/presentation/main/menu/widgets/menu_item.dart';
+import 'package:app/presentation/main/menu/widgets/menu_notes.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:flutter/material.dart';
 
@@ -48,21 +49,25 @@ class LoggedInMenu extends BlocPage<MenuBloc, MenuState> {
   @override
   Widget buildBodyWithNoState(BuildContext context, Widget bodyWithState) {
     return Drawer(
-      child: Scrollbar(
-        scrollbarOrientation: ScrollbarOrientation.left,
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            const MenuDrawerHeader(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 8, 0, 8),
-              child: Text(translate(context, "menu.notes.label"), style: textTitleMedium(context)),
-            ),
-            const MenuItem(pageTitleKey: "page.note.selection.temp.title"),
-            const Divider(),
-            const MenuDrawerSettings(),
-            bodyWithState,
-          ],
+      child: NotificationListener<Notification>(
+        onNotification: (Notification notification) {
+          // this is needed, so that [AppBar.notificationPredicate] does not receive the scrolls from the menu drawer and
+          // get elevated with a shadow.
+          return true;
+        },
+        child: Scrollbar(
+          scrollbarOrientation: ScrollbarOrientation.left,
+          controller: currentBloc(context).scrollController,
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              const MenuDrawerHeader(),
+              const MenuNotes(),
+              const Divider(),
+              const MenuDrawerSettings(),
+              bodyWithState,
+            ],
+          ),
         ),
       ),
     );

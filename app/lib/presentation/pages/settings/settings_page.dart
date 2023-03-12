@@ -54,6 +54,7 @@ class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
           SettingsToggleOption(
             titleKey: "page.settings.auto.login",
             descriptionKey: "page.settings.auto.login.description",
+            hasBigDescription: true,
             icon: Icons.lock_open,
             isActive: state.autoLogin,
             onChange: (bool value) => currentBloc(context).add(AutoLoginChanged(autoLogin: value)),
@@ -64,6 +65,8 @@ class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
             descriptionKeyParams: <String>[state.lockscreenTimeoutInSeconds],
             dialogTitleKey: "page.settings.lock.screen.timeout",
             dialogDescriptionKey: "page.settings.lock.screen.timeout.description.dialog",
+            dialogInputLabelKey: "dialog.input.label.number",
+            hasBigDescription: true,
             icon: Icons.lock_clock,
             disabled: state.autoLogin,
             keyboardType: TextInputType.number,

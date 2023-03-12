@@ -4,6 +4,7 @@ import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_update_batch.dart';
 import 'package:app/domain/entities/structure_note.dart';
+import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/domain/usecases/note_structure/inner/update_note_structure.dart';
 import 'package:shared/core/constants/error_codes.dart';
 
@@ -39,7 +40,7 @@ abstract class NoteStructureRepository {
   /// After the use case [UpdateNoteStructure], this will never be null! By default this starts at [recent].
   StructureItem? currentItem;
 
-  /// Returns a list of references to the top level folders with the following indices:
+  /// Returns a list of references to the static top level folders with the following indices:
   ///
   /// [0] = [root]
   ///
@@ -77,5 +78,8 @@ abstract class NoteStructureRepository {
   ///
   /// This will not use the internal variables of this repository, but instead uses the parameter [newCurrentItem] and
   /// [newTopLevelFolders] which are copies of the internal ones and can directly be send to the ui!
-  Future<void> addNewStructureUpdate(StructureItem newCurrentItem, List<StructureFolder> newTopLevelFolders);
+  Future<void> addNewStructureUpdate(
+    StructureItem newCurrentItem,
+    Map<TranslationString, StructureFolder> newTopLevelFolders,
+  );
 }

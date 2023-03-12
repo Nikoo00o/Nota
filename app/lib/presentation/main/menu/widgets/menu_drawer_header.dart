@@ -24,12 +24,13 @@ class MenuDrawerHeader extends BlocPageChild<MenuBloc, MenuState> {
     return SizedBox(
       height: 205,
       child: DrawerHeader(
-        padding: const EdgeInsets.fromLTRB(5, 20, 5, 5),
+        padding: const EdgeInsets.fromLTRB(6, 20, 6, 6),
         margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
         child: Column(
           children: <Widget>[
             const NotaIcon(imageSize: 66, fontSize: 24),
             ListTile(
+              contentPadding: const EdgeInsets.fromLTRB(6, 3, 8, 0),
               leading: Icon(
                 Icons.account_circle,
                 size: 40,

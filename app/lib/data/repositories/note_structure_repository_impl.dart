@@ -5,6 +5,7 @@ import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/entities/structure_update_batch.dart';
+import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
@@ -16,7 +17,7 @@ class NoteStructureRepositoryImpl extends NoteStructureRepository {
   });
 
   @override
-  List<StructureFolder?> get topLevelFolders => <StructureFolder?>[root, recent];
+  List<StructureFolder?> get topLevelFolders => <StructureFolder?>[root, recent, moveSelection];
 
   @override
   StructureNote? getNoteById({required int noteId, required bool useRootAsParent}) {
@@ -51,7 +52,8 @@ class NoteStructureRepositoryImpl extends NoteStructureRepository {
   }
 
   @override
-  Future<void> addNewStructureUpdate(StructureItem newCurrentItem, List<StructureFolder> newTopLevelFolders) async {
+  Future<void> addNewStructureUpdate(
+      StructureItem newCurrentItem, Map<TranslationString, StructureFolder> newTopLevelFolders) async {
     _streamController.sink.add(StructureUpdateBatch(currentItem: newCurrentItem, topLevelFolders: newTopLevelFolders));
   }
 }

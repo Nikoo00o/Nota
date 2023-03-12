@@ -39,6 +39,7 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
 
   @override
   PreferredSizeWidget buildAppBarWithState(BuildContext context, NoteSelectionState state) {
+    // if recent, root, or move -> show translated key. otherwise show empty with parms!
     return AppBar(
       title: Text(translate(context, "page.note.selection.temp.title")),
       centerTitle: false,
@@ -47,6 +48,7 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
 
   @override
   Widget? buildMenuDrawer(BuildContext context) {
+    // show of top level parent recent, or root. otherwise dont build menu at all. with state!
     return const LoggedInMenu(currentPageTranslationKey: "page.note.selection.temp.title");
   }
 

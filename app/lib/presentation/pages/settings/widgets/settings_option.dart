@@ -35,9 +35,9 @@ abstract class SettingsOption extends WidgetBase {
     return Padding(
       padding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
       child: ListTile(
-        dense: true,
-        contentPadding: const EdgeInsets.fromLTRB(10, 0, 4, 0),
-        leading: icon != null ? Icon(icon, size: iconSize,) : null,
+        dense: false,
+        contentPadding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+        leading: icon != null ? SizedBox(height: double.infinity, child: Icon(icon, size: iconSize)) : null,
         minLeadingWidth: iconSize,
         isThreeLine: hasBigDescription,
         title: Text(

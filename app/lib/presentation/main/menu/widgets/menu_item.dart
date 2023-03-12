@@ -73,7 +73,9 @@ class MenuItem extends BlocPageChild<MenuBloc, MenuState> {
       case "page.splash.screen.test.title":
         return Icons.crop_portrait;
 
-      case "page.note.selection.temp.title":
+      case "notes.root":
+        return Icons.note;
+      case "notes.recent":
         return Icons.note;
 
       default:

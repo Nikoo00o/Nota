@@ -234,11 +234,13 @@ Future<void> initializeGetIt() async {
       ));
   sl.registerFactory<MenuBloc>(() => MenuBloc(
         getUsername: sl(),
+        getStructureFolders: sl(),
         navigationService: sl(),
         appConfig: sl(),
         logoutOfAccount: sl(),
         activateLockscreen: sl(),
         dialogService: sl(),
+        navigateToItem: sl(),
       ));
 }
 

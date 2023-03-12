@@ -6,7 +6,6 @@ import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
 class StructureFolder extends StructureItem {
-
   /// The folders and files within this folder.
   ///
   /// This will not be used for comparison and can be modified!
@@ -44,6 +43,7 @@ class StructureFolder extends StructureItem {
         child,
         newDirectParent: changeParentOfChildren ? folder : null,
         changeParentOfChildren: changeParentOfChildren,
+        newRecursiveCanBeModified: changeCanBeModifiedOfChildrenRecursively ? canBeModified : null,
       ));
     }
 

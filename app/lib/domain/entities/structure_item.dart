@@ -137,15 +137,17 @@ abstract class StructureItem extends Entity {
 
   /// This throws [ErrorCodes.INVALID_PARAMS] if the [nameToValidate] is empty, or if it contains the [delimiter].
   ///
-  /// It throws [ErrorCodes.NAME_ALREADY_USED] if the [StructureFolder.recentFolderNames], or
-  /// [StructureFolder.rootFolderNames] contain the name.
+  /// It throws [ErrorCodes.NAME_ALREADY_USED] if the [StructureItem.recentFolderNames], or
+  /// [StructureItem.rootFolderNames], or [StructureItem.moveFolderNames] contain the name.
   static void throwErrorForName(String nameToValidate) {
     if (nameToValidate.isEmpty || nameToValidate.contains(StructureItem.delimiter)) {
       Logger.error("The name $nameToValidate is empty, or it contains a ${StructureItem.delimiter}");
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
 
-    if (recentFolderNames.contains(nameToValidate) || rootFolderNames.contains(nameToValidate)) {
+    if (recentFolderNames.contains(nameToValidate.toLowerCase()) ||
+        rootFolderNames.contains(nameToValidate.toLowerCase()) ||
+        moveFolderNames.contains(nameToValidate.toLowerCase())) {
       Logger.error("The name $nameToValidate is a reserved name");
       throw const ClientException(message: ErrorCodes.NAME_ALREADY_USED);
     }
