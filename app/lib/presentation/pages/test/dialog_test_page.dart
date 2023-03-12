@@ -1,5 +1,6 @@
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/get_it.dart';
+import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/presentation/main/menu/logged_in_menu.dart';
 import 'package:app/presentation/widgets/base_pages/no_bloc_page.dart';
@@ -66,8 +67,8 @@ class DialogTestPage extends NoBlocPage {
                 onConfirm: (String data) {
                   Logger.verbose("CONFIRMED $data");
                 },
-                validatorCallback: (String? input){
-                  if(input!= null && input.length<4){
+                validatorCallback: (String? input) {
+                  if (input != null && input.length < 4) {
                     return "more chars";
                   }
                   return null;
@@ -82,20 +83,20 @@ class DialogTestPage extends NoBlocPage {
           FilledButton(
             onPressed: () async {
               sl<DialogService>().show(ShowSelectDialog(
-                selectionTranslatedStrings: const <String>[
-                  "first",
-                  "second",
-                  "third",
-                  "fourth",
-                  "sixth",
-                  "seventhseventhseventhseventhasdd",
-                  "seventh",
-                  "seventh",
-                  "seventh",
-                  "seventh",
-                  "seventh",
-                  "seventh",
-                  "seventh",
+                translationStrings: <TranslationString>[
+                  TranslationString("first"),
+                  TranslationString("second"),
+                  TranslationString("third"),
+                  TranslationString("fourth"),
+                  TranslationString("sixth"),
+                  TranslationString("seventhseventhseventhseventhasdd"),
+                  TranslationString("seventh"),
+                  TranslationString("seventh"),
+                  TranslationString("seventh"),
+                  TranslationString("seventh"),
+                  TranslationString("seventh"),
+                  TranslationString("seventh"),
+                  TranslationString("seventh"),
                 ],
                 descriptionKey: "select something",
                 onConfirm: (int index) {

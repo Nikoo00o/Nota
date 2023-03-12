@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_state.dart';
 import 'package:app/presentation/main/dialog_overlay/widgets/input_dialog.dart';
 import 'package:app/presentation/main/dialog_overlay/widgets/loading_dialog_content.dart';

@@ -50,7 +50,7 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
     return SettingsStateInitialized(
       isDarkTheme: await appSettingsRepository.isDarkTheme(),
       localeIndex: await _getLocaleIndex(),
-      localeOptions: Locales.localeTranslationKeys.map((String key) => translate(key)).toList(),
+      localeOptions: Locales.localeTranslationKeys,
     );
   }
 

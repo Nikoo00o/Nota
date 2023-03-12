@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app/core/get_it.dart';
+import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/presentation/widgets/widget_base.dart';
 import 'package:app/services/dialog_service.dart';
@@ -21,9 +22,14 @@ class SettingsSelectionOption extends WidgetBase {
   /// leading icon if not null
   final IconData? icon;
 
-  final List<String> options;
+  final List<TranslationString> options;
   final int? initialOptionIndex;
   final FutureOr<void> Function(int index) onSelected;
+
+  final String? dialogTitleKey;
+  final List<String>? dialogTitleKeyParams;
+  final String? dialogDescriptionKey;
+  final List<String>? dialogDescriptionKeyParams;
 
   const SettingsSelectionOption({
     required this.titleKey,
@@ -36,6 +42,10 @@ class SettingsSelectionOption extends WidgetBase {
     required this.options,
     this.initialOptionIndex,
     required this.onSelected,
+    this.dialogTitleKey,
+    this.dialogTitleKeyParams,
+    this.dialogDescriptionKey,
+    this.dialogDescriptionKeyParams,
   });
 
   @override
@@ -60,9 +70,11 @@ class SettingsSelectionOption extends WidgetBase {
 
   Future<void> _openDialog(BuildContext context) async {
     sl<DialogService>().showSelectionDialog(ShowSelectDialog(
-      descriptionKey: titleKey,
-      descriptionKeyParams: titleKeyParams,
-      selectionTranslatedStrings: options,
+      titleKey: dialogTitleKey,
+      titleKeyParams: dialogTitleKeyParams,
+      descriptionKey: dialogDescriptionKey,
+      descriptionKeyParams: dialogDescriptionKeyParams,
+      translationStrings: options,
       onConfirm: onSelected,
       initialSelectedIndex: initialOptionIndex,
     ));

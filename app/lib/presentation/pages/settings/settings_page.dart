@@ -1,5 +1,6 @@
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/get_it.dart';
+import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/presentation/main/menu/logged_in_menu.dart';
 import 'package:app/presentation/pages/settings/settings_bloc.dart';
 import 'package:app/presentation/pages/settings/settings_event.dart';
@@ -41,8 +42,9 @@ class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
           ),
           SettingsSelectionOption(
             titleKey: "page.settings.locale",
+            dialogTitleKey: "language",
             initialOptionIndex: state.localeIndex,
-            options: state.localeOptions,
+            options: state.localeOptions.map((String key) => TranslationString(key)).toList(),
             onSelected: (int index) => currentBloc(context).add(LocaleChanged(index: index)),
           ),
         ],

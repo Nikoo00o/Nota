@@ -230,15 +230,15 @@ class ShowInputDialog extends _CancelDialog {
 
 /// Shows a selection dialog with a title, text and a confirm button and also a cancel button.
 ///
-/// Below the text will be a list of options from the translated [selectionTranslatedStrings] for which the user
-/// can choose one . The index of the selected  element will be returned inside of the [onConfirm] callback!
+/// Below the text will be a list of options from the [translationStrings] for which the user
+/// can choose one. The index of the selected  element will be returned inside of the [onConfirm] callback!
 ///
-/// IMPORTANT: THE [selectionTranslatedStrings] HAVE TO BE TRANSLATED VALUES and not translation keys!!!
+/// The [translationStrings] will be translated by the dialog.
 ///
 /// The confirm button will only be clickable if one of the elements was selected
 class ShowSelectDialog extends _CancelDialog {
-  /// The translation keys for the elements
-  final List<String> selectionTranslatedStrings;
+  /// The translation keys for the elements which will be translated!
+  final List<TranslationString> translationStrings;
 
   /// Callback that gets called when the confirm button of the dialog was pressed and also contains the data the user put in
   final FutureOr<void> Function(int) onConfirm;
@@ -251,7 +251,7 @@ class ShowSelectDialog extends _CancelDialog {
     super.titleKeyParams,
     super.titleStyle,
     super.titleIcon,
-    required super.descriptionKey,
+    String? descriptionKey,
     super.descriptionKeyParams,
     super.descriptionStyle,
     super.confirmButtonKey,
@@ -261,10 +261,10 @@ class ShowSelectDialog extends _CancelDialog {
     super.cancelButtonKeyParams,
     super.cancelButtonStyle,
     super.onCancel,
-    required this.selectionTranslatedStrings,
+    required this.translationStrings,
     required this.onConfirm,
     this.initialSelectedIndex,
-  });
+  }) : super(descriptionKey: descriptionKey ?? "dialog.select.description");
 }
 
 /// Hides both loading and custom dialog if visible

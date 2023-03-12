@@ -1,3 +1,4 @@
+import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:flutter/material.dart';
 
@@ -58,7 +59,7 @@ class _SelectionDialogState extends State<SelectionDialog> {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List<Widget>.generate(
-                  event.selectionTranslatedStrings.length,
+                  event.translationStrings.length,
                   (int index) => _buildElement(context, index),
                 ),
               ),
@@ -71,10 +72,11 @@ class _SelectionDialogState extends State<SelectionDialog> {
   }
 
   Widget _buildElement(BuildContext context, int index) {
+    final TranslationString translationString = event.translationStrings[index];
     return RadioListTile<int?>(
       dense: true,
       title: Text(
-        event.selectionTranslatedStrings[index],
+        translate(translationString.translationKey, keyParams: translationString.translationKeyParams),
         style: event.descriptionStyle,
       ),
       value: index,
