@@ -9,6 +9,8 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// This returns a a list of deep copies of the top level note structure folders (first "root" and second element "recent").
 /// But the parent folder references for the children are not changed!
 ///
+/// The last folder will always be the move folder and it should be ignored!!!
+///
 /// This should be used to build the menu items for navigating to the folders.
 ///
 /// This can not be used to modify the note structure!

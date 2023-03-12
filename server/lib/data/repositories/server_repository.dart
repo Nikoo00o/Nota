@@ -76,7 +76,7 @@ class ServerRepository {
     await noteRepository.cleanUpOldTransfers();
   }
 
-  /// Adds the callbacks for the endpoints if they are not already initialized.
+  /// Adds the callbacks for the endpoints if they are not already initialised.
   ///
   /// [endpointCallbacks] must be a list of endpoints with a matching callback function which handles http requests to the
   /// endpoint.

@@ -1,4 +1,5 @@
 import 'package:app/core/config/app_config.dart';
+import 'package:app/core/config/app_theme.dart';
 import 'package:app/data/datasources/local_data_source.dart';
 import 'package:app/data/datasources/local_data_source_impl.dart';
 import 'package:app/data/datasources/remote_account_data_source.dart';
@@ -11,7 +12,7 @@ import 'package:app/domain/repositories/account_repository.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
 import 'package:app/domain/repositories/note_transfer_repository.dart';
-import 'package:app/domain/usecases/account/change/activate_screen_saver.dart';
+import 'package:app/domain/usecases/account/change/activate_lock_screen.dart';
 import 'package:app/domain/usecases/account/change/change_account_password.dart';
 import 'package:app/domain/usecases/account/change/change_auto_login.dart';
 import 'package:app/domain/usecases/account/change/logout_of_account.dart';
@@ -51,6 +52,7 @@ import 'package:app/services/navigation_service.dart';
 import 'package:app/services/session_service.dart';
 import 'package:app/services/translation_service.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared/data/datasources/rest_client.dart';
@@ -119,7 +121,7 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<GetLoggedInAccount>(() => GetLoggedInAccount(accountRepository: sl()));
   sl.registerLazySingleton<GetUsername>(() => GetUsername(accountRepository: sl()));
   sl.registerLazySingleton<SaveAccount>(() => SaveAccount(accountRepository: sl()));
-  sl.registerLazySingleton<ActivateScreenSaver>(() => ActivateScreenSaver(accountRepository: sl(), navigationService: sl()));
+  sl.registerLazySingleton<ActivateLockscreen>(() => ActivateLockscreen(accountRepository: sl(), navigationService: sl()));
 
   sl.registerLazySingleton<LoadNoteContent>(() => LoadNoteContent(getLoggedInAccount: sl(), noteTransferRepository: sl()));
   sl.registerLazySingleton<StoreNoteEncrypted>(() => StoreNoteEncrypted(
@@ -224,8 +226,22 @@ Future<void> initializeGetIt() async {
         firstButtonScrollKey: arguments.firstButtonScrollKey,
       ));
   sl.registerFactory<NoteSelectionBloc>(() => NoteSelectionBloc());
-  sl.registerFactory<SettingsBloc>(() => SettingsBloc(logoutOfAccount: sl()));
-  sl.registerFactory<MenuBloc>(() => MenuBloc(getUsername: sl()));
+  sl.registerFactory<SettingsBloc>(() => SettingsBloc(
+        appSettingsRepository: sl(),
+        appBloc: sl(),
+        changeAutoLogin: sl(),
+        getAutoLogin: sl(),
+      navigationService: sl(),
+      changeAccountPassword: sl(),
+      ));
+  sl.registerFactory<MenuBloc>(() => MenuBloc(
+        getUsername: sl(),
+        navigationService: sl(),
+        appConfig: sl(),
+        logoutOfAccount: sl(),
+        activateLockscreen: sl(),
+        dialogService: sl(),
+      ));
 }
 
 Future<SessionToken?> fetchCurrentSessionToken() => sl<SharedFetchCurrentSessionToken>().call(const NoParams());

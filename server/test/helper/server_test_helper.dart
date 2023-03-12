@@ -44,7 +44,7 @@ late StartNotaServer startNotaServer;
 late StopNotaServer stopNotaServer;
 late FetchCurrentSessionTokenMock fetchCurrentSessionTokenMock;
 late RestClient restClient;
-bool initialized = false;
+bool initialised = false;
 
 /// Should be the first call in the [setUp] function of each test.
 ///
@@ -93,7 +93,7 @@ Future<void> createCommonTestObjects({required int serverPort, LogLevel logLevel
   fetchCurrentSessionTokenMock = FetchCurrentSessionTokenMock();
   restClient = RestClient(sharedConfig: serverConfigMock, fetchSessionTokenCallback: _fetchCurrentSessionToken);
 
-  initialized = true;
+  initialised = true;
 
   await _setup(logLevel);
 }
@@ -105,7 +105,7 @@ Future<SessionToken?> _fetchCurrentSessionToken() =>
     fetchCurrentSessionTokenMock.call(const NoParams());
 
 Future<void> _setup(LogLevel logLevel) async {
-  Logger.initLogger(Logger(logLevel: logLevel)); // the logger must always be initialized first
+  Logger.initLogger(Logger(logLevel: logLevel)); // the logger must always be initialised first
 
   // modifies the resource path to depend on the test port, so its unique for each test
   final String baseTestPath = FileUtils.getLocalFilePath("test${Platform.pathSeparator}data");

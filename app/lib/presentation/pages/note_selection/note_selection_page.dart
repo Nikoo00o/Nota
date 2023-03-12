@@ -17,19 +17,20 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
   }
 
   @override
+  Widget buildBodyWithNoState(BuildContext context, Widget bodyWithState) {
+    return Scrollbar(
+      child: SingleChildScrollView(
+        child: bodyWithState,
+      ),
+    );
+  }
+
+  @override
   Widget buildBodyWithState(BuildContext context, NoteSelectionState state) {
-    print("build");
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        FilledButton(
-          onPressed: () {
-            sl<NavigationService>().navigateTo(Routes.settings);
-          },
-          child: const Text("to settings"),
-        ),
-      ],
+      children: <Widget>[],
     );
   }
 
@@ -39,14 +40,14 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
   @override
   PreferredSizeWidget buildAppBarWithState(BuildContext context, NoteSelectionState state) {
     return AppBar(
-      title: Text(translate("page.note_selection.title")),
+      title: Text(translate(context, "page.note.selection.temp.title")),
       centerTitle: false,
     );
   }
 
   @override
   Widget? buildMenuDrawer(BuildContext context) {
-    return const LoggedInMenu();
+    return const LoggedInMenu(currentPageTranslationKey: "page.note.selection.temp.title");
   }
 
   @override

@@ -5,12 +5,9 @@ import 'dart:ui';
 import 'package:app/data/models/client_account_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared/core/config/shared_config.dart';
-import 'package:shared/core/constants/error_codes.dart';
-import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/core/utils/string_utils.dart';
 import 'package:shared/data/models/note_info_model.dart';
-import 'package:shared/domain/entities/note_info.dart';
 
 /// Always call [init] first before using any other method!
 abstract class LocalDataSource {
@@ -27,6 +24,10 @@ abstract class LocalDataSource {
   static const String LOCALE = "LOCALE";
 
   static const String CLIENT_NOTE_COUNTER = "CLIENT_NOTE_COUNTER";
+
+  static const String CONFIG_PREFIX = "CONFIG_PREFIX";
+
+  static const String LOCK_SCREEN_TIMEOUT = "LOCK_SCREEN_TIMEOUT";
 
   /// Must be called first in the main function to initialize hive to the [getApplicationDocumentsDirectory].
   Future<void> init();
@@ -90,8 +91,12 @@ abstract class LocalDataSource {
     return Locale(languageCode);
   }
 
-  Future<void> setLocale(Locale locale) async {
-    await write(key: LOCALE, value: locale.languageCode, secure: false);
+  Future<void> setLocale(Locale? locale) async {
+    if (locale == null) {
+      await delete(key: LOCALE, secure: false);
+    } else {
+      await write(key: LOCALE, value: locale.languageCode, secure: false);
+    }
   }
 
   Future<int?> getClientNoteCounter() async {
@@ -104,6 +109,34 @@ abstract class LocalDataSource {
 
   Future<void> setClientNoteCounter(int clientNoteCounter) async {
     await write(key: CLIENT_NOTE_COUNTER, value: clientNoteCounter.toString(), secure: false);
+  }
+
+  /// Returns the config toggle value with the [configKey].
+  ///
+  /// Per default this will return false.
+  Future<bool> getConfigValue({required String configKey}) async {
+    final String? value = await read(key: "${CONFIG_PREFIX}_$configKey", secure: false);
+    if (value == null) {
+      return false;
+    }
+    return value == "true";
+  }
+
+  /// This sets the value at the [configKey] to the [configValue] which can be retrieved with [getConfigValue].
+  Future<void> setConfigValue({required String configKey, required bool configValue}) async {
+    await write(key: "${CONFIG_PREFIX}_$configKey", value: configValue.toString(), secure: false);
+  }
+
+  Future<Duration?> getLockscreenTimeout() async {
+    final String? value = await read(key: LOCK_SCREEN_TIMEOUT, secure: false);
+    if (value == null) {
+      return null;
+    }
+    return Duration(milliseconds: int.parse(value));
+  }
+
+  Future<void> setLockscreenTimeout({required Duration duration}) async {
+    await write(key: LOCK_SCREEN_TIMEOUT, value: duration.inMilliseconds.toString(), secure: false);
   }
 
   /// Needs to be overridden in the subclasses.

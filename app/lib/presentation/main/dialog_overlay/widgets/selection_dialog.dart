@@ -1,13 +1,17 @@
+import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:flutter/material.dart';
 
+/// This dialog and the selection dialog are a bit bigger than the others
 class SelectionDialog extends StatefulWidget {
   final DialogOverlayBloc bloc;
   final ShowSelectDialog event;
+  final int? initialIndex;
 
   const SelectionDialog({
     required this.bloc,
     required this.event,
+    required this.initialIndex,
   });
 
   @override
@@ -15,8 +19,15 @@ class SelectionDialog extends StatefulWidget {
 }
 
 class _SelectionDialogState extends State<SelectionDialog> {
-  bool _confirmButtonEnabled = false;
+  late bool _confirmButtonEnabled;
   int? selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedIndex = widget.initialIndex;
+    _confirmButtonEnabled = selectedIndex != null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +48,8 @@ class _SelectionDialogState extends State<SelectionDialog> {
       // wider dialog
       width: double.maxFinite,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(translate(event.descriptionKey, keyParams: event.descriptionKeyParams), style: event.descriptionStyle),
           const SizedBox(height: 10),
@@ -47,7 +60,7 @@ class _SelectionDialogState extends State<SelectionDialog> {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List<Widget>.generate(
-                  event.selectionTranslatedStrings.length,
+                  event.translationStrings.length,
                   (int index) => _buildElement(context, index),
                 ),
               ),
@@ -60,10 +73,11 @@ class _SelectionDialogState extends State<SelectionDialog> {
   }
 
   Widget _buildElement(BuildContext context, int index) {
+    final TranslationString translationString = event.translationStrings[index];
     return RadioListTile<int?>(
       dense: true,
       title: Text(
-        event.selectionTranslatedStrings[index],
+        translate(translationString.translationKey, keyParams: translationString.translationKeyParams),
         style: event.descriptionStyle,
       ),
       value: index,

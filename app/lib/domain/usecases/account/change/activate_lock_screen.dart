@@ -17,11 +17,11 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// This will ignore any exceptions and just do nothing in that case.
 ///
 /// It is called on reopening the app again from the background.
-class ActivateScreenSaver extends UseCase<void, NoParams> {
+class ActivateLockscreen extends UseCase<void, NoParams> {
   final AccountRepository accountRepository;
   final NavigationService navigationService;
 
-  const ActivateScreenSaver({required this.accountRepository, required this.navigationService});
+  const ActivateLockscreen({required this.accountRepository, required this.navigationService});
 
   @override
   Future<void> execute(NoParams params) async {
@@ -30,7 +30,7 @@ class ActivateScreenSaver extends UseCase<void, NoParams> {
     if (account != null && account.storeDecryptedDataKey == false) {
       account.clearDecryptedDataKey();
       await accountRepository.saveAccount(account);
-      Logger.info("Activated screen saver");
+      Logger.info("Activated Lockscreen");
       navigationService.navigateTo(Routes.login);
     }
   }

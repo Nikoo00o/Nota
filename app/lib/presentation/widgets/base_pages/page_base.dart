@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 /// Use one of the subclasses [BlocPage], or [NoBlocPage] and not this class.
 ///
-/// This is only the abstract base class to provide common member variables.
+/// This is only the abstract base class for page routes to provide common member variables.
 ///
 /// You can also override [customBackNavigation] to provide a custom back navigation.
 /// Per default, a confirmation dialog will be opened if the app should be closed.

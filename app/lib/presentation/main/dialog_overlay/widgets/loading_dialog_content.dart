@@ -23,7 +23,7 @@ class LoadingDialogContent extends WidgetBase {
           ),
         ),
         const SizedBox(height: 30.0),
-        Text(translate(descriptionKey ?? "dialog.loading.description", keyParams: descriptionKeyParams)),
+        Text(translate(context, descriptionKey ?? "dialog.loading.description", keyParams: descriptionKeyParams)),
       ],
     );
   }

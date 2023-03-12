@@ -7,7 +7,7 @@ import 'package:synchronized/synchronized.dart';
 
 /// Logger subclasses should override [logToConsole] with the preferred way to log into the console.
 ///
-/// Before the static methods of the logger are used, the instance needs to be initialized with [initLogger]!
+/// Before the static methods of the logger are used, the instance needs to be initialised with [initLogger]!
 ///
 /// Subclasses can also override [logToStorage] if the logs should be stored, or [addColorForConsole] to add different
 /// color strings to the log messages in the console.
@@ -44,27 +44,27 @@ class Logger {
   }
 
   static void error(String? message, [Object? error, StackTrace? stackTrace]) {
-    assert(_instance != null, "logger not initialized");
+    assert(_instance != null, "logger not initialised");
     _instance?.log(message, LogLevel.ERROR, error, stackTrace);
   }
 
   static void warn(String? message, [Object? error, StackTrace? stackTrace]) {
-    assert(_instance != null, "logger not initialized");
+    assert(_instance != null, "logger not initialised");
     _instance?.log(message, LogLevel.WARN, error, stackTrace);
   }
 
   static void info(String? message, [Object? error, StackTrace? stackTrace]) {
-    assert(_instance != null, "logger not initialized");
+    assert(_instance != null, "logger not initialised");
     _instance?.log(message, LogLevel.INFO, error, stackTrace);
   }
 
   static void debug(String? message, [Object? error, StackTrace? stackTrace]) {
-    assert(_instance != null, "logger not initialized");
+    assert(_instance != null, "logger not initialised");
     _instance?.log(message, LogLevel.DEBUG, error, stackTrace);
   }
 
   static void verbose(String? message, [Object? error, StackTrace? stackTrace]) {
-    assert(_instance != null, "logger not initialized");
+    assert(_instance != null, "logger not initialised");
     _instance?.log(message, LogLevel.VERBOSE, error, stackTrace);
   }
 

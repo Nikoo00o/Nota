@@ -80,6 +80,9 @@ abstract class BlocPageChild<Bloc extends PageBloc<PageEvent, State>, State exte
 
   /// Returns current bloc of hte page without listening to it, so that events can be added, or navigation can be done, etc.
   /// This should not be used for widgets that depend on state changes of the bloc!
+  ///
+  /// This can also be used to access [TextEditingController], or any other controllers inside of the widgets which are
+  /// initialized once in the constructor of the bloc and are final.
   Bloc currentBloc(BuildContext context) => BlocProvider.of<Bloc>(context);
 
   /// Listens to the bloc for state changes and returns the bloc so that ui can be build with data from it.

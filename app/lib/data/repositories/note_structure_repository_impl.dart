@@ -51,7 +51,7 @@ class NoteStructureRepositoryImpl extends NoteStructureRepository {
   }
 
   @override
-  Future<void> addNewStructureUpdate(StructureItem? newCurrentItem, List<StructureFolder?> newTopLevelFolders) async {
+  Future<void> addNewStructureUpdate(StructureItem newCurrentItem, List<StructureFolder> newTopLevelFolders) async {
     _streamController.sink.add(StructureUpdateBatch(currentItem: newCurrentItem, topLevelFolders: newTopLevelFolders));
   }
 }

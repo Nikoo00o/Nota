@@ -1,11 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
-import 'package:app/core/constants/locales.dart';
-import 'package:app/core/get_it.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';
 import 'package:app/presentation/main/app/app_bloc.dart';
-import 'package:app/presentation/main/app/app_event.dart';
 import 'package:flutter/services.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
@@ -28,31 +25,17 @@ class TranslationService {
   static String get _basePath => "assets${Platform.pathSeparator}";
 
   /// must be called at the beginning of the app to load the translated values.
-  ///
-  /// This is also called by [setLocale].
   Future<void> init() async {
     final Locale locale = await appSettingsRepository.getCurrentLocale();
-    _locale = locale;
-    final String jsonString = await rootBundle.loadString("$_basePath${locale.languageCode}.json");
+    if (locale != _locale) {
+      _locale = locale;
+      final String jsonString = await rootBundle.loadString("$_basePath${locale.languageCode}.json");
 
-    final Map<String, dynamic> jsonMap = json.decode(jsonString) as Map<String, dynamic>;
-    _keys = jsonMap.map((String key, dynamic value) {
-      return MapEntry<String, String>(key, value.toString());
-    });
-    Logger.debug("Loaded ${_keys?.length ?? 0} key-value-pairs for the locale $locale");
-  }
-
-  /// Sets the locale to a new one of the supported locales.
-  Future<void> setLocale(Locale newLocale) async {
-    if (Locales.supportedLocales.contains(newLocale)) {
-      await appSettingsRepository.setLocale(newLocale);
-      await init();
-
-      sl<AppBloc>().add(UpdateLocale(newLocale)); // update the app and force a rebuild. direct access, because the
-      // app bloc depends on the translation service to get the current locale (and that would lead to a loop).
-      Logger.info("Updated the locale to $newLocale");
-    } else {
-      Logger.warn("A not supported locale was used: $newLocale");
+      final Map<String, dynamic> jsonMap = json.decode(jsonString) as Map<String, dynamic>;
+      _keys = jsonMap.map((String key, dynamic value) {
+        return MapEntry<String, String>(key, value.toString());
+      });
+      Logger.debug("Loaded ${_keys?.length ?? 0} key-value-pairs for the locale $locale");
     }
   }
 
@@ -79,7 +62,7 @@ class TranslationService {
     return key;
   }
 
-  /// Returns the current [_locale] if it is not null and was already initialized with [init].
+  /// Returns the current [_locale] if it is not null and was already initialised with [init].
   /// Otherwise this throws a [ClientException] with [ErrorCodes.FILE_NOT_FOUND].
   Locale get currentLocale {
     if (_locale == null) {

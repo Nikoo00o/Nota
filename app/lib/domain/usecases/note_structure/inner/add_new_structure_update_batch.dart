@@ -26,7 +26,7 @@ class AddNewStructureUpdateBatch extends UseCase<void, NoParams> {
     // the use cases would import each other in a chain! Because those 2 use cases are very small and will call nothing
     // else at this point, this is ok!
     final StructureItem currentItem = await sl<GetCurrentStructureItem>().call(const NoParams());
-    final List<StructureFolder?> topLevelFolders = await sl<GetStructureFolders>().call(const NoParams());
+    final List<StructureFolder> topLevelFolders = await sl<GetStructureFolders>().call(const NoParams());
     await noteStructureRepository.addNewStructureUpdate(
       currentItem,
       topLevelFolders,

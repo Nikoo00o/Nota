@@ -7,6 +7,8 @@ class CustomTextFormField extends WidgetBase {
 
   /// Callback that gets ONLY called by the text form field if there is a [Form] Widget build as a parent higher up in the
   /// widget tree!!!
+  ///
+  /// This can, but will mostly not be null.
   final FormFieldValidator<String>? validator;
 
   /// The text key used for translating a value.
@@ -20,6 +22,9 @@ class CustomTextFormField extends WidgetBase {
 
   final ValueChanged<String>? onChanged;
 
+  /// can be used to limit the keyboard
+  final TextInputType? keyboardType;
+
   const CustomTextFormField({
     super.key,
     this.controller,
@@ -28,17 +33,20 @@ class CustomTextFormField extends WidgetBase {
     required this.textKey,
     this.textKeyParams,
     this.onChanged,
+    this.keyboardType,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      keyboardType: keyboardType,
       controller: controller,
       validator: validator,
       obscureText: obscureText,
       onChanged: onChanged,
       decoration: InputDecoration(
-        labelText: translate(textKey, keyParams: textKeyParams),
+        contentPadding: const EdgeInsets.fromLTRB(8, 12, 8, 8),
+        labelText: translate(context, textKey, keyParams: textKeyParams),
         isDense: true,
         border: const OutlineInputBorder(),
       ),

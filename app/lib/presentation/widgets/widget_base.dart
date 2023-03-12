@@ -1,4 +1,5 @@
 import 'package:app/core/get_it.dart';
+import 'package:app/presentation/main/app/widgets/custom_app_localizations.dart';
 import 'package:app/services/translation_service.dart';
 import 'package:flutter/material.dart';
 
@@ -8,9 +9,8 @@ abstract class WidgetBase extends StatelessWidget {
   /// Translates a translation [key] for the current locale.
   ///
   /// Placeholders are replaced with [keyParams].
-  String translate(String key, {List<String>? keyParams}) {
-    return sl<TranslationService>().translate(key, keyParams: keyParams); // direct access, because every widget should
-    // not contain a reference to the translation service
+  String translate(BuildContext context, String key, {List<String>? keyParams}) {
+    return CustomAppLocalizations.of(context)?.translate(key, keyParams: keyParams) ?? "";
   }
 
   /// Returns the theme data. The [ThemeData.colorScheme] contains the colors used inside of the app.
@@ -108,4 +108,77 @@ abstract class WidgetBase extends StatelessWidget {
 
   /// Returns the color of [ThemeData.colorScheme].
   Color colorInversePrimary(BuildContext context) => theme(context).colorScheme.inversePrimary;
+
+  /// Returns the disabled color of [ThemeData].
+  Color colorDisabled(BuildContext context) => theme(context).disabledColor;
+
+  /// Helper method for text styles
+  TextStyle _textParams(TextStyle? input) => TextStyle(
+      fontSize: input?.fontSize,
+      fontWeight: input?.fontWeight,
+      letterSpacing: input?.letterSpacing,
+      wordSpacing: input?.wordSpacing,
+      height: input?.height,
+      textBaseline: input?.textBaseline,
+      leadingDistribution: input?.leadingDistribution);
+
+  /// Returns only the size, weight and spacing of the [ThemeData.textTheme], so that the text color will not be
+  /// overridden when using this in widgets! (and so that something like a disabled color still works!)
+  TextStyle textDisplayLarge(BuildContext context) => _textParams(theme(context).textTheme.displayLarge);
+
+  /// Returns only the size, weight and spacing of the [ThemeData.textTheme], so that the text color will not be
+  /// overridden when using this in widgets! (and so that something like a disabled color still works!)
+  TextStyle textDisplayMedium(BuildContext context) => _textParams(theme(context).textTheme.displayMedium);
+
+  /// Returns only the size, weight and spacing of the [ThemeData.textTheme], so that the text color will not be
+  /// overridden when using this in widgets! (and so that something like a disabled color still works!)
+  TextStyle textDisplaySmall(BuildContext context) => _textParams(theme(context).textTheme.displaySmall);
+
+  /// Returns only the size, weight and spacing of the [ThemeData.textTheme], so that the text color will not be
+  /// overridden when using this in widgets! (and so that something like a disabled color still works!)
+  TextStyle textHeadlineLarge(BuildContext context) => _textParams(theme(context).textTheme.headlineLarge);
+
+  /// Returns only the size, weight and spacing of the [ThemeData.textTheme], so that the text color will not be
+  /// overridden when using this in widgets! (and so that something like a disabled color still works!)
+  TextStyle textHeadlineMedium(BuildContext context) => _textParams(theme(context).textTheme.headlineMedium);
+
+  /// Returns only the size, weight and spacing of the [ThemeData.textTheme], so that the text color will not be
+  /// overridden when using this in widgets! (and so that something like a disabled color still works!)
+  TextStyle textHeadlineSmall(BuildContext context) => _textParams(theme(context).textTheme.headlineSmall);
+
+  /// Returns only the size, weight and spacing of the [ThemeData.textTheme], so that the text color will not be
+  /// overridden when using this in widgets! (and so that something like a disabled color still works!)
+  TextStyle textTitleLarge(BuildContext context) => _textParams(theme(context).textTheme.titleLarge);
+
+  /// Returns only the size, weight and spacing of the [ThemeData.textTheme], so that the text color will not be
+  /// overridden when using this in widgets! (and so that something like a disabled color still works!)
+  TextStyle textTitleMedium(BuildContext context) => _textParams(theme(context).textTheme.titleMedium);
+
+  /// Returns only the size, weight and spacing of the [ThemeData.textTheme], so that the text color will not be
+  /// overridden when using this in widgets! (and so that something like a disabled color still works!)
+  TextStyle textTitleSmall(BuildContext context) => _textParams(theme(context).textTheme.titleSmall);
+
+  /// Returns only the size, weight and spacing of the [ThemeData.textTheme], so that the text color will not be
+  /// overridden when using this in widgets! (and so that something like a disabled color still works!)
+  TextStyle textLabelLarge(BuildContext context) => _textParams(theme(context).textTheme.labelLarge);
+
+  /// Returns only the size, weight and spacing of the [ThemeData.textTheme], so that the text color will not be
+  /// overridden when using this in widgets! (and so that something like a disabled color still works!)
+  TextStyle textLabelMedium(BuildContext context) => _textParams(theme(context).textTheme.labelMedium);
+
+  /// Returns only the size, weight and spacing of the [ThemeData.textTheme], so that the text color will not be
+  /// overridden when using this in widgets! (and so that something like a disabled color still works!)
+  TextStyle textLabelSmall(BuildContext context) => _textParams(theme(context).textTheme.labelSmall);
+
+  /// Returns only the size, weight and spacing of the [ThemeData.textTheme], so that the text color will not be
+  /// overridden when using this in widgets! (and so that something like a disabled color still works!)
+  TextStyle textBodyLarge(BuildContext context) => _textParams(theme(context).textTheme.bodyLarge);
+
+  /// Returns only the size, weight and spacing of the [ThemeData.textTheme], so that the text color will not be
+  /// overridden when using this in widgets! (and so that something like a disabled color still works!)
+  TextStyle textBodyMedium(BuildContext context) => _textParams(theme(context).textTheme.bodyMedium);
+
+  /// Returns only the size, weight and spacing of the [ThemeData.textTheme], so that the text color will not be
+  /// overridden when using this in widgets! (and so that something like a disabled color still works!)
+  TextStyle textBodySmall(BuildContext context) => _textParams(theme(context).textTheme.bodySmall);
 }

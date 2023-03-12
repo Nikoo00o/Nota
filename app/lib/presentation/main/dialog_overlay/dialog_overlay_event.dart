@@ -205,7 +205,12 @@ class ShowInputDialog extends _CancelDialog {
   final FutureOr<void> Function(String) onConfirm;
 
   /// If this callback returns null, that means that there is no error.
+  ///
+  /// Otherwise this must return the already translated error message!!!
   final String? Function(String?)? validatorCallback;
+
+  /// can be used to limit the keyboard
+  final TextInputType? keyboardType;
 
   const ShowInputDialog({
     super.titleKey,
@@ -225,30 +230,34 @@ class ShowInputDialog extends _CancelDialog {
     this.inputLabelKey,
     required this.onConfirm,
     this.validatorCallback,
+    this.keyboardType,
   }) : super(descriptionKey: descriptionKey ?? "");
 }
 
 /// Shows a selection dialog with a title, text and a confirm button and also a cancel button.
 ///
-/// Below the text will be a list of options from the translated [selectionTranslatedStrings] for which the user
-/// can choose one . The index of the selected  element will be returned inside of the [onConfirm] callback!
+/// Below the text will be a list of options from the [translationStrings] for which the user
+/// can choose one. The index of the selected  element will be returned inside of the [onConfirm] callback!
 ///
-/// IMPORTANT: THE [selectionTranslatedStrings] HAVE TO BE TRANSLATED VALUES and not translation keys!!!
+/// The [translationStrings] will be translated by the dialog.
 ///
 /// The confirm button will only be clickable if one of the elements was selected
 class ShowSelectDialog extends _CancelDialog {
-  /// The translation keys for the elements
-  final List<String> selectionTranslatedStrings;
+  /// The translation keys for the elements which will be translated!
+  final List<TranslationString> translationStrings;
 
   /// Callback that gets called when the confirm button of the dialog was pressed and also contains the data the user put in
   final FutureOr<void> Function(int) onConfirm;
+
+  /// Can be set to already have one element selected at the beginning
+  final int? initialSelectedIndex;
 
   const ShowSelectDialog({
     super.titleKey,
     super.titleKeyParams,
     super.titleStyle,
     super.titleIcon,
-    required super.descriptionKey,
+    String? descriptionKey,
     super.descriptionKeyParams,
     super.descriptionStyle,
     super.confirmButtonKey,
@@ -258,9 +267,10 @@ class ShowSelectDialog extends _CancelDialog {
     super.cancelButtonKeyParams,
     super.cancelButtonStyle,
     super.onCancel,
-    required this.selectionTranslatedStrings,
+    required this.translationStrings,
     required this.onConfirm,
-  });
+    this.initialSelectedIndex,
+  }) : super(descriptionKey: descriptionKey ?? "dialog.select.description");
 }
 
 /// Hides both loading and custom dialog if visible
@@ -279,4 +289,8 @@ class HideDialog extends DialogOverlayEvent {
 /// Only hides the current loading dialog if no custom dialog is visible!
 class HideLoadingDialog extends DialogOverlayEvent {
   const HideLoadingDialog();
+}
+
+class ShowAboutDialog extends DialogOverlayEvent {
+  const ShowAboutDialog();
 }

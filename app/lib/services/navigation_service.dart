@@ -18,10 +18,9 @@ class NavigationService {
   /// this also removes all stored pages, so that navigating back is not possible!
   void navigateTo(String routeName, {Object? arguments}) {
     Logger.verbose("navigating from $_currentRoute to $routeName");
-    if (routeName != _currentRoute) {
-      navigatorKey.currentState?.pushNamedAndRemoveUntil(routeName, (Route<dynamic> route) => false, arguments: arguments);
-      _currentRoute = routeName;
-    } else {
+    navigatorKey.currentState?.pushNamedAndRemoveUntil(routeName, (Route<dynamic> route) => false, arguments: arguments);
+    _currentRoute = routeName;
+    if (routeName == _currentRoute) {
       Logger.warn("navigating to the same route as before: $routeName");
     }
   }

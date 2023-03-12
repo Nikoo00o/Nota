@@ -37,7 +37,7 @@ class CustomOutlinedButton extends WidgetBase {
         ),
         shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0))),
       ),
-      child: Text(translate(textKey, keyParams: textKeyParams)),
+      child: Text(translate(context, textKey, keyParams: textKeyParams)),
     );
   }
 }

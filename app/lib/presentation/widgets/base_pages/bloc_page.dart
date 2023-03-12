@@ -7,7 +7,7 @@ import 'package:app/presentation/widgets/base_pages/page_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// This is an abstract super class that can be used for the pages which are used with a bloc.
+/// This is an abstract super class that can be used for the pages with routes which are used with a bloc.
 /// For pages without a bloc, use [NoBlocPage].
 ///
 /// You should override the methods [buildBodyWithNoState] and [buildBodyWithState] inside of your sub class to build the
@@ -143,20 +143,29 @@ abstract class BlocPage<Bloc extends PageBloc<PageEvent, State>, State extends P
 
   @override
   Widget build(BuildContext context) {
-    return createBlocProvider(buildPage(
-      context,
-      buildBodyWithNoState(context, createBlocBuilder(
-        builder: (BuildContext context, State state) {
-          return buildBodyWithState(context, state);
-        },
-      )),
-      buildAppBar(context),
-      buildMenuDrawer(context),
-    ));
+    return createBlocProvider(
+      Builder(builder: (BuildContext context) {
+        // important: this wrapped builder is needed, so that the buildPartWithNoState can still access the bloc to send
+        // events with the inner build context!
+        return buildPage(
+          context,
+          buildBodyWithNoState(context, createBlocBuilder(
+            builder: (BuildContext context, State state) {
+              return buildBodyWithState(context, state);
+            },
+          )),
+          buildAppBar(context),
+          buildMenuDrawer(context),
+        );
+      }),
+    );
   }
 
   /// Returns current bloc of page without listening to it, so that events can be added, or navigation can be done, etc.
   /// This should not be used for widgets that depend on state changes of the bloc!
+  ///
+  /// This can also be used to access [TextEditingController], or any other controllers inside of the widgets which are
+  /// initialized once in the constructor of the bloc and are final.
   Bloc currentBloc(BuildContext context) => BlocProvider.of<Bloc>(context);
 
   /// Listens to the bloc for state changes and returns the bloc so that ui can be build with data from it.

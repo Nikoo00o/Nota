@@ -9,24 +9,15 @@ class LoginEventInitialise extends LoginEvent {
 }
 
 class LoginEventRemoteLogin extends LoginEvent {
-  final String username;
-  final String password;
-
-  const LoginEventRemoteLogin(this.username, this.password);
+  const LoginEventRemoteLogin();
 }
 
 class LoginEventLocalLogin extends LoginEvent {
-  final String password;
-
-  const LoginEventLocalLogin(this.password);
+  const LoginEventLocalLogin();
 }
 
 class LoginEventCreate extends LoginEvent {
-  final String username;
-  final String password;
-  final String confirmPassword;
-
-  const LoginEventCreate({required this.username, required this.password, required this.confirmPassword});
+  const LoginEventCreate();
 }
 
 /// Switch from local to remote login.
