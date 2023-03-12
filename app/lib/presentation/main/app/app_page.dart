@@ -1,16 +1,20 @@
 import 'package:app/core/config/app_config.dart';
+import 'package:app/core/config/app_theme.dart';
 import 'package:app/core/constants/locales.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/domain/usecases/account/change/activate_lock_screen.dart';
 import 'package:app/presentation/main/app/app_bloc.dart';
+import 'package:app/presentation/main/app/app_event.dart';
 import 'package:app/presentation/main/app/app_state.dart';
 import 'package:app/presentation/main/app/widgets/app_observer.dart';
 import 'package:app/presentation/main/app/widgets/custom_navigator.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_page.dart';
+import 'package:app/presentation/pages/test/splash_screen_test_page.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:app/services/session_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -23,6 +27,8 @@ class App extends StatelessWidget {
   final DialogService dialogService;
   final SessionService sessionService;
   final ActivateLockscreen activateLockscreen;
+  final Locale initialLocale;
+  final ThemeData initialTheme;
 
   const App({
     required this.appConfig,
@@ -30,20 +36,29 @@ class App extends StatelessWidget {
     required this.dialogService,
     required this.sessionService,
     required this.activateLockscreen,
+    required this.initialLocale,
+    required this.initialTheme,
   });
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<AppBloc>(
-      create: (_) => sl<AppBloc>(),
+      create: (_) {
+        final AppBloc bloc = sl<AppBloc>();
+        bloc.locale = initialLocale;
+        bloc.theme = initialTheme;
+        return bloc;
+      },
       child: BlocBuilder<AppBloc, AppState>(
         builder: (BuildContext context, AppState state) {
+          final ThemeData theme = _getTheme(state);
+          _setSystemStatusBar(isDarkTheme: theme.brightness == Brightness.dark);
           return MaterialApp(
             title: appConfig.appTitle,
-            theme: appConfig.theme,
+            theme: theme,
             debugShowCheckedModeBanner: false,
             scrollBehavior: const CustomScrollBehavior(),
-            locale: state.locale,
+            locale: state is AppStateInitialised ? state.locale : initialLocale,
             supportedLocales: Locales.supportedLocales,
             localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
               GlobalMaterialLocalizations.delegate,
@@ -74,11 +89,37 @@ class App extends StatelessWidget {
 
   /// Builds the page with the navigator and the safe area!
   Widget _buildPage(BuildContext context, AppState state) {
-    return SafeArea(
-      child: CustomNavigator(
-        navigationService: navigationService,
-        appConfig: appConfig,
-      ),
-    );
+    return Container(
+        color: _getTheme(state).colorScheme.background,
+        child: SafeArea(
+          child: CustomNavigator(
+            navigationService: navigationService,
+            appConfig: appConfig,
+          ),
+        ));
   }
+
+  ThemeData _getTheme(AppState state) => state is AppStateInitialised ? state.theme : initialTheme;
+
+  void _setSystemStatusBar({required bool isDarkTheme}) =>
+      SystemChrome.setSystemUIOverlayStyle(isDarkTheme ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark);
+
+  List<LocalizationsDelegate<dynamic>> _localizationsDelegates() {
+    return <LocalizationsDelegate<dynamic>>[
+      AppLocalizationsDelegate(translationService: _translationService),
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ];
+  }
+
+  Locale _localeResolutionCallback(Locale? locale, Iterable<Locale> supportedLocales) {
+    for (final Locale supportedLocale in supportedLocales) {
+      if (locale != null && supportedLocale.languageCode == locale.languageCode) {
+        return supportedLocale;
+      }
+    }
+    return supportedLocales.first;
+  }
+
 }

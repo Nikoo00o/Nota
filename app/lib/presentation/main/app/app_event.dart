@@ -10,3 +10,9 @@ class UpdateLocale extends AppEvent {
 
   const UpdateLocale(this.locale);
 }
+
+class UpdateTheme extends AppEvent {
+  final bool useDarkTheme;
+
+  const UpdateTheme({required this.useDarkTheme});
+}

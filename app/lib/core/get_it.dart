@@ -1,4 +1,5 @@
 import 'package:app/core/config/app_config.dart';
+import 'package:app/core/config/app_theme.dart';
 import 'package:app/data/datasources/local_data_source.dart';
 import 'package:app/data/datasources/local_data_source_impl.dart';
 import 'package:app/data/datasources/remote_account_data_source.dart';
@@ -51,6 +52,7 @@ import 'package:app/services/navigation_service.dart';
 import 'package:app/services/session_service.dart';
 import 'package:app/services/translation_service.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared/data/datasources/rest_client.dart';
@@ -200,13 +202,13 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<SessionService>(() => SessionService());
   sl.registerLazySingleton<DialogService>(() => DialogServiceImpl(dialogOverlayBloc: sl()));
   sl.registerLazySingleton<NavigationService>(() => NavigationService());
-  sl.registerLazySingleton<TranslationService>(() => TranslationService(appSettingsRepository: sl()));
+  sl.registerLazySingleton<TranslationService>(() => TranslationService(appSettingsRepository: sl(), appBloc: sl()));
 
   // presentation layer (blocs)
 
   // important: the next two blocs are singletons and no factory functions, because they are used within the app and are
   // only created once!
-  sl.registerLazySingleton<AppBloc>(() => AppBloc(translationService: sl()));
+  sl.registerLazySingleton<AppBloc>(() => AppBloc());
   sl.registerLazySingleton<DialogOverlayBloc>(() => DialogOverlayBloc(
         dialogOverlayKey: GlobalKey(),
         translationService: sl(),
@@ -224,7 +226,7 @@ Future<void> initializeGetIt() async {
         firstButtonScrollKey: arguments.firstButtonScrollKey,
       ));
   sl.registerFactory<NoteSelectionBloc>(() => NoteSelectionBloc());
-  sl.registerFactory<SettingsBloc>(() => SettingsBloc(appSettingsRepository: sl()));
+  sl.registerFactory<SettingsBloc>(() => SettingsBloc(appSettingsRepository: sl(), appBloc: sl()));
   sl.registerFactory<MenuBloc>(() => MenuBloc(
         getUsername: sl(),
         navigationService: sl(),

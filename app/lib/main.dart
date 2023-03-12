@@ -1,8 +1,10 @@
 import 'dart:ui';
+import 'package:app/core/config/app_theme.dart';
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/core/logger/app_logger.dart';
 import 'package:app/data/datasources/local_data_source.dart';
+import 'package:app/domain/repositories/app_settings_repository.dart';
 import 'package:app/domain/usecases/account/change/logout_of_account.dart';
 import 'package:app/presentation/main/app/app_page.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
@@ -34,6 +36,8 @@ Future<void> main(List<String> arguments) async {
       sessionService: sl(),
       navigationService: sl(),
       activateLockscreen: sl(),
+      initialLocale: sl<TranslationService>().currentLocale,
+      initialTheme: AppTheme.newTheme(darkTheme: await sl<AppSettingsRepository>().isDarkTheme()),
     ));
   } catch (e, s) {
     Logger.error("critical error starting the app", e, s);

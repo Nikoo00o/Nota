@@ -19,10 +19,11 @@ class TranslationService {
   Map<String, String>? _keys;
 
   final AppSettingsRepository appSettingsRepository;
+  final AppBloc appBloc;
 
   Locale? _locale;
 
-  TranslationService({required this.appSettingsRepository});
+  TranslationService({required this.appSettingsRepository, required this.appBloc});
 
   /// The path to the "assets/" dir
   static String get _basePath => "assets${Platform.pathSeparator}";
@@ -48,8 +49,7 @@ class TranslationService {
       await appSettingsRepository.setLocale(newLocale);
       await init();
 
-      sl<AppBloc>().add(UpdateLocale(newLocale)); // update the app and force a rebuild. direct access, because the
-      // app bloc depends on the translation service to get the current locale (and that would lead to a loop).
+      appBloc.add(UpdateLocale(newLocale)); // update the app and force a rebuild
       Logger.info("Updated the locale to $newLocale");
     } else {
       Logger.warn("A not supported locale was used: $newLocale");

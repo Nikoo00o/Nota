@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:app/core/constants/locales.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';
+import 'package:app/presentation/main/app/app_bloc.dart';
+import 'package:app/presentation/main/app/app_event.dart';
 import 'package:app/presentation/pages/settings/settings_event.dart';
 import 'package:app/presentation/pages/settings/settings_state.dart';
 import 'package:app/presentation/widgets/base_pages/page_bloc.dart';
@@ -9,9 +11,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
   final AppSettingsRepository appSettingsRepository;
+  final AppBloc appBloc;
 
   SettingsBloc({
     required this.appSettingsRepository,
+    required this.appBloc,
   }) : super(initialState: const SettingsState());
 
   @override
@@ -27,6 +31,7 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
 
   Future<void> _handleDarkThemeChange(DarkThemeChanged event, Emitter<SettingsState> emit) async {
     await appSettingsRepository.setDarkTheme(useDarkTheme: event.isDarkTheme);
+    appBloc.add(UpdateTheme(useDarkTheme: event.isDarkTheme)); // update the app and force a rebuild
     emit(await _buildState());
   }
 
@@ -34,7 +39,7 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
     Locale? newLocale;
     if (event.index < Locales.supportedLocales.length) {
       newLocale = Locales.supportedLocales[event.index];
-    }
+    } else {}
     await appSettingsRepository.setLocale(newLocale);
     emit(await _buildState());
   }
