@@ -5,6 +5,7 @@ import 'package:app/presentation/main/menu/logged_in_menu.dart';
 import 'package:app/presentation/pages/settings/settings_bloc.dart';
 import 'package:app/presentation/pages/settings/settings_event.dart';
 import 'package:app/presentation/pages/settings/settings_state.dart';
+import 'package:app/presentation/pages/settings/widgets/settings_input_option.dart';
 import 'package:app/presentation/pages/settings/widgets/settings_selection_option.dart';
 import 'package:app/presentation/pages/settings/widgets/settings_toggle_option.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
@@ -48,6 +49,30 @@ class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
             initialOptionIndex: state.localeIndex,
             options: state.localeOptions.map((String key) => TranslationString(key)).toList(),
             onSelected: (int index) => currentBloc(context).add(LocaleChanged(index: index)),
+          ),
+          SettingsToggleOption(
+            titleKey: "page.settings.auto.login",
+            descriptionKey: "page.settings.auto.login.description",
+            icon: Icons.lock_open,
+            isActive: state.autoLogin,
+            onChange: (bool value) => currentBloc(context).add(AutoLoginChanged(autoLogin: value)),
+          ),
+          SettingsInputOption(
+            titleKey: "page.settings.lock.screen.timeout",
+            descriptionKey: "page.settings.lock.screen.timeout.description",
+            descriptionKeyParams: <String>[state.lockscreenTimeoutInSeconds],
+            dialogTitleKey: "page.settings.lock.screen.timeout",
+            dialogDescriptionKey: "page.settings.lock.screen.timeout.description.dialog",
+            icon: Icons.lock_clock,
+            disabled: state.autoLogin,
+            keyboardType: TextInputType.number,
+            validatorCallback: (String? input) {
+              if (RegExp(r"^\d+$").hasMatch(input ?? "") == false) {
+                return translate(context, "error.only.numbers");
+              }
+              return null;
+            },
+            onConfirm: (String value) => currentBloc(context).add(LockscreenTimeoutChanged(timeoutInSeconds: value)),
           ),
         ],
       );

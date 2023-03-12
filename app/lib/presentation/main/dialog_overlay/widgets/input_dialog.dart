@@ -2,6 +2,7 @@ import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/presentation/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
 
+/// This is the only dialog that is completely scrollable and wrapped inside of a center widget!
 class InputDialog extends StatefulWidget {
   final DialogOverlayBloc bloc;
   final ShowInputDialog event;
@@ -21,16 +22,20 @@ class _InputDialogState extends State<InputDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(child: AlertDialog(
-      icon: event.titleIcon,
-      title: Text(translate(event.titleKey ?? "dialog.input.title", keyParams: event.titleKeyParams)),
-      titleTextStyle: event.titleStyle,
-      content: _buildContent(context),
-      actions: <Widget>[
-        _buildCancelButton(context),
-        _buildConfirmButton(context),
-      ],
-    ),);
+    return Center(
+      child: SingleChildScrollView(
+        child: AlertDialog(
+          icon: event.titleIcon,
+          title: Text(translate(event.titleKey ?? "dialog.input.title", keyParams: event.titleKeyParams)),
+          titleTextStyle: event.titleStyle,
+          content: _buildContent(context),
+          actions: <Widget>[
+            _buildCancelButton(context),
+            _buildConfirmButton(context),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildContent(BuildContext context) {
@@ -58,6 +63,7 @@ class _InputDialogState extends State<InputDialog> {
       controller: controller,
       validator: event.validatorCallback,
       textKey: event.inputLabelKey ?? "dialog.input.label",
+      keyboardType: event.keyboardType,
       onChanged: (String? input) {
         setState(() {
           if (input?.isEmpty ?? true) {

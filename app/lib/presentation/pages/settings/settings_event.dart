@@ -19,3 +19,15 @@ class LocaleChanged extends SettingsEvent {
 
   const LocaleChanged({required this.index});
 }
+
+class AutoLoginChanged extends SettingsEvent {
+  final bool autoLogin;
+
+  const AutoLoginChanged({required this.autoLogin});
+}
+
+class LockscreenTimeoutChanged extends SettingsEvent {
+  final String timeoutInSeconds;
+
+  const LockscreenTimeoutChanged({required this.timeoutInSeconds});
+}

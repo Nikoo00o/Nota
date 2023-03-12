@@ -2,6 +2,7 @@
   "empty": "",
   "empty.param.1": "{0}",
   "error.unknown": "Unknown Error",
+  "error.only.numbers": "Only Numbers are valid",
   "yes": "Yes",
   "no": "No",
   "language": "Language",
@@ -50,5 +51,10 @@
   "locale.system": "System setting",
   "page.dialog.test.title": "Dialog Test",
   "page.material.color.test.title": "Material Color Test",
-  "page.splash.screen.test.title": "Splash Screen Test"
+  "page.splash.screen.test.title": "Splash Screen Test",
+  "page.settings.auto.login": "Auto login",
+  "page.settings.auto.login.description": "You don't have to enter a password on starting the app",
+  "page.settings.lock.screen.timeout": "Lockscreen Timeout",
+  "page.settings.lock.screen.timeout.description": "Currently you only have to enter your password if the app was in the background for longer than {0} seconds",
+  "page.settings.lock.screen.timeout.description.dialog": "Enter a new Timeout in seconds"
 }

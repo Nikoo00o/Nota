@@ -2,6 +2,7 @@ import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:flutter/material.dart';
 
+/// This dialog and the selection dialog are a bit bigger than the others
 class SelectionDialog extends StatefulWidget {
   final DialogOverlayBloc bloc;
   final ShowSelectDialog event;

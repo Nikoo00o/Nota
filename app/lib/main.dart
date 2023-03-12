@@ -35,6 +35,7 @@ Future<void> main(List<String> arguments) async {
 
     runApp(App(
       appConfig: sl(),
+      appSettingsRepository: sl(),
       translationService: sl(),
       dialogService: sl(),
       sessionService: sl(),

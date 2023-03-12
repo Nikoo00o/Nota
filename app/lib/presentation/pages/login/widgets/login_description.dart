@@ -18,7 +18,7 @@ class LoginDescription extends BlocPageChild<LoginBloc, LoginState> {
         const SizedBox(height: 25),
         Text(
           translate(context, _getPageDescription(state)),
-          style: theme(context).textTheme.bodyLarge,
+          style: textBodyLarge(context),
           // textAlign: TextAlign.center,
         ),
       ],
@@ -32,14 +32,14 @@ class LoginDescription extends BlocPageChild<LoginBloc, LoginState> {
         const SizedBox(height: 25),
         Text.rich(
           TextSpan(
-            style: theme(context).textTheme.bodyLarge,
+            style: textBodyLarge(context),
             children: <InlineSpan>[
               TextSpan(
                 text: translate(context, "page.login.description.local.login.1"),
               ),
               TextSpan(
                 text: translate(context, "empty.param.1", keyParams: <String>[state.username]),
-                style: theme(context).textTheme.titleLarge?.copyWith(color: colorSecondary(context)),
+                style: textTitleLarge(context)?.copyWith(color: colorSecondary(context)),
               ),
             ],
           ),
@@ -47,7 +47,7 @@ class LoginDescription extends BlocPageChild<LoginBloc, LoginState> {
         const SizedBox(height: 5),
         Text(
           translate(context, "page.login.description.local.login.2"),
-          style: theme(context).textTheme.bodyLarge,
+          style: textBodyLarge(context),
         ),
       ],
     );

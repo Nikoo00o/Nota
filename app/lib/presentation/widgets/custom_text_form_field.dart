@@ -22,6 +22,9 @@ class CustomTextFormField extends WidgetBase {
 
   final ValueChanged<String>? onChanged;
 
+  /// can be used to limit the keyboard
+  final TextInputType? keyboardType;
+
   const CustomTextFormField({
     super.key,
     this.controller,
@@ -30,11 +33,13 @@ class CustomTextFormField extends WidgetBase {
     required this.textKey,
     this.textKeyParams,
     this.onChanged,
+    this.keyboardType,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      keyboardType: keyboardType,
       controller: controller,
       validator: validator,
       obscureText: obscureText,

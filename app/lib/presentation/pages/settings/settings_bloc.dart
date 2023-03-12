@@ -2,21 +2,27 @@ import 'dart:ui';
 
 import 'package:app/core/constants/locales.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';
+import 'package:app/domain/usecases/account/change/change_auto_login.dart';
+import 'package:app/domain/usecases/account/get_auto_login.dart';
 import 'package:app/presentation/main/app/app_bloc.dart';
 import 'package:app/presentation/main/app/app_event.dart';
 import 'package:app/presentation/pages/settings/settings_event.dart';
 import 'package:app/presentation/pages/settings/settings_state.dart';
 import 'package:app/presentation/widgets/base_pages/page_bloc.dart';
-import 'package:app/services/translation_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared/domain/usecases/usecase.dart';
 
 class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
   final AppSettingsRepository appSettingsRepository;
   final AppBloc appBloc;
+  final GetAutoLogin getAutoLogin;
+  final ChangeAutoLogin changeAutoLogin;
 
   SettingsBloc({
     required this.appSettingsRepository,
     required this.appBloc,
+    required this.getAutoLogin,
+    required this.changeAutoLogin,
   }) : super(initialState: const SettingsState());
 
   @override
@@ -24,6 +30,8 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
     on<SettingsEventInitialise>(_handleInitialise);
     on<DarkThemeChanged>(_handleDarkThemeChange);
     on<LocaleChanged>(_handleLocaleSelected);
+    on<AutoLoginChanged>(_handleAutoLoginChanged);
+    on<LockscreenTimeoutChanged>(_lockscreenTimeoutChanged);
   }
 
   Future<void> _handleInitialise(SettingsEventInitialise event, Emitter<SettingsState> emit) async {
@@ -46,11 +54,24 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
     emit(await _buildState());
   }
 
+  Future<void> _handleAutoLoginChanged(AutoLoginChanged event, Emitter<SettingsState> emit) async {
+    await changeAutoLogin.call(ChangeAutoLoginParams(autoLogin: event.autoLogin));
+    emit(await _buildState());
+  }
+
+  Future<void> _lockscreenTimeoutChanged(LockscreenTimeoutChanged event, Emitter<SettingsState> emit) async {
+    await appSettingsRepository.setLockscreenTimeout(duration: Duration(seconds: int.parse(event.timeoutInSeconds)));
+    emit(await _buildState());
+  }
+
   Future<SettingsState> _buildState() async {
+    final Duration timeout = await appSettingsRepository.getLockscreenTimeout();
     return SettingsStateInitialised(
       isDarkTheme: await appSettingsRepository.isDarkTheme(),
       localeIndex: await _getLocaleIndex(),
       localeOptions: Locales.localeTranslationKeys,
+      autoLogin: await getAutoLogin.call(const NoParams()),
+      lockscreenTimeoutInSeconds: timeout.inSeconds.toString(),
     );
   }
 

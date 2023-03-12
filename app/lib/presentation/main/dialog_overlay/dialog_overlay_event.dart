@@ -205,7 +205,12 @@ class ShowInputDialog extends _CancelDialog {
   final FutureOr<void> Function(String) onConfirm;
 
   /// If this callback returns null, that means that there is no error.
+  ///
+  /// Otherwise this must return the already translated error message!!!
   final String? Function(String?)? validatorCallback;
+
+  /// can be used to limit the keyboard
+  final TextInputType? keyboardType;
 
   const ShowInputDialog({
     super.titleKey,
@@ -225,6 +230,7 @@ class ShowInputDialog extends _CancelDialog {
     this.inputLabelKey,
     required this.onConfirm,
     this.validatorCallback,
+    this.keyboardType,
   }) : super(descriptionKey: descriptionKey ?? "");
 }
 

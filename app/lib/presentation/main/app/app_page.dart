@@ -1,7 +1,7 @@
 import 'package:app/core/config/app_config.dart';
-import 'package:app/core/config/app_theme.dart';
 import 'package:app/core/constants/locales.dart';
 import 'package:app/core/get_it.dart';
+import 'package:app/domain/repositories/app_settings_repository.dart';
 import 'package:app/domain/usecases/account/change/activate_lock_screen.dart';
 import 'package:app/presentation/main/app/app_bloc.dart';
 import 'package:app/presentation/main/app/app_event.dart';
@@ -10,7 +10,6 @@ import 'package:app/presentation/main/app/widgets/app_observer.dart';
 import 'package:app/presentation/main/app/widgets/custom_app_localizations.dart';
 import 'package:app/presentation/main/app/widgets/custom_navigator.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_page.dart';
-import 'package:app/presentation/pages/test/splash_screen_test_page.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:app/services/session_service.dart';
@@ -26,6 +25,7 @@ import 'widgets/custom_scroll_behavior.dart';
 /// The top level widget that builds the app itself with the widget subtree
 class App extends StatelessWidget {
   final AppConfig appConfig;
+  final AppSettingsRepository appSettingsRepository;
   final NavigationService navigationService;
   final TranslationService translationService;
   final DialogService dialogService;
@@ -36,6 +36,7 @@ class App extends StatelessWidget {
 
   const App({
     required this.appConfig,
+    required this.appSettingsRepository,
     required this.navigationService,
     required this.translationService,
     required this.dialogService,
@@ -87,7 +88,7 @@ class App extends StatelessWidget {
       dialogService: dialogService,
       sessionService: sessionService,
       navigationService: navigationService,
-      appConfig: appConfig,
+      appSettingsRepository: appSettingsRepository,
       activateLockscreen: activateLockscreen,
       child: DialogOverlayPage(
         child: _buildPage(context, state),

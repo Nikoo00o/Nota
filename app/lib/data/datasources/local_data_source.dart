@@ -5,12 +5,9 @@ import 'dart:ui';
 import 'package:app/data/models/client_account_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared/core/config/shared_config.dart';
-import 'package:shared/core/constants/error_codes.dart';
-import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/core/utils/string_utils.dart';
 import 'package:shared/data/models/note_info_model.dart';
-import 'package:shared/domain/entities/note_info.dart';
 
 /// Always call [init] first before using any other method!
 abstract class LocalDataSource {
@@ -29,6 +26,8 @@ abstract class LocalDataSource {
   static const String CLIENT_NOTE_COUNTER = "CLIENT_NOTE_COUNTER";
 
   static const String CONFIG_PREFIX = "CONFIG_PREFIX";
+
+  static const String LOCK_SCREEN_TIMEOUT = "LOCK_SCREEN_TIMEOUT";
 
   /// Must be called first in the main function to initialize hive to the [getApplicationDocumentsDirectory].
   Future<void> init();
@@ -100,6 +99,18 @@ abstract class LocalDataSource {
     }
   }
 
+  Future<int?> getClientNoteCounter() async {
+    final String? value = await read(key: CLIENT_NOTE_COUNTER, secure: false);
+    if (value == null) {
+      return null;
+    }
+    return int.parse(value);
+  }
+
+  Future<void> setClientNoteCounter(int clientNoteCounter) async {
+    await write(key: CLIENT_NOTE_COUNTER, value: clientNoteCounter.toString(), secure: false);
+  }
+
   /// Returns the config toggle value with the [configKey].
   ///
   /// Per default this will return false.
@@ -116,16 +127,16 @@ abstract class LocalDataSource {
     await write(key: "${CONFIG_PREFIX}_$configKey", value: configValue.toString(), secure: false);
   }
 
-  Future<int?> getClientNoteCounter() async {
-    final String? value = await read(key: CLIENT_NOTE_COUNTER, secure: false);
+  Future<Duration?> getLockscreenTimeout() async {
+    final String? value = await read(key: LOCK_SCREEN_TIMEOUT, secure: false);
     if (value == null) {
       return null;
     }
-    return int.parse(value);
+    return Duration(milliseconds: int.parse(value));
   }
 
-  Future<void> setClientNoteCounter(int clientNoteCounter) async {
-    await write(key: CLIENT_NOTE_COUNTER, value: clientNoteCounter.toString(), secure: false);
+  Future<void> setLockscreenTimeout({required Duration duration}) async {
+    await write(key: LOCK_SCREEN_TIMEOUT, value: duration.inMilliseconds.toString(), secure: false);
   }
 
   /// Needs to be overridden in the subclasses.

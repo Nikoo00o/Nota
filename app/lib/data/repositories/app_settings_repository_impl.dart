@@ -31,4 +31,14 @@ class AppSettingsRepositoryImpl extends AppSettingsRepository {
   @override
   Future<void> setDarkTheme({required bool useDarkTheme}) =>
       localDataSource.setConfigValue(configKey: CONFIG_DARK_THEME, configValue: useDarkTheme);
+
+  @override
+  Future<Duration> getLockscreenTimeout() async {
+    final Duration? savedTimeout = await localDataSource.getLockscreenTimeout();
+    return savedTimeout ?? appConfig.defaultLockscreenTimeout;
+  }
+
+  @override
+  Future<void> setLockscreenTimeout({required Duration duration}) =>
+      localDataSource.setLockscreenTimeout(duration: duration);
 }

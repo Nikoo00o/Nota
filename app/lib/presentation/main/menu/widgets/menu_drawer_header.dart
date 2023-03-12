@@ -12,7 +12,7 @@ class MenuDrawerHeader extends BlocPageChild<MenuBloc, MenuState> {
     if (state is MenuStateInitialised) {
       return Text(
         state.userName ?? "",
-        style: theme(context).textTheme.titleLarge?.copyWith(color: colorSecondary(context)),
+        style: textTitleLarge(context).copyWith(color: colorSecondary(context)),
         maxLines: 2,
       );
     }

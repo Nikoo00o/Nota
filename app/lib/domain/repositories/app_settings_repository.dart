@@ -18,4 +18,10 @@ abstract class AppSettingsRepository {
   Future<bool> isDarkTheme();
 
   Future<void> setDarkTheme({required bool useDarkTheme});
+
+  /// the time the app needs to be in the background to require a local password login again.
+  Future<Duration> getLockscreenTimeout();
+
+  /// see [getLockscreenTimeout]
+  Future<void> setLockscreenTimeout({required Duration duration});
 }

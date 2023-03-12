@@ -2,6 +2,7 @@
   "empty": "",
   "empty.param.1": "{0}",
   "error.unknown": "Unbekannter Fehler",
+  "error.only.numbers": "Nur Zahlen sind gültig",
   "yes": "Ja",
   "no": "Nein",
   "language": "Sprache",
@@ -39,8 +40,8 @@
   "page.login.account.created": "Neuen Account erfolgreich erstellt",
   "page.login.account.created.title": "Account erstellt",
   "page.login.account.created.description": "Sie können sich jetzt mit ihren Daten einloggen\n{0}",
-  "menu.notes.label" : "Notizen",
-  "menu.lock.screen.title" : "Sperrbildschirm",
+  "menu.notes.label": "Notizen",
+  "menu.lock.screen.title": "Sperrbildschirm",
   "menu.logout.title": "Ausloggen",
   "menu.about": "About",
   "page.settings.title": "Einstellungen",
@@ -51,5 +52,10 @@
   "locale.system": "System-Einstellung",
   "page.dialog.test.title": "Dialog Test",
   "page.material.color.test.title": "Material Color Test",
-  "page.splash.screen.test.title": "Splash Screen Test"
+  "page.splash.screen.test.title": "Splash Screen Test",
+  "page.settings.auto.login": "Automatisch einloggen",
+  "page.settings.auto.login.description": "Bei Start der App muss kein Passwort eingegeben werden",
+  "page.settings.lock.screen.timeout": "Sperrbildschirm Timeout",
+  "page.settings.lock.screen.timeout.description": "Aktuell müssen Sie ihr Passwort erst eingeben, nachdem die App {0} Sekunden im Hintergrund war",
+  "page.settings.lock.screen.timeout.description.dialog": "Geben Sie eine neue Zeitspanne in Sekunden ein"
 }
