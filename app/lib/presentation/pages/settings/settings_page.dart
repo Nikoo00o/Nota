@@ -41,7 +41,7 @@ class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
             titleKey: "page.settings.dark.theme",
             icon: Icons.dark_mode,
             isActive: state.isDarkTheme,
-            onChange: (bool value) => currentBloc(context).add(DarkThemeChanged(isDarkTheme: value)),
+            onChange: (bool value) => currentBloc(context).add(SettingsDarkThemeChanged(isDarkTheme: value)),
           ),
           SettingsSelectionOption(
             titleKey: "page.settings.locale",
@@ -49,7 +49,7 @@ class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
             dialogTitleKey: "language",
             initialOptionIndex: state.localeIndex,
             options: state.localeOptions.map((String key) => TranslationString(key)).toList(),
-            onSelected: (int index) => currentBloc(context).add(LocaleChanged(index: index)),
+            onSelected: (int index) => currentBloc(context).add(SettingsLocaleChanged(index: index)),
           ),
           SettingsToggleOption(
             titleKey: "page.settings.auto.login",
@@ -57,7 +57,7 @@ class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
             hasBigDescription: true,
             icon: Icons.lock_open,
             isActive: state.autoLogin,
-            onChange: (bool value) => currentBloc(context).add(AutoLoginChanged(autoLogin: value)),
+            onChange: (bool value) => currentBloc(context).add(SettingsAutoLoginChanged(autoLogin: value)),
           ),
           SettingsInputOption(
             titleKey: "page.settings.lock.screen.timeout",
@@ -71,13 +71,13 @@ class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
             disabled: state.autoLogin,
             keyboardType: TextInputType.number,
             validatorCallback: (String? input) => lockscreenTimeoutValidator(input, context),
-            onConfirm: (String value) => currentBloc(context).add(LockscreenTimeoutChanged(timeoutInSeconds: value)),
+            onConfirm: (String value) => currentBloc(context).add(SettingsLockscreenTimeoutChanged(timeoutInSeconds: value)),
           ),
           SettingsCustomOption(
             titleKey: "page.settings.password",
             descriptionKey: "page.settings.password.description",
             icon: Icons.lock_reset,
-            onTap: () => currentBloc(context).add(const NavigatedToChangePasswordPage()),
+            onTap: () => currentBloc(context).add(const SettingsNavigatedToChangePasswordPage()),
           ),
         ],
       );

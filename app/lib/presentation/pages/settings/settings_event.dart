@@ -8,35 +8,35 @@ class SettingsEventInitialise extends SettingsEvent {
   const SettingsEventInitialise();
 }
 
-class DarkThemeChanged extends SettingsEvent {
+class SettingsDarkThemeChanged extends SettingsEvent {
   final bool isDarkTheme;
 
-  const DarkThemeChanged({required this.isDarkTheme});
+  const SettingsDarkThemeChanged({required this.isDarkTheme});
 }
 
-class LocaleChanged extends SettingsEvent {
+class SettingsLocaleChanged extends SettingsEvent {
   final int index;
 
-  const LocaleChanged({required this.index});
+  const SettingsLocaleChanged({required this.index});
 }
 
-class AutoLoginChanged extends SettingsEvent {
+class SettingsAutoLoginChanged extends SettingsEvent {
   final bool autoLogin;
 
-  const AutoLoginChanged({required this.autoLogin});
+  const SettingsAutoLoginChanged({required this.autoLogin});
 }
 
-class LockscreenTimeoutChanged extends SettingsEvent {
+class SettingsLockscreenTimeoutChanged extends SettingsEvent {
   final String timeoutInSeconds;
 
-  const LockscreenTimeoutChanged({required this.timeoutInSeconds});
+  const SettingsLockscreenTimeoutChanged({required this.timeoutInSeconds});
 }
 
-class NavigatedToChangePasswordPage extends SettingsEvent {
-  const NavigatedToChangePasswordPage();
+class SettingsNavigatedToChangePasswordPage extends SettingsEvent {
+  const SettingsNavigatedToChangePasswordPage();
 }
 
-class PasswordChanged extends SettingsEvent {
+class SettingsPasswordChanged extends SettingsEvent {
   final bool cancel;
-  const PasswordChanged({required this.cancel});
+  const SettingsPasswordChanged({required this.cancel});
 }

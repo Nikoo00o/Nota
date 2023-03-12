@@ -23,11 +23,11 @@ class AppBloc extends Bloc<AppEvent, AppState> {
   }
 
   void registerEventHandlers() {
-    on<UpdateLocale>(_handleUpdateLocale);
-    on<UpdateTheme>(_handleUpdateTheme);
+    on<AppUpdateLocale>(_handleUpdateLocale);
+    on<AppUpdateTheme>(_handleUpdateTheme);
   }
 
-  Future<void> _handleUpdateLocale(UpdateLocale event, Emitter<AppState> emit) async {
+  Future<void> _handleUpdateLocale(AppUpdateLocale event, Emitter<AppState> emit) async {
     if(event.locale!=locale){
       locale = event.locale;
       await translationService.init();//first load the new translation keys
@@ -36,7 +36,7 @@ class AppBloc extends Bloc<AppEvent, AppState> {
     }
   }
 
-  Future<void> _handleUpdateTheme(UpdateTheme event, Emitter<AppState> emit) async {
+  Future<void> _handleUpdateTheme(AppUpdateTheme event, Emitter<AppState> emit) async {
     theme = AppTheme.newTheme(darkTheme: event.useDarkTheme);
     emit(await _buildState());
     Logger.debug("Updated the theme to ${event.useDarkTheme ? "dark" : "light"}");

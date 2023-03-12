@@ -13,7 +13,7 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
 
   @override
   NoteSelectionBloc createBloc(BuildContext context) {
-    return sl<NoteSelectionBloc>()..add(const NoteSelectionEventInitialise());
+    return sl<NoteSelectionBloc>()..add(const NoteSelectionInitialised());
   }
 
   @override
