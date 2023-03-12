@@ -1,4 +1,5 @@
 import 'package:app/core/get_it.dart';
+import 'package:app/presentation/main/app/widgets/custom_app_localizations.dart';
 import 'package:app/services/translation_service.dart';
 import 'package:flutter/material.dart';
 
@@ -8,9 +9,8 @@ abstract class WidgetBase extends StatelessWidget {
   /// Translates a translation [key] for the current locale.
   ///
   /// Placeholders are replaced with [keyParams].
-  String translate(String key, {List<String>? keyParams}) {
-    return sl<TranslationService>().translate(key, keyParams: keyParams); // direct access, because every widget should
-    // not contain a reference to the translation service
+  String translate(BuildContext context, String key, {List<String>? keyParams}) {
+    return CustomAppLocalizations.of(context)?.translate(key, keyParams: keyParams) ?? "";
   }
 
   /// Returns the theme data. The [ThemeData.colorScheme] contains the colors used inside of the app.

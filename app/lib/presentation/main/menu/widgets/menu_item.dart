@@ -34,7 +34,7 @@ class MenuItem extends BlocPageChild<MenuBloc, MenuState> {
               )
             : null,
         minLeadingWidth: iconSize,
-        title: Text(translate(pageTitleKey, keyParams: pageTitleKeyParams)),
+        title: Text(translate(context, pageTitleKey, keyParams: pageTitleKeyParams)),
         onTap: () {
           currentBloc(context).add(MenuItemClicked(
             targetPageTranslationKey: pageTitleKey,

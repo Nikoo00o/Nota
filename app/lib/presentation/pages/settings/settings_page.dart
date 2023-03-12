@@ -54,7 +54,7 @@ class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
   @override
   PreferredSizeWidget? buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text(translate("page.settings.title")),
+      title: Text(translate(context, "page.settings.title")),
       centerTitle: false,
     );
   }

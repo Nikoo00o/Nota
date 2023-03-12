@@ -202,13 +202,13 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<SessionService>(() => SessionService());
   sl.registerLazySingleton<DialogService>(() => DialogServiceImpl(dialogOverlayBloc: sl()));
   sl.registerLazySingleton<NavigationService>(() => NavigationService());
-  sl.registerLazySingleton<TranslationService>(() => TranslationService(appSettingsRepository: sl(), appBloc: sl()));
+  sl.registerLazySingleton<TranslationService>(() => TranslationService(appSettingsRepository: sl()));
 
   // presentation layer (blocs)
 
   // important: the next two blocs are singletons and no factory functions, because they are used within the app and are
   // only created once!
-  sl.registerLazySingleton<AppBloc>(() => AppBloc());
+  sl.registerLazySingleton<AppBloc>(() => AppBloc(translationService: sl()));
   sl.registerLazySingleton<DialogOverlayBloc>(() => DialogOverlayBloc(
         dialogOverlayKey: GlobalKey(),
         translationService: sl(),

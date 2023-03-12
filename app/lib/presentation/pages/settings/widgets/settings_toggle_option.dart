@@ -41,9 +41,9 @@ class SettingsToggleOption extends WidgetBase {
         contentPadding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
         secondary: icon != null ? Icon(icon, size: iconSize) : null,
         isThreeLine: hasBigDescription,
-        title: Text(translate(titleKey, keyParams: titleKeyParams)),
+        title: Text(translate(context, titleKey, keyParams: titleKeyParams)),
         subtitle: descriptionKey != null
-            ? Text(translate(descriptionKey!, keyParams: descriptionKeyParams),
+            ? Text(translate(context, descriptionKey!, keyParams: descriptionKeyParams),
                 style: theme(context).textTheme.bodySmall?.copyWith(color: colorOnSurfaceVariant(context)))
             : null,
         value: isActive,

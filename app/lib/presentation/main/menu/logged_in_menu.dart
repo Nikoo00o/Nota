@@ -56,7 +56,7 @@ class LoggedInMenu extends BlocPage<MenuBloc, MenuState> {
             const MenuDrawerHeader(),
             Padding(
               padding: const EdgeInsets.fromLTRB(8, 8, 0, 8),
-              child: Text(translate("menu.notes.label"), style: theme(context).textTheme.titleMedium),
+              child: Text(translate(context, "menu.notes.label"), style: theme(context).textTheme.titleMedium),
             ),
             const MenuItem(pageTitleKey: "page.note.selection.temp.title"),
             const Divider(),

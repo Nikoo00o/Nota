@@ -64,7 +64,7 @@ class LoginPage extends BlocPage<LoginBloc, LoginState> {
 
   @override
   PreferredSizeWidget buildAppBarWithState(BuildContext context, LoginState state) {
-    return AppBar(centerTitle: false, title: Text(translate(_getPageTitle(state))));
+    return AppBar(centerTitle: false, title: Text(translate(context, _getPageTitle(state))));
   }
 
   String _getPageTitle(LoginState state) {

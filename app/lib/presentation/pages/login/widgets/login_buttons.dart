@@ -26,7 +26,7 @@ class LoginButtons extends BlocPageChild<LoginBloc, LoginState> {
         FilledButton(
           onPressed: () => _firstButtonPressed(context, state),
           key: state.firstButtonScrollKey,
-          child: Text(translate(firstButtonKey)),
+          child: Text(translate(context, firstButtonKey)),
         ),
         const SizedBox(height: 10),
         CustomOutlinedButton(

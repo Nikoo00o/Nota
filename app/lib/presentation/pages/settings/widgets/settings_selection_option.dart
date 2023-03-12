@@ -48,9 +48,9 @@ class SettingsSelectionOption extends WidgetBase {
         leading: icon != null ? Icon(icon, size: iconSize) : null,
         minLeadingWidth: iconSize,
         isThreeLine: hasBigDescription,
-        title: Text(translate(titleKey, keyParams: titleKeyParams)),
+        title: Text(translate(context, titleKey, keyParams: titleKeyParams)),
         subtitle: descriptionKey != null
-            ? Text(translate(descriptionKey!, keyParams: descriptionKeyParams),
+            ? Text(translate(context, descriptionKey!, keyParams: descriptionKeyParams),
                 style: theme(context).textTheme.bodySmall?.copyWith(color: colorOnSurfaceVariant(context)))
             : null,
         onTap: () => _openDialog(context),

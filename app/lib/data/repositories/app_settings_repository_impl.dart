@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:app/core/config/app_config.dart';
+import 'package:app/core/constants/locales.dart';
 import 'package:app/data/datasources/local_data_source.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';
 
@@ -14,7 +15,8 @@ class AppSettingsRepositoryImpl extends AppSettingsRepository {
 
   @override
   Future<Locale> getCurrentLocale() async {
-    return await localDataSource.getLocale() ?? appConfig.defaultLocale;
+    final Locale? savedLocale = await localDataSource.getLocale();
+    return savedLocale ?? (Locales.getSupportedSystemLocale() ?? appConfig.defaultLocale);
   }
 
   @override

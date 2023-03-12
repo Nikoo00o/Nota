@@ -5,7 +5,6 @@ import 'package:app/presentation/widgets/nota_icon.dart';
 import 'package:flutter/material.dart';
 
 class LoginDescription extends BlocPageChild<LoginBloc, LoginState> {
-
   const LoginDescription();
 
   @override
@@ -18,7 +17,7 @@ class LoginDescription extends BlocPageChild<LoginBloc, LoginState> {
         const NotaIcon(),
         const SizedBox(height: 25),
         Text(
-          translate(_getPageDescription(state)),
+          translate(context, _getPageDescription(state)),
           style: theme(context).textTheme.bodyLarge,
           // textAlign: TextAlign.center,
         ),
@@ -36,10 +35,10 @@ class LoginDescription extends BlocPageChild<LoginBloc, LoginState> {
             style: theme(context).textTheme.bodyLarge,
             children: <InlineSpan>[
               TextSpan(
-                text: translate("page.login.description.local.login.1"),
+                text: translate(context, "page.login.description.local.login.1"),
               ),
               TextSpan(
-                text: translate("empty.param.1", keyParams: <String>[state.username]),
+                text: translate(context, "empty.param.1", keyParams: <String>[state.username]),
                 style: theme(context).textTheme.titleLarge?.copyWith(color: colorSecondary(context)),
               ),
             ],
@@ -47,7 +46,7 @@ class LoginDescription extends BlocPageChild<LoginBloc, LoginState> {
         ),
         const SizedBox(height: 5),
         Text(
-          translate("page.login.description.local.login.2"),
+          translate(context, "page.login.description.local.login.2"),
           style: theme(context).textTheme.bodyLarge,
         ),
       ],

@@ -28,16 +28,21 @@ Future<void> main(List<String> arguments) async {
     _initErrorCallbacks();
     await sl<LocalDataSource>().init();
     await sl<TranslationService>().init();
-    Logger.debug("initialisation complete");
+
+    final ThemeData theme = AppTheme.newTheme(darkTheme: await sl<AppSettingsRepository>().isDarkTheme());
+    final Locale locale = sl<TranslationService>().currentLocale;
+    Logger.info("Starting the app with ${theme.brightness == Brightness.dark ? "dark" : "light"} theme and the language "
+        "code: ${locale.languageCode}");
 
     runApp(App(
       appConfig: sl(),
+      translationService: sl(),
       dialogService: sl(),
       sessionService: sl(),
       navigationService: sl(),
       activateLockscreen: sl(),
-      initialLocale: sl<TranslationService>().currentLocale,
-      initialTheme: AppTheme.newTheme(darkTheme: await sl<AppSettingsRepository>().isDarkTheme()),
+      initialLocale: locale,
+      initialTheme: theme,
     ));
   } catch (e, s) {
     Logger.error("critical error starting the app", e, s);

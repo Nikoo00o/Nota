@@ -40,7 +40,7 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
   @override
   PreferredSizeWidget buildAppBarWithState(BuildContext context, NoteSelectionState state) {
     return AppBar(
-      title: Text(translate("page.note.selection.temp.title")),
+      title: Text(translate(context, "page.note.selection.temp.title")),
       centerTitle: false,
     );
   }

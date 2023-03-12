@@ -27,13 +27,12 @@ class LoginInputs extends BlocPageChild<LoginBloc, LoginState> {
           if (state is LoginRemoteState || state is LoginCreateState)
             CustomTextFormField(
               controller: usernameController,
-              validator: _usernameValidator,
               textKey: "page.login.name",
             ),
           if (state is LoginRemoteState || state is LoginCreateState) const SizedBox(height: space),
           CustomTextFormField(
             controller: passwordController,
-            validator: state is LoginCreateState ? _passwordValidator : null,
+            validator: state is LoginCreateState ? (String? input) => _passwordValidator(context, input) : null,
             textKey: "page.login.password",
             obscureText: true,
           ),
@@ -41,7 +40,7 @@ class LoginInputs extends BlocPageChild<LoginBloc, LoginState> {
           if (state is LoginCreateState)
             CustomTextFormField(
               controller: passwordConfirmController,
-              validator: _passwordConfirmValidator,
+              validator: (String? input) => _passwordConfirmValidator(context, input),
               textKey: "page.login.password.confirm",
               obscureText: true,
             ),
@@ -51,23 +50,19 @@ class LoginInputs extends BlocPageChild<LoginBloc, LoginState> {
   }
 
   /// Returns error message, or null
-  String? _usernameValidator(String? input) {
-    return null;
-  }
-
-  String? _passwordValidator(String? input) {
+  String? _passwordValidator(BuildContext context, String? input) {
     if (input != null && input.isNotEmpty) {
       if (InputValidator.validatePassword(input) == false) {
-        return translate("page.login.insecure.password");
+        return translate(context, "page.login.insecure.password");
       }
     }
     return null;
   }
 
-  String? _passwordConfirmValidator(String? input) {
+  String? _passwordConfirmValidator(BuildContext context, String? input) {
     if (input != null && input.isNotEmpty) {
       if (input != passwordController.text) {
-        return translate("page.login.no.password.match");
+        return translate(context, "page.login.no.password.match");
       }
     }
     return null;

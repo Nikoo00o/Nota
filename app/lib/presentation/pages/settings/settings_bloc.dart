@@ -7,6 +7,7 @@ import 'package:app/presentation/main/app/app_event.dart';
 import 'package:app/presentation/pages/settings/settings_event.dart';
 import 'package:app/presentation/pages/settings/settings_state.dart';
 import 'package:app/presentation/widgets/base_pages/page_bloc.dart';
+import 'package:app/services/translation_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
@@ -36,11 +37,12 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
   }
 
   Future<void> _handleLocaleSelected(LocaleChanged event, Emitter<SettingsState> emit) async {
-    Locale? newLocale;
+    Locale? newLocale; // null if system locale should be used
     if (event.index < Locales.supportedLocales.length) {
       newLocale = Locales.supportedLocales[event.index];
-    } else {}
+    }
     await appSettingsRepository.setLocale(newLocale);
+    appBloc.add(UpdateLocale(await appSettingsRepository.getCurrentLocale())); // update the app and force a rebuild
     emit(await _buildState());
   }
 

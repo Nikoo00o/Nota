@@ -7,16 +7,19 @@ import 'package:app/presentation/main/app/app_bloc.dart';
 import 'package:app/presentation/main/app/app_event.dart';
 import 'package:app/presentation/main/app/app_state.dart';
 import 'package:app/presentation/main/app/widgets/app_observer.dart';
+import 'package:app/presentation/main/app/widgets/custom_app_localizations.dart';
 import 'package:app/presentation/main/app/widgets/custom_navigator.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_page.dart';
 import 'package:app/presentation/pages/test/splash_screen_test_page.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:app/services/session_service.dart';
+import 'package:app/services/translation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:shared/core/utils/logger/logger.dart';
 
 import 'widgets/custom_scroll_behavior.dart';
 
@@ -24,6 +27,7 @@ import 'widgets/custom_scroll_behavior.dart';
 class App extends StatelessWidget {
   final AppConfig appConfig;
   final NavigationService navigationService;
+  final TranslationService translationService;
   final DialogService dialogService;
   final SessionService sessionService;
   final ActivateLockscreen activateLockscreen;
@@ -33,6 +37,7 @@ class App extends StatelessWidget {
   const App({
     required this.appConfig,
     required this.navigationService,
+    required this.translationService,
     required this.dialogService,
     required this.sessionService,
     required this.activateLockscreen,
@@ -60,12 +65,15 @@ class App extends StatelessWidget {
             scrollBehavior: const CustomScrollBehavior(),
             locale: state is AppStateInitialised ? state.locale : initialLocale,
             supportedLocales: Locales.supportedLocales,
-            localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+            localizationsDelegates: <LocalizationsDelegate<dynamic>>[
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
+              CustomAppLocalizationsDelegate(translationService: translationService),
             ],
             home: _buildStructure(context, state),
+            localeResolutionCallback: (Locale? locale, Iterable<Locale> supportedLocales) =>
+                _localeResolutionCallback(locale, supportedLocales, context),
           );
         },
       ),
@@ -90,13 +98,14 @@ class App extends StatelessWidget {
   /// Builds the page with the navigator and the safe area!
   Widget _buildPage(BuildContext context, AppState state) {
     return Container(
-        color: _getTheme(state).colorScheme.background,
-        child: SafeArea(
-          child: CustomNavigator(
-            navigationService: navigationService,
-            appConfig: appConfig,
-          ),
-        ));
+      color: _getTheme(state).colorScheme.background,
+      child: SafeArea(
+        child: CustomNavigator(
+          navigationService: navigationService,
+          appConfig: appConfig,
+        ),
+      ),
+    );
   }
 
   ThemeData _getTheme(AppState state) => state is AppStateInitialised ? state.theme : initialTheme;
@@ -104,22 +113,15 @@ class App extends StatelessWidget {
   void _setSystemStatusBar({required bool isDarkTheme}) =>
       SystemChrome.setSystemUIOverlayStyle(isDarkTheme ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark);
 
-  List<LocalizationsDelegate<dynamic>> _localizationsDelegates() {
-    return <LocalizationsDelegate<dynamic>>[
-      AppLocalizationsDelegate(translationService: _translationService),
-      GlobalMaterialLocalizations.delegate,
-      GlobalWidgetsLocalizations.delegate,
-      GlobalCupertinoLocalizations.delegate,
-    ];
-  }
-
-  Locale _localeResolutionCallback(Locale? locale, Iterable<Locale> supportedLocales) {
-    for (final Locale supportedLocale in supportedLocales) {
-      if (locale != null && supportedLocale.languageCode == locale.languageCode) {
-        return supportedLocale;
-      }
+  Locale _localeResolutionCallback(Locale? locale, Iterable<Locale> supportedLocales, BuildContext context) {
+    late Locale result;
+    if (supportedLocales.where((Locale other) => other.languageCode == locale?.languageCode).isNotEmpty) {
+      result = locale!;
+    } else {
+      Logger.warn("Locale ${locale?.languageCode} was not supported");
+      result = appConfig.defaultLocale;
     }
-    return supportedLocales.first;
+    BlocProvider.of<AppBloc>(context).add(UpdateLocale(result)); // make sure to also get system locale changes!
+    return result;
   }
-
 }
