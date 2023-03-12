@@ -77,7 +77,7 @@ class LoginPage extends BlocPage<LoginBloc, LoginState> {
     if (state is LoginLocalState) {
       return "page.login.title.local.login";
     }
-    throw UnimplementedError();
+    return "empty";
   }
 
   @override

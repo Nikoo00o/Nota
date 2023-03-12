@@ -61,6 +61,6 @@ class LoginDescription extends BlocPageChild<LoginBloc, LoginState> {
     if (state is LoginRemoteState) {
       return "page.login.description.remote.login";
     }
-    throw UnimplementedError();
+    return "empty";
   }
 }

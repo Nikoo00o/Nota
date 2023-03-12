@@ -47,7 +47,7 @@ class LoginButtons extends BlocPageChild<LoginBloc, LoginState> {
     if (state is LoginLocalState) {
       return "page.login.change.account";
     }
-    throw UnimplementedError();
+    return "empty";
   }
 
   void _firstButtonPressed(BuildContext context, LoginState state) {

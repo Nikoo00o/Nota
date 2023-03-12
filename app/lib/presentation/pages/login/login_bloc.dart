@@ -48,7 +48,7 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
     required this.dialogService,
     required this.navigationService,
     required GlobalKey firstButtonScrollKey,
-  }) : super(initialState: LoginRemoteState(firstButtonScrollKey: firstButtonScrollKey));
+  }) : super(initialState: LoginState(firstButtonScrollKey: firstButtonScrollKey));
 
   @override
   void registerEventHandlers() {
