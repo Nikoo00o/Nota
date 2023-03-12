@@ -61,5 +61,6 @@
   "page.settings.lock.screen.timeout.description.dialog": "Enter a new Timeout in seconds",
   "page.settings.password" : "Change Password",
   "page.settings.password.description" : "All other devices will get logged out",
-  "page.change.password.description": "Enter and confirm your new Password"
+  "page.change.password.description": "Enter and confirm your new Password",
+  "page.change.password.changed": "Password changed successfully"
 }

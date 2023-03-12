@@ -36,6 +36,8 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
   final TextEditingController passwordConfirmController = TextEditingController();
   final ScrollController scrollController = ScrollController();
 
+  final GlobalKey firstButtonScrollKey = GlobalKey();
+
   StreamSubscription<bool>? keyboardSubscription;
 
   LoginBloc({
@@ -46,8 +48,7 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
     required this.logoutOfAccount,
     required this.dialogService,
     required this.navigationService,
-    required GlobalKey firstButtonScrollKey,
-  }) : super(initialState: LoginState(firstButtonScrollKey: firstButtonScrollKey));
+  }) : super(initialState: const LoginState());
 
   @override
   void registerEventHandlers() {
@@ -117,13 +118,12 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
   /// [username] is only used for [LoginLocalState]
   LoginState _buildState({String? username}) {
     if (_createNewAccount) {
-      // the global key will never change, because it is only created once and then always copied
-      return LoginCreateState(firstButtonScrollKey: state.firstButtonScrollKey);
+      return const LoginCreateState();
     }
     if (_loginStatus == RequiredLoginStatus.REMOTE) {
-      return LoginRemoteState(firstButtonScrollKey: state.firstButtonScrollKey);
+      return const LoginRemoteState();
     }
-    return LoginLocalState(firstButtonScrollKey: state.firstButtonScrollKey, username: username ?? "");
+    return LoginLocalState(username: username ?? "");
   }
 
   void _navigateToNextPage() {
@@ -153,12 +153,11 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
         if (visible) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             Scrollable.ensureVisible(
-              state.firstButtonScrollKey.currentContext!,
+              firstButtonScrollKey.currentContext!,
               duration: const Duration(milliseconds: 250), // duration for scrolling time
               curve: Curves.easeInOutCubic,
               alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
             );
-            //scrollController.jumpTo(value)
           });
         }
       });

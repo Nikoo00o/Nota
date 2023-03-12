@@ -45,7 +45,7 @@
   "menu.notes.label": "Notizen",
   "menu.lock.screen.title": "Sperrbildschirm",
   "menu.logout.title": "Ausloggen",
-  "menu.about": "About",
+  "menu.about": "App-Info",
   "page.settings.title": "Einstellungen",
   "page.settings.dark.theme": "Dunkles Design benutzen",
   "page.settings.locale": "Sprache auswählen",
@@ -57,10 +57,11 @@
   "page.splash.screen.test.title": "Splash Screen Test",
   "page.settings.auto.login": "Automatisch einloggen",
   "page.settings.auto.login.description": "Bei Start der App muss kein Passwort eingegeben werden",
-  "page.settings.lock.screen.timeout": "Sperrbildschirm Timeout",
+  "page.settings.lock.screen.timeout": "Sperrbildschirm Verzögerung",
   "page.settings.lock.screen.timeout.description": "Aktuell müssen Sie ihr Passwort erst eingeben, nachdem die App {0} Sekunden im Hintergrund war",
   "page.settings.lock.screen.timeout.description.dialog": "Geben Sie eine neue Zeitspanne in Sekunden ein",
   "page.settings.password" : "Passwort ändern",
   "page.settings.password.description" : "Alle anderen Geräte werden ausgeloggt",
-  "page.change.password.description": "Geben Sie ihr neues Passwort ein und Bestätigen Sie dieses"
+  "page.change.password.description": "Geben Sie ihr neues Passwort ein und Bestätigen Sie dieses",
+  "page.change.password.changed": "Ihr Passwort wurde erfolgreich geändert"
 }

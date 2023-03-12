@@ -8,10 +8,12 @@ import 'package:app/domain/usecases/account/change/change_auto_login.dart';
 import 'package:app/domain/usecases/account/get_auto_login.dart';
 import 'package:app/presentation/main/app/app_bloc.dart';
 import 'package:app/presentation/main/app/app_event.dart';
+import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/presentation/pages/settings/settings_event.dart';
 import 'package:app/presentation/pages/settings/settings_state.dart';
 import 'package:app/presentation/pages/settings/widgets/change_password_page.dart';
 import 'package:app/presentation/widgets/base_pages/page_bloc.dart';
+import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,6 +22,7 @@ import 'package:shared/domain/usecases/usecase.dart';
 class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
   final AppSettingsRepository appSettingsRepository;
   final NavigationService navigationService;
+  final DialogService dialogService;
   final ChangeAccountPassword changeAccountPassword;
   final AppBloc appBloc;
   final GetAutoLogin getAutoLogin;
@@ -30,11 +33,12 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
 
   SettingsBloc({
     required this.appSettingsRepository,
+    required this.navigationService,
+    required this.dialogService,
+    required this.changeAccountPassword,
     required this.appBloc,
     required this.getAutoLogin,
     required this.changeAutoLogin,
-    required this.navigationService,
-    required this.changeAccountPassword,
   }) : super(initialState: const SettingsState());
 
   @override
@@ -97,6 +101,7 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
     )) {
       await changeAccountPassword(ChangePasswordParams(newPassword: passwordController.text));
       navigationService.navigateBack();
+      dialogService.showInfoSnackBar(const ShowInfoSnackBar(textKey: "page.change.password.changed"));
       emit(await _buildState());
     }
   }
