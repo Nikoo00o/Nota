@@ -21,7 +21,7 @@ class _InputDialogState extends State<InputDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
+    return SingleChildScrollView(child: AlertDialog(
       icon: event.titleIcon,
       title: Text(translate(event.titleKey ?? "dialog.input.title", keyParams: event.titleKeyParams)),
       titleTextStyle: event.titleStyle,
@@ -30,27 +30,25 @@ class _InputDialogState extends State<InputDialog> {
         _buildCancelButton(context),
         _buildConfirmButton(context),
       ],
-    );
+    ),);
   }
 
   Widget _buildContent(BuildContext context) {
-    return SingleChildScrollView(
-      child: SizedBox(
-        // wider dialog
-        width: double.maxFinite,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            if (event.descriptionKey.isNotEmpty)
-              Text(translate(event.descriptionKey, keyParams: event.descriptionKeyParams), style: event.descriptionStyle),
-            if (event.descriptionKey.isNotEmpty) const SizedBox(height: 20),
-            Form(
-              autovalidateMode: AutovalidateMode.always,
-              child: _buildFormField(context),
-            ),
-          ],
-        ),
+    return SizedBox(
+      // wider dialog
+      width: double.maxFinite,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          if (event.descriptionKey.isNotEmpty)
+            Text(translate(event.descriptionKey, keyParams: event.descriptionKeyParams), style: event.descriptionStyle),
+          if (event.descriptionKey.isNotEmpty) const SizedBox(height: 20),
+          Form(
+            autovalidateMode: AutovalidateMode.always,
+            child: _buildFormField(context),
+          ),
+        ],
       ),
     );
   }

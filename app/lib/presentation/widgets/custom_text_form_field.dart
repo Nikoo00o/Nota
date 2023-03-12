@@ -40,6 +40,7 @@ class CustomTextFormField extends WidgetBase {
       obscureText: obscureText,
       onChanged: onChanged,
       decoration: InputDecoration(
+        contentPadding: const EdgeInsets.fromLTRB(8, 12, 8, 8),
         labelText: translate(context, textKey, keyParams: textKeyParams),
         isDense: true,
         border: const OutlineInputBorder(),

@@ -127,7 +127,7 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
     navigationService.navigateTo(Routes.notes);
   }
 
-  /// returns false on error
+  /// returns false on error. password strength and matching will only be checked if [confirmPassword] is not null!
   bool _validateInput({String? username, required String password, String? confirmPassword}) {
     final bool fieldsAreNotEmpty =
         (username?.isNotEmpty ?? true) && password.isNotEmpty && (confirmPassword?.isNotEmpty ?? true);
@@ -136,7 +136,7 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
       dialogService.show(const ShowErrorDialog(descriptionKey: "page.login.empty.params"));
       return false;
     }
-    if (InputValidator.validatePassword(password) == false) {
+    if (confirmPassword != null && InputValidator.validatePassword(password) == false) {
       Logger.error("The password was not secure enough");
       dialogService.show(const ShowErrorDialog(descriptionKey: "page.login.insecure.password"));
     }
