@@ -5,6 +5,8 @@
   "error.only.numbers": "Nur Zahlen sind gültig",
   "yes": "Ja",
   "no": "Nein",
+  "confirm": "Bestätigen",
+  "cancel": "Abbrechen",
   "language": "Sprache",
   "dialog.loading.title": "Laden",
   "dialog.loading.description": "Bitte warten...",
@@ -57,5 +59,8 @@
   "page.settings.auto.login.description": "Bei Start der App muss kein Passwort eingegeben werden",
   "page.settings.lock.screen.timeout": "Sperrbildschirm Timeout",
   "page.settings.lock.screen.timeout.description": "Aktuell müssen Sie ihr Passwort erst eingeben, nachdem die App {0} Sekunden im Hintergrund war",
-  "page.settings.lock.screen.timeout.description.dialog": "Geben Sie eine neue Zeitspanne in Sekunden ein"
+  "page.settings.lock.screen.timeout.description.dialog": "Geben Sie eine neue Zeitspanne in Sekunden ein",
+  "page.settings.password" : "Passwort ändern",
+  "page.settings.password.description" : "Alle anderen Geräte werden ausgeloggt",
+  "page.change.password.description": "Geben Sie ihr neues Passwort ein und Bestätigen Sie dieses"
 }

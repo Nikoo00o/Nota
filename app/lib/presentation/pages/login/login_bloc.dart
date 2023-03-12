@@ -75,21 +75,25 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
   }
 
   Future<void> _handleRemoteLogin(LoginEventRemoteLogin event, Emitter<LoginState> emit) async {
-    if (_validateInput(password: event.password, username: event.username)) {
+    if (InputValidator.validateInput(password: event.password, username: event.username)) {
       await loginToAccount(LoginToAccountParamsRemote(password: event.password, username: event.username));
       _navigateToNextPage();
     }
   }
 
   Future<void> _handleLocalLogin(LoginEventLocalLogin event, Emitter<LoginState> emit) async {
-    if (_validateInput(password: event.password)) {
+    if (InputValidator.validateInput(password: event.password)) {
       await loginToAccount(LoginToAccountParamsLocal(password: event.password));
       _navigateToNextPage();
     }
   }
 
   Future<void> _handleCreate(LoginEventCreate event, Emitter<LoginState> emit) async {
-    if (_validateInput(password: event.password, username: event.username, confirmPassword: event.confirmPassword)) {
+    if (InputValidator.validateInput(
+      password: event.password,
+      username: event.username,
+      confirmPassword: event.confirmPassword,
+    )) {
       await createAccount(CreateAccountParams(username: event.username, password: event.password));
       dialogService.show(ShowInfoDialog(
         titleKey: "page.login.account.created.title",
@@ -125,28 +129,6 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
 
   void _navigateToNextPage() {
     navigationService.navigateTo(Routes.notes);
-  }
-
-  /// returns false on error. password strength and matching will only be checked if [confirmPassword] is not null!
-  bool _validateInput({String? username, required String password, String? confirmPassword}) {
-    final bool fieldsAreNotEmpty =
-        (username?.isNotEmpty ?? true) && password.isNotEmpty && (confirmPassword?.isNotEmpty ?? true);
-    if (fieldsAreNotEmpty == false) {
-      Logger.error("One of the login page input fields was empty");
-      dialogService.show(const ShowErrorDialog(descriptionKey: "page.login.empty.params"));
-      return false;
-    }
-    if (confirmPassword != null && InputValidator.validatePassword(password) == false) {
-      Logger.error("The password was not secure enough");
-      dialogService.show(const ShowErrorDialog(descriptionKey: "page.login.insecure.password"));
-    }
-
-    if (confirmPassword != null && password !=confirmPassword) {
-      Logger.error("The passwords did not match");
-      dialogService.show(const ShowErrorDialog(descriptionKey: "page.login.no.password.match"));
-      return false;
-    }
-    return true;
   }
 
   void _clearTextInputFields() {

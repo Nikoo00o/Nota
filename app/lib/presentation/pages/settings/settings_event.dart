@@ -31,3 +31,12 @@ class LockscreenTimeoutChanged extends SettingsEvent {
 
   const LockscreenTimeoutChanged({required this.timeoutInSeconds});
 }
+
+class NavigatedToChangePasswordPage extends SettingsEvent {
+  const NavigatedToChangePasswordPage();
+}
+
+class PasswordChanged extends SettingsEvent {
+  final bool cancel;
+  const PasswordChanged({required this.cancel});
+}

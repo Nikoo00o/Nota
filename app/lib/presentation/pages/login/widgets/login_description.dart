@@ -39,7 +39,7 @@ class LoginDescription extends BlocPageChild<LoginBloc, LoginState> {
               ),
               TextSpan(
                 text: translate(context, "empty.param.1", keyParams: <String>[state.username]),
-                style: textTitleLarge(context)?.copyWith(color: colorSecondary(context)),
+                style: textTitleLarge(context).copyWith(color: colorSecondary(context)),
               ),
             ],
           ),

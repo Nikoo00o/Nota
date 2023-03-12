@@ -51,7 +51,6 @@ class LoginPage extends BlocPage<LoginBloc, LoginState> {
                 passwordController: passwordController,
                 passwordConfirmController: passwordConfirmController,
               ),
-              const SizedBox(height: 25),
             ],
           ),
         ),

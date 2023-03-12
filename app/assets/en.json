@@ -5,6 +5,8 @@
   "error.only.numbers": "Only Numbers are valid",
   "yes": "Yes",
   "no": "No",
+  "confirm": "Confirm",
+  "cancel": "Cancel",
   "language": "Language",
   "dialog.loading.title": "Loading",
   "dialog.loading.description": "Please wait...",
@@ -56,5 +58,8 @@
   "page.settings.auto.login.description": "You don't have to enter a password on starting the app",
   "page.settings.lock.screen.timeout": "Lockscreen Timeout",
   "page.settings.lock.screen.timeout.description": "Currently you only have to enter your password if the app was in the background for longer than {0} seconds",
-  "page.settings.lock.screen.timeout.description.dialog": "Enter a new Timeout in seconds"
+  "page.settings.lock.screen.timeout.description.dialog": "Enter a new Timeout in seconds",
+  "page.settings.password" : "Change Password",
+  "page.settings.password.description" : "All other devices will get logged out",
+  "page.change.password.description": "Enter and confirm your new Password"
 }

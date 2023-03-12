@@ -1,28 +1,40 @@
 import 'dart:ui';
 
 import 'package:app/core/constants/locales.dart';
+import 'package:app/core/utils/input_validator.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';
+import 'package:app/domain/usecases/account/change/change_account_password.dart';
 import 'package:app/domain/usecases/account/change/change_auto_login.dart';
 import 'package:app/domain/usecases/account/get_auto_login.dart';
 import 'package:app/presentation/main/app/app_bloc.dart';
 import 'package:app/presentation/main/app/app_event.dart';
 import 'package:app/presentation/pages/settings/settings_event.dart';
 import 'package:app/presentation/pages/settings/settings_state.dart';
+import 'package:app/presentation/pages/settings/widgets/change_password_page.dart';
 import 'package:app/presentation/widgets/base_pages/page_bloc.dart';
+import 'package:app/services/navigation_service.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
 class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
   final AppSettingsRepository appSettingsRepository;
+  final NavigationService navigationService;
+  final ChangeAccountPassword changeAccountPassword;
   final AppBloc appBloc;
   final GetAutoLogin getAutoLogin;
   final ChangeAutoLogin changeAutoLogin;
+
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController passwordConfirmController = TextEditingController();
 
   SettingsBloc({
     required this.appSettingsRepository,
     required this.appBloc,
     required this.getAutoLogin,
     required this.changeAutoLogin,
+    required this.navigationService,
+    required this.changeAccountPassword,
   }) : super(initialState: const SettingsState());
 
   @override
@@ -31,7 +43,9 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
     on<DarkThemeChanged>(_handleDarkThemeChange);
     on<LocaleChanged>(_handleLocaleSelected);
     on<AutoLoginChanged>(_handleAutoLoginChanged);
-    on<LockscreenTimeoutChanged>(_lockscreenTimeoutChanged);
+    on<LockscreenTimeoutChanged>(_handleLockscreenTimeoutChanged);
+    on<NavigatedToChangePasswordPage>(_handleNavigatedToChangePasswordPage);
+    on<PasswordChanged>(_handlePasswordChanged);
   }
 
   Future<void> _handleInitialise(SettingsEventInitialise event, Emitter<SettingsState> emit) async {
@@ -59,9 +73,32 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
     emit(await _buildState());
   }
 
-  Future<void> _lockscreenTimeoutChanged(LockscreenTimeoutChanged event, Emitter<SettingsState> emit) async {
+  Future<void> _handleLockscreenTimeoutChanged(LockscreenTimeoutChanged event, Emitter<SettingsState> emit) async {
     await appSettingsRepository.setLockscreenTimeout(duration: Duration(seconds: int.parse(event.timeoutInSeconds)));
     emit(await _buildState());
+  }
+
+  Future<void> _handleNavigatedToChangePasswordPage(NavigatedToChangePasswordPage event, Emitter<SettingsState> emit) async {
+    passwordController.clear(); // if the change password page is opened multiple times
+    passwordConfirmController.clear();
+    navigationService.pushPage(ChangePasswordPage(bloc: this));
+    emit(await _buildState());
+  }
+
+  Future<void> _handlePasswordChanged(PasswordChanged event, Emitter<SettingsState> emit) async {
+    if(event.cancel == true){
+      navigationService.navigateBack();
+      emit(await _buildState());
+      return;
+    }
+    if (InputValidator.validateInput(
+      password: passwordController.text,
+      confirmPassword: passwordConfirmController.text,
+    )) {
+      await changeAccountPassword(ChangePasswordParams(newPassword: passwordController.text));
+      navigationService.navigateBack();
+      emit(await _buildState());
+    }
   }
 
   Future<SettingsState> _buildState() async {

@@ -5,6 +5,7 @@ import 'package:app/presentation/main/menu/logged_in_menu.dart';
 import 'package:app/presentation/pages/settings/settings_bloc.dart';
 import 'package:app/presentation/pages/settings/settings_event.dart';
 import 'package:app/presentation/pages/settings/settings_state.dart';
+import 'package:app/presentation/pages/settings/widgets/settings_custom_option.dart';
 import 'package:app/presentation/pages/settings/widgets/settings_input_option.dart';
 import 'package:app/presentation/pages/settings/widgets/settings_selection_option.dart';
 import 'package:app/presentation/pages/settings/widgets/settings_toggle_option.dart';
@@ -66,18 +67,26 @@ class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
             icon: Icons.lock_clock,
             disabled: state.autoLogin,
             keyboardType: TextInputType.number,
-            validatorCallback: (String? input) {
-              if (RegExp(r"^\d+$").hasMatch(input ?? "") == false) {
-                return translate(context, "error.only.numbers");
-              }
-              return null;
-            },
+            validatorCallback: (String? input) => lockscreenTimeoutValidator(input, context),
             onConfirm: (String value) => currentBloc(context).add(LockscreenTimeoutChanged(timeoutInSeconds: value)),
+          ),
+          SettingsCustomOption(
+            titleKey: "page.settings.password",
+            descriptionKey: "page.settings.password.description",
+            icon: Icons.lock_reset,
+            onTap: () => currentBloc(context).add(const NavigatedToChangePasswordPage()),
           ),
         ],
       );
     }
     return const SizedBox();
+  }
+
+  String? lockscreenTimeoutValidator(String? input, BuildContext context) {
+    if (RegExp(r"^\d+$").hasMatch(input ?? "") == false) {
+      return translate(context, "error.only.numbers");
+    }
+    return null;
   }
 
   @override

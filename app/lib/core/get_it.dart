@@ -231,6 +231,8 @@ Future<void> initializeGetIt() async {
         appBloc: sl(),
         changeAutoLogin: sl(),
         getAutoLogin: sl(),
+      navigationService: sl(),
+      changeAccountPassword: sl(),
       ));
   sl.registerFactory<MenuBloc>(() => MenuBloc(
         getUsername: sl(),
