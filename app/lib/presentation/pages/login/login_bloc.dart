@@ -16,7 +16,6 @@ import 'package:app/services/navigation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
 class LoginBloc extends PageBloc<LoginEvent, LoginState> {
@@ -31,11 +30,11 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
   late RequiredLoginStatus _loginStatus;
   bool _createNewAccount = false;
 
-  // controllers are set by ui and only used for clearing
-  late final TextEditingController usernameController;
-  late final TextEditingController passwordController;
-  late final TextEditingController passwordConfirmController;
-  late final ScrollController scrollController;
+  // controllers are only used for clearing. also used inside of the ui to save the input
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController passwordConfirmController = TextEditingController();
+  final ScrollController scrollController = ScrollController();
 
   StreamSubscription<bool>? keyboardSubscription;
 
@@ -75,30 +74,30 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
   }
 
   Future<void> _handleRemoteLogin(LoginEventRemoteLogin event, Emitter<LoginState> emit) async {
-    if (InputValidator.validateInput(password: event.password, username: event.username)) {
-      await loginToAccount(LoginToAccountParamsRemote(password: event.password, username: event.username));
+    if (InputValidator.validateInput(username: usernameController.text, password: passwordController.text)) {
+      await loginToAccount(LoginToAccountParamsRemote(username: usernameController.text, password: passwordController.text));
       _navigateToNextPage();
     }
   }
 
   Future<void> _handleLocalLogin(LoginEventLocalLogin event, Emitter<LoginState> emit) async {
-    if (InputValidator.validateInput(password: event.password)) {
-      await loginToAccount(LoginToAccountParamsLocal(password: event.password));
+    if (InputValidator.validateInput(password: passwordController.text)) {
+      await loginToAccount(LoginToAccountParamsLocal(password: passwordController.text));
       _navigateToNextPage();
     }
   }
 
   Future<void> _handleCreate(LoginEventCreate event, Emitter<LoginState> emit) async {
     if (InputValidator.validateInput(
-      password: event.password,
-      username: event.username,
-      confirmPassword: event.confirmPassword,
+      username: usernameController.text,
+      password: passwordController.text,
+      confirmPassword: passwordConfirmController.text,
     )) {
-      await createAccount(CreateAccountParams(username: event.username, password: event.password));
+      await createAccount(CreateAccountParams(username: usernameController.text, password: passwordController.text));
       dialogService.show(ShowInfoDialog(
         titleKey: "page.login.account.created.title",
         descriptionKey: "page.login.account.created.description",
-        descriptionKeyParams: <String>[event.username],
+        descriptionKeyParams: <String>[usernameController.text],
       ));
       _createNewAccount = false;
       add(const LoginEventInitialise());

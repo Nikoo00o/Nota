@@ -6,15 +6,7 @@ import 'package:app/presentation/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
 
 class LoginInputs extends BlocPageChild<LoginBloc, LoginState> {
-  final TextEditingController usernameController;
-  final TextEditingController passwordController;
-  final TextEditingController passwordConfirmController;
-
-  const LoginInputs({
-    required this.usernameController,
-    required this.passwordController,
-    required this.passwordConfirmController,
-  });
+  const LoginInputs();
 
   @override
   Widget buildWithState(BuildContext context, LoginState state) {
@@ -26,12 +18,12 @@ class LoginInputs extends BlocPageChild<LoginBloc, LoginState> {
         children: <Widget>[
           if (state is LoginRemoteState || state is LoginCreateState)
             CustomTextFormField(
-              controller: usernameController,
+              controller: currentBloc(context).usernameController,
               textKey: "page.login.name",
             ),
           if (state is LoginRemoteState || state is LoginCreateState) const SizedBox(height: space),
           CustomTextFormField(
-            controller: passwordController,
+            controller: currentBloc(context).passwordController,
             validator: state is LoginCreateState ? (String? input) => _passwordValidator(context, input) : null,
             textKey: "page.login.password",
             obscureText: true,
@@ -39,7 +31,7 @@ class LoginInputs extends BlocPageChild<LoginBloc, LoginState> {
           if (state is LoginCreateState) const SizedBox(height: space),
           if (state is LoginCreateState)
             CustomTextFormField(
-              controller: passwordConfirmController,
+              controller: currentBloc(context).passwordConfirmController,
               validator: (String? input) => _passwordConfirmValidator(context, input),
               textKey: "page.login.password.confirm",
               obscureText: true,
@@ -61,7 +53,7 @@ class LoginInputs extends BlocPageChild<LoginBloc, LoginState> {
 
   String? _passwordConfirmValidator(BuildContext context, String? input) {
     if (input != null && input.isNotEmpty) {
-      if (input != passwordController.text) {
+      if (input != currentBloc(context).passwordController.text) {
         return translate(context, "page.login.no.password.match");
       }
     }

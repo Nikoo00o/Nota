@@ -10,20 +10,12 @@ import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends BlocPage<LoginBloc, LoginState> {
-  final TextEditingController usernameController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController passwordConfirmController = TextEditingController();
-  final ScrollController scrollController = ScrollController();
 
-  LoginPage() : super();
+  const LoginPage() : super();
 
   @override
   LoginBloc createBloc(BuildContext context) {
     final LoginBloc bloc = sl<LoginBloc>(param1: LoginBlocArguments(firstButtonScrollKey: GlobalKey()));
-    bloc.usernameController = usernameController;
-    bloc.passwordController = passwordController;
-    bloc.passwordConfirmController = passwordConfirmController;
-    bloc.scrollController = scrollController;
     return bloc..add(const LoginEventInitialise());
   }
 
@@ -33,24 +25,16 @@ class LoginPage extends BlocPage<LoginBloc, LoginState> {
       child: Scrollbar(
         scrollbarOrientation: ScrollbarOrientation.right,
         child: SingleChildScrollView(
-          controller: scrollController,
+          controller: currentBloc(context).scrollController,
           padding: const EdgeInsets.fromLTRB(40, 5, 40, 5),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              const LoginDescription(),
-              const SizedBox(height: 25),
-              LoginInputs(
-                usernameController: usernameController,
-                passwordController: passwordController,
-                passwordConfirmController: passwordConfirmController,
-              ),
-              const SizedBox(height: 25),
-              LoginButtons(
-                usernameController: usernameController,
-                passwordController: passwordController,
-                passwordConfirmController: passwordConfirmController,
-              ),
+            children: const <Widget>[
+              LoginDescription(),
+              SizedBox(height: 25),
+              LoginInputs(),
+              SizedBox(height: 25),
+              LoginButtons(),
             ],
           ),
         ),

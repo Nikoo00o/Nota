@@ -6,15 +6,7 @@ import 'package:app/presentation/widgets/custom_outlined_button.dart';
 import 'package:flutter/material.dart';
 
 class LoginButtons extends BlocPageChild<LoginBloc, LoginState> {
-  final TextEditingController usernameController;
-  final TextEditingController passwordController;
-  final TextEditingController passwordConfirmController;
-
-  const LoginButtons({
-    required this.usernameController,
-    required this.passwordController,
-    required this.passwordConfirmController,
-  });
+  const LoginButtons();
 
   @override
   Widget buildWithState(BuildContext context, LoginState state) {
@@ -53,15 +45,11 @@ class LoginButtons extends BlocPageChild<LoginBloc, LoginState> {
   void _firstButtonPressed(BuildContext context, LoginState state) {
     unFocus(context);
     if (state is LoginCreateState) {
-      currentBloc(context).add(LoginEventCreate(
-        username: usernameController.text,
-        password: passwordController.text,
-        confirmPassword: passwordConfirmController.text,
-      ));
+      currentBloc(context).add(const LoginEventCreate());
     } else if (state is LoginRemoteState) {
-      currentBloc(context).add(LoginEventRemoteLogin(usernameController.text, passwordController.text));
+      currentBloc(context).add(const LoginEventRemoteLogin());
     } else if (state is LoginLocalState) {
-      currentBloc(context).add(LoginEventLocalLogin(passwordController.text));
+      currentBloc(context).add(const LoginEventLocalLogin());
     }
   }
 

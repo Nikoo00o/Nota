@@ -24,7 +24,7 @@ class CustomNavigator extends StatelessWidget {
   Widget _getPageForRoute(String? routeName, Object? arguments) {
     switch (routeName) {
       case Routes.login:
-        return LoginPage();
+        return const LoginPage();
       case Routes.notes:
         return const NoteSelectionPage();
       case Routes.settings:
