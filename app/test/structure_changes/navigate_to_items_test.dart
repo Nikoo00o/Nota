@@ -5,8 +5,10 @@ import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_update_batch.dart';
+import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/navigation/get_structure_folders.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_updates_stream.dart';
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
@@ -44,10 +46,27 @@ void main() {
       expect(sl<NoteStructureRepository>().currentItem, sl<NoteStructureRepository>().root);
     });
 
+    test("navigating to root top level folder root by name", () async {
+      await sl<NavigateToItem>().call(NavigateToItemParamsTopLevelName(folderName: StructureItem.rootFolderNames.first));
+      expect(sl<NoteStructureRepository>().currentItem, sl<NoteStructureRepository>().root);
+    });
+
     test("navigating to the first child of root", () async {
       sl<NoteStructureRepository>().currentItem = sl<NoteStructureRepository>().root;
       await sl<NavigateToItem>().call(const NavigateToItemParamsChild(childIndex: 0));
       expect(sl<NoteStructureRepository>().currentItem, sl<NoteStructureRepository>().root!.getChild(0));
+    });
+
+    test("navigating to the first child folder of root by name", () async {
+      sl<NoteStructureRepository>().currentItem = sl<NoteStructureRepository>().root;
+      await sl<NavigateToItem>().call(const NavigateToItemParamsChildFolderByName(folderName: "dir1"));
+      expect(sl<NoteStructureRepository>().currentItem, sl<NoteStructureRepository>().root!.getChild(0));
+    });
+
+    test("navigating to the first note of root by id", () async {
+      sl<NoteStructureRepository>().currentItem = sl<NoteStructureRepository>().root;
+      await sl<NavigateToItem>().call(const NavigateToItemParamsChildNoteById(noteId: -1));
+      expect(sl<NoteStructureRepository>().currentItem, sl<NoteStructureRepository>().root!.getChild(2));
     });
 
     test("navigating to the root parent", () async {
@@ -92,6 +111,14 @@ void main() {
       await sl<NavigateToItem>().call(const NavigateToItemParamsChild(childIndex: 0));
 
       expect(listenerCallAmount, 3, reason: "listener1 should have only been called 3 times");
+    });
+
+    test("getting top level parents without the move selection should contain all top level folders except move", () async {
+      final Map<TranslationString, StructureFolder> folders =
+          await sl<GetStructureFolders>().call(const GetStructureFoldersParams(includeMoveFolder: false));
+      expect(folders[TranslationString(StructureItem.rootFolderNames.first)]?.isRoot, true, reason: "root");
+      expect(folders[TranslationString(StructureItem.recentFolderNames.first)]?.isRecent, true, reason: "recent");
+      expect(folders[TranslationString(StructureItem.moveFolderNames.first)]?.isMove, null, reason: "move");
     });
   });
 }

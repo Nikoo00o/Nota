@@ -1,6 +1,5 @@
 import 'package:app/core/get_it.dart';
 import 'package:app/presentation/pages/login/login_bloc.dart';
-import 'package:app/presentation/pages/login/login_bloc_arguments.dart';
 import 'package:app/presentation/pages/login/login_event.dart';
 import 'package:app/presentation/pages/login/login_state.dart';
 import 'package:app/presentation/pages/login/widgets/login_buttons.dart';
@@ -10,12 +9,11 @@ import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends BlocPage<LoginBloc, LoginState> {
-
   const LoginPage() : super();
 
   @override
   LoginBloc createBloc(BuildContext context) {
-    final LoginBloc bloc = sl<LoginBloc>(param1: LoginBlocArguments(firstButtonScrollKey: GlobalKey()));
+    final LoginBloc bloc = sl<LoginBloc>();
     return bloc..add(const LoginEventInitialise());
   }
 
@@ -47,7 +45,10 @@ class LoginPage extends BlocPage<LoginBloc, LoginState> {
 
   @override
   PreferredSizeWidget buildAppBarWithState(BuildContext context, LoginState state) {
-    return AppBar(centerTitle: false, title: Text(translate(context, _getPageTitle(state))));
+    return AppBar(
+      centerTitle: false,
+      title: Text(translate(context, _getPageTitle(state))),
+    );
   }
 
   String _getPageTitle(LoginState state) {

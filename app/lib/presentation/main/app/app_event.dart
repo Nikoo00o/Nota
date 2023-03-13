@@ -5,14 +5,14 @@ abstract class AppEvent extends PageEvent {
   const AppEvent();
 }
 
-class UpdateLocale extends AppEvent {
+class AppUpdateLocale extends AppEvent {
   final Locale locale;
 
-  const UpdateLocale(this.locale);
+  const AppUpdateLocale(this.locale);
 }
 
-class UpdateTheme extends AppEvent {
+class AppUpdateTheme extends AppEvent {
   final bool useDarkTheme;
 
-  const UpdateTheme({required this.useDarkTheme});
+  const AppUpdateTheme({required this.useDarkTheme});
 }

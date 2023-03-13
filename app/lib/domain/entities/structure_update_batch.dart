@@ -1,5 +1,6 @@
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
+import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_updates_stream.dart';
 import 'package:shared/domain/entities/entity.dart';
 
@@ -10,7 +11,7 @@ class StructureUpdateBatch extends Entity {
   final StructureItem currentItem;
 
   /// The last folder will always be the move folder and it should be ignored in the ui!!!
-  final List<StructureFolder> topLevelFolders;
+  final Map<TranslationString, StructureFolder> topLevelFolders;
 
   StructureUpdateBatch({
     required this.currentItem,
@@ -21,5 +22,9 @@ class StructureUpdateBatch extends Entity {
         });
 
   /// Returns the [topLevelFolders] that should be used for the ui and does not include the move selection folder!
-  List<StructureFolder> get menuItems => topLevelFolders.sublist(0, topLevelFolders.length - 1);
+  Map<TranslationString, StructureFolder> get menuItems {
+    final Map<TranslationString, StructureFolder> copy = Map<TranslationString, StructureFolder>.of(topLevelFolders);
+    copy.remove(TranslationString(StructureItem.moveFolderNames.first));
+    return copy;
+  }
 }

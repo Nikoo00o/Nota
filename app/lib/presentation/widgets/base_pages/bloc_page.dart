@@ -82,7 +82,10 @@ abstract class BlocPage<Bloc extends PageBloc<PageEvent, State>, State extends P
 
   /// This can be overridden to build the [AppBar] with access to the [State] changes.
   ///
-  /// [buildAppBar] must be overridden to return this!
+  /// [buildAppBar] must be overridden to return [createAppBarWithState]!
+  ///
+  /// This may also return "const PreferredSize(preferredSize: Size.fromHeight(0.0), child: SizedBox());" to disable the
+  /// Appbar completely depending on the state, but it can also just return an empty appbar instead.
   PreferredSizeWidget buildAppBarWithState(BuildContext context, State state) =>
       const PreferredSize(preferredSize: Size.zero, child: SizedBox());
 
@@ -100,7 +103,12 @@ abstract class BlocPage<Bloc extends PageBloc<PageEvent, State>, State extends P
 
   /// This can be overridden to build the menu drawer with access to the [State] changes.
   ///
-  /// [buildMenuDrawer] must be overridden to return this!
+  /// [buildMenuDrawer] must be overridden to return [createMenuDrawerWithState]!
+  ///
+  /// Sadly if you want to disable the Appbar depending on the state, then you have to do that by overriding the [build]
+  /// method itself and return the helper method [buildWithToggleForMenuDrawer] directly.
+  ///
+  /// For usage of the parameters of the helper method, look at the comments of [buildWithToggleForMenuDrawer]!
   Widget buildMenuDrawerWithState(BuildContext context, State state) => const SizedBox();
 
   /// For better performance, you could also directly use this inside of [buildBodyWithNoState] instead of overriding and
@@ -143,8 +151,8 @@ abstract class BlocPage<Bloc extends PageBloc<PageEvent, State>, State extends P
 
   @override
   Widget build(BuildContext context) {
-    return createBlocProvider(
-      Builder(builder: (BuildContext context) {
+    return createBlocProvider(Builder(
+      builder: (BuildContext context) {
         // important: this wrapped builder is needed, so that the buildPartWithNoState can still access the bloc to send
         // events with the inner build context!
         return buildPage(
@@ -157,8 +165,30 @@ abstract class BlocPage<Bloc extends PageBloc<PageEvent, State>, State extends P
           buildAppBar(context),
           buildMenuDrawer(context),
         );
-      }),
-    );
+      },
+    ));
+  }
+
+  /// This method just receives the [context] from the [build] method, but then it also needs the [selectorCallback] which
+  /// is a function that takes in the state and should return a bool if the menu drawer should be added, or not!
+  Widget buildWithToggleForMenuDrawer(BuildContext context, bool Function(State) selectorCallback) {
+    return createBlocProvider(BlocSelector<Bloc, State, bool>(
+      // same as the builder above, but also with a selector to listen to only a part of the state changes to update the
+      // menu drawer!
+      selector: selectorCallback,
+      builder: (BuildContext context, bool enableMenuDrawer) {
+        return buildPage(
+          context,
+          buildBodyWithNoState(context, createBlocBuilder(
+            builder: (BuildContext context, State state) {
+              return buildBodyWithState(context, state);
+            },
+          )),
+          buildAppBar(context),
+          enableMenuDrawer ? buildMenuDrawer(context) : null,
+        );
+      },
+    ));
   }
 
   /// Returns current bloc of page without listening to it, so that events can be added, or navigation can be done, etc.

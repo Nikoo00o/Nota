@@ -1,4 +1,6 @@
 import 'package:app/domain/entities/structure_folder.dart';
+import 'package:app/domain/entities/structure_item.dart';
+import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_updates_stream.dart';
@@ -7,7 +9,11 @@ import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
 /// This returns a a list of deep copies of the top level note structure folders (first "root" and second element "recent").
-/// But the parent folder references for the children are not changed!
+///
+/// The parent folder of children of recent will not be changed!
+///
+/// This will return the [NoteStructureRepository.topLevelFolders], but with the users custom favourites added before the
+/// move folder
 ///
 /// The last folder will always be the move folder and it should be ignored!!!
 ///
@@ -20,7 +26,7 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// This can throw the exceptions of [GetLoggedInAccount], but perform no additional input validation!
 ///
 /// As an alternative, you can use [GetStructureUpdatesStream] to receive streamed updates instead!
-class GetStructureFolders extends UseCase<List<StructureFolder>, NoParams> {
+class GetStructureFolders extends UseCase<Map<TranslationString, StructureFolder>, GetStructureFoldersParams> {
   final NoteStructureRepository noteStructureRepository;
   final FetchNewNoteStructure fetchNewNoteStructure;
 
@@ -30,17 +36,38 @@ class GetStructureFolders extends UseCase<List<StructureFolder>, NoParams> {
   });
 
   @override
-  Future<List<StructureFolder>> execute(NoParams params) async {
+  Future<Map<TranslationString, StructureFolder>> execute(GetStructureFoldersParams params) async {
     if (noteStructureRepository.root == null) {
       await fetchNewNoteStructure.call(const NoParams());
     }
 
     Logger.verbose("Returned a new deep copied list of the top level folders");
 
-    return noteStructureRepository.topLevelFolders.map((StructureFolder? folder) {
+    final Iterable<MapEntry<TranslationString, StructureFolder>> entries =
+        noteStructureRepository.topLevelFolders.map<MapEntry<TranslationString, StructureFolder>>((StructureFolder? folder) {
       final bool changeParentOfChildren = folder!.isRecent == false; // don't change the parent of children of recent,
       // because recent has the notes as direct children which have their folder structure as direct parents!
-      return folder.copyWith(changeParentOfChildren: changeParentOfChildren);
-    }).toList();
+      final StructureFolder newFolder = folder.copyWith(changeParentOfChildren: changeParentOfChildren);
+      final String translationKey = StructureItem.getTranslationStringForStructureItem(newFolder).translationKey;
+
+      return MapEntry<TranslationString, StructureFolder>(TranslationString(translationKey), newFolder);
+    });
+
+    final Map<TranslationString, StructureFolder> result = Map<TranslationString, StructureFolder>.fromEntries(entries);
+
+    if (params.includeMoveFolder == false) {
+      result.remove(TranslationString(StructureItem.moveFolderNames.first));
+    }
+    //todo: insert user custom favourite folders before the move folder, but after the other folders
+    return result;
   }
+}
+
+class GetStructureFoldersParams {
+  /// if false, then the move folder will not be included in the output
+  final bool includeMoveFolder;
+
+  const GetStructureFoldersParams({
+    required this.includeMoveFolder,
+  });
 }

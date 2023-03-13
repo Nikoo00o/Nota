@@ -7,6 +7,7 @@ import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
+import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
 import 'package:app/domain/repositories/note_transfer_repository.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
@@ -64,7 +65,7 @@ void _testWithoutAccount() {
 
   test("other throw with no logged in account and get current structure folders", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-    expect(() async => sl<GetStructureFolders>().call(const NoParams()),
+    expect(() async => sl<GetStructureFolders>().call(const GetStructureFoldersParams(includeMoveFolder: true)),
         throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.ACCOUNT_WRONG_PASSWORD)));
   });
 }
@@ -103,7 +104,7 @@ Future<void> _testSimpleNoteStructure({required bool callFetchNewStructure}) asy
   }
 
   final StructureItem item = await sl<GetCurrentStructureItem>().call(const NoParams());
-  final List<StructureFolder> folders = await sl<GetStructureFolders>().call(const NoParams());
+  final List<StructureFolder> folders = await getStructureFoldersAsList();
 
   expect(folders[0].isRoot, true, reason: "root true");
   expect(folders[0].sorting, NoteSorting.BY_NAME, reason: "name sorting");
@@ -128,7 +129,7 @@ Future<void> _testSimpleNoteStructure({required bool callFetchNewStructure}) asy
 Future<void> _testComplexStructure() async {
   await createSomeTestNotes();
 
-  final List<StructureFolder> folders = await sl<GetStructureFolders>().call(const NoParams());
+  final List<StructureFolder> folders = await getStructureFoldersAsList();
   final StructureFolder root = folders[0];
   final StructureFolder recent = folders[1];
 
@@ -203,29 +204,27 @@ void _testChanges() {
   });
 
   test("changing current item of root and fetching new structure", () async {
-    final List<StructureFolder> folders = await sl<GetStructureFolders>().call(const NoParams());
+    final List<StructureFolder> folders = await getStructureFoldersAsList();
     final StructureFolder root = folders[0];
     sl<NoteStructureRepository>().currentItem = (root.getChild(0) as StructureFolder).getChild(0);
 
     await sl<FetchNewNoteStructure>().call(const NoParams());
-    final StructureItem currentItem =
-        await sl<GetCurrentStructureItem>().call(const NoParams());
+    final StructureItem currentItem = await sl<GetCurrentStructureItem>().call(const NoParams());
     expect(currentItem.path, "dir1/a_third");
   });
 
   test("changing current item of recent and fetching new structure", () async {
-    final List<StructureFolder> folders = await sl<GetStructureFolders>().call(const NoParams());
+    final List<StructureFolder> folders = await getStructureFoldersAsList();
     final StructureFolder recent = folders[1];
     sl<NoteStructureRepository>().currentItem = recent.getChild(1);
 
     await sl<FetchNewNoteStructure>().call(const NoParams());
-    final StructureItem currentItem =
-        await sl<GetCurrentStructureItem>().call(const NoParams());
+    final StructureItem currentItem = await sl<GetCurrentStructureItem>().call(const NoParams());
     expect(currentItem.path, "dir1/a_third");
   });
 
   test("get notes by id and folders by path / name", () async {
-    final List<StructureFolder> folders = await sl<GetStructureFolders>().call(const NoParams());
+    final List<StructureFolder> folders = await getStructureFoldersAsList();
     final StructureFolder root = folders[0];
     final StructureFolder recent = folders[1];
 
@@ -245,12 +244,12 @@ void _testChanges() {
   });
 
   test("the parent of note should still get correctly matched to root, or recent after updating", () async {
-    List<StructureFolder> folders = await sl<GetStructureFolders>().call(const NoParams());
+    List<StructureFolder> folders = await getStructureFoldersAsList();
     sl<NoteStructureRepository>().currentItem = folders[0].getChild(2);
 
     await sl<FetchNewNoteStructure>().call(const NoParams());
     StructureItem currentItem = await sl<GetCurrentStructureItem>().call(const NoParams());
-    folders = await sl<GetStructureFolders>().call(const NoParams());
+    folders = await getStructureFoldersAsList();
 
     expect(currentItem.path, "first", reason: "name should match");
     expect(currentItem.directParent, folders[0], reason: "parent should be root first");
@@ -258,9 +257,19 @@ void _testChanges() {
     sl<NoteStructureRepository>().currentItem = folders[1].getChild(4); // switch current item to child of recent
     await sl<FetchNewNoteStructure>().call(const NoParams());
     currentItem = await sl<GetCurrentStructureItem>().call(const NoParams());
-    folders = await sl<GetStructureFolders>().call(const NoParams());
+    folders = await getStructureFoldersAsList();
 
     expect(currentItem.path, "first", reason: "name should still match");
     expect(currentItem.directParent, folders[1], reason: "parent should be recent now");
   });
+}
+
+Future<List<StructureFolder>> getStructureFoldersAsList() async {
+  final Map<TranslationString, StructureFolder> folders =
+      await sl<GetStructureFolders>().call(const GetStructureFoldersParams(includeMoveFolder: true));
+  return <StructureFolder>[
+    folders[TranslationString(StructureItem.rootFolderNames.first)]!,
+    folders[TranslationString(StructureItem.recentFolderNames.first)]!,
+    folders[TranslationString(StructureItem.moveFolderNames.first)]!,
+  ];
 }

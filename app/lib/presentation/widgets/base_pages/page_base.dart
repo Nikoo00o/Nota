@@ -114,4 +114,5 @@ abstract class PageBase extends WidgetBase with PageHelperMixin {
   ///
   /// This will not be called if the menu is open, because then the menu will be closed first!
   Future<bool> customBackNavigation(BuildContext context) async => true;
+
 }

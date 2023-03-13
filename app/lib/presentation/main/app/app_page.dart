@@ -122,7 +122,7 @@ class App extends StatelessWidget {
       Logger.warn("Locale ${locale?.languageCode} was not supported");
       result = appConfig.defaultLocale;
     }
-    BlocProvider.of<AppBloc>(context).add(UpdateLocale(result)); // make sure to also get system locale changes!
+    BlocProvider.of<AppBloc>(context).add(AppUpdateLocale(result)); // make sure to also get system locale changes!
     return result;
   }
 }

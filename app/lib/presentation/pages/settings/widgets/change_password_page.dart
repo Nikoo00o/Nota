@@ -62,12 +62,12 @@ class ChangePasswordPage extends ReuseBlocPage<SettingsBloc, SettingsState> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         FilledButton(
-          onPressed: () => currentBloc(context).add(const PasswordChanged(cancel: false)),
+          onPressed: () => currentBloc(context).add(const SettingsPasswordChanged(cancel: false)),
           child: Text(translate(context, "confirm")),
         ),
         const SizedBox(height: 10),
         CustomOutlinedButton(
-          onPressed: () => currentBloc(context).add(const PasswordChanged(cancel: true)),
+          onPressed: () => currentBloc(context).add(const SettingsPasswordChanged(cancel: true)),
           textKey: "cancel",
         ),
       ],

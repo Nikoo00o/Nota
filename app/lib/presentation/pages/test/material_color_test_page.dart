@@ -196,7 +196,10 @@ class MaterialColorTestPage extends NoBlocPage {
 
   @override
   PreferredSizeWidget? buildAppBar(BuildContext context) {
-    return AppBar(title: const Text("Material Color Test"));
+    return AppBar(
+      title: const Text("Material Color Test"),
+      centerTitle: false,
+    );
   }
 
   @override

@@ -19,6 +19,7 @@
   "dialog.button.confirm": "Ok",
   "dialog.button.cancel": "Cancel",
   "dialog.input.label": "Enter Text",
+  "dialog.input.label.number": "Enter Number",
   "dialog.logged.out": "You were logged out of your Account",
   "page.app.should.close": "Should the App be terminated?",
   "page.login.title.create": "Account Creation",
@@ -59,7 +60,11 @@
   "page.settings.lock.screen.timeout": "Lockscreen Timeout",
   "page.settings.lock.screen.timeout.description": "Currently you only have to enter your password if the app was in the background for longer than {0} seconds",
   "page.settings.lock.screen.timeout.description.dialog": "Enter a new Timeout in seconds",
-  "page.settings.password" : "Change Password",
-  "page.settings.password.description" : "All other devices will get logged out",
-  "page.change.password.description": "Enter and confirm your new Password"
+  "page.settings.password": "Change Password",
+  "page.settings.password.description": "All other devices will get logged out",
+  "page.change.password.description": "Enter and confirm your new Password",
+  "page.change.password.changed": "Password changed successfully",
+  "notes.root": "Root Folder",
+  "notes.recent": "Recent Notes",
+  "notes.move": "Select Target Folder"
 }

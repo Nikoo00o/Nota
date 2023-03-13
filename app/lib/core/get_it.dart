@@ -1,5 +1,4 @@
 import 'package:app/core/config/app_config.dart';
-import 'package:app/core/config/app_theme.dart';
 import 'package:app/data/datasources/local_data_source.dart';
 import 'package:app/data/datasources/local_data_source_impl.dart';
 import 'package:app/data/datasources/remote_account_data_source.dart';
@@ -44,7 +43,6 @@ import 'package:app/presentation/main/app/app_bloc.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/presentation/main/menu/menu_bloc.dart';
 import 'package:app/presentation/pages/login/login_bloc.dart';
-import 'package:app/presentation/pages/login/login_bloc_arguments.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
 import 'package:app/presentation/pages/settings/settings_bloc.dart';
 import 'package:app/services/dialog_service.dart';
@@ -215,7 +213,7 @@ Future<void> initializeGetIt() async {
       ));
 
   // the blocs below are factory functions, because they should be newly created each time the user navigates to the page!
-  sl.registerFactoryParam<LoginBloc, LoginBlocArguments, void>((LoginBlocArguments arguments, _) => LoginBloc(
+  sl.registerFactory<LoginBloc>(() => LoginBloc(
         navigationService: sl(),
         dialogService: sl(),
         getRequiredLoginStatus: sl(),
@@ -223,24 +221,29 @@ Future<void> initializeGetIt() async {
         createAccount: sl(),
         loginToAccount: sl(),
         logoutOfAccount: sl(),
-        firstButtonScrollKey: arguments.firstButtonScrollKey,
       ));
-  sl.registerFactory<NoteSelectionBloc>(() => NoteSelectionBloc());
+  sl.registerFactory<NoteSelectionBloc>(() => NoteSelectionBloc(
+        getCurrentStructureItem: sl(),
+        getStructureUpdatesStream: sl(),
+      ));
   sl.registerFactory<SettingsBloc>(() => SettingsBloc(
         appSettingsRepository: sl(),
         appBloc: sl(),
         changeAutoLogin: sl(),
         getAutoLogin: sl(),
-      navigationService: sl(),
-      changeAccountPassword: sl(),
+        navigationService: sl(),
+        changeAccountPassword: sl(),
+        dialogService: sl(),
       ));
   sl.registerFactory<MenuBloc>(() => MenuBloc(
         getUsername: sl(),
+        getStructureFolders: sl(),
         navigationService: sl(),
         appConfig: sl(),
         logoutOfAccount: sl(),
         activateLockscreen: sl(),
         dialogService: sl(),
+        navigateToItem: sl(),
       ));
 }
 

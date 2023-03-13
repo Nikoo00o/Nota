@@ -142,6 +142,7 @@ class TransferNotes extends UseCase<void, NoParams> {
   bool _containsAServerChange(List<NoteUpdate> updates) =>
       updates.where((NoteUpdate update) => update.noteTransferStatus == NoteTransferStatus.CLIENT_NEEDS_UPDATE).isNotEmpty;
 
+  /// This returns the old client side names of the notes (if a file was renamed on server side)!
   Future<List<String>> _getServerChangeFileNames(List<NoteUpdate> updates, ClientAccount account) async {
     final List<String> serverNames = List<String>.empty(growable: true);
     final List<NoteUpdate> serverChanges =

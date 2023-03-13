@@ -11,7 +11,6 @@ class SettingsCustomOption extends SettingsOption {
     super.descriptionKey,
     super.descriptionKeyParams,
     super.hasBigDescription = false,
-    super.iconSize = 30,
     super.icon,
     super.disabled = false,
     required VoidCallback onTap,

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
+import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_folders.dart';
@@ -26,7 +27,8 @@ class AddNewStructureUpdateBatch extends UseCase<void, NoParams> {
     // the use cases would import each other in a chain! Because those 2 use cases are very small and will call nothing
     // else at this point, this is ok!
     final StructureItem currentItem = await sl<GetCurrentStructureItem>().call(const NoParams());
-    final List<StructureFolder> topLevelFolders = await sl<GetStructureFolders>().call(const NoParams());
+    final Map<TranslationString, StructureFolder> topLevelFolders =
+        await sl<GetStructureFolders>().call(const GetStructureFoldersParams(includeMoveFolder: true));
     await noteStructureRepository.addNewStructureUpdate(
       currentItem,
       topLevelFolders,
