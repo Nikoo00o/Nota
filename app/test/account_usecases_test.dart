@@ -57,7 +57,7 @@ void _testCreateAccount() {
     final ClientAccount storedAccount = await sl<AccountRepository>().getAccountAndThrowIfNull();
     expect(cachedAccount.username, "test1", reason: "username should match");
     expect(cachedAccount, storedAccount, reason: "accounts should match");
-    expect(server.accountRepository.getAccountByUserName("test1"), isNot(null), reason: "server should have account");
+    expect(server.accountRepository.getAccountByUsername("test1"), isNot(null), reason: "server should have account");
 
     final bool checkAccountProps = cachedAccount.passwordHash.isNotEmpty &&
         cachedAccount.encryptedDataKey.isNotEmpty &&
@@ -76,8 +76,8 @@ void _testCreateAccount() {
     final ClientAccount storedAccount = await sl<AccountRepository>().getAccountAndThrowIfNull();
     expect(cachedAccount.username, "test2", reason: "username should match");
     expect(cachedAccount, storedAccount, reason: "accounts should match");
-    expect(server.accountRepository.getAccountByUserName("test1"), isNot(null), reason: "server should have account 1");
-    expect(server.accountRepository.getAccountByUserName("test2"), isNot(null), reason: "and server should have account 2");
+    expect(server.accountRepository.getAccountByUsername("test1"), isNot(null), reason: "server should have account 1");
+    expect(server.accountRepository.getAccountByUsername("test2"), isNot(null), reason: "and server should have account 2");
   });
 }
 

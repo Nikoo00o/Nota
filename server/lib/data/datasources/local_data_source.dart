@@ -38,7 +38,7 @@ abstract class LocalDataSource {
   }
 
   /// Returns a list of all stored account user names!
-  Future<List<String>> getAllAccountUserNames() async {
+  Future<List<String>> getAllAccountUsernames() async {
     return readAllKeys(databaseKey: ACCOUNT_DATABASE);
   }
 

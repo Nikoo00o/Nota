@@ -17,3 +17,5 @@ class MenuItemClicked extends MenuEvent {
 
   const MenuItemClicked({required this.targetPageTranslationKey, this.targetPageTranslationKeyParams});
 }
+
+class MenuUserProfileClicked extends MenuEvent {}

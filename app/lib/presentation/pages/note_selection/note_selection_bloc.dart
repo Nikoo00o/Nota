@@ -43,17 +43,17 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
       Logger.warn("this should not happen, note selection bloc already initialised");
       return;
     }
-    currentItem = await getCurrentStructureItem.call(const NoParams());
+    add(NoteSelectionStructureChanged(newCurrentItem: await getCurrentStructureItem.call(const NoParams())));
     subscription =
         await getStructureUpdatesStream.call(GetStructureUpdatesStreamParams(callbackFunction: (StructureUpdateBatch batch) {
       add(NoteSelectionStructureChanged(newCurrentItem: batch.currentItem));
     }));
-    emit(_buildState());
   }
 
   Future<void> _handleStructureChanged(NoteSelectionStructureChanged event, Emitter<NoteSelectionState> emit) async {
     currentItem = event.newCurrentItem;
     Logger.verbose("handling structure change with new item ${currentItem.path}");
+    //todo: decide if no folder, then navigate. otherwise emit state!
     emit(_buildState());
   }
 

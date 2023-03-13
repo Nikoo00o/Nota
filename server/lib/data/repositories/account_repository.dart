@@ -40,7 +40,7 @@ class AccountRepository {
   /// Returns cached, or stored account and also updates the cache.
   ///
   /// Also makes sure that the base64 encoded session token is not already contained in the cached accounts.
-  Future<ServerAccount?> getAccountByUserName(String username) async {
+  Future<ServerAccount?> getAccountByUsername(String username) async {
     return _lock.synchronized(() async => accountDataSource.getAccountByUsername(username));
   }
 

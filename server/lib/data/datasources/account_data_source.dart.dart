@@ -53,7 +53,7 @@ class AccountDataSource {
       account = _cachedSessionTokenAccounts[sessionToken]!;
     } else {
       // check stored accounts
-      for (final String username in await localDataSource.getAllAccountUserNames()) {
+      for (final String username in await localDataSource.getAllAccountUsernames()) {
         final ServerAccountModel? tempAccount = await localDataSource.loadAccount(username);
         if (tempAccount?.containsSessionToken(sessionToken) ?? false) {
           account = tempAccount;
@@ -143,7 +143,7 @@ class AccountDataSource {
   Future<void> resetAllSessionTokens() async {
     Logger.debug("Clearing all session tokens");
     _cachedSessionTokenAccounts.clear();
-    final List<String> usernames = await localDataSource.getAllAccountUserNames();
+    final List<String> usernames = await localDataSource.getAllAccountUsernames();
     for (final String username in usernames) {
       final ServerAccountModel? account = await localDataSource.loadAccount(username);
       if (account != null && account.sessionToken != null) {

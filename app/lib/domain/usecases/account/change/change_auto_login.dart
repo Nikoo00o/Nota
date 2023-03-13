@@ -10,6 +10,8 @@ import 'package:shared/domain/usecases/usecase.dart';
 ///
 /// If this is set to false, then the user needs to log in to the app again with his password on restarting the app.
 ///
+/// This will be reset on logout + server side remote login!
+///
 /// This can throw a [ClientException] with [ErrorCodes.CLIENT_NO_ACCOUNT]
 class ChangeAutoLogin extends UseCase<void, ChangeAutoLoginParams> {
   final AccountRepository accountRepository;

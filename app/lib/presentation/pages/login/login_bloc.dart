@@ -64,6 +64,7 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
     _loginStatus = await getRequiredLoginStatus(const NoParams());
     if (_loginStatus == RequiredLoginStatus.NONE) {
       _navigateToNextPage();
+      return;
     }
     _clearTextInputFields();
     _setupAutoScroll();

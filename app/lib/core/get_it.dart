@@ -239,6 +239,7 @@ Future<void> initializeGetIt() async {
         getUsername: sl(),
         getStructureFolders: sl(),
         navigationService: sl(),
+        changeAutoLogin: sl(),
         appConfig: sl(),
         logoutOfAccount: sl(),
         activateLockscreen: sl(),

@@ -17,7 +17,13 @@ abstract class NoBlocPage extends PageBase {
 
   @override
   Widget build(BuildContext context) {
-    return buildPage(context, buildBody(context), buildAppBar(context), buildMenuDrawer(context));
+    return buildPage(
+      context,
+      body: buildBody(context),
+      appBar: buildAppBar(context),
+      menuDrawer: buildMenuDrawer(context),
+      bottomBar: buildBottomBar(context),
+    );
   }
 
   /// This can be overridden inside of a subclass to build an app bar for this page.
@@ -25,6 +31,9 @@ abstract class NoBlocPage extends PageBase {
 
   /// This can be overridden inside of a subclass to build a menu drawer for this page.
   Widget? buildMenuDrawer(BuildContext context) => null;
+
+  /// You can override this to build a bottom bar for this page.
+  Widget? buildBottomBar(BuildContext context) => null;
 
   /// builds the body of the page.
   ///

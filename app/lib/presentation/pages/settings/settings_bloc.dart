@@ -92,7 +92,6 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
   Future<void> _handlePasswordChanged(SettingsPasswordChanged event, Emitter<SettingsState> emit) async {
     if(event.cancel == true){
       navigationService.navigateBack();
-      emit(await _buildState());
       return;
     }
     if (InputValidator.validateInput(
@@ -102,7 +101,6 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
       await changeAccountPassword(ChangePasswordParams(newPassword: passwordController.text));
       navigationService.navigateBack();
       dialogService.showInfoSnackBar(const ShowInfoSnackBar(textKey: "page.change.password.changed"));
-      emit(await _buildState());
     }
   }
 
