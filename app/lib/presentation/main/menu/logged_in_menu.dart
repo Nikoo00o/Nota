@@ -48,13 +48,13 @@ class LoggedInMenu extends BlocPage<MenuBloc, MenuState> {
 
   @override
   Widget buildBodyWithNoState(BuildContext context, Widget bodyWithState) {
-    return Drawer(
-      child: NotificationListener<Notification>(
-        onNotification: (Notification notification) {
-          // this is needed, so that [AppBar.notificationPredicate] does not receive the scrolls from the menu drawer and
-          // get elevated with a shadow.
-          return true;
-        },
+    return NotificationListener<Notification>(
+      onNotification: (Notification notification) {
+        // this is needed, so that [AppBar.notificationPredicate] does not receive the scrolls from the menu drawer and
+        // get elevated with a shadow.
+        return true;
+      },
+      child: Drawer(
         child: Scrollbar(
           scrollbarOrientation: ScrollbarOrientation.left,
           controller: currentBloc(context).scrollController,
