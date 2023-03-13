@@ -31,7 +31,7 @@ class ServerAccountModel extends ServerAccount with SharedAccountModelMixin impl
 
     final List<dynamic> noteInfoDynList = json[SharedAccountModelMixin.JSON_NOTE_INFO_LIST] as List<dynamic>;
     final List<NoteInfo> noteInfoList =
-        noteInfoDynList.map((dynamic map) => NoteInfoModel.fromJson(map as Map<String, dynamic>)).toList();
+        noteInfoDynList.map<NoteInfo>((dynamic map) => NoteInfoModel.fromJson(map as Map<String, dynamic>)).toList();
 
     return ServerAccountModel(
       username: json[SharedAccountModelMixin.JSON_USER_NAME] as String,
