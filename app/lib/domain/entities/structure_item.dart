@@ -1,5 +1,6 @@
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_note.dart';
+import 'package:app/domain/entities/translation_string.dart';
 import 'package:shared/core/config/shared_config.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
@@ -151,5 +152,22 @@ abstract class StructureItem extends Entity {
       Logger.error("The name $nameToValidate is a reserved name");
       throw const ClientException(message: ErrorCodes.NAME_ALREADY_USED);
     }
+  }
+
+  /// This will return the correct translation key for root, recent and move selection.
+  ///
+  /// For others it will return "empty.params.1" with the name of the [structureItem] as the keyParams.
+  static TranslationString getTranslationStringForStructureItem(StructureItem structureItem) {
+    String translationKey = "empty.param.1";
+    if (structureItem.isRecent) {
+      translationKey = StructureItem.recentFolderNames.first;
+    } else if (structureItem.isRoot) {
+      translationKey = StructureItem.rootFolderNames.first;
+    } else if (structureItem.isMove) {
+      translationKey = StructureItem.moveFolderNames.first;
+    } else {
+      return TranslationString(translationKey, translationKeyParams: <String>[structureItem.name]);
+    }
+    return TranslationString(translationKey);
   }
 }

@@ -222,7 +222,10 @@ Future<void> initializeGetIt() async {
         loginToAccount: sl(),
         logoutOfAccount: sl(),
       ));
-  sl.registerFactory<NoteSelectionBloc>(() => NoteSelectionBloc());
+  sl.registerFactory<NoteSelectionBloc>(() => NoteSelectionBloc(
+        getCurrentStructureItem: sl(),
+        getStructureUpdatesStream: sl(),
+      ));
   sl.registerFactory<SettingsBloc>(() => SettingsBloc(
         appSettingsRepository: sl(),
         appBloc: sl(),

@@ -48,14 +48,7 @@ class GetStructureFolders extends UseCase<Map<TranslationString, StructureFolder
       final bool changeParentOfChildren = folder!.isRecent == false; // don't change the parent of children of recent,
       // because recent has the notes as direct children which have their folder structure as direct parents!
       final StructureFolder newFolder = folder.copyWith(changeParentOfChildren: changeParentOfChildren);
-      String translationKey = "empty.param.1";
-      if (newFolder.isRecent) {
-        translationKey = StructureItem.recentFolderNames.first;
-      } else if (newFolder.isRoot) {
-        translationKey = StructureItem.rootFolderNames.first;
-      } else if (newFolder.isMove) {
-        translationKey = StructureItem.moveFolderNames.first;
-      }
+      final String translationKey = StructureItem.getTranslationStringForStructureItem(newFolder).translationKey;
 
       return MapEntry<TranslationString, StructureFolder>(TranslationString(translationKey), newFolder);
     });
