@@ -124,7 +124,7 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
 
   Future<void> _topLevelNoteFolderClicked(MenuItemClicked event, Emitter<MenuState> emit) async {
     await navigateToItem.call(NavigateToItemParamsTopLevelName(folderName: currentPageTranslationKey));
-    navigationService.navigateTo(Routes.notes);
+    navigationService.navigateTo(Routes.note_selection);
   }
 
   Future<void> _userMenuEntryClicked(MenuItemClicked event, Emitter<MenuState> emit) async {}

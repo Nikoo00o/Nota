@@ -107,7 +107,7 @@ class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
 
   @override
   Future<bool> customBackNavigation(BuildContext context) async {
-    sl<NavigationService>().navigateTo(Routes.notes);
+    sl<NavigationService>().navigateTo(Routes.note_selection);
     return false;
   }
 

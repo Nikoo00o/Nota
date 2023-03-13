@@ -209,7 +209,7 @@ class MaterialColorTestPage extends NoBlocPage {
 
   @override
   Future<bool> customBackNavigation(BuildContext context) async {
-    sl<NavigationService>().navigateTo(Routes.notes);
+    sl<NavigationService>().navigateTo(Routes.note_selection);
     return false;
   }
 

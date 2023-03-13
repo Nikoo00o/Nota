@@ -128,7 +128,7 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
   }
 
   void _navigateToNextPage() {
-    navigationService.navigateTo(Routes.notes);
+    navigationService.navigateTo(Routes.note_selection);
   }
 
   void _clearTextInputFields() {

@@ -2,6 +2,7 @@ import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/routes.dart';
 import 'package:app/presentation/main/app/widgets/page_route_animation.dart';
 import 'package:app/presentation/pages/login/login_page.dart';
+import 'package:app/presentation/pages/note_edit/note_edit_page.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_page.dart';
 import 'package:app/presentation/pages/settings/settings_page.dart';
 import 'package:app/presentation/pages/test/dialog_test_page.dart';
@@ -25,8 +26,10 @@ class CustomNavigator extends StatelessWidget {
     switch (routeName) {
       case Routes.login:
         return const LoginPage();
-      case Routes.notes:
+      case Routes.note_selection:
         return const NoteSelectionPage();
+      case Routes.note_edit:
+        return const NoteEditPage();
       case Routes.settings:
         return const SettingsPage();
       case Routes.material_color_test:
