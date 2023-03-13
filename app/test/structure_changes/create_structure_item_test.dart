@@ -82,5 +82,32 @@ void main() {
 
       expect(sl<NoteStructureRepository>().recent!.getChild(0).path, "dir1/fifth", reason: "recent should be updated");
     });
+
+    test("creating a new note inside of recent", () async {
+      sl<NoteStructureRepository>().currentItem = sl<NoteStructureRepository>().recent!;
+
+      await sl<CreateStructureItem>().call(const CreateStructureItemParams(name: "fifth", isFolder: false));
+      final StructureItem current = await sl<GetCurrentStructureItem>().call(const NoParams());
+
+      expect(current.path, "fifth", reason: "path of the new note should match");
+
+      final StructureFolder recent = sl<NoteStructureRepository>().recent!;
+      expect(recent.amountOfChildren, 6, reason: "recent should now have 6 children");
+
+      expect((recent.getChild(0) as StructureNote).id, (current as StructureNote).id,
+          reason: "the new note should be the "
+              "newest");
+      expect(current.topMostParent.isRecent, true, reason: "current should also exist in recent");
+
+      final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
+      expect(current.path,
+          SecurityUtils.decryptString(account.noteInfoList.last.encFileName, base64UrlEncode(account.decryptedDataKey!)),
+          reason: "enc file name should match");
+
+      final List<int> bytes = await sl<LoadNoteContent>().call(LoadNoteContentParams(noteId: current.id));
+      expect(bytes, utf8.encode(""), reason: "bytes should be empty");
+
+      expect(sl<NoteStructureRepository>().root!.getChild(2).path, "fifth", reason: "root should be updated");
+    });
   });
 }

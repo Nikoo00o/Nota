@@ -28,7 +28,7 @@ import 'package:shared/domain/usecases/usecase.dart';
 ///
 /// For read only access, use [GetCurrentStructureItem]!
 ///
-/// This can throw [ErrorCodes.CANT_BE_MODIFIED] if [NoteStructureRepository.currentItem] is recent, itself!
+/// This will return [NoteStructureRepository.root] itself if the current item is recent, or move!
 ///
 /// This can call the use case [FetchNewNoteStructure] if there is no note structure cached.
 ///
@@ -50,9 +50,9 @@ class GetOriginalStructureItem extends UseCase<StructureItem, NoParams> {
     final StructureItem? item = noteStructureRepository.currentItem;
 
     if (item is StructureFolder) {
-      if (item.isRecent || item.topMostParent.isRecent) {
-        Logger.error("The current original item is recent");
-        throw const ClientException(message: ErrorCodes.CANT_BE_MODIFIED);
+      if (item.isRecent || item.isMove) {
+        Logger.verbose("The current original item is recent");
+        return noteStructureRepository.root!;
       }
       final StructureFolder? folder = noteStructureRepository.getFolderByPath(item.path, deepCopy: false);
       Logger.debug("Returned the original folder reference:\n$folder");
