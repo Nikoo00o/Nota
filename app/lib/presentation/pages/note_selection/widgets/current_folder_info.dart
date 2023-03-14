@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 class CurrentFolderInfo extends BlocPageChild<NoteSelectionBloc, NoteSelectionState> {
   final StructureFolder folder;
 
+  static const double iconSize = 30;
+
   const CurrentFolderInfo({
     required this.folder,
   });
@@ -18,22 +20,28 @@ class CurrentFolderInfo extends BlocPageChild<NoteSelectionBloc, NoteSelectionSt
     if (folder.isTopLevel) {
       return const SizedBox();
     }
-
-    // maybe add description of current path where we are. or show full path in title with diescription navigate back
-
     return Card(
-      elevation: 5,
       color: colorTertiaryContainer(context),
       child: ListTile(
         isThreeLine: true,
         dense: true,
-        title: Text("..${StructureItem.delimiter}${_getParentName(context)}"),
+        minLeadingWidth: iconSize,
+        leading: const SizedBox(
+          height: double.infinity,
+          child: Icon(Icons.drive_file_move_rtl),
+        ),
+        title: Text(
+          "..${StructureItem.delimiter}${_getParentName(context)}",
+          style: textTitleMedium(context),
+          maxLines: 1,
+          softWrap: false,
+        ),
         subtitle: Text(
-          'Here is a second line',
+          translate(context, "note.selection.current.folder.info", keyParams: <String>[_getParentPath(context)]),
+          softWrap: true,
           style: theme(context).textTheme.bodySmall?.copyWith(color: colorOnSurfaceVariant(context)),
         ),
         onTap: () => currentBloc(context).add(const NoteSelectionNavigatedBack(completer: null)),
-        leading: const Icon(Icons.drive_file_move_rtl),
       ),
     );
   }
@@ -41,11 +49,22 @@ class CurrentFolderInfo extends BlocPageChild<NoteSelectionBloc, NoteSelectionSt
   String _getParentName(BuildContext context) {
     final StructureFolder parent = folder.getParent()!;
     if (parent.isTopLevel) {
-      return translate(context, parent.path);
+      return translate(context, parent.name);
     } else {
-      return parent.path;
+      return parent.name;
     }
   }
-}
 
-// build empty if this is top level, otherwise path of parent with "../"
+  String _getParentPath(BuildContext context) {
+    final StructureFolder parent = folder.getParent()!;
+    final StringBuffer buffer = StringBuffer();
+    buffer.write(StructureItem.delimiter);
+    if (parent.isTopLevel) {
+      buffer.write(translate(context, parent.path));
+    } else {
+      buffer.write(parent.path);
+    }
+    buffer.write(StructureItem.delimiter);
+    return buffer.toString();
+  }
+}

@@ -15,7 +15,7 @@ import 'package:app/presentation/widgets/custom_icon_button.dart';
 import 'package:flutter/material.dart';
 
 class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> {
-  const NoteSelectionPage() : super();
+  const NoteSelectionPage() : super(pagePadding: const EdgeInsets.fromLTRB(5, 0, 5, 0));
 
   @override
   NoteSelectionBloc createBloc(BuildContext context) {
@@ -31,6 +31,7 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
   Widget buildBodyWithState(BuildContext context, NoteSelectionState state) {
     if (state is NoteSelectionStateInitialised) {
       return ListView.builder(
+        controller: currentBloc(context).scrollController,
         // always one extra item for the info about the current folder
         itemCount: state.currentFolder.amountOfChildren + 1,
         itemBuilder: (BuildContext context, int index) {
@@ -54,7 +55,8 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
     if (state is NoteSelectionStateInitialised) {
       final TranslationString translation = StructureItem.getTranslationStringForStructureItem(state.currentFolder);
       return AppBar(
-        title: Text(translate(context, translation.translationKey, keyParams: translation.translationKeyParams)),
+        title: Text(translate(context, translation.translationKey, keyParams: translation.translationKeyParams),
+            overflow: TextOverflow.fade),
         centerTitle: false,
         actions: <Widget>[
           PopupMenuButton<int>(

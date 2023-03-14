@@ -79,9 +79,13 @@
   "note.selection.create.folder": "Create Folder",
   "note.selection.create.note": "Create Note",
   "note.selection.create.note.description": "The new note name may not contain the character \"/\"",
-  "note.selection.create.folder.description": "The new folder name may not contain the character \"/\" and it must be unique",
+  "note.selection.create.folder.description": "The new folder name may not contain the character \"/\" and it must be unique. Folders also need to contain at least one note to not be deleted.",
   "note.selection.create.invalid.name": "Invalid name",
   "note.selection.create.name.taken": "There already is a folder of the same parent with this name",
   "note.selection.folder.created": "Created the new folder {0}",
-  "available.in.different.view": "Only available in different View"
+  "available.in.different.view": "Only available in different View",
+  "note.selection.folder.description" : "\nFolder last modified: {0}",
+  "note.selection.note.description" : "\nNote last modified: {0}",
+  "note.selection.folder.needs.note" : "\nThis folder needs one note to not get deleted",
+  "note.selection.current.folder.info" : "Parent path: {0}"
 }

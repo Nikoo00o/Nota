@@ -47,6 +47,9 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
   /// The menu needs its own scroll controller
   final ScrollController scrollController = ScrollController();
 
+  /// key for closing the menu here
+  final GlobalKey drawerKey = GlobalKey();
+
   MenuBloc({
     required this.getUsername,
     required this.getStructureFolders,
@@ -124,7 +127,12 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
 
   Future<void> _topLevelNoteFolderClicked(MenuItemClicked event, Emitter<MenuState> emit) async {
     await navigateToItem.call(NavigateToItemParamsTopLevelName(folderName: currentPageTranslationKey));
-    navigationService.navigateTo(Routes.note_selection);
+    if (navigationService.currentRoute != Routes.note_selection) {
+      // for performance, if already on the note selection page, the event stream will handle the updating
+      navigationService.navigateTo(Routes.note_selection);
+    } else {
+      Navigator.of(drawerKey.currentContext!).pop();
+    }
   }
 
   Future<void> _userMenuEntryClicked(MenuItemClicked event, Emitter<MenuState> emit) async {}

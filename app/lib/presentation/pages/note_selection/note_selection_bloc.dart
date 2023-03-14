@@ -14,13 +14,14 @@ import 'package:app/presentation/pages/note_selection/note_selection_state.dart'
 import 'package:app/presentation/widgets/base_pages/page_bloc.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
 class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState> {
   /// This will be updated as deep copies (so it can be used as a reference inside of the state)
-  late StructureItem currentItem;
+  StructureItem? currentItem;
 
   final NavigationService navigationService;
   final DialogService dialogService;
@@ -33,6 +34,8 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
 
   /// for the [getStructureUpdatesStream]
   StreamSubscription<StructureUpdateBatch>? subscription;
+
+  final ScrollController scrollController = ScrollController();
 
   NoteSelectionBloc({
     required this.navigationService,
@@ -72,21 +75,28 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
   }
 
   Future<void> _handleStructureChanged(NoteSelectionStructureChanged event, Emitter<NoteSelectionState> emit) async {
+    final StructureItem? lastItem = currentItem;
     currentItem = event.newCurrentItem;
-    Logger.verbose("handling structure change with new item ${currentItem.path}");
+    Logger.verbose("handling structure change with new item ${currentItem!.path}");
     if (currentItem is StructureFolder) {
       emit(_buildState());
+      if (lastItem != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          // reset scroll on navigating to other items
+          scrollController.jumpTo(scrollController.position.minScrollExtent);
+        });
+      }
     } else {
       navigationService.navigateTo(Routes.note_edit);
     }
   }
 
   Future<void> _handleNavigatedBack(NoteSelectionNavigatedBack event, Emitter<NoteSelectionState> emit) async {
-    if (currentItem.isTopLevel) {
+    if (currentItem?.isTopLevel ?? true) {
       event.completer?.complete(true);
     } else {
       event.completer?.complete(false);
-      Logger.verbose("navigated back to ${currentItem.getParent()?.path}");
+      Logger.verbose("navigated back to ${currentItem?.getParent()?.path}");
       await navigateToItem.call(const NavigateToItemParamsParent());
     }
   }
