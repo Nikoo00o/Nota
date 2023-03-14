@@ -109,7 +109,7 @@ abstract class StructureItem extends Entity {
   /// Returns if this item is a top level folder by returning if the [directParent] is null.
   bool get isTopLevel => directParent == null;
 
-  String get lastModifiedFormatted => DateFormat("yyyy-MM-dd – kk:mm").format(lastModified);
+  String get lastModifiedFormatted => DateFormat("yyyy-MM-dd – HH:mm").format(lastModified);
 
   /// Returns a deep copy of the [item] (recursively copy all sub folders and items).
   ///

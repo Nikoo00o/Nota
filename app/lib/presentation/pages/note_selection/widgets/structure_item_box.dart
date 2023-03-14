@@ -4,6 +4,7 @@ import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_event.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_state.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
+import 'package:app/presentation/widgets/custom_card.dart';
 import 'package:flutter/material.dart';
 
 class StructureItemBox extends BlocPageChild<NoteSelectionBloc, NoteSelectionState> {
@@ -18,30 +19,13 @@ class StructureItemBox extends BlocPageChild<NoteSelectionBloc, NoteSelectionSta
 
   @override
   Widget buildWithNoState(BuildContext context, Widget partWithState) {
-    return Card(
+    return CustomCard(
       color: item is StructureFolder ? colorSecondaryContainer(context) : colorPrimaryContainer(context),
-      child: ListTile(
-        isThreeLine: false,
-        dense: true,
-        minLeadingWidth: iconSize,
-        leading: SizedBox(
-          height: double.infinity,
-          child: Icon(item is StructureFolder ? Icons.folder : Icons.edit_note, size: iconSize),
-        ),
-        title: Text(
-          item.name,
-          style: textTitleMedium(context),
-          maxLines: 1,
-          softWrap: false,
-        ),
-        subtitle: Text(
-          _getDescription(context),
-          maxLines: 1,
-          textAlign: TextAlign.right,
-          style: theme(context).textTheme.bodySmall?.copyWith(color: colorOnSurfaceVariant(context)),
-        ),
-        onTap: () => currentBloc(context).add(NoteSelectionItemClicked(index: index)),
-      ),
+      onTap: () => currentBloc(context).add(NoteSelectionItemClicked(index: index)),
+      icon: item is StructureFolder ? Icons.folder : Icons.edit_note,
+      title: item.name,
+      description: _getDescription(context),
+      alignDescriptionRight: true,
     );
   }
 

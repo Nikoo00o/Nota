@@ -118,7 +118,32 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
   }
 
   Future<void> _handleDropDownMenuSelected(NoteSelectionDropDownMenuSelected event, Emitter<NoteSelectionState> emit) async {
-    //todo: implement
+    switch (event.index) {
+      case 0:
+        await _renameCurrentFolder();
+        break;
+    }
+  }
+
+  Future<void> _renameCurrentFolder() async {
+    final Completer<String?> completer = Completer<String?>();
+    dialogService.showInputDialog(ShowInputDialog(
+      onConfirm: (String input) => completer.complete(input),
+      onCancel: () => completer.complete(null),
+      titleKey: "note.selection.rename.folder",
+      inputLabelKey: "name",
+      descriptionKey: "note.selection.create.folder.description",
+      validatorCallback: (String? input) => _validateNewItem(input, isFolder: true),
+    ));
+    final String? name = await completer.future;
+    final String? oldName = currentItem?.name;
+    if (name != null && oldName != null) {
+      await changeCurrentStructureItem.call(ChangeCurrentFolderParam(newName: name));
+      dialogService.showInfoSnackBar(ShowInfoSnackBar(
+        textKey: "note.selection.rename.folder.done",
+        textKeyParams: <String>[oldName, name],
+      ));
+    }
   }
 
   Future<void> _handleCreatedItem(NoteSelectionCreatedItem event, Emitter<NoteSelectionState> emit) async {

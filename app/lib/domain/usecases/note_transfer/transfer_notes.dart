@@ -130,8 +130,8 @@ class TransferNotes extends UseCase<void, NoParams> {
 
       dialogService.show(ShowConfirmDialog(
         descriptionKey: "note.transfer.server.change.description",
-        descriptionKeyParams: <String>[serverChanges.join("\n")],
-        confirmButtonKey: "note.transfer.server.change.button.confirm",
+        descriptionKeyParams: <String>[serverChanges.join("\n\n")],
+        confirmButtonKey: "accept",
         onConfirm: () => completer.complete(true),
         onCancel: () => completer.complete(false),
       ));

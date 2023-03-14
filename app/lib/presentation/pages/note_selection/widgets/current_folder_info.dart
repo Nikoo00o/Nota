@@ -4,6 +4,7 @@ import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_event.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_state.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
+import 'package:app/presentation/widgets/custom_card.dart';
 import 'package:flutter/material.dart';
 
 class CurrentFolderInfo extends BlocPageChild<NoteSelectionBloc, NoteSelectionState> {
@@ -20,29 +21,14 @@ class CurrentFolderInfo extends BlocPageChild<NoteSelectionBloc, NoteSelectionSt
     if (folder.isTopLevel) {
       return const SizedBox();
     }
-    return Card(
+    return CustomCard(
       color: colorTertiaryContainer(context),
-      child: ListTile(
-        isThreeLine: false,
-        dense: true,
-        minLeadingWidth: iconSize,
-        leading: const SizedBox(
-          height: double.infinity,
-          child: Icon(Icons.drive_file_move_rtl),
-        ),
-        title: Text(
-          "..${StructureItem.delimiter}${_getParentName(context)}",
-          style: textTitleMedium(context),
-          maxLines: 1,
-          softWrap: false,
-        ),
-        subtitle: Text(
-          translate(context, "note.selection.current.folder.info", keyParams: <String>[_getParentPath(context)]),
-          softWrap: true,
-          style: theme(context).textTheme.bodySmall?.copyWith(color: colorOnSurfaceVariant(context)),
-        ),
-        onTap: () => currentBloc(context).add(const NoteSelectionNavigatedBack(completer: null)),
-      ),
+      onTap: () => currentBloc(context).add(const NoteSelectionNavigatedBack(completer: null)),
+      icon: Icons.drive_file_move_rtl,
+      title: "..${StructureItem.delimiter}${_getParentName(context)}",
+      description: translate(context, "note.selection.current.folder.info", keyParams: <String>[_getParentPath(context)]),
+      alignDescriptionRight: false,
+      toolTip: "note.selection.navigate.to.parent",
     );
   }
 

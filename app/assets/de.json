@@ -6,6 +6,7 @@
   "yes": "Ja",
   "no": "Nein",
   "confirm": "Bestätigen",
+  "accept": "Akzeptieren",
   "cancel": "Abbrechen",
   "language": "Sprache",
   "name": "Name",
@@ -89,5 +90,9 @@
   "note.selection.folder.description" : "Ordner zuletzt geändert: {0}",
   "note.selection.note.description" : "Notiz zuletzt geändert: {0}",
   "note.selection.folder.needs.note" : "Dieser Ordner braucht eine Notiz, um nicht gelöscht zu werden",
-  "note.selection.current.folder.info" : "Übergeordneter Pfad: {0}"
+  "note.selection.current.folder.info" : "Übergeordneter Pfad: {0}",
+  "note.selection.navigate.to.parent" : "Zum Übergeordneten Ordner navigieren",
+  "note.selection.rename.folder" : "Ordner Umbenennen",
+  "note.selection.rename.folder.done" : "Der Ordner wurde von {0} zu {1} umbenannt",
+  "note.transfer.server.change.description": "Die folgenden Notizen werden durch Server Änderungen Überschrieben:\n\n{0}"
 }

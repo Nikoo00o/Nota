@@ -1,0 +1,101 @@
+import 'package:app/presentation/widgets/widget_base.dart';
+import 'package:flutter/material.dart';
+
+class CustomCard extends WidgetBase {
+  final Color color;
+  final VoidCallback onTap;
+  final IconData icon;
+
+  /// The title (already translated value!)
+  final String title;
+
+  /// tooltip on long press if not null
+  final String? toolTip;
+
+  /// The description (already translated value!)
+  final String description;
+
+  /// If the description should be put in the bottom right corner
+  final bool alignDescriptionRight;
+
+  static const double iconSize = 30;
+
+  const CustomCard({
+    required this.color,
+    required this.onTap,
+    required this.icon,
+    required this.title,
+    this.toolTip,
+    required this.description,
+    required this.alignDescriptionRight,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: color,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10.0),
+        child: _buildTooltipContainer(context),
+      ),
+    );
+  }
+
+  Widget _buildTooltipContainer(BuildContext context) {
+    if (toolTip != null) {
+      return Tooltip(
+        message: toolTip,
+        triggerMode: TooltipTriggerMode.longPress,
+        child: _buildInner(context),
+      );
+    } else {
+      return _buildInner(context);
+    }
+  }
+
+  Widget _buildInner(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
+        children: <Widget>[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Icon(
+                icon,
+                size: iconSize,
+                color: colorOnSurface(context),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  style: textTitleMedium(context).copyWith(color: colorOnSurfaceVariant(context)),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 50),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: alignDescriptionRight ? MainAxisAlignment.end : MainAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  description,
+                  textAlign: alignDescriptionRight ? TextAlign.right : TextAlign.left,
+                  style: theme(context).textTheme.labelSmall?.copyWith(color: colorOnSurfaceVariant(context)),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
