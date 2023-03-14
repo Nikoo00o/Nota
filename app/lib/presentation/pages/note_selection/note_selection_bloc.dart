@@ -8,9 +8,11 @@ import 'package:app/domain/usecases/note_structure/create_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_updates_stream.dart';
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
+import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_event.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_state.dart';
 import 'package:app/presentation/widgets/base_pages/page_bloc.dart';
+import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared/core/utils/logger/logger.dart';
@@ -21,17 +23,20 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
   late StructureItem currentItem;
 
   final NavigationService navigationService;
+  final DialogService dialogService;
   final NavigateToItem navigateToItem;
   final CreateStructureItem createStructureItem;
 
   final GetCurrentStructureItem getCurrentStructureItem;
 
   final GetStructureUpdatesStream getStructureUpdatesStream;
+
   /// for the [getStructureUpdatesStream]
   StreamSubscription<StructureUpdateBatch>? subscription;
 
   NoteSelectionBloc({
     required this.navigationService,
+    required this.dialogService,
     required this.navigateToItem,
     required this.createStructureItem,
     required this.getCurrentStructureItem,
@@ -90,12 +95,40 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
   }
 
   Future<void> _handleCreatedItem(NoteSelectionCreatedItem event, Emitter<NoteSelectionState> emit) async {
+    final Completer<String?> completer = Completer<String?>();
+    dialogService.showInputDialog(ShowInputDialog(
+      onConfirm: (String input) => completer.complete(input),
+      onCancel: () => completer.complete(null),
+      titleKey: event.isFolder ? "note.selection.create.folder" : "note.selection.create.note",
+      inputLabelKey: "name",
+      descriptionKey: event.isFolder ? "note.selection.create.folder.description" : "note.selection.create.note.description",
+      validatorCallback: (String? input) => _validateNewItem(input, isFolder: event.isFolder),
+    ));
+    final String? name = await completer.future;
+    if (name != null) {
+      await createStructureItem.call(CreateStructureItemParams(name: name, isFolder: event.isFolder));
+      if (event.isFolder) {
+        dialogService.showInfoSnackBar(ShowInfoSnackBar(
+          textKey: "note.selection.folder.created",
+          textKeyParams: <String>[name],
+        ));
+      }
+    }
+  }
 
-
-    // todo: show dialog with input validator, etc
-
-    await createStructureItem.call(CreateStructureItemParams(name: "test", isFolder: event.isFolder));
-
+  String? _validateNewItem(String? name, {required bool isFolder}) {
+    if (name == null || name.isEmpty) {
+      return null;
+    }
+    try {
+      StructureItem.throwErrorForName(name);
+    } catch (_) {
+      return translate("note.selection.create.invalid.name");
+    }
+    if (isFolder && (currentItem as StructureFolder?)?.getDirectFolderByName(name, deepCopy: false) != null) {
+      return translate("note.selection.create.name.taken");
+    }
+    return null;
   }
 
   /// only if [currentItem] is [StructureFolder]

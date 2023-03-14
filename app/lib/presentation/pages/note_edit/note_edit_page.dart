@@ -64,7 +64,7 @@ class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
           children: <Widget>[
             CustomIconButton(
               icon: Icons.search,
-              tooltip: "note.selection.search",
+              tooltipKey: "note.selection.search",
               size: 30,
               onPressed: () {},
             ),

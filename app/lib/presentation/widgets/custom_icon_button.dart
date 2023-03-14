@@ -9,7 +9,8 @@ class CustomIconButton extends WidgetBase {
   final CustomIconButtonType buttonType;
   final EdgeInsets? padding;
   final double? size;
-  final String? tooltip;
+  final String? tooltipKey;
+  final List<String>? tooltipKeyParams;
 
   const CustomIconButton({
     required this.icon,
@@ -18,7 +19,8 @@ class CustomIconButton extends WidgetBase {
     this.buttonType = CustomIconButtonType.DEFAULT,
     this.padding,
     this.size,
-    this.tooltip,
+    this.tooltipKey,
+    this.tooltipKeyParams,
   });
 
   @override
@@ -90,7 +92,7 @@ class CustomIconButton extends WidgetBase {
       iconSize: size,
       padding: padding,
       style: style,
-      tooltip: tooltip,
+      tooltip: tooltipKey == null ? null : translate(context, tooltipKey!, keyParams: tooltipKeyParams),
     );
   }
 }

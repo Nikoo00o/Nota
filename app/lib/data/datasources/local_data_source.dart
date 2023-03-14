@@ -8,6 +8,7 @@ import 'package:shared/core/config/shared_config.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/core/utils/string_utils.dart';
 import 'package:shared/data/models/note_info_model.dart';
+import 'package:shared/domain/entities/note_info.dart';
 
 /// Always call [init] first before using any other method!
 abstract class LocalDataSource {
@@ -64,23 +65,25 @@ abstract class LocalDataSource {
   }
 
   /// Returns the usernames matched to the note info lists of old logged in accounts, so that the notes don't get lost
-  Future<Map<String, List<NoteInfoModel>>> getOldAccounts() async {
+  Future<Map<String, List<NoteInfo>>> getOldAccounts() async {
     final String? jsonString = await read(key: OLD_ACCOUNTS, secure: false);
     if (jsonString == null) {
-      return <String, List<NoteInfoModel>>{};
+      return <String, List<NoteInfo>>{};
     }
     final Map<String, dynamic> json = jsonDecode(jsonString) as Map<String, dynamic>;
     return json.map((String username, dynamic value) {
       final List<dynamic> dynList = value as List<dynamic>;
-      final List<NoteInfoModel> notes =
-          dynList.map((dynamic map) => NoteInfoModel.fromJson(map as Map<String, dynamic>)).toList();
-      return MapEntry<String, List<NoteInfoModel>>(username, notes);
+      final List<NoteInfo> notes =
+          dynList.map<NoteInfo>((dynamic map) => NoteInfoModel.fromJson(map as Map<String, dynamic>)).toList();
+      return MapEntry<String, List<NoteInfo>>(username, notes);
     });
   }
 
   /// Stores the usernames matched to the note info lists of old logged in accounts, so that the notes don't get lost
-  Future<void> saveOldAccounts(Map<String, List<NoteInfoModel>> oldAccounts) async {
-    await write(key: OLD_ACCOUNTS, value: jsonEncode(oldAccounts), secure: false);
+  Future<void> saveOldAccounts(Map<String, List<NoteInfo>> oldAccounts) async {
+    final Map<String, List<NoteInfoModel>> mapped = oldAccounts.map((String key, List<NoteInfo> value) =>
+        MapEntry<String, List<NoteInfoModel>>(key, value.map((NoteInfo note) => NoteInfoModel.fromNoteInfo(note)).toList()));
+    await write(key: OLD_ACCOUNTS, value: jsonEncode(mapped), secure: false);
   }
 
   Future<Locale?> getLocale() async {

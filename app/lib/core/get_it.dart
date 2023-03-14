@@ -229,6 +229,7 @@ Future<void> initializeGetIt() async {
         navigationService: sl(),
         createStructureItem: sl(),
         navigateToItem: sl(),
+        dialogService: sl(),
       ));
   sl.registerFactory<NoteEditBloc>(() => NoteEditBloc(
         getCurrentStructureItem: sl(),

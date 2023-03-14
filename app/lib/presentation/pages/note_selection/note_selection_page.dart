@@ -109,6 +109,7 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
 
   @override
   Widget buildBottomBarWithState(BuildContext context, NoteSelectionState state) {
+    //todo: move selection has different bottom bar
     if (state is NoteSelectionStateInitialised) {
       return BottomAppBar(
         child: Row(
@@ -116,27 +117,28 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
           children: <Widget>[
             CustomIconButton(
               icon: Icons.search,
-              tooltip: "note.selection.search",
+              tooltipKey: "note.selection.search",
               size: 30,
               onPressed: () {},
             ),
             CustomIconButton(
+              enabled: state.currentFolder.isRecent == false,
               icon: Icons.create_new_folder_rounded,
-              tooltip: "note.selection.create.folder",
+              tooltipKey: state.currentFolder.isRecent ? "available.in.different.view" : "note.selection.create.folder",
               size: 30,
               buttonType: CustomIconButtonType.OUTLINED,
               onPressed: () => currentBloc(context).add(const NoteSelectionCreatedItem(isFolder: true)),
             ),
             CustomIconButton(
               icon: Icons.sync,
-              tooltip: "note.selection.sync",
+              tooltipKey: "note.selection.sync",
               size: 30,
               buttonType: CustomIconButtonType.FILLED_TONAL,
               onPressed: () {},
             ),
             CustomIconButton(
               icon: Icons.note_add,
-              tooltip: "note.selection.create.file",
+              tooltipKey: "note.selection.create.note",
               size: 30,
               buttonType: CustomIconButtonType.FILLED,
               onPressed: () => currentBloc(context).add(const NoteSelectionCreatedItem(isFolder: false)),

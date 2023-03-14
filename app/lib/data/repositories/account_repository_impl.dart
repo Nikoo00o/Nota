@@ -103,14 +103,14 @@ class AccountRepositoryImpl extends AccountRepository {
 
   @override
   Future<List<NoteInfo>?> getOldNotesForAccount(String username) async {
-    final Map<String, List<NoteInfoModel>> accounts = await localDataSource.getOldAccounts();
+    final Map<String, List<NoteInfo>> accounts = await localDataSource.getOldAccounts();
     return accounts[username];
   }
 
   @override
   Future<void> saveNotesForOldAccount(String username, List<NoteInfo> notes) async {
-    final Map<String, List<NoteInfoModel>> accounts = await localDataSource.getOldAccounts();
-    accounts[username] = notes.map((NoteInfo note) => NoteInfoModel.fromNoteInfo(note)).toList();
+    final Map<String, List<NoteInfo>> accounts = await localDataSource.getOldAccounts();
+    accounts[username] = notes;
     await localDataSource.saveOldAccounts(accounts);
   }
 }
