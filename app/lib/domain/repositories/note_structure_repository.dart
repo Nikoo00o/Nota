@@ -6,6 +6,7 @@ import 'package:app/domain/entities/structure_update_batch.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/domain/usecases/note_structure/inner/update_note_structure.dart';
+import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:shared/core/constants/error_codes.dart';
 
 abstract class NoteStructureRepository {
@@ -82,4 +83,9 @@ abstract class NoteStructureRepository {
     StructureItem newCurrentItem,
     Map<TranslationString, StructureFolder> newTopLevelFolders,
   );
+
+  /// Clears all temp stored data for the note structure and sets everything to null.
+  /// Afterwards [FetchNewNoteStructure] has to be called again.
+  /// This is only called when logging out of the account (remotely)!
+  Future<void> clearStructureCache();
 }

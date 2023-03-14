@@ -75,6 +75,7 @@
   "note.selection.move": "Move",
   "note.selection.delete": "Delete",
   "note.selection.search": "Search",
+  "note.selection.extended.search": "Extended Search",
   "note.selection.sync": "Server Sync",
   "note.selection.create.folder": "Create Folder",
   "note.selection.create.note": "Create Note",
@@ -84,8 +85,8 @@
   "note.selection.create.name.taken": "There already is a folder of the same parent with this name",
   "note.selection.folder.created": "Created the new folder {0}",
   "available.in.different.view": "Only available in different View",
-  "note.selection.folder.description" : "\nFolder last modified: {0}",
-  "note.selection.note.description" : "\nNote last modified: {0}",
-  "note.selection.folder.needs.note" : "\nThis folder needs one note to not get deleted",
+  "note.selection.folder.description" : "Folder last modified: {0}",
+  "note.selection.note.description" : "Note last modified: {0}",
+  "note.selection.folder.needs.note" : "This folder needs one note to not get deleted",
   "note.selection.current.folder.info" : "Parent path: {0}"
 }

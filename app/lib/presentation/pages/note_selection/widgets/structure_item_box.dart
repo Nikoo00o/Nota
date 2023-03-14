@@ -21,7 +21,7 @@ class StructureItemBox extends BlocPageChild<NoteSelectionBloc, NoteSelectionSta
     return Card(
       color: item is StructureFolder ? colorSecondaryContainer(context) : colorPrimaryContainer(context),
       child: ListTile(
-        isThreeLine: true,
+        isThreeLine: false,
         dense: true,
         minLeadingWidth: iconSize,
         leading: SizedBox(
@@ -36,7 +36,7 @@ class StructureItemBox extends BlocPageChild<NoteSelectionBloc, NoteSelectionSta
         ),
         subtitle: Text(
           _getDescription(context),
-          maxLines: 2,
+          maxLines: 1,
           textAlign: TextAlign.right,
           style: theme(context).textTheme.bodySmall?.copyWith(color: colorOnSurfaceVariant(context)),
         ),

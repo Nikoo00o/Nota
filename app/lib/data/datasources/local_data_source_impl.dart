@@ -85,7 +85,7 @@ class LocalDataSourceImpl extends LocalDataSource with SharedHiveDataSourceMixin
     if (await FileUtils.fileExistsAsync(oldPath) == false) {
       return false;
     }
-    await FileUtils.moveFileAsync(oldPath, newLocalFilePath);
+    await FileUtils.moveFileAsync(oldPath, await _getAbsolutePath(newLocalFilePath));
     return true;
   }
 

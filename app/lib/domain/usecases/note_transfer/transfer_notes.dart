@@ -5,6 +5,7 @@ import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/repositories/note_transfer_repository.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/save_account.dart';
+import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:shared/core/enums/note_transfer_status.dart';
@@ -17,20 +18,24 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// It updates the account and the note files remotely and locally!
 ///
 /// This can throw the exceptions of [NoteTransferRepository.startNoteTransfer], [NoteTransferRepository.uploadOrDownloadNote]
-/// , [NoteTransferRepository.finishNoteTransfer] and [NoteTransferRepository.renameNote] !
+/// , [NoteTransferRepository.finishNoteTransfer], [NoteTransferRepository.renameNote] and [FetchNewNoteStructure]!
 ///
 /// This can also throw the exceptions of [GetLoggedInAccount]!
+///
+/// At the end of this, [FetchNewNoteStructure] is called to create a new note structure and update the ui!
 class TransferNotes extends UseCase<void, NoParams> {
   final GetLoggedInAccount getLoggedInAccount;
   final SaveAccount saveAccount;
   final NoteTransferRepository noteTransferRepository;
   final DialogService dialogService;
+  final FetchNewNoteStructure fetchNewNoteStructure;
 
   const TransferNotes({
     required this.getLoggedInAccount,
     required this.saveAccount,
     required this.noteTransferRepository,
     required this.dialogService,
+    required this.fetchNewNoteStructure,
   });
 
   @override
@@ -56,13 +61,14 @@ class TransferNotes extends UseCase<void, NoParams> {
 
       Logger.verbose("Applying the account note info changes"); // must be after replacing, because of the id changes!
       await _applyAccountChanges(noteUpdates, account);
-    } catch (_) {
-      Logger.warn("Clearing temp notes, because the transfer failed");
+    } catch (e) {
+      Logger.warn("Clearing temp notes, because the transfer failed $e");
       await noteTransferRepository.clearTempNotes();
       rethrow;
     }
 
     await saveAccount.call(const NoParams()); // always save changes to the account to the local storage at the end!
+    await fetchNewNoteStructure.call(const NoParams()); // refresh note structure and ui!
     Logger.info("Transferred notes between client and server: $noteUpdates");
   }
 
@@ -96,7 +102,7 @@ class TransferNotes extends UseCase<void, NoParams> {
       if (replaced == false && newTimeStamp != null && newFileName != null) {
         Logger.verbose("Added new note");
         account.noteInfoList.add(NoteInfo(id: newId ?? oldId, encFileName: newFileName, lastEdited: newTimeStamp));
-      } else {
+      } else if(newId == null) {
         Logger.warn("No note changed and also none added!");
       }
 

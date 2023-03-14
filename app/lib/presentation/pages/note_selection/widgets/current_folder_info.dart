@@ -23,7 +23,7 @@ class CurrentFolderInfo extends BlocPageChild<NoteSelectionBloc, NoteSelectionSt
     return Card(
       color: colorTertiaryContainer(context),
       child: ListTile(
-        isThreeLine: true,
+        isThreeLine: false,
         dense: true,
         minLeadingWidth: iconSize,
         leading: const SizedBox(

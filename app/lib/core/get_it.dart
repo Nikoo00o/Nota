@@ -107,9 +107,15 @@ Future<void> initializeGetIt() async {
         accountRepository: sl(),
         appConfig: sl(),
         getRequiredLoginStatus: sl(),
+        transferNotes: sl(),
       ));
-  sl.registerLazySingleton<LogoutOfAccount>(
-      () => LogoutOfAccount(accountRepository: sl(), navigationService: sl(), appConfig: sl(), dialogService: sl()));
+  sl.registerLazySingleton<LogoutOfAccount>(() => LogoutOfAccount(
+        accountRepository: sl(),
+        navigationService: sl(),
+        appConfig: sl(),
+        dialogService: sl(),
+        noteStructureRepository: sl(),
+      ));
   sl.registerLazySingleton<ChangeAccountPassword>(() => ChangeAccountPassword(
         accountRepository: sl(),
         appConfig: sl(),
@@ -133,6 +139,7 @@ Future<void> initializeGetIt() async {
         noteTransferRepository: sl(),
         saveAccount: sl(),
         dialogService: sl(),
+        fetchNewNoteStructure: sl(),
       ));
 
   sl.registerLazySingleton<FetchNewNoteStructure>(() => FetchNewNoteStructure(
@@ -228,6 +235,11 @@ Future<void> initializeGetIt() async {
         getStructureUpdatesStream: sl(),
         navigationService: sl(),
         createStructureItem: sl(),
+        startMoveStructureItem: sl(),
+        deleteCurrentStructureItem: sl(),
+        changeCurrentStructureItem: sl(),
+        transferNotes: sl(),
+        finishMoveStructureItem: sl(),
         navigateToItem: sl(),
         dialogService: sl(),
       ));

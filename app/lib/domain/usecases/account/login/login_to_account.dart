@@ -5,6 +5,7 @@ import 'package:app/core/utils/security_utils_extension.dart';
 import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/repositories/account_repository.dart';
 import 'package:app/domain/usecases/account/login/get_required_login_status.dart';
+import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
@@ -28,15 +29,22 @@ import 'package:shared/domain/usecases/usecase.dart';
 ///
 /// Without the [LoginToAccountParamsLocal], offline editing would not be possible!
 ///
-/// This also restores old note info lists stored on the device if multiple accounts are used!
+/// This also restores old note info lists stored on the device if multiple accounts are used! Otherwise this will fetch
+/// the notes from the server once. So this calls [TransferNotes] and can throw the exceptions of it!
 ///
 /// Input validation of the params is done by the bloc!
 class LoginToAccount extends UseCase<void, LoginToAccountParams> {
   final AccountRepository accountRepository;
   final AppConfig appConfig;
   final GetRequiredLoginStatus getRequiredLoginStatus;
+  final TransferNotes transferNotes;
 
-  const LoginToAccount({required this.accountRepository, required this.appConfig, required this.getRequiredLoginStatus});
+  const LoginToAccount({
+    required this.accountRepository,
+    required this.appConfig,
+    required this.getRequiredLoginStatus,
+    required this.transferNotes,
+  });
 
   @override
   Future<void> execute(LoginToAccountParams params) async {
@@ -74,7 +82,8 @@ class LoginToAccount extends UseCase<void, LoginToAccountParams> {
     account.needsServerSideLogin = false;
 
     if (params is LoginToAccountParamsRemote) {
-      await _tryToReuseNotes(account); // see if the account had some notes cached that should be used
+      await _tryToReuseNotes(account); // see if the account had some notes cached that should be used, or otherwise get
+      // server notes
     }
 
     // save the account (and if the [ClientAccount.storeDecryptedDataKey] is set, then also the decrypted data key)
@@ -88,6 +97,9 @@ class LoginToAccount extends UseCase<void, LoginToAccountParams> {
     if (oldNotes != null) {
       account.noteInfoList = oldNotes;
       Logger.verbose("Loaded previous notes\n$oldNotes\nfor the new account ${account.username}");
+    } else {
+      Logger.verbose("Loading server notes the first time for ${account.username}");
+      await transferNotes.call(const NoParams());
     }
   }
 

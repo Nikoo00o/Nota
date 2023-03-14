@@ -41,3 +41,7 @@ class NoteSelectionItemClicked extends NoteSelectionEvent {
 
   const NoteSelectionItemClicked({required this.index});
 }
+
+class NoteSelectionServerSynced extends NoteSelectionEvent {
+  const NoteSelectionServerSynced();
+}

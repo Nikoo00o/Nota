@@ -4,10 +4,15 @@ import 'package:app/core/constants/routes.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_update_batch.dart';
+import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/create_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/finish_move_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_updates_stream.dart';
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
+import 'package:app/domain/usecases/note_structure/start_move_structure_item.dart';
+import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_event.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_state.dart';
@@ -27,6 +32,11 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
   final DialogService dialogService;
   final NavigateToItem navigateToItem;
   final CreateStructureItem createStructureItem;
+  final ChangeCurrentStructureItem changeCurrentStructureItem;
+  final DeleteCurrentStructureItem deleteCurrentStructureItem;
+  final StartMoveStructureItem startMoveStructureItem;
+  final FinishMoveStructureItem finishMoveStructureItem;
+  final TransferNotes transferNotes;
 
   final GetCurrentStructureItem getCurrentStructureItem;
 
@@ -42,6 +52,11 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     required this.dialogService,
     required this.navigateToItem,
     required this.createStructureItem,
+    required this.changeCurrentStructureItem,
+    required this.deleteCurrentStructureItem,
+    required this.startMoveStructureItem,
+    required this.finishMoveStructureItem,
+    required this.transferNotes,
     required this.getCurrentStructureItem,
     required this.getStructureUpdatesStream,
   }) : super(initialState: const NoteSelectionState());
@@ -54,6 +69,7 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     on<NoteSelectionDropDownMenuSelected>(_handleDropDownMenuSelected);
     on<NoteSelectionCreatedItem>(_handleCreatedItem);
     on<NoteSelectionItemClicked>(_handleItemClicked);
+    on<NoteSelectionServerSynced>(_handleServerSync);
   }
 
   @override
@@ -144,6 +160,10 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
 
   Future<void> _handleItemClicked(NoteSelectionItemClicked event, Emitter<NoteSelectionState> emit) async {
     await navigateToItem(NavigateToItemParamsChild(childIndex: event.index));
+  }
+
+  Future<void> _handleServerSync(NoteSelectionServerSynced event, Emitter<NoteSelectionState> emit) async {
+    await transferNotes(const NoParams());
   }
 
   /// only if [currentItem] is [StructureFolder]
