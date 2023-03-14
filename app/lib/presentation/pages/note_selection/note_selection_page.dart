@@ -1,6 +1,4 @@
 import 'dart:async';
-
-import 'package:app/core/constants/routes.dart';
 import 'package:app/core/enums/custom_icon_button_type.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/structure_item.dart';
@@ -9,10 +7,11 @@ import 'package:app/presentation/main/menu/logged_in_menu.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_event.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_state.dart';
+import 'package:app/presentation/pages/note_selection/widgets/current_folder_info.dart';
+import 'package:app/presentation/pages/note_selection/widgets/structure_item_box.dart';
 import 'package:app/presentation/pages/settings/widgets/settings_toggle_option.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:app/presentation/widgets/custom_icon_button.dart';
-import 'package:app/services/navigation_service.dart';
 import 'package:flutter/material.dart';
 
 class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> {
@@ -30,27 +29,21 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
 
   @override
   Widget buildBodyWithState(BuildContext context, NoteSelectionState state) {
-    return ListView.builder(
-      itemCount: _getItemCount(state),
-      itemBuilder: (BuildContext context, int index) {
-        //todo: build the boxes (info not for top level folder?)
-        return SettingsToggleOption(
-          titleKey: "empty.params.1",
-          titleKeyParams: <String>[index.toString()],
-          icon: Icons.add,
-          isActive: false,
-          onChange: (bool value) {},
-        );
-      },
-    );
-  }
-
-  int _getItemCount(NoteSelectionState state) {
     if (state is NoteSelectionStateInitialised) {
-      return state.currentFolder.amountOfChildren + 1; // always one extra item for the info about the current folder
-    } else {
-      return 0;
+      return ListView.builder(
+        // always one extra item for the info about the current folder
+        itemCount: state.currentFolder.amountOfChildren + 1,
+        itemBuilder: (BuildContext context, int index) {
+          if (index == 0) {
+            return CurrentFolderInfo(folder: state.currentFolder);
+          } else {
+            final int itemIndex = index - 1; // so of course here the index must be decreased by one
+            return StructureItemBox(item: state.currentFolder.getChild(itemIndex), index: itemIndex);
+          }
+        },
+      );
     }
+    return const SizedBox();
   }
 
   @override
@@ -122,19 +115,19 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
               onPressed: () {},
             ),
             CustomIconButton(
+              icon: Icons.sync,
+              tooltipKey: "note.selection.sync",
+              size: 30,
+              buttonType: CustomIconButtonType.OUTLINED,
+              onPressed: () {},
+            ),
+            CustomIconButton(
               enabled: state.currentFolder.isRecent == false,
               icon: Icons.create_new_folder_rounded,
               tooltipKey: state.currentFolder.isRecent ? "available.in.different.view" : "note.selection.create.folder",
               size: 30,
-              buttonType: CustomIconButtonType.OUTLINED,
-              onPressed: () => currentBloc(context).add(const NoteSelectionCreatedItem(isFolder: true)),
-            ),
-            CustomIconButton(
-              icon: Icons.sync,
-              tooltipKey: "note.selection.sync",
-              size: 30,
               buttonType: CustomIconButtonType.FILLED_TONAL,
-              onPressed: () {},
+              onPressed: () => currentBloc(context).add(const NoteSelectionCreatedItem(isFolder: true)),
             ),
             CustomIconButton(
               icon: Icons.note_add,

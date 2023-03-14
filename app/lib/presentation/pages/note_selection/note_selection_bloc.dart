@@ -50,6 +50,7 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     on<NoteSelectionNavigatedBack>(_handleNavigatedBack);
     on<NoteSelectionDropDownMenuSelected>(_handleDropDownMenuSelected);
     on<NoteSelectionCreatedItem>(_handleCreatedItem);
+    on<NoteSelectionItemClicked>(_handleItemClicked);
   }
 
   @override
@@ -82,9 +83,9 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
 
   Future<void> _handleNavigatedBack(NoteSelectionNavigatedBack event, Emitter<NoteSelectionState> emit) async {
     if (currentItem.isTopLevel) {
-      event.completer.complete(true);
+      event.completer?.complete(true);
     } else {
-      event.completer.complete(false);
+      event.completer?.complete(false);
       Logger.verbose("navigated back to ${currentItem.getParent()?.path}");
       await navigateToItem.call(const NavigateToItemParamsParent());
     }
@@ -129,6 +130,10 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
       return translate("note.selection.create.name.taken");
     }
     return null;
+  }
+
+  Future<void> _handleItemClicked(NoteSelectionItemClicked event, Emitter<NoteSelectionState> emit) async {
+    await navigateToItem(NavigateToItemParamsChild(childIndex: event.index));
   }
 
   /// only if [currentItem] is [StructureFolder]

@@ -19,7 +19,7 @@ class NoteSelectionStructureChanged extends NoteSelectionEvent {
 
 class NoteSelectionNavigatedBack extends NoteSelectionEvent {
   /// The completer returns true if the current item is a top level folder and otherwise false(if it can navigate to parent)
-  final Completer<bool> completer;
+  final Completer<bool>? completer;
 
   const NoteSelectionNavigatedBack({required this.completer});
 }
@@ -34,4 +34,10 @@ class NoteSelectionCreatedItem extends NoteSelectionEvent {
   final bool isFolder;
 
   const NoteSelectionCreatedItem({required this.isFolder});
+}
+
+class NoteSelectionItemClicked extends NoteSelectionEvent {
+  final int index;
+
+  const NoteSelectionItemClicked({required this.index});
 }

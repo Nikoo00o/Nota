@@ -35,6 +35,11 @@ class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
     if (state is NoteEditStateInitialised) {
       final TranslationString translation = StructureItem.getTranslationStringForStructureItem(state.currentNote);
       return AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          tooltip: translate(context, "back"),
+          onPressed: () => currentBloc(context).add(const NoteEditNavigatedBack()),
+        ),
         title: Text(translate(context, translation.translationKey, keyParams: translation.translationKeyParams)),
         centerTitle: false,
         actions: <Widget>[
