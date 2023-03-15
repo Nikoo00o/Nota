@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:app/core/config/app_config.dart';
@@ -92,6 +93,12 @@ class LocalDataSourceImpl extends LocalDataSource with SharedHiveDataSourceMixin
   @override
   Future<List<String>> getFilePaths({required String subFolderPath}) async =>
       FileUtils.getFilesInDirectory(await _getAbsolutePath(subFolderPath));
+
+  @override
+  Future<void> deleteEverything() async {
+    await deleteAllHiveDatabases();
+    await secureStorage.deleteAll();
+  }
 
   Future<String> _getAbsolutePath(String localFilePath) async {
     final Directory documents = await getApplicationDocumentsDirectory();

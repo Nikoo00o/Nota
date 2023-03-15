@@ -25,7 +25,7 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// A login with [LoginToAccountParamsLocal] needs a stored account and can throw a [ClientException] with
 /// [ErrorCodes.ACCOUNT_WRONG_PASSWORD], or [ErrorCodes.CLIENT_NO_ACCOUNT] if the wrong [LoginToAccountParams] are used,
 /// or if no account is stored.
-///
+/// This can also throw [ErrorCodes.INVALID_PARAMS] if the params are empty!
 ///
 /// Without the [LoginToAccountParamsLocal], offline editing would not be possible!
 ///
@@ -55,21 +55,11 @@ class LoginToAccount extends UseCase<void, LoginToAccountParams> {
     // get the correct account depending on the params. throws error if [params] is not one of the sub classes. also
     // creates the account if not already exists. also sets username and password hash to params
     ClientAccount account = await _getMatchingAccount(params, passwordHash);
+    await _checkForErrors(params, account, passwordHash);
 
-    final RequiredLoginStatus loginStatus = await getRequiredLoginStatus(const NoParams());
-    // login, or compare password hash
     if (params is LoginToAccountParamsRemote) {
-      if (loginStatus != RequiredLoginStatus.REMOTE) {
-        throw const ClientException(message: ErrorCodes.CLIENT_NO_ACCOUNT);
-      }
-      account = await accountRepository.login(); //login and update the account (updates session token and enc data key)
-    } else if (params is LoginToAccountParamsLocal) {
-      if (loginStatus != RequiredLoginStatus.LOCAL) {
-        throw const ClientException(message: ErrorCodes.CLIENT_NO_ACCOUNT);
-      }
-      if (account.passwordHash != passwordHash) {
-        throw const ClientException(message: ErrorCodes.ACCOUNT_WRONG_PASSWORD);
-      }
+      account = await accountRepository.login(); //login to server and update the account (updates session token and enc
+      // data key)
     }
 
     // decrypt the data key and cache it
@@ -92,15 +82,47 @@ class LoginToAccount extends UseCase<void, LoginToAccountParams> {
     Logger.info("Logged in ${params.runtimeType} to the account: $account");
   }
 
+  Future<void> _checkForErrors(LoginToAccountParams params, ClientAccount account, String passwordHash) async {
+    final RequiredLoginStatus loginStatus = await getRequiredLoginStatus(const NoParams());
+    if (params.password.isEmpty) {
+      Logger.error("password empty");
+      throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
+    }
+    if (params is LoginToAccountParamsRemote) {
+      if (params.username.isEmpty) {
+        Logger.error("username empty");
+        throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
+      }
+      if (loginStatus != RequiredLoginStatus.REMOTE) {
+        Logger.error("required no remote login");
+        throw const ClientException(message: ErrorCodes.CLIENT_NO_ACCOUNT);
+      }
+    } else if (params is LoginToAccountParamsLocal) {
+      if (loginStatus != RequiredLoginStatus.LOCAL) {
+        Logger.error("required no local login");
+        throw const ClientException(message: ErrorCodes.CLIENT_NO_ACCOUNT);
+      }
+      if (account.passwordHash != passwordHash) {
+        Logger.error("password hash wrong");
+        throw const ClientException(message: ErrorCodes.ACCOUNT_WRONG_PASSWORD); // compare password
+      }
+    }
+  }
+
   Future<void> _tryToReuseNotes(ClientAccount account) async {
     final List<NoteInfo>? oldNotes = await accountRepository.getOldNotesForAccount(account.username);
-    if (oldNotes != null) {
-      account.noteInfoList = oldNotes;
+    if (oldNotes != null && oldNotes.isNotEmpty) {
       Logger.verbose("Loaded previous notes\n$oldNotes\nfor the new account ${account.username}");
-    } else {
-      Logger.verbose("Loading server notes the first time for ${account.username}");
-      await transferNotes.call(const NoParams());
+      try {
+        await SecurityUtilsExtension.decryptStringAsync2(oldNotes.first.encFileName, account.decryptedDataKey!);
+        account.noteInfoList = oldNotes;
+        return; // dont load server notes if previous notes were loaded
+      } catch (_) {
+        Logger.warn("could not load previous notes for the account ${account.username}");
+      }
     }
+    Logger.verbose("Loading server notes the first time for ${account.username}");
+    await transferNotes.call(const NoParams());
   }
 
   /// For remote login, the username and [passwordHash] will be set to the account.

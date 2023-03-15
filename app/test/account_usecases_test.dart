@@ -14,6 +14,7 @@ import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/account/login/get_required_login_status.dart';
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
+import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
@@ -46,6 +47,7 @@ void main() {
     group("Fetch current Session Token: ", _testFetchCurrentSessionToken);
     group("Change Account Password: ", _testChangeAccountPassword);
     group("Get Logged in Account: ", _testGetLoggedInAccount);
+    group("Loading previous notes: ", _testLoadPreviousNotes);
   });
 }
 
@@ -455,5 +457,65 @@ void _testGetLoggedInAccount() {
     expect(() async {
       await sl<GetLoggedInAccount>().call(const NoParams());
     }, throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.ACCOUNT_WRONG_PASSWORD)));
+  });
+}
+
+void _testLoadPreviousNotes() {
+  setUp(() async {
+    await createAndLoginToTestAccount(reuseOldNotes: false);
+    await createSomeTestNotes();
+  });
+
+  test("Getting no notes", () async {
+    await sl<TransferNotes>().call(const NoParams());
+    await sl<TransferNotes>().call(const NoParams());
+    await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
+    final ClientAccount account = await loginToTestAccount(reuseOldNotes: false);
+    expect(account.noteInfoList.isEmpty, true, reason: "notes should be empty");
+  });
+
+  test("Getting previous notes from client which are empty", () async {
+    await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
+    await sl<AccountRepository>().saveNotesForOldAccount("test1", <NoteInfo>[]);
+    final ClientAccount account = await loginToTestAccount(reuseOldNotes: true);
+    expect(account.noteInfoList.isEmpty, true, reason: "notes should be empty");
+  });
+
+  test("Getting previous notes from client", () async {
+    await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
+    final ClientAccount account = await loginToTestAccount(reuseOldNotes: true);
+    expect(account.noteInfoList.isEmpty, false, reason: "notes should not be empty");
+  });
+
+  test("Getting previous notes from server", () async {
+    await sl<TransferNotes>().call(const NoParams());
+    await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
+    await sl<LocalDataSource>().deleteEverything();
+    final ClientAccount account = await loginToTestAccount(reuseOldNotes: true);
+    expect(account.noteInfoList.isEmpty, false, reason: "notes should not be empty");
+  });
+
+  test("should also still work the same after password change", () async {
+    await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
+    final ClientAccount account1 = await loginToTestAccount(reuseOldNotes: true);
+    await sl<ChangeAccountPassword>().call(const ChangePasswordParams(newPassword: "password2"));
+    await sl<AccountRepository>().saveAccount(null);
+    await sl<LoginToAccount>()
+        .call(const LoginToAccountParamsRemote(username: "test1", password: "password2", reuseOldNotes: true));
+    final ClientAccount account2 = await sl<GetLoggedInAccount>().call(const NoParams());
+    expect(account2.noteInfoList.isEmpty, false, reason: "notes should not be empty");
+  });
+
+  test("should also still work the same after password change from server", () async {
+    await sl<TransferNotes>().call(const NoParams());
+    await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
+    await loginToTestAccount(reuseOldNotes: true);
+    await sl<ChangeAccountPassword>().call(const ChangePasswordParams(newPassword: "password2"));
+    await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
+    await sl<LocalDataSource>().deleteEverything();
+    await sl<LoginToAccount>()
+        .call(const LoginToAccountParamsRemote(username: "test1", password: "password2", reuseOldNotes: true));
+    final ClientAccount account2 = await sl<GetLoggedInAccount>().call(const NoParams());
+    expect(account2.noteInfoList.isEmpty, false, reason: "notes should not be empty");
   });
 }

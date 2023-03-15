@@ -188,4 +188,9 @@ abstract class LocalDataSource {
   ///
   /// [subFolderPath] can also be empty and it can also point to a file inside of the target folder!
   Future<List<String>> getFilePaths({required String subFolderPath});
+
+  /// Clears all key - value pairs and also all keys, etc. Afterwards [init] has to be called again!
+  ///
+  /// Also deletes all files!
+  Future<void> deleteEverything();
 }

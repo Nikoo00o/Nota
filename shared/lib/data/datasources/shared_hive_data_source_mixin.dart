@@ -107,4 +107,22 @@ mixin SharedHiveDataSourceMixin {
     final BoxBase<String> hiveBox = _getHiveBox(databaseKey);
     await hiveBox.delete(key);
   }
+
+  /// Deletes the hive box with the [databaseKey].
+  Future<void> deleteHiveDatabase({required String databaseKey}) async {
+    await _loadHiveDatabases();
+    final BoxBase<String> hiveBox = _getHiveBox(databaseKey);
+    await hiveBox.close();
+    await hiveBox.deleteFromDisk();
+  }
+
+  /// Deletes all hive boxes
+  Future<void> deleteAllHiveDatabases() async {
+    await _loadHiveDatabases();
+    for (final BoxBase<String> hiveBox in _hiveDatabases!.values) {
+      await hiveBox.close();
+      await hiveBox.deleteFromDisk();
+    }
+    _hiveDatabases = null;
+  }
 }
