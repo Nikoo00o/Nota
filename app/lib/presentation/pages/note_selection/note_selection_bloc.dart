@@ -188,7 +188,10 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
   }
 
   Future<void> _handleServerSync(NoteSelectionServerSynced event, Emitter<NoteSelectionState> emit) async {
-    await transferNotes(const NoParams());
+    final bool confirmed = await transferNotes(const NoParams());
+    if (confirmed) {
+      dialogService.showInfoSnackBar(const ShowInfoSnackBar(textKey: "note.selection.transferred.notes"));
+    }
   }
 
   /// only if [currentItem] is [StructureFolder]

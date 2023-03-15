@@ -23,7 +23,10 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// This can also throw the exceptions of [GetLoggedInAccount]!
 ///
 /// At the end of this, [FetchNewNoteStructure] is called to create a new note structure and update the ui!
-class TransferNotes extends UseCase<void, NoParams> {
+///
+/// This always returns [true] except when the user cancels the internally opened dialog which displays the remote changes
+/// which would override local files!
+class TransferNotes extends UseCase<bool, NoParams> {
   final GetLoggedInAccount getLoggedInAccount;
   final SaveAccount saveAccount;
   final NoteTransferRepository noteTransferRepository;
@@ -39,7 +42,7 @@ class TransferNotes extends UseCase<void, NoParams> {
   });
 
   @override
-  Future<void> execute(NoParams params) async {
+  Future<bool> execute(NoParams params) async {
     final ClientAccount account = await getLoggedInAccount.call(const NoParams());
     Logger.verbose("Starting note transfer for the account $account");
 
@@ -47,7 +50,7 @@ class TransferNotes extends UseCase<void, NoParams> {
     if (await _didUserCancel(noteUpdates, account)) {
       Logger.info("User cancelled note transfer");
       await noteTransferRepository.finishNoteTransfer(shouldCancel: true);
-      return;
+      return false;
     }
 
     try {
@@ -70,6 +73,7 @@ class TransferNotes extends UseCase<void, NoParams> {
     await saveAccount.call(const NoParams()); // always save changes to the account to the local storage at the end!
     await fetchNewNoteStructure.call(const NoParams()); // refresh note structure and ui!
     Logger.info("Transferred notes between client and server: $noteUpdates");
+    return true;
   }
 
   Future<void> _applyAccountChanges(List<NoteUpdate> updates, ClientAccount account) async {

@@ -94,5 +94,6 @@
   "note.selection.navigate.to.parent" : "Zum Übergeordneten Ordner navigieren",
   "note.selection.rename.folder" : "Ordner Umbenennen",
   "note.selection.rename.folder.done" : "Der Ordner wurde von {0} zu {1} umbenannt",
-  "note.transfer.server.change.description": "Die folgenden Notizen werden durch Server Änderungen Überschrieben:\n\n{0}"
+  "note.transfer.server.change.description": "Die folgenden Notizen werden durch Server Änderungen Überschrieben:\n\n{0}",
+  "note.selection.transferred.notes": "Die lokalen Notizen wurden mit den auf dem Server gespeicherten synchronisiert"
 }

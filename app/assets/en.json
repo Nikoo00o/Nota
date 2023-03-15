@@ -93,5 +93,6 @@
   "note.selection.navigate.to.parent" : "Navigate to parent",
   "note.selection.rename.folder" : "Rename folder",
   "note.selection.rename.folder.done" : "The folder was renamed from {0} to {1}",
-  "note.transfer.server.change.description": "The following notes will be overridden by server changes:\n\n{0}"
+  "note.transfer.server.change.description": "The following notes will be overridden by server changes:\n\n{0}",
+  "note.selection.transferred.notes": "Synchronised the local notes with the ones stored on the server"
 }
