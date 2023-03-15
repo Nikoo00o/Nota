@@ -81,7 +81,7 @@ class LoginToAccount extends UseCase<void, LoginToAccountParams> {
     // update the accounts login status
     account.needsServerSideLogin = false;
 
-    if (params is LoginToAccountParamsRemote) {
+    if (params is LoginToAccountParamsRemote && params.reuseOldNotes) {
       await _tryToReuseNotes(account); // see if the account had some notes cached that should be used, or otherwise get
       // server notes
     }
@@ -136,7 +136,11 @@ class LoginToAccountParamsRemote extends LoginToAccountParams {
   /// The username which is needed for a login request to the server
   final String username;
 
-  const LoginToAccountParamsRemote({required super.password, required this.username});
+  /// If old notes from previous locally stored accounts should be loaded, or if the notes of the server should already be
+  /// fetched once
+  final bool reuseOldNotes;
+
+  const LoginToAccountParamsRemote({required super.password, required this.username, required this.reuseOldNotes});
 }
 
 class LoginToAccountParamsLocal extends LoginToAccountParams {

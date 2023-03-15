@@ -3,6 +3,7 @@
   "empty.param.1": "{0}",
   "error.unknown": "Unbekannter Fehler",
   "error.only.numbers": "Nur Zahlen sind gültig",
+  "error.moved.into.self": "Ein Ordner kann nicht in einen Unterordner von sich selbst verschoben werden",
   "yes": "Ja",
   "no": "Nein",
   "confirm": "Bestätigen",
@@ -95,5 +96,10 @@
   "note.selection.rename.folder" : "Ordner Umbenennen",
   "note.selection.rename.folder.done" : "Der Ordner wurde von {0} zu {1} umbenannt",
   "note.transfer.server.change.description": "Die folgenden Notizen werden durch Server Änderungen Überschrieben:\n\n{0}",
-  "note.selection.transferred.notes": "Die lokalen Notizen wurden mit den auf dem Server gespeicherten synchronisiert"
+  "note.selection.transferred.notes": "Die lokalen Notizen wurden mit den auf dem Server gespeicherten synchronisiert",
+  "note.selection.delete.folder" : "Ordner löschen",
+  "note.selection.delete.folder.description" : "Soll der aktuelle Ordner {0} und alle Notizen aus diesem wirklich gelöscht werden?",
+  "note.selection.delete.folder.done" : "Der Ordner mit dem Pfad {0} wurde gelöscht",
+  "note.selection.moved.folder": "Der Ordner {0} wurde in den übergeordneten Pfad {1} verschoben",
+  "note.selection.moved.folder.top": "Der Ordner {0} wurde in den Stammordner verschoben"
 }

@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:app/core/constants/routes.dart';
+import 'package:app/core/enums/event_action.dart';
+import 'package:app/core/utils/input_validator.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_update_batch.dart';
@@ -23,6 +25,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
+import 'package:tuple/tuple.dart';
 
 class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState> {
   /// This will be updated as deep copies (so it can be used as a reference inside of the state)
@@ -70,6 +73,7 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     on<NoteSelectionCreatedItem>(_handleCreatedItem);
     on<NoteSelectionItemClicked>(_handleItemClicked);
     on<NoteSelectionServerSynced>(_handleServerSync);
+    on<NoteSelectionChangedMove>(_handleChangeMove);
   }
 
   @override
@@ -122,6 +126,12 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
       case 0:
         await _renameCurrentFolder();
         break;
+      case 1:
+        await startMoveStructureItem(const NoParams());
+        break;
+      case 2:
+        await _deleteCurrentFolder();
+        break;
     }
   }
 
@@ -133,7 +143,8 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
       titleKey: "note.selection.rename.folder",
       inputLabelKey: "name",
       descriptionKey: "note.selection.create.folder.description",
-      validatorCallback: (String? input) => _validateNewItem(input, isFolder: true),
+      validatorCallback: (String? input) =>
+          InputValidator.validateNewItem(input, isFolder: true, parent: currentItem?.getParent()),
     ));
     final String? name = await completer.future;
     final String? oldName = currentItem?.name;
@@ -146,6 +157,25 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     }
   }
 
+  Future<void> _deleteCurrentFolder() async {
+    final Completer<bool> completer = Completer<bool>();
+    dialogService.showConfirmDialog(ShowConfirmDialog(
+      onConfirm: () => completer.complete(true),
+      onCancel: () => completer.complete(false),
+      titleKey: "note.selection.delete.folder",
+      descriptionKey: "note.selection.delete.folder.description",
+      descriptionKeyParams: <String>[currentItem!.name],
+    ));
+    if (await completer.future) {
+      final String path = currentItem!.path;
+      await deleteCurrentStructureItem.call(const NoParams());
+      dialogService.showInfoSnackBar(ShowInfoSnackBar(
+        textKey: "note.selection.delete.folder.done",
+        textKeyParams: <String>[path],
+      ));
+    }
+  }
+
   Future<void> _handleCreatedItem(NoteSelectionCreatedItem event, Emitter<NoteSelectionState> emit) async {
     final Completer<String?> completer = Completer<String?>();
     dialogService.showInputDialog(ShowInputDialog(
@@ -154,7 +184,8 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
       titleKey: event.isFolder ? "note.selection.create.folder" : "note.selection.create.note",
       inputLabelKey: "name",
       descriptionKey: event.isFolder ? "note.selection.create.folder.description" : "note.selection.create.note.description",
-      validatorCallback: (String? input) => _validateNewItem(input, isFolder: event.isFolder),
+      validatorCallback: (String? input) =>
+          InputValidator.validateNewItem(input, isFolder: event.isFolder, parent: currentItem as StructureFolder?),
     ));
     final String? name = await completer.future;
     if (name != null) {
@@ -168,21 +199,6 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     }
   }
 
-  String? _validateNewItem(String? name, {required bool isFolder}) {
-    if (name == null || name.isEmpty) {
-      return null;
-    }
-    try {
-      StructureItem.throwErrorForName(name);
-    } catch (_) {
-      return translate("note.selection.create.invalid.name");
-    }
-    if (isFolder && (currentItem as StructureFolder?)?.getDirectFolderByName(name, deepCopy: false) != null) {
-      return translate("note.selection.create.name.taken");
-    }
-    return null;
-  }
-
   Future<void> _handleItemClicked(NoteSelectionItemClicked event, Emitter<NoteSelectionState> emit) async {
     await navigateToItem(NavigateToItemParamsChild(childIndex: event.index));
   }
@@ -191,6 +207,22 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     final bool confirmed = await transferNotes(const NoParams());
     if (confirmed) {
       dialogService.showInfoSnackBar(const ShowInfoSnackBar(textKey: "note.selection.transferred.notes"));
+    }
+  }
+
+  Future<void> _handleChangeMove(NoteSelectionChangedMove event, Emitter<NoteSelectionState> emit) async {
+    final bool confirmed = event.status == EventAction.CONFIRMED;
+    final Tuple2<String, String> result =
+        await finishMoveStructureItem(FinishMoveStructureItemParams(wasConfirmed: confirmed));
+    if (confirmed) {
+      if (result.item2.isEmpty) {
+        // moved to top level folder
+        dialogService.showInfoSnackBar(
+            ShowInfoSnackBar(textKey: "note.selection.moved.folder.top", textKeyParams: <String>[result.item1]));
+      } else {
+        dialogService.showInfoSnackBar(
+            ShowInfoSnackBar(textKey: "note.selection.moved.folder", textKeyParams: <String>[result.item1, result.item2]));
+      }
     }
   }
 

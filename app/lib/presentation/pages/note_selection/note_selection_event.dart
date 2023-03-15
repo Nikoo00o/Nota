@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app/core/enums/event_action.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/presentation/widgets/base_pages/page_event.dart';
 
@@ -44,4 +45,10 @@ class NoteSelectionItemClicked extends NoteSelectionEvent {
 
 class NoteSelectionServerSynced extends NoteSelectionEvent {
   const NoteSelectionServerSynced();
+}
+
+class NoteSelectionChangedMove extends NoteSelectionEvent {
+  final EventAction status;
+
+  const NoteSelectionChangedMove({required this.status});
 }

@@ -8,6 +8,8 @@ import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_event.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_state.dart';
 import 'package:app/presentation/pages/note_selection/widgets/current_folder_info.dart';
+import 'package:app/presentation/pages/note_selection/widgets/selection_bottom_bar.dart';
+import 'package:app/presentation/pages/note_selection/widgets/selection_popup_menu.dart';
 import 'package:app/presentation/pages/note_selection/widgets/structure_item_box.dart';
 import 'package:app/presentation/pages/settings/widgets/settings_toggle_option.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
@@ -58,26 +60,8 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
         title: Text(translate(context, translation.translationKey, keyParams: translation.translationKeyParams),
             overflow: TextOverflow.fade),
         centerTitle: false,
-        actions: <Widget>[
-          PopupMenuButton<int>(
-            onSelected: (int value) => currentBloc(context).add(NoteSelectionDropDownMenuSelected(index: value)),
-            itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[
-              PopupMenuItem<int>(
-                value: 0,
-                enabled: state.currentFolder.isTopLevel == false,
-                child: Text(translate(context, "note.selection.rename")),
-              ),
-              PopupMenuItem<int>(
-                  value: 1,
-                  enabled: state.currentFolder.isTopLevel == false,
-                  child: Text(translate(context, "note.selection.move"))),
-              PopupMenuItem<int>(
-                  value: 2,
-                  enabled: state.currentFolder.isTopLevel == false,
-                  child: Text(translate(context, "note.selection.delete"))),
-              PopupMenuItem<int>(value: 3, child: Text(translate(context, "note.selection.extended.search"))),
-            ],
-          ),
+        actions: const <Widget>[
+          SelectionPopupMenu(),
         ],
       );
     }
@@ -111,50 +95,7 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
       state is NoteSelectionStateInitialised && state.currentFolder.topMostParent.topMostParent.isMove == false;
 
   @override
-  Widget buildBottomBar(BuildContext context) => createBottomBarWithState(context);
-
-  @override
-  Widget buildBottomBarWithState(BuildContext context, NoteSelectionState state) {
-    //todo: move selection has different bottom bar
-    if (state is NoteSelectionStateInitialised) {
-      return BottomAppBar(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            CustomIconButton(
-              icon: Icons.search,
-              tooltipKey: "note.selection.search",
-              size: 30,
-              onPressed: () {},
-            ),
-            CustomIconButton(
-              icon: Icons.sync,
-              tooltipKey: "note.selection.sync",
-              size: 30,
-              buttonType: CustomIconButtonType.OUTLINED,
-              onPressed: () => currentBloc(context).add(const NoteSelectionServerSynced()),
-            ),
-            CustomIconButton(
-              enabled: state.currentFolder.isRecent == false,
-              icon: Icons.create_new_folder_rounded,
-              tooltipKey: state.currentFolder.isRecent ? "available.in.different.view" : "note.selection.create.folder",
-              size: 30,
-              buttonType: CustomIconButtonType.FILLED_TONAL,
-              onPressed: () => currentBloc(context).add(const NoteSelectionCreatedItem(isFolder: true)),
-            ),
-            CustomIconButton(
-              icon: Icons.note_add,
-              tooltipKey: "note.selection.create.note",
-              size: 30,
-              buttonType: CustomIconButtonType.FILLED,
-              onPressed: () => currentBloc(context).add(const NoteSelectionCreatedItem(isFolder: false)),
-            ),
-          ],
-        ),
-      );
-    }
-    return const SizedBox();
-  }
+  Widget buildBottomBar(BuildContext context) => const SelectionBottomBar();
 
   @override
   Future<bool> customBackNavigation(BuildContext context) async {

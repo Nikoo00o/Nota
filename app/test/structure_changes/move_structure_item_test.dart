@@ -35,10 +35,12 @@ void main() {
 
   group("move structure item tests: ", () {
     setUp(() async {
-      await loginToTestAccount();
+      await createAndLoginToTestAccount();
       await createSomeTestNotes();
       await sl<FetchNewNoteStructure>().call(const NoParams());
     });
+
+    // todo: also test all errors, cancelling ,etc. also test moving a folder into itself
 
     test("moving a deeper folder of root to another deeper folder", () async {
       final DateTime before = DateTime.now();

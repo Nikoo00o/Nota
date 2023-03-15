@@ -1,6 +1,9 @@
 import 'package:app/core/get_it.dart';
+import 'package:app/domain/entities/structure_folder.dart';
+import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/services/dialog_service.dart';
+import 'package:app/services/translation_service.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
 class InputValidator {
@@ -34,5 +37,23 @@ class InputValidator {
       return false;
     }
     return true;
+  }
+
+  /// new name for structure note, or folder. [parent] only needs to be set if [isFolder] is true.
+  ///
+  /// Returns the translated error string
+  static String? validateNewItem(String? name, {required bool isFolder, StructureFolder? parent}) {
+    if (name == null || name.isEmpty) {
+      return null;
+    }
+    try {
+      StructureItem.throwErrorForName(name);
+    } catch (_) {
+      return sl<TranslationService>().translate("note.selection.create.invalid.name");
+    }
+    if (isFolder && parent?.getDirectFolderByName(name, deepCopy: false) != null) {
+      return sl<TranslationService>().translate("note.selection.create.name.taken");
+    }
+    return null;
   }
 }

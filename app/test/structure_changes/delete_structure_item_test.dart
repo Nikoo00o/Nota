@@ -34,7 +34,7 @@ void main() {
 
   group("delete structure item tests: ", () {
     setUp(() async {
-      await loginToTestAccount();
+      await createAndLoginToTestAccount();
       await createSomeTestNotes();
       await sl<FetchNewNoteStructure>().call(const NoParams());
     });

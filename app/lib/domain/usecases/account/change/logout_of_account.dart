@@ -39,7 +39,7 @@ class LogoutOfAccount extends UseCase<void, LogoutOfAccountParams> {
   Future<void> execute(LogoutOfAccountParams params) async {
     final ClientAccount account = await accountRepository.getAccountAndThrowIfNull();
 
-    // cache note info list for the account
+    // cache note info list for the account and also clear the note info list of the account
     if (account.noteInfoList.isNotEmpty) {
       Logger.verbose("Storing the notes\n${account.noteInfoList}\nfor later use for the account ${account.username}");
       await accountRepository.saveNotesForOldAccount(account.username, account.noteInfoList);
@@ -57,7 +57,7 @@ class LogoutOfAccount extends UseCase<void, LogoutOfAccountParams> {
     // clear the cached and stored account
     await accountRepository.saveAccount(null);
 
-    // clera the note structure cache
+    // clear the note structure cache
     await noteStructureRepository.clearStructureCache();
 
     Logger.info("Logged out of the account ${account.username}");

@@ -11,6 +11,7 @@ import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
+import 'package:tuple/tuple.dart';
 
 /// This finishes the move of the [NoteStructureRepository.moveItemSrc] to the new parent target folder
 /// [NoteStructureRepository.currentItem]. Afterwards it will navigate back to the item for that the move was started with.
@@ -27,7 +28,10 @@ import 'package:shared/domain/usecases/usecase.dart';
 ///
 /// This calls the use cases [GetOriginalStructureItem], [GetCurrentStructureItem], [StoreNoteEncrypted] and
 /// [UpdateNoteStructure] and can throw the exceptions of them!
-class FinishMoveStructureItem extends UseCase<void, FinishMoveStructureItemParams> {
+///
+/// This returns a tuple of first the name of the source item and the new path of the parent folder for after the move!
+/// If the path is empty, then that means, that it was moved to a top level folder!
+class FinishMoveStructureItem extends UseCase<Tuple2<String, String>, FinishMoveStructureItemParams> {
   final GetCurrentStructureItem getCurrentStructureItem;
   final NoteStructureRepository noteStructureRepository;
   final GetOriginalStructureItem getOriginalStructureItem;
@@ -43,25 +47,24 @@ class FinishMoveStructureItem extends UseCase<void, FinishMoveStructureItemParam
   });
 
   @override
-  Future<void> execute(FinishMoveStructureItemParams params) async {
+  Future<Tuple2<String, String>> execute(FinishMoveStructureItemParams params) async {
     final StructureItem? sourceItem = noteStructureRepository.moveItemSrc;
     final StructureItem targetFolder = await getCurrentStructureItem.call(const NoParams());
     StructureItem? result;
 
-    // important: this is needed to apply the move! (gets the reference to the root tree)
+    // important: this is needed to apply the move! (gets the reference to the root tree for the [targetFolder]).
+    // so the top most parent is root instead of move!
     final StructureItem originalTarget = await getOriginalStructureItem.call(const NoParams());
-
-    noteStructureRepository.moveItemSrc = null; // always reset and cancel the move first before throwing errors
-    noteStructureRepository.currentItem = noteStructureRepository.root; // default way is to navigate to root on errors
 
     if (params.wasConfirmed == true &&
         hasNoChangesOrHasErrors(parent: targetFolder, child: sourceItem, originalTarget: originalTarget) == false) {
       Logger.verbose("confirmed the move");
 
+      final StructureItem? oldCurrent = noteStructureRepository.currentItem;
       // important: get the original source item reference from the root tree
       noteStructureRepository.currentItem = sourceItem;
       final StructureItem originalSource = await getOriginalStructureItem.call(const NoParams());
-      noteStructureRepository.currentItem = noteStructureRepository.root; // reset the current item again in case
+      noteStructureRepository.currentItem = oldCurrent; // reset the current item again in case
       // something goes wrong
 
       result = await _moveChildToNewParent(child: originalSource, parent: originalTarget as StructureFolder); //update
@@ -77,6 +80,7 @@ class FinishMoveStructureItem extends UseCase<void, FinishMoveStructureItemParam
 
     Logger.info("${params.wasConfirmed ? "Finished" : "Cancelled"} the move for the item:\n$sourceItem\n to the new parent "
         "path ${targetFolder.path}");
+    return Tuple2<String, String>(sourceItem?.name ?? "", originalTarget.isTopLevel ? "" : originalTarget.path);
   }
 
   Future<StructureItem> _moveChildToNewParent({required StructureItem child, required StructureFolder parent}) async {
@@ -124,20 +128,27 @@ class FinishMoveStructureItem extends UseCase<void, FinishMoveStructureItemParam
       Logger.error("The source item is null for the move to the target folder:\n$parent");
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
-    if (parent.path == child.directParent!.path) {
+    if (originalTarget.path == child.directParent!.path) {
       return true;
     }
+
+    final bool isSamePathOrTopLevel = originalTarget.path == parent.path || (originalTarget.isTopLevel && parent.isTopLevel);
 
     if (parent is! StructureFolder ||
         parent.topMostParent.isMove == false ||
         originalTarget is! StructureFolder ||
-        originalTarget.path != parent.path) {
+        isSamePathOrTopLevel == false) {
       Logger.error("The current item is not a valid folder of the move selection:\n$parent");
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
 
+    if (parent.path.startsWith(child.path)) {
+      Logger.error("Tried to move a folder inside of a subfolder of itself:\n$parent");
+      throw const ClientException(message: ErrorCodes.MOVED_INTO_SELF);
+    }
+
     if (child is StructureFolder) {
-      final StructureFolder? folderWithName = parent.getDirectFolderByName(child.name, deepCopy: false);
+      final StructureFolder? folderWithName = originalTarget.getDirectFolderByName(child.name, deepCopy: false);
       if (folderWithName != null) {
         Logger.error("There already is a folder with the name of the source inside of the target:\n$folderWithName");
         throw const ClientException(message: ErrorCodes.NAME_ALREADY_USED);

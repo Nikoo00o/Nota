@@ -46,7 +46,12 @@ class CurrentFolderInfo extends BlocPageChild<NoteSelectionBloc, NoteSelectionSt
     final StringBuffer buffer = StringBuffer();
     buffer.write(StructureItem.delimiter);
     if (parent.isTopLevel) {
-      buffer.write(translate(context, parent.path));
+      if (parent.isMove) {
+        buffer.write(translate(context, StructureItem.rootFolderNames.first)); // special case for move to visualize that
+        // its the root folder
+      } else {
+        buffer.write(translate(context, parent.path));
+      }
     } else {
       buffer.write(parent.path);
     }

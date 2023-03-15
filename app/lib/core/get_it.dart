@@ -190,6 +190,7 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<StartMoveStructureItem>(() => StartMoveStructureItem(
         noteStructureRepository: sl(),
         getCurrentStructureItem: sl(),
+        addNewStructureUpdateBatch: sl(),
       ));
   sl.registerLazySingleton<FinishMoveStructureItem>(() => FinishMoveStructureItem(
         noteStructureRepository: sl(),

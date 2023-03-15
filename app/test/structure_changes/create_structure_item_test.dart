@@ -48,7 +48,7 @@ void main() {
 
   group("create structure item tests: ", () {
     setUp(() async {
-      await loginToTestAccount();
+      await createAndLoginToTestAccount();
       await createSomeTestNotes();
       await sl<FetchNewNoteStructure>().call(const NoParams());
     });

@@ -77,7 +77,8 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
 
   Future<void> _handleRemoteLogin(LoginEventRemoteLogin event, Emitter<LoginState> emit) async {
     if (InputValidator.validateInput(username: usernameController.text, password: passwordController.text)) {
-      await loginToAccount(LoginToAccountParamsRemote(username: usernameController.text, password: passwordController.text));
+      await loginToAccount(LoginToAccountParamsRemote(
+          username: usernameController.text, password: passwordController.text, reuseOldNotes: true));
       _navigateToNextPage();
     }
   }
