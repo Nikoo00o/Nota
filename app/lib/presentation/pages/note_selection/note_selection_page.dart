@@ -57,8 +57,11 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
     if (state is NoteSelectionStateInitialised) {
       final TranslationString translation = StructureItem.getTranslationStringForStructureItem(state.currentFolder);
       return AppBar(
-        title: Text(translate(context, translation.translationKey, keyParams: translation.translationKeyParams),
-            overflow: TextOverflow.fade),
+        title: Text(
+          translate(context, translation.translationKey, keyParams: translation.translationKeyParams),
+          overflow: TextOverflow.fade,
+          style: textTitleLarge(context).copyWith(fontWeight: FontWeight.bold),
+        ),
         centerTitle: false,
         actions: const <Widget>[
           SelectionPopupMenu(),

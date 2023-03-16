@@ -79,7 +79,10 @@ class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
         tooltip: translate(context, "back"),
         onPressed: () => currentBloc(context).add(const NoteEditNavigatedBack()),
       ),
-      title: Text(translate(context, translation.translationKey, keyParams: translation.translationKeyParams)),
+      title: Text(
+        translate(context, translation.translationKey, keyParams: translation.translationKeyParams),
+        style: textTitleLarge(context).copyWith(fontWeight: FontWeight.bold),
+      ),
       centerTitle: false,
       actions: const <Widget>[
         EditPopupMenu(),

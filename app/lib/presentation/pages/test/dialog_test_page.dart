@@ -118,7 +118,10 @@ class DialogTestPage extends NoBlocPage {
   @override
   PreferredSizeWidget? buildAppBar(BuildContext context) {
     return AppBar(
-      title: const Text("Dialog Test"),
+      title: Text(
+        "Dialog Test",
+        style: textTitleLarge(context).copyWith(fontWeight: FontWeight.bold),
+      ),
       centerTitle: false,
     );
   }

@@ -96,7 +96,10 @@ class ChangePasswordPage extends ReuseBlocPage<SettingsBloc, SettingsState> {
   @override
   PreferredSizeWidget? buildAppBar(BuildContext context) {
     return AppBar(
-      title: Text(translate(context, "page.settings.password")),
+      title: Text(
+        translate(context, "page.settings.password"),
+        style: textTitleLarge(context).copyWith(fontWeight: FontWeight.bold),
+      ),
       centerTitle: false,
     );
   }
