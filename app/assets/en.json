@@ -12,6 +12,8 @@
   "language": "Language",
   "name": "Name",
   "back": "Back",
+  "save": "Save",
+  "saved": "Saved",
   "dialog.loading.title": "Loading",
   "dialog.loading.description": "Please wait...",
   "dialog.info.title": "Information",
@@ -100,5 +102,7 @@
   "note.selection.delete.folder.description": "Should the current folder {0} and all notes within really be deleted?",
   "note.selection.delete.folder.done": "Deleted the folder at the path {0}",
   "note.selection.moved.folder": "Moved the folder {0} to the new parent path {1}",
-  "note.selection.moved.folder.top": "Moved the folder {0} to the top level folder"
+  "note.selection.moved.folder.top": "Moved the folder {0} to the top level folder",
+  "note.edit.input.text" : "Write some text",
+  "note.edit.path" : "Note Path: {0}"
 }

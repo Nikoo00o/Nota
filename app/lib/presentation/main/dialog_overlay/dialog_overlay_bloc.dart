@@ -88,6 +88,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
 
   Future<void> _handleShowInfoSnackBar(ShowInfoSnackBar event, Emitter<DialogOverlayState> emit) async {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      duration: event.duration,
       content: Text(translate(event.textKey, keyParams: event.textKeyParams), style: event.textStyle),
       action: SnackBarAction(
         label: translate("dialog.button.confirm"),

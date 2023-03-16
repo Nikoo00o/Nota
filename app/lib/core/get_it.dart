@@ -249,6 +249,9 @@ Future<void> initializeGetIt() async {
         getStructureUpdatesStream: sl(),
         navigationService: sl(),
         navigateToItem: sl(),
+        changeCurrentStructureItem: sl(),
+        loadNoteContent: sl(),
+        dialogService: sl(),
       ));
   sl.registerFactory<SettingsBloc>(() => SettingsBloc(
         appSettingsRepository: sl(),

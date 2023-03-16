@@ -12,6 +12,8 @@
   "language": "Sprache",
   "name": "Name",
   "back": "Zurück",
+  "save": "Speichern",
+  "saved": "Gespeichert",
   "dialog.loading.title": "Laden",
   "dialog.loading.description": "Bitte warten...",
   "dialog.info.title": "Information",
@@ -101,5 +103,7 @@
   "note.selection.delete.folder.description" : "Soll der aktuelle Ordner {0} und alle Notizen aus diesem wirklich gelöscht werden?",
   "note.selection.delete.folder.done" : "Der Ordner mit dem Pfad {0} wurde gelöscht",
   "note.selection.moved.folder": "Der Ordner {0} wurde in den übergeordneten Pfad {1} verschoben",
-  "note.selection.moved.folder.top": "Der Ordner {0} wurde in den Stammordner verschoben"
+  "note.selection.moved.folder.top": "Der Ordner {0} wurde in den Stammordner verschoben",
+  "note.edit.input.text" : "Schreiben Sie etwas hier hin",
+  "note.edit.path" : "Notiz Pfad: {0}"
 }

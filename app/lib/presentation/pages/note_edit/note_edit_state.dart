@@ -9,10 +9,13 @@ class NoteEditState extends PageState {
 
 class NoteEditStateInitialised extends NoteEditState {
   final StructureNote currentNote;
+  final bool isInputFocused;
 
   NoteEditStateInitialised({
     required this.currentNote,
+    required this.isInputFocused,
   }) : super(<String, Object?>{
           "currentNote": currentNote,
+          "isInputFocused": isInputFocused,
         });
 }

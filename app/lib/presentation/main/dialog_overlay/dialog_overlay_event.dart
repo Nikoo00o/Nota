@@ -61,11 +61,14 @@ class ShowInfoSnackBar extends DialogOverlayEvent {
   final String textKey;
   final List<String>? textKeyParams;
   final TextStyle? textStyle;
+  /// Default is 4 seconds
+  final Duration duration;
 
   const ShowInfoSnackBar({
     required this.textKey,
     this.textKeyParams,
     this.textStyle,
+    this.duration = const Duration(seconds: 4),
   });
 }
 
