@@ -15,6 +15,7 @@
   "back": "Zurück",
   "save": "Speichern",
   "saved": "Gespeichert",
+  "attention": "Achtung",
   "dialog.loading.title": "Laden",
   "dialog.loading.description": "Bitte warten...",
   "dialog.info.title": "Information",
@@ -110,5 +111,6 @@
   "note.edit.path": "Notiz Pfad: {0}",
   "note.edit.search.up": "Vorheriges",
   "note.edit.search.down": "Nächstes",
-  "note.edit.search.counter": "{0}/{1}"
+  "note.edit.search.counter": "{0}/{1}",
+  "note.edit.drop.changes" : "Sollen die ungespeicherten Änderungen wirklich verworfen werden?"
 }

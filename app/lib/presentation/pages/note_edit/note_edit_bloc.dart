@@ -135,13 +135,30 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
   }
 
   Future<void> _handleNavigatedBack(NoteEditNavigatedBack event, Emitter<NoteEditState> emit) async {
-    Logger.verbose("navigated back to ${currentItem.getParent()?.path}");
-    await navigateToItem.call(const NavigateToItemParamsParent());
-    //navigating will be done automatically inside of _handleStructureChanged
+    if (isEditing == false ||
+        ListUtils.equals(noteHash, await SecurityUtilsExtension.hashBytesAsync(utf8.encode(inputController.text))) ||
+        await _userConfirmedDrop()) {
+      Logger.verbose("navigated back to ${currentItem.getParent()?.path}");
+      await navigateToItem.call(const NavigateToItemParamsParent());
+      //navigating will be done automatically inside of _handleStructureChanged
+    }
+  }
+
+  Future<bool> _userConfirmedDrop() async {
+    final Completer<bool> completer = Completer<bool>();
+    dialogService.showConfirmDialog(ShowConfirmDialog(
+      onConfirm: () => completer.complete(true),
+      onCancel: () => completer.complete(false),
+      titleKey: "attention",
+      descriptionKey: "note.edit.drop.changes",
+      confirmButtonKey: "yes",
+      cancelButtonKey: "no",
+    ));
+    return completer.future;
   }
 
   Future<void> _handleDropDownMenuSelected(NoteEditDropDownMenuSelected event, Emitter<NoteEditState> emit) async {
-    //todo: implement
+
   }
 
   Future<void> _handleInputSaved(NoteEditInputSaved event, Emitter<NoteEditState> emit) async {

@@ -15,6 +15,7 @@
   "back": "Back",
   "save": "Save",
   "saved": "Saved",
+  "attention": "Attention",
   "dialog.loading.title": "Loading",
   "dialog.loading.description": "Please wait...",
   "dialog.info.title": "Information",
@@ -109,5 +110,6 @@
   "note.edit.path": "Note Path: {0}",
   "note.edit.search.up": "Previous",
   "note.edit.search.down": "Next",
-  "note.edit.search.counter": "{0}/{1}"
+  "note.edit.search.counter": "{0}/{1}",
+  "note.edit.drop.changes" : "Do you really want to drop the unsaved changes?"
 }
