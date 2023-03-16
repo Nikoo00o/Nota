@@ -6,6 +6,7 @@
   "error.moved.into.self": "Ein Ordner kann nicht in einen Unterordner von sich selbst verschoben werden",
   "yes": "Ja",
   "no": "Nein",
+  "ok": "Ok",
   "confirm": "Bestätigen",
   "accept": "Akzeptieren",
   "cancel": "Abbrechen",
@@ -104,6 +105,7 @@
   "note.selection.delete.folder.done" : "Der Ordner mit dem Pfad {0} wurde gelöscht",
   "note.selection.moved.folder": "Der Ordner {0} wurde in den übergeordneten Pfad {1} verschoben",
   "note.selection.moved.folder.top": "Der Ordner {0} wurde in den Stammordner verschoben",
+  "note.selection.search.name": "Namen suchen",
   "note.edit.input.text" : "Schreiben Sie etwas hier hin",
   "note.edit.path" : "Notiz Pfad: {0}"
 }

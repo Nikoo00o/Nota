@@ -19,14 +19,24 @@ class StructureItemBox extends BlocPageChild<NoteSelectionBloc, NoteSelectionSta
 
   @override
   Widget buildWithNoState(BuildContext context, Widget partWithState) {
-    return CustomCard(
-      color: item is StructureFolder ? colorSecondaryContainer(context) : colorPrimaryContainer(context),
-      onTap: () => currentBloc(context).add(NoteSelectionItemClicked(index: index)),
-      icon: item is StructureFolder ? Icons.folder : Icons.edit_note,
-      title: item.name,
-      description: _getDescription(context),
-      alignDescriptionRight: true,
-    );
+    return createBlocSelector<String?>(selector: (NoteSelectionState state) {
+      if (state is NoteSelectionStateInitialised) {
+        return state.searchInput;
+      }
+      return null;
+    }, builder: (BuildContext context, String? searchString) {
+      if (searchString == null || item.containsName(searchString)) {
+        return CustomCard(
+          color: item is StructureFolder ? colorSecondaryContainer(context) : colorPrimaryContainer(context),
+          onTap: () => currentBloc(context).add(NoteSelectionItemClicked(index: index)),
+          icon: item is StructureFolder ? Icons.folder : Icons.edit_note,
+          title: item.name,
+          description: _getDescription(context),
+          alignDescriptionRight: true,
+        );
+      }
+      return const SizedBox();
+    });
   }
 
   String _getDescription(BuildContext context) {

@@ -55,13 +55,14 @@ class SelectionBottomBar extends BlocPageChild<NoteSelectionBloc, NoteSelectionS
             icon: Icons.search,
             tooltipKey: "note.selection.search",
             size: 30,
-            onPressed: () {},
+            buttonType: CustomIconButtonType.OUTLINED,
+            onPressed: () => currentBloc(context).add(const NoteSelectionFocusSearch(focus: true)),
           ),
           CustomIconButton(
             icon: Icons.sync,
             tooltipKey: "note.selection.sync",
             size: 30,
-            buttonType: CustomIconButtonType.OUTLINED,
+            buttonType: CustomIconButtonType.FILLED_TERTIARY,
             onPressed: () => currentBloc(context).add(const NoteSelectionServerSynced()),
           ),
           CustomIconButton(
@@ -69,7 +70,7 @@ class SelectionBottomBar extends BlocPageChild<NoteSelectionBloc, NoteSelectionS
             icon: Icons.create_new_folder_rounded,
             tooltipKey: state.currentFolder.isRecent ? "available.in.different.view" : "note.selection.create.folder",
             size: 30,
-            buttonType: CustomIconButtonType.FILLED_TONAL,
+            buttonType: CustomIconButtonType.FILLED_SECONDARY,
             onPressed: () => currentBloc(context).add(const NoteSelectionCreatedItem(isFolder: true)),
           ),
           CustomIconButton(

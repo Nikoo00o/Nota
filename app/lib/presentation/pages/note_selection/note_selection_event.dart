@@ -8,6 +8,10 @@ abstract class NoteSelectionEvent extends PageEvent {
   const NoteSelectionEvent();
 }
 
+class NoteSelectionUpdatedState extends NoteSelectionEvent {
+  const NoteSelectionUpdatedState();
+}
+
 class NoteSelectionInitialised extends NoteSelectionEvent {
   const NoteSelectionInitialised();
 }
@@ -21,8 +25,11 @@ class NoteSelectionStructureChanged extends NoteSelectionEvent {
 class NoteSelectionNavigatedBack extends NoteSelectionEvent {
   /// The completer returns true if the current item is a top level folder and otherwise false(if it can navigate to parent)
   final Completer<bool>? completer;
+  /// If this is true, then the search will not be cancelled and instead the other navigate logic will be executed.
+  /// This is the case for the folder info item
+  final bool ignoreSearch;
 
-  const NoteSelectionNavigatedBack({required this.completer});
+  const NoteSelectionNavigatedBack({required this.completer, required this.ignoreSearch});
 }
 
 class NoteSelectionDropDownMenuSelected extends NoteSelectionEvent {
@@ -51,4 +58,10 @@ class NoteSelectionChangedMove extends NoteSelectionEvent {
   final EventAction status;
 
   const NoteSelectionChangedMove({required this.status});
+}
+
+class NoteSelectionFocusSearch extends NoteSelectionEvent {
+  final bool focus;
+
+  const NoteSelectionFocusSearch({required this.focus});
 }

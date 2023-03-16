@@ -17,7 +17,7 @@ class EditBottomBar extends BlocPageChild<NoteEditBloc, NoteEditState> {
     if (state is NoteEditStateInitialised) {
       return BottomAppBar(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
@@ -30,6 +30,7 @@ class EditBottomBar extends BlocPageChild<NoteEditBloc, NoteEditState> {
               maxLines: 2,
               style: textLabelMedium(context).copyWith(color: colorTertiary(context)),
             ),
+            const SizedBox(height: 5),
             Text(
               translate(
                 context,

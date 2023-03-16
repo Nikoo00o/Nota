@@ -28,6 +28,10 @@ class CustomIconButton extends WidgetBase {
     switch (buttonType) {
       case CustomIconButtonType.FILLED:
         return _buildFilled(context);
+      case CustomIconButtonType.FILLED_SECONDARY:
+        return _buildFilledSecondary(context);
+      case CustomIconButtonType.FILLED_TERTIARY:
+        return _buildFilledTertiary(context);
       case CustomIconButtonType.FILLED_TONAL:
         return _buildFilledTonal(context);
       case CustomIconButtonType.OUTLINED:
@@ -47,6 +51,34 @@ class CustomIconButton extends WidgetBase {
         hoverColor: colorOnPrimary(context).withOpacity(0.08),
         focusColor: colorOnPrimary(context).withOpacity(0.12),
         highlightColor: colorOnPrimary(context).withOpacity(0.12),
+      ),
+    );
+  }
+
+  Widget _buildFilledSecondary(BuildContext context) {
+    return _buildDefault(
+      context,
+      IconButton.styleFrom(
+        foregroundColor: colorOnSecondary(context),
+        backgroundColor: colorSecondary(context),
+        disabledBackgroundColor: colorOnSurface(context).withOpacity(0.12),
+        hoverColor: colorOnSecondary(context).withOpacity(0.08),
+        focusColor: colorOnSecondary(context).withOpacity(0.12),
+        highlightColor: colorOnSecondary(context).withOpacity(0.12),
+      ),
+    );
+  }
+
+  Widget _buildFilledTertiary(BuildContext context) {
+    return _buildDefault(
+      context,
+      IconButton.styleFrom(
+        foregroundColor: colorOnTertiary(context),
+        backgroundColor: colorTertiary(context),
+        disabledBackgroundColor: colorOnSurface(context).withOpacity(0.12),
+        hoverColor: colorOnTertiary(context).withOpacity(0.08),
+        focusColor: colorOnTertiary(context).withOpacity(0.12),
+        highlightColor: colorOnTertiary(context).withOpacity(0.12),
       ),
     );
   }

@@ -49,6 +49,10 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
   StreamSubscription<StructureUpdateBatch>? subscription;
 
   final ScrollController scrollController = ScrollController();
+  final FocusNode searchFocus = FocusNode();
+  final TextEditingController searchController = TextEditingController();
+
+  bool isSearching = false;
 
   NoteSelectionBloc({
     required this.navigationService,
@@ -66,6 +70,7 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
 
   @override
   void registerEventHandlers() {
+    on<NoteSelectionUpdatedState>(_handleUpdatedState);
     on<NoteSelectionInitialised>(_handleInitialised);
     on<NoteSelectionStructureChanged>(_handleStructureChanged);
     on<NoteSelectionNavigatedBack>(_handleNavigatedBack);
@@ -74,6 +79,7 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     on<NoteSelectionItemClicked>(_handleItemClicked);
     on<NoteSelectionServerSynced>(_handleServerSync);
     on<NoteSelectionChangedMove>(_handleChangeMove);
+    on<NoteSelectionFocusSearch>(_handleFocusSearch);
   }
 
   @override
@@ -81,6 +87,9 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     await subscription?.cancel();
     return super.close();
   }
+
+  Future<void> _handleUpdatedState(NoteSelectionUpdatedState event, Emitter<NoteSelectionState> emit) async =>
+      emit(_buildState());
 
   Future<void> _handleInitialised(NoteSelectionInitialised event, Emitter<NoteSelectionState> emit) async {
     if (subscription != null) {
@@ -112,7 +121,11 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
   }
 
   Future<void> _handleNavigatedBack(NoteSelectionNavigatedBack event, Emitter<NoteSelectionState> emit) async {
-    if (currentItem?.isTopLevel ?? true) {
+    if (isSearching && event.ignoreSearch == false) {
+      event.completer?.complete(false);
+      _disableSearch(emit);
+      emit(_buildState());
+    } else if (currentItem?.isTopLevel ?? true) {
       event.completer?.complete(true);
     } else {
       event.completer?.complete(false);
@@ -177,6 +190,7 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
   }
 
   Future<void> _handleCreatedItem(NoteSelectionCreatedItem event, Emitter<NoteSelectionState> emit) async {
+    _disableSearch(emit);
     final Completer<String?> completer = Completer<String?>();
     dialogService.showInputDialog(ShowInputDialog(
       onConfirm: (String input) => completer.complete(input),
@@ -204,6 +218,7 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
   }
 
   Future<void> _handleServerSync(NoteSelectionServerSynced event, Emitter<NoteSelectionState> emit) async {
+    _disableSearch(emit);
     final bool confirmed = await transferNotes(const NoParams());
     if (confirmed) {
       dialogService.showInfoSnackBar(const ShowInfoSnackBar(textKey: "note.selection.transferred.notes"));
@@ -226,10 +241,40 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     }
   }
 
+  Future<void> _handleFocusSearch(NoteSelectionFocusSearch event, Emitter<NoteSelectionState> emit) async {
+    if (event.focus) {
+      if (isSearching == false) {
+        isSearching = true;
+        emit(_buildState());
+      }
+      if (searchFocus.hasFocus == false) {
+        searchFocus.requestFocus();
+      }
+    } else {
+      if (searchFocus.hasFocus) {
+        searchFocus.unfocus();
+      }
+    }
+  }
+
+  void _disableSearch(Emitter<NoteSelectionState> emit) {
+    if (searchFocus.hasFocus) {
+      searchFocus.unfocus();
+    }
+    isSearching = false;
+    searchController.clear();
+    emit(_buildState());
+  }
+
   /// only if [currentItem] is [StructureFolder]
   NoteSelectionState _buildState() {
     if (currentItem is StructureFolder) {
-      return NoteSelectionStateInitialised(currentFolder: currentItem as StructureFolder);
+      final bool containsSearch = isSearching && searchController.text.isNotEmpty;
+      return NoteSelectionStateInitialised(
+        currentFolder: currentItem as StructureFolder,
+        isSearching: isSearching,
+        searchInput: containsSearch ? searchController.text : null,
+      );
     } else {
       return const NoteSelectionState();
     }

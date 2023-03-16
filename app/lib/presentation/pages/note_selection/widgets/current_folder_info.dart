@@ -23,7 +23,7 @@ class CurrentFolderInfo extends BlocPageChild<NoteSelectionBloc, NoteSelectionSt
     }
     return CustomCard(
       color: colorTertiaryContainer(context),
-      onTap: () => currentBloc(context).add(const NoteSelectionNavigatedBack(completer: null)),
+      onTap: () => currentBloc(context).add(const NoteSelectionNavigatedBack(completer: null, ignoreSearch: true)),
       icon: Icons.drive_file_move_rtl,
       title: "..${StructureItem.delimiter}${_getParentName(context)}",
       description: translate(context, "note.selection.current.folder.info", keyParams: <String>[_getParentPath(context)]),

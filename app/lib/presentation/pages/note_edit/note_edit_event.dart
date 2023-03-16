@@ -6,8 +6,8 @@ abstract class NoteEditEvent extends PageEvent {
   const NoteEditEvent();
 }
 
-class NoteEditUpdateState extends NoteEditEvent {
-  const NoteEditUpdateState();
+class NoteEditUpdatedState extends NoteEditEvent {
+  const NoteEditUpdatedState();
 }
 
 class NoteEditInitialised extends NoteEditEvent {

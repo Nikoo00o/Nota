@@ -63,8 +63,8 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
 
   @override
   void registerEventHandlers() {
+    on<NoteEditUpdatedState>(_handleUpdatedState);
     on<NoteEditInitialised>(_handleInitialised);
-    on<NoteEditUpdateState>(_handleUpdateState);
     on<NoteEditStructureChanged>(_handleStructureChanged);
     on<NoteEditNavigatedBack>(_handleNavigatedBack);
     on<NoteEditDropDownMenuSelected>(_handleDropDownMenuSelected);
@@ -77,7 +77,7 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
     return super.close();
   }
 
-  Future<void> _handleUpdateState(NoteEditUpdateState event, Emitter<NoteEditState> emit) async => emit(_buildState());
+  Future<void> _handleUpdatedState(NoteEditUpdatedState event, Emitter<NoteEditState> emit) async => emit(_buildState());
 
   Future<void> _handleInitialised(NoteEditInitialised event, Emitter<NoteEditState> emit) async {
     if (subscription != null) {
@@ -87,7 +87,7 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
 
     inputFocusNode.addListener(() {
       if (inputFocusNode.hasFocus) {
-        add(const NoteEditUpdateState()); // important: rebuild state only if input received the focus
+        add(const NoteEditUpdatedState()); // important: rebuild state only if input received the focus
       }
     });
 

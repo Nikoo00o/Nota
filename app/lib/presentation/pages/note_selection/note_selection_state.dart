@@ -8,10 +8,16 @@ class NoteSelectionState extends PageState {
 
 class NoteSelectionStateInitialised extends NoteSelectionState {
   final StructureFolder currentFolder;
+  final bool isSearching;
+  final String? searchInput;
 
   NoteSelectionStateInitialised({
     required this.currentFolder,
+    required this.isSearching,
+    required this.searchInput,
   }) : super(<String, Object?>{
           "currentFolder": currentFolder,
+          "isSearching": isSearching,
+          "searchInput": searchInput,
         });
 }

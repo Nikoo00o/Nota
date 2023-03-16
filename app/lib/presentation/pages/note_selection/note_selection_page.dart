@@ -55,20 +55,69 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
   @override
   PreferredSizeWidget buildAppBarWithState(BuildContext context, NoteSelectionState state) {
     if (state is NoteSelectionStateInitialised) {
-      final TranslationString translation = StructureItem.getTranslationStringForStructureItem(state.currentFolder);
-      return AppBar(
-        title: Text(
-          translate(context, translation.translationKey, keyParams: translation.translationKeyParams),
-          overflow: TextOverflow.fade,
-          style: textTitleLarge(context).copyWith(fontWeight: FontWeight.bold),
-        ),
-        centerTitle: false,
-        actions: const <Widget>[
-          SelectionPopupMenu(),
-        ],
-      );
+      if (state.isSearching) {
+        return _buildSearchAppBar(context, state);
+      } else {
+        return _buildTitleAppBar(context, state);
+      }
     }
     return AppBar(); // use empty app bar at first, so that the element gets cached for performance
+  }
+
+  PreferredSizeWidget _buildTitleAppBar(BuildContext context, NoteSelectionStateInitialised state) {
+    final TranslationString translation = StructureItem.getTranslationStringForStructureItem(state.currentFolder);
+    return AppBar(
+      title: Text(
+        translate(context, translation.translationKey, keyParams: translation.translationKeyParams),
+        overflow: TextOverflow.fade,
+        style: textTitleLarge(context).copyWith(fontWeight: FontWeight.bold),
+      ),
+      centerTitle: false,
+      actions: const <Widget>[
+        SelectionPopupMenu(),
+      ],
+    );
+  }
+
+  PreferredSizeWidget _buildSearchAppBar(BuildContext context, NoteSelectionStateInitialised state) {
+    return AppBar(
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        tooltip: translate(context, "back"),
+        onPressed: () => currentBloc(context).add(const NoteSelectionNavigatedBack(completer: null, ignoreSearch: false)),
+      ),
+      title: Row(
+        children: <Widget>[
+          Flexible(
+            child: Container(
+              height: 34.0,
+              decoration: BoxDecoration(
+                color: colorPrimary(context).withOpacity(0.15),
+                borderRadius: BorderRadius.circular(32),
+              ),
+              padding: const EdgeInsets.only(right: 10),
+              child: TextField(
+                focusNode: currentBloc(context).searchFocus,
+                controller: currentBloc(context).searchController,
+                onChanged: (String _) => currentBloc(context).add(const NoteSelectionUpdatedState()),
+                decoration: InputDecoration(
+                  hintText: translate(context, "note.selection.search.name"),
+                  prefixIcon: const Icon(Icons.search),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.only(bottom: 12),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 14),
+          TextButton(
+            onPressed: () => currentBloc(context).add(const NoteSelectionFocusSearch(focus: false)),
+            child: Text(translate(context, "ok")),
+          ),
+        ],
+      ),
+      centerTitle: false,
+    );
   }
 
   @override
@@ -103,7 +152,7 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
   @override
   Future<bool> customBackNavigation(BuildContext context) async {
     final Completer<bool> completer = Completer<bool>();
-    currentBloc(context).add(NoteSelectionNavigatedBack(completer: completer));
+    currentBloc(context).add(NoteSelectionNavigatedBack(completer: completer, ignoreSearch: false));
     return completer.future;
   }
 

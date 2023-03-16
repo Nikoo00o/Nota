@@ -111,6 +111,9 @@ abstract class StructureItem extends Entity {
 
   String get lastModifiedFormatted => DateFormat("yyyy-MM-dd – HH:mm").format(lastModified);
 
+  /// Returns if this item, or any sub folder contains the [pattern] inside of its [name]
+  bool containsName(String pattern);
+
   /// Returns a deep copy of the [item] (recursively copy all sub folders and items).
   ///
   ///  If [changeParentOfChildren] is true, then the [directParent] of the children will be changed to this new copy!
