@@ -4,15 +4,18 @@ import 'dart:typed_data';
 
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/enums/event_action.dart';
+import 'package:app/core/utils/input_validator.dart';
 import 'package:app/core/utils/security_utils_extension.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/entities/structure_update_batch.dart';
 import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_updates_stream.dart';
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
+import 'package:app/domain/usecases/note_structure/start_move_structure_item.dart';
 import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
 import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
@@ -33,6 +36,8 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
   late StructureItem currentItem;
 
   final NavigationService navigationService;
+  final StartMoveStructureItem startMoveStructureItem;
+  final DeleteCurrentStructureItem deleteCurrentStructureItem;
   final NavigateToItem navigateToItem;
   final DialogService dialogService;
   final GetCurrentStructureItem getCurrentStructureItem;
@@ -57,6 +62,8 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
 
   NoteEditBloc({
     required this.navigationService,
+    required this.startMoveStructureItem,
+    required this.deleteCurrentStructureItem,
     required this.navigateToItem,
     required this.dialogService,
     required this.getCurrentStructureItem,
@@ -158,7 +165,57 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
   }
 
   Future<void> _handleDropDownMenuSelected(NoteEditDropDownMenuSelected event, Emitter<NoteEditState> emit) async {
+    switch (event.index) {
+      case 0:
+        await _renameCurrentNote();
+        break;
+      case 1:
+        await startMoveStructureItem(const NoParams());
+        break;
+      case 2:
+        await _deleteCurrentNote();
+        break;
+    }
+  }
 
+  Future<void> _renameCurrentNote() async {
+    final Completer<String?> completer = Completer<String?>();
+    dialogService.showInputDialog(ShowInputDialog(
+      onConfirm: (String input) => completer.complete(input),
+      onCancel: () => completer.complete(null),
+      titleKey: "note.edit.rename.note",
+      inputLabelKey: "name",
+      descriptionKey: "note.selection.create.folder.description",
+      validatorCallback: (String? input) =>
+          InputValidator.validateNewItem(input, isFolder: true, parent: currentItem.getParent()),
+    ));
+    final String? name = await completer.future;
+    if (name != null) {
+      await changeCurrentStructureItem.call(ChangeCurrentNoteParam(newName: name));
+      dialogService.showInfoSnackBar(ShowInfoSnackBar(
+        textKey: "note.edit.rename.note.done",
+        textKeyParams: <String>[currentItem.name, name],
+      ));
+    }
+  }
+
+  Future<void> _deleteCurrentNote() async {
+    final Completer<bool> completer = Completer<bool>();
+    dialogService.showConfirmDialog(ShowConfirmDialog(
+      onConfirm: () => completer.complete(true),
+      onCancel: () => completer.complete(false),
+      titleKey: "note.edit.delete.note",
+      descriptionKey: "note.edit.delete.note.description",
+      descriptionKeyParams: <String>[currentItem.name],
+    ));
+    if (await completer.future) {
+      final String path = currentItem.path;
+      await deleteCurrentStructureItem.call(const NoParams());
+      dialogService.showInfoSnackBar(ShowInfoSnackBar(
+        textKey: "note.edit.delete.note.done",
+        textKeyParams: <String>[path],
+      ));
+    }
   }
 
   Future<void> _handleInputSaved(NoteEditInputSaved event, Emitter<NoteEditState> emit) async {

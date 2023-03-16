@@ -111,5 +111,10 @@
   "note.edit.search.up": "Previous",
   "note.edit.search.down": "Next",
   "note.edit.search.counter": "{0}/{1}",
-  "note.edit.drop.changes" : "Do you really want to drop the unsaved changes?"
+  "note.edit.drop.changes": "Do you really want to drop the unsaved changes?",
+  "note.edit.rename.note": "Rename note",
+  "note.edit.rename.note.done": "The note was renamed from {0} to {1}",
+  "note.edit.delete.note": "Delete note",
+  "note.edit.delete.note.description": "Should the current note {0} really be deleted?",
+  "note.edit.delete.note.done": "Deleted the note at the path {0}"
 }

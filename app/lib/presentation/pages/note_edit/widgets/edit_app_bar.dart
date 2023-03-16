@@ -37,7 +37,7 @@ class EditAppBar extends BlocPageChild<NoteEditBloc, NoteEditState> {
         partWithState,
         const SizedBox(width: 16),
         CustomIconButton(
-          icon: Icons.save_alt,
+          icon: Icons.save,
           tooltipKey: "save",
           size: 20,
           buttonType: CustomIconButtonType.FILLED,

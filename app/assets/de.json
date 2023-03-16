@@ -112,5 +112,10 @@
   "note.edit.search.up": "Vorheriges",
   "note.edit.search.down": "Nächstes",
   "note.edit.search.counter": "{0}/{1}",
-  "note.edit.drop.changes" : "Sollen die ungespeicherten Änderungen wirklich verworfen werden?"
+  "note.edit.drop.changes": "Sollen die ungespeicherten Änderungen wirklich verworfen werden?",
+  "note.edit.rename.note": "Notiz umbenennen",
+  "note.edit.rename.note.done": "Die Notiz wurde umbenannt von {0} zu {1}",
+  "note.edit.delete.note": "Notiz löschen",
+  "note.edit.delete.note.description": "Soll die aktuelle Notiz {0} wirklich gelöscht werden?",
+  "note.edit.delete.note.done": "Die Notiz mit dem Pfad {0} wurde gelöscht"
 }

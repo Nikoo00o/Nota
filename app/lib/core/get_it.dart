@@ -252,6 +252,8 @@ Future<void> initializeGetIt() async {
         changeCurrentStructureItem: sl(),
         loadNoteContent: sl(),
         dialogService: sl(),
+        deleteCurrentStructureItem: sl(),
+        startMoveStructureItem: sl(),
       ));
   sl.registerFactory<SettingsBloc>(() => SettingsBloc(
         appSettingsRepository: sl(),
