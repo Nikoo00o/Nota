@@ -112,6 +112,7 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
       emit(_buildState());
     } else {
       navigationService.navigateTo(Routes.note_selection);
+      inputController.clear();// clear text input field on navigating away
     }
   }
 
