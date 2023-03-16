@@ -19,10 +19,10 @@ class NavigationService {
   void navigateTo(String routeName, {Object? arguments}) {
     Logger.verbose("navigating from $_currentRoute to $routeName");
     navigatorKey.currentState?.pushNamedAndRemoveUntil(routeName, (Route<dynamic> route) => false, arguments: arguments);
-    _currentRoute = routeName;
     if (routeName == _currentRoute) {
       Logger.warn("navigating to the same route as before: $routeName");
     }
+    _currentRoute = routeName;
   }
 
   /// pushes a new page (that has no route) on top of the navigator without removing other stored pages.
