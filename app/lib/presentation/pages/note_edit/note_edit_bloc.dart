@@ -43,13 +43,21 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
 
   final LoadNoteContent loadNoteContent;
   final ChangeCurrentStructureItem changeCurrentStructureItem;
+
+  final TextEditingController searchController = TextEditingController();
+  final FocusNode searchFocus = FocusNode();
   final TextEditingController inputController = TextEditingController();
 
   /// the has focus is true if the user is currently editing the note
-  final FocusNode inputFocusNode = FocusNode(); // todo: also add one for search field
+  final FocusNode inputFocus = FocusNode(); // todo: also add one for search field
 
   /// calculated from the loaded note to test if the user changed something
   List<int>? noteHash;
+
+  List<int> searchPositions = <int>[];
+
+  /// note zero base!
+  int currentSearchPosition = 0;
 
   NoteEditBloc({
     required this.navigationService,
@@ -68,7 +76,8 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
     on<NoteEditStructureChanged>(_handleStructureChanged);
     on<NoteEditNavigatedBack>(_handleNavigatedBack);
     on<NoteEditDropDownMenuSelected>(_handleDropDownMenuSelected);
-    on<NoteEditInputStatusChanged>(_handleInputStatusChanged);
+    on<NoteEditInputSaved>(_handleInputSaved);
+    on<NoteEditSearchStepped>(_handleSearchStep);
   }
 
   @override
@@ -77,7 +86,17 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
     return super.close();
   }
 
-  Future<void> _handleUpdatedState(NoteEditUpdatedState event, Emitter<NoteEditState> emit) async => emit(_buildState());
+  Future<void> _handleUpdatedState(NoteEditUpdatedState event, Emitter<NoteEditState> emit) async {
+    if (event.didSearchChange) {
+      currentSearchPosition = 0;
+      if (searchController.text.isEmpty) {
+        searchPositions = <int>[];
+      } else {
+        searchPositions = searchController.text.allMatches(inputController.text).map((Match match) => match.start).toList();
+      }
+    }
+    emit(_buildState());
+  }
 
   Future<void> _handleInitialised(NoteEditInitialised event, Emitter<NoteEditState> emit) async {
     if (subscription != null) {
@@ -85,9 +104,15 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
       return;
     }
 
-    inputFocusNode.addListener(() {
-      if (inputFocusNode.hasFocus) {
-        add(const NoteEditUpdatedState()); // important: rebuild state only if input received the focus
+    inputFocus.addListener(() {
+      if (inputFocus.hasFocus) {
+        add(const NoteEditUpdatedState(didSearchChange: false)); // important: rebuild state only if input received the focus
+      }
+    });
+    searchFocus.addListener(() {
+      if (searchFocus.hasFocus) {
+        add(const NoteEditUpdatedState(didSearchChange: false)); // important: rebuild state only if search received the
+        // focus
       }
     });
 
@@ -112,7 +137,7 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
       emit(_buildState());
     } else {
       navigationService.navigateTo(Routes.note_selection);
-      inputController.clear();// clear text input field on navigating away
+      inputController.clear(); // clear text input field on navigating away
     }
   }
 
@@ -126,18 +151,47 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
     //todo: implement
   }
 
-  Future<void> _handleInputStatusChanged(NoteEditInputStatusChanged event, Emitter<NoteEditState> emit) async {
-    if (event.action == EventAction.CONFIRMED) {
-      inputFocusNode.unfocus();
-      final List<int> newData = utf8.encode(inputController.text);
-      final List<int> newHash = await SecurityUtilsExtension.hashBytesAsync(newData);
-      if (ListUtils.equals(newHash, noteHash) == false) {
-        await changeCurrentStructureItem.call(ChangeCurrentNoteParam(newName: currentItem.name, newContent: newData));
-        dialogService.showInfoSnackBar(const ShowInfoSnackBar(textKey: "saved", duration: Duration(seconds: 1)));
+  Future<void> _handleInputSaved(NoteEditInputSaved event, Emitter<NoteEditState> emit) async {
+    _clearFocus();
+    final List<int> newData = utf8.encode(inputController.text);
+    final List<int> newHash = await SecurityUtilsExtension.hashBytesAsync(newData);
+    if (ListUtils.equals(newHash, noteHash) == false) {
+      await changeCurrentStructureItem.call(ChangeCurrentNoteParam(newName: currentItem.name, newContent: newData));
+      noteHash = newHash;
+      dialogService.showInfoSnackBar(const ShowInfoSnackBar(textKey: "saved", duration: Duration(seconds: 1)));
+    }
+    emit(_buildState());
+  }
+
+  Future<void> _handleSearchStep(NoteEditSearchStepped event, Emitter<NoteEditState> emit) async {
+    if (searchPositions.isNotEmpty) {
+      if (event.forward) {
+        if (++currentSearchPosition > searchPositions.length) {
+          currentSearchPosition = 1;
+        }
+      } else {
+        if (--currentSearchPosition <= 0) {
+          currentSearchPosition = searchPositions.length;
+        }
+      }
+      final int offset = searchPositions[currentSearchPosition - 1];
+      inputController.selection = TextSelection.fromPosition(TextPosition(offset: offset));
+
+      if (inputFocus.hasFocus == false) {
+        inputFocus.requestFocus();
       }
     }
-    //todo: implement
     emit(_buildState());
+  }
+
+  void _clearFocus() {
+    if (inputFocus.hasFocus) {
+      inputFocus.unfocus();
+    }
+    if (searchFocus.hasFocus) {
+      searchFocus.unfocus();
+    }
+    searchController.clear(); // also clear search text
   }
 
   /// only if [currentItem] is [StructureNote]
@@ -145,10 +199,14 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
     if (currentItem is StructureNote) {
       return NoteEditStateInitialised(
         currentNote: currentItem as StructureNote,
-        isInputFocused: inputFocusNode.hasFocus,
+        isEditing: isEditing,
+        currentSearchPosition: currentSearchPosition.toString(),
+        searchPositionSize: searchPositions.length.toString(),
       );
     } else {
       return const NoteEditState();
     }
   }
+
+  bool get isEditing => inputFocus.hasFocus || searchFocus.hasFocus;
 }

@@ -5,6 +5,7 @@ import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_bloc.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_event.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_state.dart';
+import 'package:app/presentation/pages/note_edit/widgets/edit_app_bar.dart';
 import 'package:app/presentation/pages/note_edit/widgets/edit_bottom_bar.dart';
 import 'package:app/presentation/pages/note_edit/widgets/edit_popup_menu.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
@@ -46,7 +47,7 @@ class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
                 expands: true,
                 style: textBodyLarge(context),
                 controller: currentBloc(context).inputController,
-                focusNode: currentBloc(context).inputFocusNode,
+                focusNode: currentBloc(context).inputFocus,
               ),
             ),
           ),
@@ -62,59 +63,32 @@ class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
   @override
   PreferredSizeWidget buildAppBarWithState(BuildContext context, NoteEditState state) {
     if (state is NoteEditStateInitialised) {
-      if (state.isInputFocused) {
-        return _buildEditAppBar(context, state);
-      } else {
-        return _buildNoEditAppBar(context, state);
-      }
+      return AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          tooltip: translate(context, "back"),
+          onPressed: () => currentBloc(context).add(const NoteEditNavigatedBack()),
+        ),
+        title: _buildAppBarTitle(context, state),
+        centerTitle: false,
+        actions: const <Widget>[
+          EditPopupMenu(),
+        ],
+      );
     }
     return AppBar(); // use empty app bar at first, so that the element gets cached for performance
   }
 
-  PreferredSizeWidget _buildNoEditAppBar(BuildContext context, NoteEditStateInitialised state) {
-    final TranslationString translation = StructureItem.getTranslationStringForStructureItem(state.currentNote);
-    return AppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        tooltip: translate(context, "back"),
-        onPressed: () => currentBloc(context).add(const NoteEditNavigatedBack()),
-      ),
-      title: Text(
+  Widget _buildAppBarTitle(BuildContext context, NoteEditStateInitialised state) {
+    if (state.isEditing) {
+      return const EditAppBar();
+    } else {
+      final TranslationString translation = StructureItem.getTranslationStringForStructureItem(state.currentNote);
+      return Text(
         translate(context, translation.translationKey, keyParams: translation.translationKeyParams),
         style: textTitleLarge(context).copyWith(fontWeight: FontWeight.bold),
-      ),
-      centerTitle: false,
-      actions: const <Widget>[
-        EditPopupMenu(),
-      ],
-    );
-  }
-
-  PreferredSizeWidget _buildEditAppBar(BuildContext context, NoteEditStateInitialised state) {
-    return AppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        tooltip: translate(context, "back"),
-        onPressed: () => currentBloc(context).add(const NoteEditNavigatedBack()),
-      ),
-      title: Row(
-        children: <Widget>[
-          TextButton(
-            onPressed: () => currentBloc(context).add(const NoteEditInputStatusChanged(action: EventAction.CONFIRMED)),
-            child: Text(
-              translate(context, "save"),
-              style: textTitleLarge(context),
-            ),
-          ),
-        ],
-      ),
-      centerTitle: false,
-      actions: const <Widget>[
-        EditPopupMenu(),
-      ],
-    );
-
-    //todo: add other widgets
+      );
+    }
   }
 
   @override

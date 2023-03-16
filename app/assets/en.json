@@ -105,6 +105,9 @@
   "note.selection.moved.folder": "Moved the folder {0} to the new parent path {1}",
   "note.selection.moved.folder.top": "Moved the folder {0} to the top level folder",
   "note.selection.search.name": "Search name",
-  "note.edit.input.text" : "Write some text",
-  "note.edit.path" : "Note Path: {0}"
+  "note.edit.input.text": "Write some text",
+  "note.edit.path": "Note Path: {0}",
+  "note.edit.search.up": "Previous",
+  "note.edit.search.down": "Next",
+  "note.edit.search.counter": "{0}/{1}"
 }
