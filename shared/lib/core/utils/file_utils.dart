@@ -2,6 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/exceptions/exceptions.dart';
+import 'package:shared/core/utils/logger/logger.dart';
+
 class FileUtils {
   /// Returns the absolute full file path for a local relative file path inside of the working directory (server, or client
   /// root)
@@ -72,8 +76,13 @@ class FileUtils {
   static void copyFile(String oldPath, String newPath) {
     final File oldFile = File(oldPath);
     final File newFile = File(newPath);
-    assert(oldFile.existsSync(), "error, file $oldPath does not exist");
-    newFile.parent.createSync();
+    if (oldFile.existsSync() == false) {
+      Logger.error("File $oldPath does not exist");
+      throw const FileException(message: ErrorCodes.FILE_NOT_FOUND);
+    }
+    if (newFile.parent.existsSync() == false) {
+      newFile.parent.createSync();
+    }
     oldFile.copySync(newFile.path);
   }
 
@@ -83,8 +92,13 @@ class FileUtils {
   static void moveFile(String oldPath, String newPath) {
     final File oldFile = File(oldPath);
     final File newFile = File(newPath);
-    assert(oldFile.existsSync(), "error, file $oldPath does not exist");
-    newFile.parent.createSync();
+    if (oldFile.existsSync() == false) {
+      Logger.error("File $oldPath does not exist");
+      throw const FileException(message: ErrorCodes.FILE_NOT_FOUND);
+    }
+    if (newFile.parent.existsSync() == false) {
+      newFile.parent.createSync();
+    }
     newFile.parent.renameSync(newPath);
   }
 
@@ -94,8 +108,15 @@ class FileUtils {
   static Future<void> moveFileAsync(String oldPath, String newPath) async {
     final File oldFile = File(oldPath);
     final File newFile = File(newPath);
-    assert(await oldFile.exists(), "error, file $oldPath does not exist");
-    await newFile.parent.create();
+    final bool exists = await oldFile.exists();
+    if (exists == false) {
+      Logger.error("File $oldPath does not exist");
+      throw const FileException(message: ErrorCodes.FILE_NOT_FOUND);
+    }
+    final bool newParentExists = await newFile.parent.exists();
+    if (newParentExists == false) {
+      await newFile.parent.create();
+    }
     await oldFile.rename(newFile.path);
   }
 

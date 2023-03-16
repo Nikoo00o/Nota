@@ -43,6 +43,7 @@ import 'package:app/presentation/main/app/app_bloc.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/presentation/main/menu/menu_bloc.dart';
 import 'package:app/presentation/pages/login/login_bloc.dart';
+import 'package:app/presentation/pages/note_edit/note_edit_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
 import 'package:app/presentation/pages/settings/settings_bloc.dart';
 import 'package:app/services/dialog_service.dart';
@@ -106,9 +107,15 @@ Future<void> initializeGetIt() async {
         accountRepository: sl(),
         appConfig: sl(),
         getRequiredLoginStatus: sl(),
+        transferNotes: sl(),
       ));
-  sl.registerLazySingleton<LogoutOfAccount>(
-      () => LogoutOfAccount(accountRepository: sl(), navigationService: sl(), appConfig: sl(), dialogService: sl()));
+  sl.registerLazySingleton<LogoutOfAccount>(() => LogoutOfAccount(
+        accountRepository: sl(),
+        navigationService: sl(),
+        appConfig: sl(),
+        dialogService: sl(),
+        noteStructureRepository: sl(),
+      ));
   sl.registerLazySingleton<ChangeAccountPassword>(() => ChangeAccountPassword(
         accountRepository: sl(),
         appConfig: sl(),
@@ -132,6 +139,7 @@ Future<void> initializeGetIt() async {
         noteTransferRepository: sl(),
         saveAccount: sl(),
         dialogService: sl(),
+        fetchNewNoteStructure: sl(),
       ));
 
   sl.registerLazySingleton<FetchNewNoteStructure>(() => FetchNewNoteStructure(
@@ -182,6 +190,7 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<StartMoveStructureItem>(() => StartMoveStructureItem(
         noteStructureRepository: sl(),
         getCurrentStructureItem: sl(),
+        addNewStructureUpdateBatch: sl(),
       ));
   sl.registerLazySingleton<FinishMoveStructureItem>(() => FinishMoveStructureItem(
         noteStructureRepository: sl(),
@@ -225,6 +234,24 @@ Future<void> initializeGetIt() async {
   sl.registerFactory<NoteSelectionBloc>(() => NoteSelectionBloc(
         getCurrentStructureItem: sl(),
         getStructureUpdatesStream: sl(),
+        navigationService: sl(),
+        createStructureItem: sl(),
+        startMoveStructureItem: sl(),
+        deleteCurrentStructureItem: sl(),
+        changeCurrentStructureItem: sl(),
+        transferNotes: sl(),
+        finishMoveStructureItem: sl(),
+        navigateToItem: sl(),
+        dialogService: sl(),
+      ));
+  sl.registerFactory<NoteEditBloc>(() => NoteEditBloc(
+        getCurrentStructureItem: sl(),
+        getStructureUpdatesStream: sl(),
+        navigationService: sl(),
+        navigateToItem: sl(),
+        changeCurrentStructureItem: sl(),
+        loadNoteContent: sl(),
+        dialogService: sl(),
       ));
   sl.registerFactory<SettingsBloc>(() => SettingsBloc(
         appSettingsRepository: sl(),
@@ -239,6 +266,7 @@ Future<void> initializeGetIt() async {
         getUsername: sl(),
         getStructureFolders: sl(),
         navigationService: sl(),
+        changeAutoLogin: sl(),
         appConfig: sl(),
         logoutOfAccount: sl(),
         activateLockscreen: sl(),

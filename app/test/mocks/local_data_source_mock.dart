@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:app/data/datasources/local_data_source.dart';
@@ -79,5 +80,12 @@ class LocalDataSourceMock extends LocalDataSource {
       }
     }
     return filePaths;
+  }
+
+  @override
+  Future<void> deleteEverything() async {
+    hiveStorage.clear();
+    secureStorage.clear();
+    files.clear();
   }
 }

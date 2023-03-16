@@ -33,6 +33,7 @@ class LoginPage extends BlocPage<LoginBloc, LoginState> {
               LoginInputs(),
               SizedBox(height: 25),
               LoginButtons(),
+              SizedBox(height: BlocPage.defaultAppBarHeight),
             ],
           ),
         ),

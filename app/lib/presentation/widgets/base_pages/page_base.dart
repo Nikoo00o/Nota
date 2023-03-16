@@ -68,7 +68,13 @@ abstract class PageBase extends WidgetBase with PageHelperMixin {
   /// background color.
   ///
   /// Everything will be build inside of a [Scaffold] which can also uses the [appBar] and [menuDrawer].
-  Widget buildPage(BuildContext context, Widget body, PreferredSizeWidget? appBar, Widget? menuDrawer) {
+  Widget buildPage(
+    BuildContext context, {
+    required Widget body,
+    required PreferredSizeWidget? appBar,
+    required Widget? menuDrawer,
+    required Widget? bottomBar,
+  }) {
     return Scaffold(
       body: Builder(
         builder: (BuildContext context) {
@@ -92,6 +98,7 @@ abstract class PageBase extends WidgetBase with PageHelperMixin {
       ),
       appBar: appBar,
       drawer: menuDrawer,
+      bottomNavigationBar: bottomBar,
     );
   }
 
@@ -114,5 +121,4 @@ abstract class PageBase extends WidgetBase with PageHelperMixin {
   ///
   /// This will not be called if the menu is open, because then the menu will be closed first!
   Future<bool> customBackNavigation(BuildContext context) async => true;
-
 }

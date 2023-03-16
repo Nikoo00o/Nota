@@ -64,6 +64,7 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
     _loginStatus = await getRequiredLoginStatus(const NoParams());
     if (_loginStatus == RequiredLoginStatus.NONE) {
       _navigateToNextPage();
+      return;
     }
     _clearTextInputFields();
     _setupAutoScroll();
@@ -76,7 +77,8 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
 
   Future<void> _handleRemoteLogin(LoginEventRemoteLogin event, Emitter<LoginState> emit) async {
     if (InputValidator.validateInput(username: usernameController.text, password: passwordController.text)) {
-      await loginToAccount(LoginToAccountParamsRemote(username: usernameController.text, password: passwordController.text));
+      await loginToAccount(LoginToAccountParamsRemote(
+          username: usernameController.text, password: passwordController.text, reuseOldNotes: true));
       _navigateToNextPage();
     }
   }
@@ -127,7 +129,7 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
   }
 
   void _navigateToNextPage() {
-    navigationService.navigateTo(Routes.notes);
+    navigationService.navigateTo(Routes.note_selection);
   }
 
   void _clearTextInputFields() {

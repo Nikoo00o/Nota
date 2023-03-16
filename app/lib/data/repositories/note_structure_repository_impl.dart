@@ -56,4 +56,12 @@ class NoteStructureRepositoryImpl extends NoteStructureRepository {
       StructureItem newCurrentItem, Map<TranslationString, StructureFolder> newTopLevelFolders) async {
     _streamController.sink.add(StructureUpdateBatch(currentItem: newCurrentItem, topLevelFolders: newTopLevelFolders));
   }
+
+  @override
+  Future<void> clearStructureCache() async {
+    root = null;
+    recent = null;
+    moveSelection = null;
+    currentItem = null;
+  }
 }

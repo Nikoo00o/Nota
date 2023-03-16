@@ -6,6 +6,8 @@ import 'package:app/core/utils/security_utils_extension.dart';
 import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/repositories/account_repository.dart';
 import 'package:shared/core/config/shared_config.dart';
+import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/core/utils/string_utils.dart';
 import 'package:shared/domain/usecases/usecase.dart';
@@ -14,6 +16,8 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// It can throw the exceptions of [AccountRepository.createNewAccount]
 ///
 /// Input validation of the params is done by the bloc!
+///
+/// This can also throw a [ClientException] with [ErrorCodes.INVALID_PARAMS] if the params are empty!
 class CreateAccount extends UseCase<void, CreateAccountParams> {
   final AccountRepository accountRepository;
   final AppConfig appConfig;
@@ -22,6 +26,10 @@ class CreateAccount extends UseCase<void, CreateAccountParams> {
 
   @override
   Future<void> execute(CreateAccountParams params) async {
+    if (params.username.isEmpty || params.password.isEmpty) {
+      Logger.error("username, or password empty");
+      throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
+    }
     // create the base64 encoded user keys
     final String passwordHash = await SecurityUtilsExtension.hashStringSecure(params.password, appConfig.passwordHashSalt);
     final String userKey = await SecurityUtilsExtension.hashStringSecure(params.password, appConfig.userKeySalt);

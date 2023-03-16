@@ -76,7 +76,7 @@ void _handleError(Object error, StackTrace trace) {
       // on a different device!. the future can not be awaited here, but the dialog is shown to the user anyways.
     }
   } else {
-    sl<DialogService>().show(const ShowErrorDialog(descriptionKey: "error.unknown"));
     Logger.error("Unknown Error", error, trace);
+    sl<DialogService>().show(const ShowErrorDialog(descriptionKey: "error.unknown"));
   }
 }

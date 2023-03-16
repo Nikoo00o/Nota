@@ -17,6 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// the bloc.
 ///
 /// Also look at [buildAppBar] and [buildMenuDrawer] to provide a custom [AppBar] and a custom menu drawer for this page!
+/// Or also [buildBottomBar] for another bottom bar!
 ///
 /// Internally the [build] method returns a [createBlocProvider] with the [buildPage] as a child with then has the
 /// [createBlocBuilder] as a child.
@@ -111,6 +112,26 @@ abstract class BlocPage<Bloc extends PageBloc<PageEvent, State>, State extends P
   /// For usage of the parameters of the helper method, look at the comments of [buildWithToggleForMenuDrawer]!
   Widget buildMenuDrawerWithState(BuildContext context, State state) => const SizedBox();
 
+  /// You can override this to build a custom [BottomNavigationBar], or [BottomAppBar] that does not need access to the
+  /// state for better performance.
+  ///
+  /// If you need access to the [State] inside of the bottom bar, then you can override this to return
+  /// [createBottomBarWithState] and build your app bar inside of the helper method [buildBottomBarWithState]!
+  ///
+  /// By default this returns [null].
+  Widget? buildBottomBar(BuildContext context) => null;
+
+  Widget createBottomBarWithState(BuildContext context) {
+    return createBlocBuilder(builder: buildBottomBarWithState);
+  }
+
+  /// This can be overridden to build the bottom bar with access to the [State] changes.
+  ///
+  /// [buildBottomBar] must be overridden to return [createBottomBarWithState]!
+  ///
+  /// This may also return "const SizedBox();" to disable the bar completely depending on the state.
+  Widget buildBottomBarWithState(BuildContext context, State state) => const SizedBox();
+
   /// For better performance, you could also directly use this inside of [buildBodyWithNoState] instead of overriding and
   /// using the [buildBodyWithState] method!
   ///
@@ -157,13 +178,14 @@ abstract class BlocPage<Bloc extends PageBloc<PageEvent, State>, State extends P
         // events with the inner build context!
         return buildPage(
           context,
-          buildBodyWithNoState(context, createBlocBuilder(
+          body: buildBodyWithNoState(context, createBlocBuilder(
             builder: (BuildContext context, State state) {
               return buildBodyWithState(context, state);
             },
           )),
-          buildAppBar(context),
-          buildMenuDrawer(context),
+          appBar: buildAppBar(context),
+          menuDrawer: buildMenuDrawer(context),
+          bottomBar: buildBottomBar(context),
         );
       },
     ));
@@ -179,13 +201,14 @@ abstract class BlocPage<Bloc extends PageBloc<PageEvent, State>, State extends P
       builder: (BuildContext context, bool enableMenuDrawer) {
         return buildPage(
           context,
-          buildBodyWithNoState(context, createBlocBuilder(
+          body: buildBodyWithNoState(context, createBlocBuilder(
             builder: (BuildContext context, State state) {
               return buildBodyWithState(context, state);
             },
           )),
-          buildAppBar(context),
-          enableMenuDrawer ? buildMenuDrawer(context) : null,
+          appBar: buildAppBar(context),
+          menuDrawer: enableMenuDrawer ? buildMenuDrawer(context) : null,
+          bottomBar: buildBottomBar(context),
         );
       },
     ));

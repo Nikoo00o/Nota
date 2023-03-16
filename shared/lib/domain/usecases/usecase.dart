@@ -21,10 +21,10 @@ abstract class UseCase<ReturnType, CallParams> {
   /// This method makes use cases available to be called like functions with `useCase(params);`.
   Future<ReturnType> call(CallParams params) async {
     try {
-      Logger.debug("Executing Use case $runtimeType...");
+      Logger.verbose("Executing Use case $runtimeType...");
       return await execute(params);
     } finally {
-      Logger.debug("Finished Use case $runtimeType");
+      Logger.verbose("Finished Use case $runtimeType");
     }
   }
 }

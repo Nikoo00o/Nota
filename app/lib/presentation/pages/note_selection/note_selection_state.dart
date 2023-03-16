@@ -1,3 +1,4 @@
+import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/presentation/widgets/base_pages/page_state.dart';
 
@@ -6,11 +7,11 @@ class NoteSelectionState extends PageState {
 }
 
 class NoteSelectionStateInitialised extends NoteSelectionState {
-  final StructureItem currentItem;
+  final StructureFolder currentFolder;
 
   NoteSelectionStateInitialised({
-    required this.currentItem,
+    required this.currentFolder,
   }) : super(<String, Object?>{
-          "currentItem": currentItem,
+          "currentFolder": currentFolder,
         });
 }

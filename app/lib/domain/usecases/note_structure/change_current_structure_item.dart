@@ -93,7 +93,7 @@ class ChangeCurrentStructureItem extends UseCase<void, ChangeCurrentStructureIte
     return newFolder;
   }
 
-  Future<StructureItem> _changeNote(StructureNote note, String newName, Uint8List? newContent,
+  Future<StructureItem> _changeNote(StructureNote note, String newName, List<int>? newContent,
       {required bool parentChanged}) async {
     String? newPath; // only not null if the path was changed
     if (newName != note.name) {
@@ -155,7 +155,7 @@ class ChangeCurrentFolderParam extends ChangeCurrentStructureItemParams {
 
 class ChangeCurrentNoteParam extends ChangeCurrentStructureItemParams {
   /// The new decrypted content of a file is optional and can be null if it should not be updated
-  final Uint8List? newContent;
+  final List<int>? newContent;
 
   const ChangeCurrentNoteParam({required super.newName, this.newContent});
 

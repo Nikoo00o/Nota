@@ -50,8 +50,13 @@ class CreateStructureItem extends UseCase<void, CreateStructureItemParams> {
     final StructureItem currentFolder = await getOriginalStructureItem.call(const NoParams());
     late final StructureItem newItem;
 
+    if (noteStructureRepository.currentItem!.topMostParent.isRecent && params.isFolder) {
+      Logger.error("The current item is inside of recent and the target is to create a folder");
+      throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
+    }
+
     if (currentFolder is! StructureFolder) {
-      Logger.error("THe current item is not a folder:\n$currentFolder");
+      Logger.error("The current item is not a folder:\n$currentFolder");
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
 

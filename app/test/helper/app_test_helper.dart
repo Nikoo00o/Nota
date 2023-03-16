@@ -56,9 +56,15 @@ Future<void> testCleanup() async {
 /// Makes it so that the account is reloaded from the mock local data source the next time in the [AccountRepository]!
 Future<ClientAccount?> clearAccountCache() async => sl<AccountRepository>().getAccount(forceLoad: true);
 
-Future<ClientAccount> loginToTestAccount() async {
+/// Also creates the account and logs in to the account and returns the account
+Future<ClientAccount> createAndLoginToTestAccount({bool reuseOldNotes = false}) async {
   await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-  await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
+  return loginToTestAccount(reuseOldNotes: reuseOldNotes);
+}
+
+Future<ClientAccount> loginToTestAccount({bool reuseOldNotes = false}) async {
+  await sl<LoginToAccount>()
+      .call(LoginToAccountParamsRemote(username: "test1", password: "password1", reuseOldNotes: reuseOldNotes));
   final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
   return account;
 }

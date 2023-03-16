@@ -89,7 +89,7 @@ void _testCreateAccounts() {
     await createTestAccount(0);
     final ServerAccountModel? account = await localDataSource.loadAccount(getTestAccount(0).username);
     expect(account, getTestAccount(0), reason: "first account should match");
-    final ServerAccount? sameAccount = await accountRepository.getAccountByUserName(getTestAccount(0).username);
+    final ServerAccount? sameAccount = await accountRepository.getAccountByUsername(getTestAccount(0).username);
     expect(account, sameAccount, reason: "second account should be the same");
   });
 
@@ -190,7 +190,7 @@ void _testSessionTokens() {
   test("after login the account should be able to be accessed by username from the cache and contain a valid session token",
       () async {
     await loginToTestAccount(0);
-    final ServerAccount? account = await accountRepository.getAccountByUserName(getTestAccount(0).username);
+    final ServerAccount? account = await accountRepository.getAccountByUsername(getTestAccount(0).username);
     expect(
       account,
       predicate((ServerAccount? account) =>
@@ -230,7 +230,7 @@ void _testSessionTokens() {
     expect(response1.sessionToken, response2.sessionToken);
     await Future<void>.delayed(const Duration(milliseconds: 80));
     await null;
-    final ServerAccount? account = await accountRepository.getAccountByUserName(getTestAccount(0).username);
+    final ServerAccount? account = await accountRepository.getAccountByUsername(getTestAccount(0).username);
     expect(response1.sessionToken, account?.sessionToken);
   });
 
@@ -243,7 +243,7 @@ void _testSessionTokens() {
     final AccountLoginResponse response2 = await loginToTestAccount(0);
     expect(response1.sessionToken, isNot(response2.sessionToken), reason: "Both responses should contain a different token");
     await Future<void>.delayed(const Duration(milliseconds: 80));
-    final ServerAccount? account = await accountRepository.getAccountByUserName(getTestAccount(0).username);
+    final ServerAccount? account = await accountRepository.getAccountByUsername(getTestAccount(0).username);
     expect(response2.sessionToken, isNot(account?.sessionToken), reason: "The account should contain a different token");
     final ServerAccount? noAccount = await accountRepository.getAccountBySessionToken(response1.sessionToken.token);
     expect(noAccount, null);

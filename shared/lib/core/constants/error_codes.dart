@@ -64,6 +64,9 @@ class ErrorCodes {
 
   /// The structure item cant be modified
   static const String CANT_BE_MODIFIED = "error.cant.be.modified";
+
+  /// tried to move a folder into a sub folder of itself
+  static const String MOVED_INTO_SELF = "error.moved.into.self";
 }
 
 // todo: add translation strings

@@ -1,4 +1,5 @@
 import 'package:shared/core/utils/immutable_equatable.dart';
+import 'package:shared/core/utils/list_utils.dart';
 
 /// Base class for all entities. Entities should made immutable with only final members most of the times!
 ///
@@ -12,4 +13,10 @@ import 'package:shared/core/utils/immutable_equatable.dart';
 /// copyWith function that returns a new object with modified members!
 abstract class Entity extends ImmutableEquatable {
   const Entity(Map<String, Object?> properties) : super(properties);
+
+  /// This can be returned inside of the [operator ==] if you want to compare the entities without their runtimetype.
+  ///
+  /// This is useful so that comparing models and entities still returns tru!
+  bool compareWithoutRuntimeType(Object other) =>
+      identical(this, other) || other is Entity && ListUtils.equals(props, other.props);
 }

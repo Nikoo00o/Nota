@@ -5,6 +5,7 @@ import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/repositories/note_transfer_repository.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/save_account.dart';
+import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:shared/core/enums/note_transfer_status.dart';
@@ -17,24 +18,31 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// It updates the account and the note files remotely and locally!
 ///
 /// This can throw the exceptions of [NoteTransferRepository.startNoteTransfer], [NoteTransferRepository.uploadOrDownloadNote]
-/// , [NoteTransferRepository.finishNoteTransfer] and [NoteTransferRepository.renameNote] !
+/// , [NoteTransferRepository.finishNoteTransfer], [NoteTransferRepository.renameNote] and [FetchNewNoteStructure]!
 ///
 /// This can also throw the exceptions of [GetLoggedInAccount]!
-class TransferNotes extends UseCase<void, NoParams> {
+///
+/// At the end of this, [FetchNewNoteStructure] is called to create a new note structure and update the ui!
+///
+/// This always returns [true] except when the user cancels the internally opened dialog which displays the remote changes
+/// which would override local files!
+class TransferNotes extends UseCase<bool, NoParams> {
   final GetLoggedInAccount getLoggedInAccount;
   final SaveAccount saveAccount;
   final NoteTransferRepository noteTransferRepository;
   final DialogService dialogService;
+  final FetchNewNoteStructure fetchNewNoteStructure;
 
   const TransferNotes({
     required this.getLoggedInAccount,
     required this.saveAccount,
     required this.noteTransferRepository,
     required this.dialogService,
+    required this.fetchNewNoteStructure,
   });
 
   @override
-  Future<void> execute(NoParams params) async {
+  Future<bool> execute(NoParams params) async {
     final ClientAccount account = await getLoggedInAccount.call(const NoParams());
     Logger.verbose("Starting note transfer for the account $account");
 
@@ -42,7 +50,7 @@ class TransferNotes extends UseCase<void, NoParams> {
     if (await _didUserCancel(noteUpdates, account)) {
       Logger.info("User cancelled note transfer");
       await noteTransferRepository.finishNoteTransfer(shouldCancel: true);
-      return;
+      return false;
     }
 
     try {
@@ -56,14 +64,16 @@ class TransferNotes extends UseCase<void, NoParams> {
 
       Logger.verbose("Applying the account note info changes"); // must be after replacing, because of the id changes!
       await _applyAccountChanges(noteUpdates, account);
-    } catch (_) {
-      Logger.warn("Clearing temp notes, because the transfer failed");
+    } catch (e) {
+      Logger.warn("Clearing temp notes, because the transfer failed $e");
       await noteTransferRepository.clearTempNotes();
       rethrow;
     }
 
     await saveAccount.call(const NoParams()); // always save changes to the account to the local storage at the end!
+    await fetchNewNoteStructure.call(const NoParams()); // refresh note structure and ui!
     Logger.info("Transferred notes between client and server: $noteUpdates");
+    return true;
   }
 
   Future<void> _applyAccountChanges(List<NoteUpdate> updates, ClientAccount account) async {
@@ -96,7 +106,7 @@ class TransferNotes extends UseCase<void, NoParams> {
       if (replaced == false && newTimeStamp != null && newFileName != null) {
         Logger.verbose("Added new note");
         account.noteInfoList.add(NoteInfo(id: newId ?? oldId, encFileName: newFileName, lastEdited: newTimeStamp));
-      } else {
+      } else if(newId == null) {
         Logger.warn("No note changed and also none added!");
       }
 
@@ -124,8 +134,8 @@ class TransferNotes extends UseCase<void, NoParams> {
 
       dialogService.show(ShowConfirmDialog(
         descriptionKey: "note.transfer.server.change.description",
-        descriptionKeyParams: <String>[serverChanges.join("\n")],
-        confirmButtonKey: "note.transfer.server.change.button.confirm",
+        descriptionKeyParams: <String>[serverChanges.join("\n\n")],
+        confirmButtonKey: "accept",
         onConfirm: () => completer.complete(true),
         onCancel: () => completer.complete(false),
       ));

@@ -14,6 +14,8 @@ class SecurityUtilsExtension {
 
   static ArgonWrapper _argonWrapper = ArgonWrapperImpl();
 
+  static final Sha256 _asyncSha = Sha256();
+
   /// For testing, this can replace the [_argonWrapper] used for the [encryptBytesAsync].
   static void replaceArgonWrapper(ArgonWrapper instance) => _argonWrapper = instance;
 
@@ -110,5 +112,14 @@ class SecurityUtilsExtension {
   static Future<String> hashStringSecure(String input, String base64EncodedSalt) async {
     final List<int> bytes = await hashBytesSecure(utf8.encode(input), base64Decode(base64EncodedSalt));
     return base64UrlEncode(bytes);
+  }
+
+  /// Uses Sha256 to create a quick hash (should not be used for passwords)
+  static Future<List<int>> hashBytesAsync(List<int> bytes) async {
+    if (bytes.isEmpty) {
+      return List<int>.empty();
+    }
+    final Hash hash = await _asyncSha.hash(bytes);
+    return hash.bytes;
   }
 }

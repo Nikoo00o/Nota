@@ -1,11 +1,12 @@
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
+import 'package:app/domain/usecases/note_structure/finish_move_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/inner/add_new_structure_update_batch.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
-
 
 /// This starts the move of the [NoteStructureRepository.currentItem] by caching a deep copy of it as the
 /// [NoteStructureRepository.moveItemSrc] and then setting the current item to the [NoteStructureRepository.moveSelection].
@@ -25,13 +26,18 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// [ErrorCodes.CANT_BE_MODIFIED]. So it should not be set to [NoteStructureRepository.root], or [NoteStructureRepository.recent]!
 ///
 /// This calls the use case [GetCurrentStructureItem] and can throw the exceptions of it!
+///
+/// This also adds a new streamed update by calling [AddNewStructureUpdateBatch] which will be received
+/// by [GetStructureUpdatesStream]!
 class StartMoveStructureItem extends UseCase<void, NoParams> {
   final GetCurrentStructureItem getCurrentStructureItem;
   final NoteStructureRepository noteStructureRepository;
+  final AddNewStructureUpdateBatch addNewStructureUpdateBatch;
 
   const StartMoveStructureItem({
     required this.getCurrentStructureItem,
     required this.noteStructureRepository,
+    required this.addNewStructureUpdateBatch,
   });
 
   @override
@@ -47,5 +53,8 @@ class StartMoveStructureItem extends UseCase<void, NoParams> {
     noteStructureRepository.currentItem = noteStructureRepository.moveSelection;
 
     Logger.debug("Started the move selection for:\n$currentItem");
+
+    // at the end send a new update event to the ui!
+    await addNewStructureUpdateBatch.call(const NoParams());
   }
 }

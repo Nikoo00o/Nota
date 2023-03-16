@@ -10,7 +10,8 @@ import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
 /// This is similar to the [LogoutOfAccount] use case, but this one here only clears the accounts decrypted data key if
-/// the [ClientAccount.storeDecryptedDataKey] is false and then it will also navigate to the login page.
+/// the [ClientAccount.storeDecryptedDataKey] is false and then it will also navigate to the login page. Otherwise it will
+/// not work.
 ///
 /// So afterwards the account will need a new local login.
 ///

@@ -48,7 +48,7 @@ void main() {
 
     test("Load note with no stored note should not work", () async {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-      await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
+      await loginToTestAccount();
       expect(() async {
         await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: -1));
       }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)));
@@ -56,7 +56,7 @@ void main() {
 
     test("Load note with an invalid note id should not work", () async {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-      await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
+      await loginToTestAccount();
       await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
           noteId: -1, decryptedName: "name", decryptedContent: Uint8List.fromList(utf8.encode("test"))));
       expect(() async {
@@ -66,7 +66,7 @@ void main() {
 
     test("Creating a note with an empty filename should not work", () async {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-      await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
+      await loginToTestAccount();
 
       expect(() async {
         await sl<StoreNoteEncrypted>()
@@ -76,7 +76,7 @@ void main() {
 
     test("Store and load note with an valid note id should work", () async {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-      await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
+      await loginToTestAccount();
       await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
           noteId: -1, decryptedName: "name", decryptedContent: Uint8List.fromList(utf8.encode("test"))));
       final List<int> bytes = await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: -1));
@@ -85,7 +85,7 @@ void main() {
 
     test("Creating a note twice should not work", () async {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-      await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
+      await loginToTestAccount();
       await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
           noteId: -1, decryptedName: "name", decryptedContent: Uint8List.fromList(utf8.encode("test"))));
       expect(() async {
@@ -96,7 +96,7 @@ void main() {
 
     test("Changing a note when there is none should not work", () async {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-      await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
+      await loginToTestAccount();
       expect(() async {
         await sl<StoreNoteEncrypted>().call(ChangeNoteEncryptedParams(
             noteId: -1, decryptedName: "name", decryptedContent: Uint8List.fromList(utf8.encode("test"))));
@@ -105,7 +105,7 @@ void main() {
 
     test("Deleting a note when there is none should not work", () async {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-      await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
+      await loginToTestAccount();
       expect(() async {
         await sl<StoreNoteEncrypted>().call(DeleteNoteEncryptedParams(noteId: -1));
       }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)));
@@ -113,7 +113,7 @@ void main() {
 
     test("Notes should also be deleted", () async {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-      await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
+      await loginToTestAccount();
       await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
           noteId: -1, decryptedName: "name", decryptedContent: Uint8List.fromList(utf8.encode("test"))));
       await sl<StoreNoteEncrypted>().call(DeleteNoteEncryptedParams(noteId: -1));
@@ -128,7 +128,7 @@ void main() {
 
     test("Notes should also be changed", () async {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-      await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
+      await loginToTestAccount();
       await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
           noteId: -1, decryptedName: "name", decryptedContent: Uint8List.fromList(utf8.encode("test"))));
 
@@ -145,7 +145,7 @@ void main() {
 
     test("Changing a note with an empty filename should not work", () async {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-      await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
+      await loginToTestAccount();
 
       expect(() async {
         await sl<StoreNoteEncrypted>()
@@ -155,7 +155,7 @@ void main() {
 
     test("Changing a note with no values should not work", () async {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-      await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
+      await loginToTestAccount();
 
       expect(() async {
         await sl<StoreNoteEncrypted>()
@@ -165,7 +165,7 @@ void main() {
 
     test("Changing a note with only an empty content should work", () async {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-      await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
+      await loginToTestAccount();
       await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
           noteId: -1, decryptedName: "name", decryptedContent: Uint8List.fromList(utf8.encode("test"))));
 
@@ -183,7 +183,7 @@ void main() {
 
     test("Changing a note with only a filename should work", () async {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-      await sl<LoginToAccount>().call(const LoginToAccountParamsRemote(username: "test1", password: "password1"));
+      await loginToTestAccount();
       await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
           noteId: -1, decryptedName: "name", decryptedContent: Uint8List.fromList(utf8.encode("test"))));
 

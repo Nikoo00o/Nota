@@ -1,6 +1,8 @@
 import 'package:shared/core/enums/note_transfer_status.dart';
 import 'package:shared/domain/entities/entity.dart';
 
+// ignore_for_file: hash_and_equals
+
 /// The Information about a note transfer update
 class NoteUpdate extends Entity {
   /// Even tho this is send from server to client, it needs to save the client id of the notes, because the client might
@@ -48,4 +50,9 @@ class NoteUpdate extends Entity {
 
   /// Compares 2 note update objects for sorting by the server id ascending
   static int compareByServerId(NoteUpdate first, NoteUpdate second) => first.serverId.compareTo(second.serverId);
+
+  /// Override the default operator==, because note update models should be able to be equal to note update objects (so
+  /// runtimetype is not compared here!)
+  @override
+  bool operator ==(Object other) => compareWithoutRuntimeType(other);
 }

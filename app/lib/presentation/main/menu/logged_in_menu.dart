@@ -55,6 +55,7 @@ class LoggedInMenu extends BlocPage<MenuBloc, MenuState> {
         return true;
       },
       child: Drawer(
+        key: currentBloc(context).drawerKey,
         child: Scrollbar(
           scrollbarOrientation: ScrollbarOrientation.left,
           controller: currentBloc(context).scrollController,

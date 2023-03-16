@@ -1,4 +1,3 @@
-import 'package:shared/core/utils/list_utils.dart';
 import 'package:shared/domain/entities/entity.dart';
 
 // ignore_for_file: hash_and_equals
@@ -33,7 +32,6 @@ class NoteInfo extends Entity {
   /// value (with either null, or a concrete value)
   ///
   /// Needs to be overridden in the model as well!
-  @override
   NoteInfo copyWith({int? newId, String? newEncFileName, DateTime? newLastEdited}) {
     return NoteInfo(
       id: newId ?? id,
@@ -45,7 +43,7 @@ class NoteInfo extends Entity {
   /// Override the default operator==, because note info models should be able to be equal to note info objects (so
   /// runtimetype is not compared here!)
   @override
-  bool operator ==(Object other) => identical(this, other) || other is NoteInfo && ListUtils.equals(props, other.props);
+  bool operator ==(Object other) => compareWithoutRuntimeType(other);
 
   /// Returns [true] if the [encFileName] of this note is empty!
   bool get isDeleted => encFileName.isEmpty;

@@ -72,7 +72,7 @@ void _testWithoutAccount() {
 
 void _testWithAccount() {
   setUp(() async {
-    await loginToTestAccount();
+    await createAndLoginToTestAccount();
   });
 
   test("update note without fetch new structure should throw ", () async {

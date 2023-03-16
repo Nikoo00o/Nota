@@ -1,5 +1,7 @@
 import 'package:shared/domain/entities/entity.dart';
 
+// ignore_for_file: hash_and_equals
+
 /// The session token for the authentication of accounts
 class SessionToken extends Entity {
   /// base64 encoded
@@ -19,4 +21,9 @@ class SessionToken extends Entity {
 
   /// Returns if the session token is still valid for the next millisecond
   bool isStillValid() => isValidFor(const Duration(milliseconds: 1));
+
+  /// Override the default operator==, because session token models should be able to be equal to session token objects (so
+  /// runtimetype is not compared here!)
+  @override
+  bool operator ==(Object other) => compareWithoutRuntimeType(other);
 }

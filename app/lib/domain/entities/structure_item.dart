@@ -1,6 +1,7 @@
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/entities/translation_string.dart';
+import 'package:intl/intl.dart';
 import 'package:shared/core/config/shared_config.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
@@ -72,7 +73,7 @@ abstract class StructureItem extends Entity {
   }
 
   /// Returns when this item was modified. Files store this date and folders just return the newest time stamp of the
-  /// children.
+  /// children (and if it has no children, then DateTime.fromMillisecondsSinceEpoch(0)).
   DateTime get lastModified;
 
   /// Returns the top most parent folder (either "root", or "recent").
@@ -107,6 +108,8 @@ abstract class StructureItem extends Entity {
 
   /// Returns if this item is a top level folder by returning if the [directParent] is null.
   bool get isTopLevel => directParent == null;
+
+  String get lastModifiedFormatted => DateFormat("yyyy-MM-dd – HH:mm").format(lastModified);
 
   /// Returns a deep copy of the [item] (recursively copy all sub folders and items).
   ///

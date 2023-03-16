@@ -3,11 +3,13 @@ import 'package:app/core/constants/routes.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/domain/usecases/account/change/activate_lock_screen.dart';
+import 'package:app/domain/usecases/account/change/change_auto_login.dart';
 import 'package:app/domain/usecases/account/change/logout_of_account.dart';
 import 'package:app/domain/usecases/account/get_user_name.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_folders.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_updates_stream.dart';
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
+import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/presentation/main/menu/menu_event.dart';
 import 'package:app/presentation/main/menu/menu_state.dart';
 import 'package:app/presentation/widgets/base_pages/page_bloc.dart';
@@ -26,10 +28,11 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
   final NavigateToItem navigateToItem;
   final NavigationService navigationService;
   final DialogService dialogService;
+  final ChangeAutoLogin changeAutoLogin;
   final ActivateLockscreen activateLockscreen;
   final LogoutOfAccount logoutOfAccount;
   final AppConfig appConfig;
-  late String? userName;
+  late String? username;
 
   /// the current page of the user which should be highlighted inside of the menu
   late String currentPageTranslationKey;
@@ -44,6 +47,9 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
   /// The menu needs its own scroll controller
   final ScrollController scrollController = ScrollController();
 
+  /// key for closing the menu here
+  final GlobalKey drawerKey = GlobalKey();
+
   MenuBloc({
     required this.getUsername,
     required this.getStructureFolders,
@@ -51,6 +57,7 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
     required this.navigationService,
     required this.dialogService,
     required this.appConfig,
+    required this.changeAutoLogin,
     required this.activateLockscreen,
     required this.logoutOfAccount,
   }) : super(initialState: const MenuState());
@@ -58,15 +65,24 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
   @override
   void registerEventHandlers() {
     on<MenuInitialised>(_handleInitialise);
+    on<MenuUserProfileClicked>(_handleMenuUserProfileClicked);
     on<MenuItemClicked>(_handleMenuItemClicked);
   }
 
   Future<void> _handleInitialise(MenuInitialised event, Emitter<MenuState> emit) async {
-    userName = await getUsername(const NoParams());
+    username = await getUsername(const NoParams());
     currentPageTranslationKey = event.currentPageTranslationKey;
     currentPageTranslationKeyParams = event.currentPageTranslationKeyParams;
     noteFolders = await getStructureFolders.call(const GetStructureFoldersParams(includeMoveFolder: false));
     emit(_buildState());
+  }
+
+  Future<void> _handleMenuUserProfileClicked(MenuUserProfileClicked event, Emitter<MenuState> emit) async {
+    dialogService.showInfoDialog(ShowInfoDialog(
+      titleKey: "menu.user.info.title",
+      descriptionKey: "menu.user.info.description",
+      descriptionKeyParams: <String>[username ?? ""],
+    ));
   }
 
   Future<void> _handleMenuItemClicked(MenuItemClicked event, Emitter<MenuState> emit) async {
@@ -76,10 +92,11 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
     // todo: handle all actions for every menu item. same as in menu_item.dart!
     switch (currentPageTranslationKey) {
       case "empty.param.1":
-        await _userMenuEntryClicked();
+        await _userMenuEntryClicked(event, emit);
         break;
 
       case "menu.lock.screen.title":
+        await changeAutoLogin(const ChangeAutoLoginParams(autoLogin: false)); // first deactivate auto login
         await activateLockscreen(const NoParams());
         break;
       case "menu.logout.title":
@@ -90,6 +107,7 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
         break;
       case "menu.about":
         dialogService.showAboutDialog();
+        emit(_buildState());
         break;
 
       case "page.dialog.test.title":
@@ -103,22 +121,25 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
         break;
 
       default:
-        await _topLevelNoteFolderClicked();
+        await _topLevelNoteFolderClicked(event, emit);
     }
-
-    emit(_buildState());
   }
 
-  Future<void> _topLevelNoteFolderClicked() async {
+  Future<void> _topLevelNoteFolderClicked(MenuItemClicked event, Emitter<MenuState> emit) async {
     await navigateToItem.call(NavigateToItemParamsTopLevelName(folderName: currentPageTranslationKey));
-    navigationService.navigateTo(Routes.notes);
+    if (navigationService.currentRoute != Routes.note_selection) {
+      // for performance, if already on the note selection page, the event stream will handle the updating
+      navigationService.navigateTo(Routes.note_selection);
+    } else {
+      Navigator.of(drawerKey.currentContext!).pop();
+    }
   }
 
-  Future<void> _userMenuEntryClicked() async {}
+  Future<void> _userMenuEntryClicked(MenuItemClicked event, Emitter<MenuState> emit) async {}
 
   MenuState _buildState() {
     return MenuStateInitialised(
-      userName: userName,
+      username: username,
       currentPageTranslationKey: currentPageTranslationKey,
       currentPageTranslationKeyParams: currentPageTranslationKeyParams,
       showDeveloperOptions: appConfig.showDeveloperOptions,

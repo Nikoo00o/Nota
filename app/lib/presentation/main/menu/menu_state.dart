@@ -6,20 +6,20 @@ class MenuState extends PageState {
 }
 
 class MenuStateInitialised extends MenuState {
-  final String? userName;
+  final String? username;
   final String currentPageTranslationKey;
   final List<String>? currentPageTranslationKeyParams;
   final bool showDeveloperOptions;
   final List<TranslationString> topLevelFolders;
 
   MenuStateInitialised({
-    required this.userName,
+    required this.username,
     required this.currentPageTranslationKey,
     this.currentPageTranslationKeyParams,
     required this.showDeveloperOptions,
     required this.topLevelFolders,
   }) : super(<String, Object?>{
-          "userName": userName,
+          "username": username,
           "currentPageTranslationKey": currentPageTranslationKey,
           "currentPageTranslationKeyParams": currentPageTranslationKeyParams,
           "showDeveloperOptions": showDeveloperOptions,
