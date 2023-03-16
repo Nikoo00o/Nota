@@ -18,6 +18,7 @@ import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_event.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_state.dart';
+import 'package:app/presentation/pages/note_edit/widgets/custom_edit_controller.dart';
 import 'package:app/presentation/widgets/base_pages/page_bloc.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
@@ -46,18 +47,13 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
 
   final TextEditingController searchController = TextEditingController();
   final FocusNode searchFocus = FocusNode();
-  final TextEditingController inputController = TextEditingController();
+  final CustomEditController inputController = CustomEditController();
 
   /// the has focus is true if the user is currently editing the note
   final FocusNode inputFocus = FocusNode(); // todo: also add one for search field
 
   /// calculated from the loaded note to test if the user changed something
   List<int>? noteHash;
-
-  List<int> searchPositions = <int>[];
-
-  /// note zero base!
-  int currentSearchPosition = 0;
 
   NoteEditBloc({
     required this.navigationService,
@@ -88,12 +84,7 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
 
   Future<void> _handleUpdatedState(NoteEditUpdatedState event, Emitter<NoteEditState> emit) async {
     if (event.didSearchChange) {
-      currentSearchPosition = 0;
-      if (searchController.text.isEmpty) {
-        searchPositions = <int>[];
-      } else {
-        searchPositions = searchController.text.allMatches(inputController.text).map((Match match) => match.start).toList();
-      }
+      inputController.updateSearch(searchController.text);
     }
     emit(_buildState());
   }
@@ -126,6 +117,7 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
 
   Future<void> _handleStructureChanged(NoteEditStructureChanged event, Emitter<NoteEditState> emit) async {
     currentItem = event.newCurrentItem;
+    dialogService.showLoadingDialog();
     Logger.verbose("handling structure change with new item ${currentItem.path}");
     if (currentItem is StructureNote) {
       if (noteHash == null) {
@@ -139,6 +131,7 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
       navigationService.navigateTo(Routes.note_selection);
       inputController.clear(); // clear text input field on navigating away
     }
+    dialogService.hideLoadingDialog();
   }
 
   Future<void> _handleNavigatedBack(NoteEditNavigatedBack event, Emitter<NoteEditState> emit) async {
@@ -152,6 +145,7 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
   }
 
   Future<void> _handleInputSaved(NoteEditInputSaved event, Emitter<NoteEditState> emit) async {
+    dialogService.showLoadingDialog();
     _clearFocus();
     final List<int> newData = utf8.encode(inputController.text);
     final List<int> newHash = await SecurityUtilsExtension.hashBytesAsync(newData);
@@ -161,22 +155,11 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
       dialogService.showInfoSnackBar(const ShowInfoSnackBar(textKey: "saved", duration: Duration(seconds: 1)));
     }
     emit(_buildState());
+    dialogService.hideLoadingDialog();
   }
 
   Future<void> _handleSearchStep(NoteEditSearchStepped event, Emitter<NoteEditState> emit) async {
-    if (searchPositions.isNotEmpty) {
-      if (event.forward) {
-        if (++currentSearchPosition > searchPositions.length) {
-          currentSearchPosition = 1;
-        }
-      } else {
-        if (--currentSearchPosition <= 0) {
-          currentSearchPosition = searchPositions.length;
-        }
-      }
-      final int offset = searchPositions[currentSearchPosition - 1];
-      inputController.selection = TextSelection.fromPosition(TextPosition(offset: offset));
-
+    if (inputController.moveSearch(forward: event.forward)) {
       if (inputFocus.hasFocus == false) {
         inputFocus.requestFocus();
       }
@@ -192,6 +175,7 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
       searchFocus.unfocus();
     }
     searchController.clear(); // also clear search text
+    inputController.updateSearch(""); // and also clear input controller
   }
 
   /// only if [currentItem] is [StructureNote]
@@ -200,8 +184,9 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
       return NoteEditStateInitialised(
         currentNote: currentItem as StructureNote,
         isEditing: isEditing,
-        currentSearchPosition: currentSearchPosition.toString(),
-        searchPositionSize: searchPositions.length.toString(),
+        currentSearchPosition: inputController.currentSearchPosition.toString(),
+        searchPositionSize: inputController.searchPositionAmount.toString(),
+        searchLength: inputController.searchSize,
       );
     } else {
       return const NoteEditState();
@@ -209,4 +194,7 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
   }
 
   bool get isEditing => inputFocus.hasFocus || searchFocus.hasFocus;
+
+  @override
+  bool get enableLoadingDialog => false; // prevent loading dialog for all small changes
 }

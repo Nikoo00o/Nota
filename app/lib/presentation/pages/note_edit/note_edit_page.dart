@@ -48,6 +48,7 @@ class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
                 style: textBodyLarge(context),
                 controller: currentBloc(context).inputController,
                 focusNode: currentBloc(context).inputFocus,
+                onChanged: (String _) => currentBloc(context).add(const NoteEditUpdatedState(didSearchChange: true)),
               ),
             ),
           ),
