@@ -403,13 +403,13 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
       }
     }
     if (loadingDialogCounter > 0) {
-      if (--loadingDialogCounter <= 0 || forceCloseLoadingDialog) {
+      if ((--loadingDialogCounter <= 0 || forceCloseLoadingDialog) && isCustomDialogVisible == false) {
         Logger.verbose("closing loading dialog");
         _pop(dataForDialog);
       } else {
         Logger.verbose("only decrementing loading dialog $loadingDialogCounter");
       }
-    } else if (isLoadingDialog) {
+    } else if (isLoadingDialog && isCustomDialogVisible == false) {
       Logger.warn("tried to close an already closed loading dialog");
       _pop(dataForDialog);
     }
