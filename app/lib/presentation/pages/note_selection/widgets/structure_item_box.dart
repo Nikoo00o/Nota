@@ -41,6 +41,9 @@ class StructureItemBox extends BlocPageChild<NoteSelectionBloc, NoteSelectionSta
 
   String _getDescription(BuildContext context) {
     if (item is StructureFolder) {
+      if(item.topMostParent.isMove){
+        return "Select this folder";
+      }
       if (item.lastModified.isBefore(DateTime.fromMillisecondsSinceEpoch(1))) {
         return translate(context, "note.selection.folder.needs.note");
       }

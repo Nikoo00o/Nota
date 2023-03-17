@@ -19,7 +19,18 @@ class CurrentFolderInfo extends BlocPageChild<NoteSelectionBloc, NoteSelectionSt
   @override
   Widget buildWithNoState(BuildContext context, Widget partWithState) {
     if (folder.isTopLevel) {
-      return const SizedBox();
+      if(folder.isMove){
+        return CustomCard(
+          color: colorSurfaceVariant(context),
+          onTap: null,
+          icon: Icons.info,
+          title: translate(context, StructureItem.rootFolderNames.first),
+          description: translate(context, "note.selection.move.info"),
+          alignDescriptionRight: false,
+        );
+      } else {
+        return const SizedBox();
+      }
     }
     return CustomCard(
       color: colorTertiaryContainer(context),
