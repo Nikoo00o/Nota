@@ -142,6 +142,7 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
   }
 
   Future<void> _handleNavigatedBack(NoteEditNavigatedBack event, Emitter<NoteEditState> emit) async {
+    _clearFocus(); // always clear focus
     if (isEditing == false ||
         ListUtils.equals(noteHash, await SecurityUtilsExtension.hashBytesAsync(utf8.encode(inputController.text))) ||
         await _userConfirmedDrop()) {
