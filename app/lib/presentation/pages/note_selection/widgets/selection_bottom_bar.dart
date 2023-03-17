@@ -49,7 +49,7 @@ class SelectionBottomBar extends BlocPageChild<NoteSelectionBloc, NoteSelectionS
   Widget _buildCompleteBar(BuildContext context, NoteSelectionStateInitialised state) {
     return BottomAppBar(
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
           CustomIconButton(
             icon: Icons.search,

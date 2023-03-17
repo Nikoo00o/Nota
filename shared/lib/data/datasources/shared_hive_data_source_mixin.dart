@@ -42,7 +42,7 @@ mixin SharedHiveDataSourceMixin {
   BoxBase<String> _getHiveBox(String databaseKey) {
     if (_hiveDatabases?.containsKey(databaseKey) == false) {
       Logger.error("Error loading data, hive box $databaseKey does not exist");
-      throw FileException(message: ErrorCodes.FILE_NOT_FOUND, messageParams: <String>[databaseKey]);
+      throw const FileException(message: ErrorCodes.FILE_NOT_FOUND);
     }
     return _hiveDatabases![databaseKey]!;
   }
