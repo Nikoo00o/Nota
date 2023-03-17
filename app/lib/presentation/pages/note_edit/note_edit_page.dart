@@ -22,74 +22,85 @@ class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
 
   @override
   Widget buildBodyWithNoState(BuildContext context, Widget bodyWithState) {
-    return Scrollbar(child: bodyWithState);
-  }
-
-  @override
-  Widget buildBodyWithState(BuildContext context, NoteEditState state) {
-    if (state is NoteEditStateInitialised) {
-      return CustomScrollView(
+    return Scrollbar(
+      child: CustomScrollView(
         slivers: <Widget>[
           SliverFillRemaining(
             hasScrollBody: false,
-            child: Scrollbar(
-              child: TextField(
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: translate(context, "note.edit.input.text"),
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                ),
-                textInputAction: TextInputAction.newline,
-                keyboardType: TextInputType.multiline,
-                minLines: null,
-                maxLines: null,
-                expands: true,
-                style: textBodyLarge(context),
-                controller: currentBloc(context).inputController,
-                focusNode: currentBloc(context).inputFocus,
-                onChanged: (String _) => currentBloc(context).add(const NoteEditUpdatedState(didSearchChange: true)),
-              ),
+            child: createBlocSelector<bool>(
+              selector: (NoteEditState state) => state is NoteEditStateInitialised,
+              builder: (BuildContext context, bool isInitialized) {
+                if (isInitialized) {
+                  return TextField(
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: translate(context, "note.edit.input.text"),
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                    ),
+                    textInputAction: TextInputAction.newline,
+                    keyboardType: TextInputType.multiline,
+                    minLines: null,
+                    maxLines: null,
+                    expands: true,
+                    style: textBodyLarge(context),
+                    controller: currentBloc(context).inputController,
+                    focusNode: currentBloc(context).inputFocus,
+                    onChanged: (String _) => currentBloc(context).add(const NoteEditUpdatedState(didSearchChange: true)),
+                  );
+                } else {
+                  return const SizedBox();
+                }
+              },
             ),
           ),
         ],
-      );
-    }
-    return const SizedBox();
+      ),
+    );
   }
 
   @override
-  PreferredSizeWidget? buildAppBar(BuildContext context) => createAppBarWithState(context);
-
-  @override
-  PreferredSizeWidget buildAppBarWithState(BuildContext context, NoteEditState state) {
-    if (state is NoteEditStateInitialised) {
-      return AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          tooltip: translate(context, "back"),
-          onPressed: () => currentBloc(context).add(const NoteEditNavigatedBack()),
-        ),
-        title: _buildAppBarTitle(context, state),
-        centerTitle: false,
-        actions: const <Widget>[
-          EditPopupMenu(),
-        ],
-      );
-    }
-    return AppBar(); // use empty app bar at first, so that the element gets cached for performance
+  PreferredSizeWidget? buildAppBar(BuildContext context) {
+    return PreferredSize(
+      // default size
+      preferredSize: const Size.fromHeight(BlocPage.defaultAppBarHeight),
+      child: createBlocSelector<bool>(
+        selector: (NoteEditState state) => state is NoteEditStateInitialised,
+        builder: (BuildContext context, bool isInitialized) {
+          if (isInitialized) {
+            return AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                tooltip: translate(context, "back"),
+                onPressed: () => currentBloc(context).add(const NoteEditNavigatedBack()),
+              ),
+              title: _buildAppBarTitle(context),
+              centerTitle: false,
+              actions: const <Widget>[
+                EditPopupMenu(),
+              ],
+            );
+          } else {
+            return AppBar(); // use empty app bar at first, so that the element gets cached for performance
+          }
+        },
+      ),
+    );
   }
 
-  Widget _buildAppBarTitle(BuildContext context, NoteEditStateInitialised state) {
-    if (state.isEditing) {
-      return const EditAppBar();
-    } else {
-      final TranslationString translation = StructureItem.getTranslationStringForStructureItem(state.currentNote);
-      return Text(
-        translate(context, translation.translationKey, keyParams: translation.translationKeyParams),
-        style: textTitleLarge(context).copyWith(fontWeight: FontWeight.bold),
-      );
-    }
+  Widget _buildAppBarTitle(BuildContext context) {
+    return createBlocBuilder(builder: (BuildContext context, NoteEditState state) {
+      final NoteEditStateInitialised initState = state as NoteEditStateInitialised; // always true
+      if (initState.isEditing) {
+        return const EditAppBar();
+      } else {
+        final TranslationString translation = StructureItem.getTranslationStringForStructureItem(initState.currentNote);
+        return Text(
+          translate(context, translation.translationKey, keyParams: translation.translationKeyParams),
+          style: textTitleLarge(context).copyWith(fontWeight: FontWeight.bold),
+        );
+      }
+    });
   }
 
   @override

@@ -34,7 +34,7 @@ class EditAppBar extends BlocPageChild<NoteEditBloc, NoteEditState> {
             ),
           ),
         ),
-        partWithState,
+        _buildTitle(context),
         const SizedBox(width: 16),
         CustomIconButton(
           icon: Icons.save,
@@ -47,55 +47,78 @@ class EditAppBar extends BlocPageChild<NoteEditBloc, NoteEditState> {
     );
   }
 
-  @override
-  Widget buildWithState(BuildContext context, NoteEditState state) {
-    if (state is NoteEditStateInitialised) {
-      final bool enabled = state.searchPositionSize != "0";
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              SizedBox(
-                width: 32,
-                height: 32,
-                child: CustomIconButton(
-                  padding: EdgeInsets.zero,
-                  icon: Icons.arrow_upward,
-                  tooltipKey: "note.edit.search.up",
-                  size: 20,
-                  enabled: enabled,
-                  buttonType: CustomIconButtonType.DEFAULT,
-                  onPressed: () => currentBloc(context).add(const NoteEditSearchStepped(forward: false)),
-                ),
+  Widget _buildTitle(BuildContext context) {
+    return createBlocSelector<bool>(
+      selector: (NoteEditState state) => state is NoteEditStateInitialised,
+      builder: (BuildContext context, bool initialised) {
+        if (initialised) {
+          return createBlocSelector<bool>(
+            selector: (NoteEditState state) => state is NoteEditStateInitialised && state.searchPositionSize != "0",
+            builder: (BuildContext context, bool enabled) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      SizedBox(
+                        width: 32,
+                        height: 32,
+                        child: CustomIconButton(
+                          padding: EdgeInsets.zero,
+                          icon: Icons.arrow_upward,
+                          tooltipKey: "note.edit.search.up",
+                          size: 20,
+                          enabled: enabled,
+                          buttonType: CustomIconButtonType.DEFAULT,
+                          onPressed: () => currentBloc(context).add(const NoteEditSearchStepped(forward: false)),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 32,
+                        height: 32,
+                        child: CustomIconButton(
+                          padding: EdgeInsets.zero,
+                          icon: Icons.arrow_downward,
+                          tooltipKey: "note.edit.search.down",
+                          size: 20,
+                          enabled: enabled,
+                          buttonType: CustomIconButtonType.DEFAULT,
+                          onPressed: () => currentBloc(context).add(const NoteEditSearchStepped(forward: true)),
+                        ),
+                      ),
+                    ],
+                  ),
+                  _buildStateCounter(context, enabled),
+                ],
+              );
+            },
+          );
+        } else {
+          return const SizedBox();
+        }
+      },
+    );
+  }
+
+  Widget _buildStateCounter(BuildContext context, bool enabled) {
+    return createBlocSelector<String>(
+      selector: (NoteEditState state) => (state as NoteEditStateInitialised).currentSearchPosition,
+      builder: (BuildContext context, String currentSearchPosition) {
+        return createBlocSelector<String>(
+          selector: (NoteEditState state) => (state as NoteEditStateInitialised).searchPositionSize,
+          builder: (BuildContext context, String searchPositionSize) {
+            return Text(
+              translate(
+                context,
+                "note.edit.search.counter",
+                keyParams: <String>[currentSearchPosition, searchPositionSize],
               ),
-              SizedBox(
-                width: 32,
-                height: 32,
-                child: CustomIconButton(
-                  padding: EdgeInsets.zero,
-                  icon: Icons.arrow_downward,
-                  tooltipKey: "note.edit.search.down",
-                  size: 20,
-                  enabled: enabled,
-                  buttonType: CustomIconButtonType.DEFAULT,
-                  onPressed: () => currentBloc(context).add(const NoteEditSearchStepped(forward: true)),
-                ),
-              ),
-            ],
-          ),
-          Text(
-            translate(
-              context,
-              "note.edit.search.counter",
-              keyParams: <String>[state.currentSearchPosition, state.searchPositionSize],
-            ),
-            style: textLabelSmall(context).copyWith(color: enabled ? null : colorDisabled(context)),
-          ),
-        ],
-      );
-    }
-    return const SizedBox();
+              style: textLabelSmall(context).copyWith(color: enabled ? null : colorDisabled(context)),
+            );
+          },
+        );
+      },
+    );
   }
 }
