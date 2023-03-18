@@ -1,3 +1,4 @@
+import 'package:app/core/enums/search_status.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_event.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_state.dart';
@@ -37,7 +38,7 @@ class SelectionSearchBar extends BlocPageChild<NoteSelectionBloc, NoteSelectionS
           width: 45,
           height: 40,
           child: TextButton(
-            onPressed: () => currentBloc(context).add(const NoteSelectionFocusSearch(focus: false)),
+            onPressed: () => currentBloc(context).add(const NoteSelectionChangeSearch(searchStatus: SearchStatus.DISABLED)),
             child: Text(translate(context, "ok")),
           ),
         ),

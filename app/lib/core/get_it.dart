@@ -28,6 +28,7 @@ import 'package:app/domain/usecases/note_structure/create_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/finish_move_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/inner/add_new_structure_update_batch.dart';
+import 'package:app/domain/usecases/note_structure/load_all_structure_content.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/inner/get_original_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_folders.dart';
@@ -214,6 +215,10 @@ Future<void> initializeGetIt() async {
         noteTransferRepository: sl(),
         getLoggedInAccount: sl(),
       ));
+  sl.registerLazySingleton<LoadAllStructureContent>(() => LoadAllStructureContent(
+        noteStructureRepository: sl(),
+        loadNoteContent: sl(),
+      ));
 
   // services
   sl.registerLazySingleton<SessionService>(() => SessionService());
@@ -250,6 +255,7 @@ Future<void> initializeGetIt() async {
         deleteCurrentStructureItem: sl(),
         changeCurrentStructureItem: sl(),
         transferNotes: sl(),
+        loadAllStructureContent: sl(),
         finishMoveStructureItem: sl(),
         navigateToItem: sl(),
         dialogService: sl(),

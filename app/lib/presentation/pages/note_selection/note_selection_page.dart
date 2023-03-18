@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:app/core/enums/custom_icon_button_type.dart';
+import 'package:app/core/enums/search_status.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/translation_string.dart';
@@ -56,7 +57,7 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
   @override
   PreferredSizeWidget buildAppBarWithState(BuildContext context, NoteSelectionState state) {
     if (state is NoteSelectionStateInitialised) {
-      if (state.isSearching) {
+      if (state.searchStatus != SearchStatus.DISABLED) {
         return _buildSearchAppBar(context, state);
       } else {
         return _buildTitleAppBar(context, state);

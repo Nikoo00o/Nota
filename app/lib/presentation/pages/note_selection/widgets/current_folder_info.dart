@@ -1,3 +1,4 @@
+import 'package:app/core/enums/search_status.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
@@ -19,7 +20,7 @@ class CurrentFolderInfo extends BlocPageChild<NoteSelectionBloc, NoteSelectionSt
   @override
   Widget buildWithNoState(BuildContext context, Widget partWithState) {
     if (folder.isTopLevel) {
-      if(folder.isMove){
+      if (folder.isMove) {
         return CustomCard(
           color: colorSurfaceVariant(context),
           onTap: null,
@@ -29,7 +30,7 @@ class CurrentFolderInfo extends BlocPageChild<NoteSelectionBloc, NoteSelectionSt
           alignDescriptionRight: false,
         );
       } else {
-        return const SizedBox();
+        return createBlocBuilder(builder: _buildSearchInfoOrNothing);
       }
     }
     return CustomCard(
@@ -41,6 +42,27 @@ class CurrentFolderInfo extends BlocPageChild<NoteSelectionBloc, NoteSelectionSt
       alignDescriptionRight: false,
       toolTip: "note.selection.navigate.to.parent",
     );
+  }
+
+  Widget _buildSearchInfoOrNothing(BuildContext context, NoteSelectionState state) {
+    if (state is NoteSelectionStateInitialised && state.searchStatus != SearchStatus.DISABLED && state.searchInput == null) {
+      final String titleKey = state.searchStatus == SearchStatus.EXTENDED
+          ? "note.selection.search.mode.extended"
+          : "note.selection.search.mode.default";
+      final String descriptionKey = state.searchStatus == SearchStatus.EXTENDED
+          ? "note.selection.search.mode.extended.description"
+          : "note.selection.search.mode.default.description";
+      return CustomCard(
+        color: colorSurfaceVariant(context),
+        onTap: null,
+        icon: Icons.info,
+        title: translate(context, titleKey),
+        description: translate(context, descriptionKey),
+        alignDescriptionRight: false,
+      );
+    } else {
+      return const SizedBox();
+    }
   }
 
   String _getParentName(BuildContext context) {

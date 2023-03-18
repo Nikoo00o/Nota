@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:app/core/enums/event_action.dart';
+import 'package:app/core/enums/search_status.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/presentation/widgets/base_pages/page_event.dart';
 
@@ -60,8 +61,8 @@ class NoteSelectionChangedMove extends NoteSelectionEvent {
   const NoteSelectionChangedMove({required this.status});
 }
 
-class NoteSelectionFocusSearch extends NoteSelectionEvent {
-  final bool focus;
+class NoteSelectionChangeSearch extends NoteSelectionEvent {
+  final SearchStatus searchStatus;
 
-  const NoteSelectionFocusSearch({required this.focus});
+  const NoteSelectionChangeSearch({required this.searchStatus});
 }

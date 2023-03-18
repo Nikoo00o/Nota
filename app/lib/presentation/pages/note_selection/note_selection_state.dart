@@ -1,5 +1,5 @@
+import 'package:app/core/enums/search_status.dart';
 import 'package:app/domain/entities/structure_folder.dart';
-import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/presentation/widgets/base_pages/page_state.dart';
 
 class NoteSelectionState extends PageState {
@@ -8,16 +8,21 @@ class NoteSelectionState extends PageState {
 
 class NoteSelectionStateInitialised extends NoteSelectionState {
   final StructureFolder currentFolder;
-  final bool isSearching;
+  final SearchStatus searchStatus;
   final String? searchInput;
+
+  /// only used for extended search
+  final Map<int, String>? noteContentMap;
 
   NoteSelectionStateInitialised({
     required this.currentFolder,
-    required this.isSearching,
+    required this.searchStatus,
     required this.searchInput,
+    required this.noteContentMap,
   }) : super(<String, Object?>{
           "currentFolder": currentFolder,
-          "isSearching": isSearching,
+          "searchStatus": searchStatus,
           "searchInput": searchInput,
+          "noteContentMap": noteContentMap,
         });
 }

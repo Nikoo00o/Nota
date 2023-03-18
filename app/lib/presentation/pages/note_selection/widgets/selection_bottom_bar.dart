@@ -1,5 +1,6 @@
 import 'package:app/core/enums/custom_icon_button_type.dart';
 import 'package:app/core/enums/event_action.dart';
+import 'package:app/core/enums/search_status.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_event.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_state.dart';
@@ -56,7 +57,7 @@ class SelectionBottomBar extends BlocPageChild<NoteSelectionBloc, NoteSelectionS
             tooltipKey: "note.selection.search",
             size: 30,
             buttonType: CustomIconButtonType.OUTLINED,
-            onPressed: () => currentBloc(context).add(const NoteSelectionFocusSearch(focus: true)),
+            onPressed: () => currentBloc(context).add(const NoteSelectionChangeSearch(searchStatus: SearchStatus.DEFAULT)),
           ),
           CustomIconButton(
             icon: Icons.sync,
