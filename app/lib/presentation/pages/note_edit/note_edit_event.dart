@@ -41,3 +41,7 @@ class NoteEditSearchStepped extends NoteEditEvent {
 
   const NoteEditSearchStepped({required this.forward});
 }
+
+class NoteEditAppPaused extends NoteEditEvent {
+  const NoteEditAppPaused();
+}

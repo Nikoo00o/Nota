@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 import 'package:app/core/config/app_config.dart';
 import 'package:app/data/datasources/remote_note_data_source.dart';
+import 'package:app/domain/usecases/note_transfer/load_note_buffer.dart';
+import 'package:app/domain/usecases/note_transfer/save_note_buffer.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/domain/entities/note_info.dart';
@@ -74,4 +76,7 @@ abstract class NoteTransferRepository {
   ///
   /// If [isTempNote] is true, then the note ending will be ".temp" instead.
   String getLocalNotePath({required int noteId, required bool isTempNote});
+
+  /// This is used directly inside of [LoadNoteBuffer] and [SaveNoteBuffer] to cache encrypted note content!
+  Uint8List? encryptedNoteBufferCache;
 }

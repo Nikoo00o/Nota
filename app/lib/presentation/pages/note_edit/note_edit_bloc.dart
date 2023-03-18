@@ -17,7 +17,9 @@ import 'package:app/domain/usecases/note_structure/navigation/get_structure_upda
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
 import 'package:app/domain/usecases/note_structure/start_move_structure_item.dart';
 import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
+import 'package:app/domain/usecases/note_transfer/load_note_buffer.dart';
 import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
+import 'package:app/domain/usecases/note_transfer/save_note_buffer.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_event.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_state.dart';
@@ -40,6 +42,8 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
   final DeleteCurrentStructureItem deleteCurrentStructureItem;
   final NavigateToItem navigateToItem;
   final DialogService dialogService;
+  final SaveNoteBuffer saveNoteBuffer;
+  final LoadNoteBuffer loadNoteBuffer;
   final GetCurrentStructureItem getCurrentStructureItem;
 
   final GetStructureUpdatesStream getStructureUpdatesStream;
@@ -65,6 +69,8 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
     required this.startMoveStructureItem,
     required this.deleteCurrentStructureItem,
     required this.navigateToItem,
+    required this.saveNoteBuffer,
+    required this.loadNoteBuffer,
     required this.dialogService,
     required this.getCurrentStructureItem,
     required this.getStructureUpdatesStream,
@@ -81,6 +87,7 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
     on<NoteEditDropDownMenuSelected>(_handleDropDownMenuSelected);
     on<NoteEditInputSaved>(_handleInputSaved);
     on<NoteEditSearchStepped>(_handleSearchStep);
+    on<NoteEditAppPaused>(_handleAppPaused);
   }
 
   @override
@@ -131,24 +138,35 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
         Logger.verbose("loading initial note content");
         final List<int> data = await loadNoteContent(LoadNoteContentParams(noteId: (currentItem as StructureNote).id));
         noteHash = await SecurityUtilsExtension.hashBytesAsync(data);
-        inputController.text = utf8.decode(data);
+        final String? bufferedData = await loadNoteBuffer(const NoParams());
+        if (bufferedData != null) {
+          inputController.text = bufferedData; // restore and reset buffered data after pausing the app and coming back
+          // here from the lockscreen
+          await saveNoteBuffer(const SaveNoteBufferParams(content: null));
+          if (inputFocus.hasFocus == false) {
+            inputFocus.requestFocus();
+          }
+        } else {
+          inputController.text = utf8.decode(data);
+        }
       }
       emit(_buildState());
     } else {
-      navigationService.navigateTo(Routes.note_selection);
-      inputController.clear(); // clear text input field on navigating away
+      navigationService.navigateTo(Routes.note_selection); // will be called automatically from _handleNavigatedBack below
     }
     dialogService.hideLoadingDialog();
   }
 
   Future<void> _handleNavigatedBack(NoteEditNavigatedBack event, Emitter<NoteEditState> emit) async {
-    _clearFocus(); // always clear focus
-    if (isEditing == false ||
-        ListUtils.equals(noteHash, await SecurityUtilsExtension.hashBytesAsync(utf8.encode(inputController.text))) ||
-        await _userConfirmedDrop()) {
+    await _clearFocus(); // always clear focus. only show confirm dialog if is editing and if content has changed!
+    final bool contentChanged = await hasContentChanged(updateOldHash: false);
+    if (contentChanged == false || await _userConfirmedDrop()) {
       Logger.verbose("navigated back to ${currentItem.getParent()?.path}");
+      inputController.clear(); // also clear text input on navigating
       await navigateToItem.call(const NavigateToItemParamsParent());
       //navigating will be done automatically inside of _handleStructureChanged
+    } else {
+      inputFocus.requestFocus(); // make sure the user knows that he has to edit the text again
     }
   }
 
@@ -221,12 +239,10 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
 
   Future<void> _handleInputSaved(NoteEditInputSaved event, Emitter<NoteEditState> emit) async {
     dialogService.showLoadingDialog();
-    _clearFocus();
+    await _clearFocus();
     final List<int> newData = utf8.encode(inputController.text);
-    final List<int> newHash = await SecurityUtilsExtension.hashBytesAsync(newData);
-    if (ListUtils.equals(newHash, noteHash) == false) {
+    if (await hasContentChanged(updateOldHash: true)) {
       await changeCurrentStructureItem.call(ChangeCurrentNoteParam(newName: currentItem.name, newContent: newData));
-      noteHash = newHash;
       dialogService.showInfoSnackBar(const ShowInfoSnackBar(textKey: "saved", duration: Duration(seconds: 1)));
     }
     emit(_buildState());
@@ -242,7 +258,15 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
     emit(_buildState());
   }
 
-  void _clearFocus() {
+  Future<void> _handleAppPaused(NoteEditAppPaused event, Emitter<NoteEditState> emit) async {
+    if (noteHash != null && await hasContentChanged(updateOldHash: false)) {
+      await saveNoteBuffer(SaveNoteBufferParams(content: inputController.text));
+    }
+  }
+
+  /// clears focus of input and search, also clears the searchcontroller and updates the search of the input controller.
+  /// also resets the note buffer
+  Future<void> _clearFocus() async {
     if (inputFocus.hasFocus) {
       inputFocus.unfocus();
     }
@@ -251,6 +275,7 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
     }
     searchController.clear(); // also clear search text
     inputController.updateSearch(""); // and also clear input controller
+    await saveNoteBuffer(const SaveNoteBufferParams(content: null));
   }
 
   /// only if [currentItem] is [StructureNote]
@@ -266,6 +291,21 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
     } else {
       return const NoteEditState();
     }
+  }
+
+  /// compares the [noteHash] to a newly computed hash of the [inputController.text] and returns if they are different.
+  ///
+  /// If they are different (so the content has changed) and [updateOldHash] is true, then the [noteHash] will be set to
+  /// the new one!
+  Future<bool> hasContentChanged({required bool updateOldHash}) async {
+    final List<int> newHash = await SecurityUtilsExtension.hashBytesAsync(utf8.encode(inputController.text));
+    if (ListUtils.equals(newHash, noteHash) == false) {
+      if (updateOldHash) {
+        noteHash = newHash;
+      }
+      return true;
+    }
+    return false;
   }
 
   bool get isEditing => inputFocus.hasFocus || searchFocus.hasFocus;
