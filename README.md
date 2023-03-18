@@ -51,6 +51,8 @@ flutter build ipa --release           # ios
   folder `nota/server/notaRes` for debug mode, or inside of a folder named `data` next to the server exe in release mode
     - if your private key is password protected, you can pass the password to the server exe as a command line argument 
       with `-r "password"`, or `--rsaPassword="password"`
+- you can also adjust the log level with `-l "number"`, or `--loglevel="number"` where the number can be 0 for errors 
+  only, 1 for warning, 2 for info, 3 for debug and 4 for verbose
 
 ### Creating a Self-Signed OpenSSL Certificate and Private Key
 

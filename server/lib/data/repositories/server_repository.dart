@@ -47,7 +47,7 @@ class ServerRepository {
     );
 
     if (serverStarted) {
-      Logger.debug("Clients should be able to connect to ${Endpoints.ABOUT.getFullApiPath(serverConfig.getServerUrl())}");
+      Logger.info("Clients should be able to connect to ${Endpoints.ABOUT.getFullApiPath(serverConfig.getServerUrl())}");
     }
 
     if (serverStarted && autoRestart) {

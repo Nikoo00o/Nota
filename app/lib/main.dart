@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:app/core/config/app_config.dart';
 import 'package:app/core/config/app_theme.dart';
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/get_it.dart';
@@ -19,12 +20,13 @@ import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
 Future<void> main(List<String> arguments) async {
-  Logger.initLogger(AppLogger(logLevel: LogLevel.VERBOSE));
+  Logger.initLogger(AppLogger(logLevel: LogLevel.DEBUG));
   try {
     DArgon2Flutter.init(); // enable flutter argon2 for better performance
     WidgetsFlutterBinding.ensureInitialized();
     await initializeGetIt();
     _initErrorCallbacks();
+    Logger.initLogger(AppLogger(logLevel: sl<AppConfig>().defaultLogLevel));
     await sl<LocalDataSource>().init();
     await sl<TranslationService>().init();
 

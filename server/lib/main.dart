@@ -7,14 +7,22 @@ import 'package:shared/core/enums/log_level.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
 Future<void> main(List<String> arguments) async {
-  Logger.initLogger(Logger(logLevel: LogLevel.VERBOSE));
+  final ArgParser parser = ArgParser()
+    ..addOption("rsaPassword", abbr: "r")
+    ..addOption("loglevel", abbr: "l");
+  final ArgResults argResults = parser.parse(arguments);
+  final String? rsaPassword = argResults["rsaPassword"] as String?;
+  final String? logLevelStr = argResults["loglevel"] as String?;
+  final int? logLevel = int.tryParse(logLevelStr ?? "");
+  if (logLevel != null && logLevel >= 0 && logLevel < LogLevel.values.length) {
+    Logger.initLogger(Logger(logLevel: LogLevel.values[logLevel]));
+  } else {
+    Logger.initLogger(Logger(logLevel: LogLevel.VERBOSE));
+  }
+  Logger.debug("Using log level ${Logger.currentLogLevel}");
   await initializeGetIt();
   await sl<LocalDataSource>().init();
   await sl<NoteDataSource>().init();
-
-  final ArgParser parser = ArgParser()..addOption("rsaPassword", abbr: "r");
-  final ArgResults argResults = parser.parse(arguments);
-  final String? rsaPassword = argResults["rsaPassword"] as String?;
 
   await sl<StartNotaServer>().call(StartNotaServerParams(rsaPassword: rsaPassword, autoRestart: true));
 }
