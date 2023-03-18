@@ -2,6 +2,7 @@ import 'package:app/core/utils/input_validator.dart';
 import 'package:app/presentation/pages/settings/settings_bloc.dart';
 import 'package:app/presentation/pages/settings/settings_event.dart';
 import 'package:app/presentation/pages/settings/settings_state.dart';
+import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:app/presentation/widgets/base_pages/reuse_bloc_page.dart';
 import 'package:app/presentation/widgets/custom_outlined_button.dart';
 import 'package:app/presentation/widgets/custom_text_form_field.dart';
@@ -25,6 +26,7 @@ class ChangePasswordPage extends ReuseBlocPage<SettingsBloc, SettingsState> {
               _buildInput(context),
               const SizedBox(height: 25),
               _buildButtons(context),
+              const SizedBox(height: BlocPage.defaultAppBarHeight),
             ],
           ),
         ),
