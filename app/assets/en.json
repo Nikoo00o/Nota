@@ -51,7 +51,7 @@
   "page.login.title.create": "Account Creation",
   "page.login.title.remote.login": "Remote Login",
   "page.login.title.local.login": "Local Login",
-  "page.login.description.create": "Create your new account credentials",
+  "page.login.description.create": "Create your new account credentials.\nThe password needs to be at least 4 characters long and contain one number, one uppercase letter and one lowercase letter.",
   "page.login.description.remote.login": "Login with your user credentials",
   "page.login.description.local.login.1": "Welcome back ",
   "page.login.description.local.login.2": "Login with your password",
@@ -112,7 +112,7 @@
   "note.selection.create.invalid.name": "Invalid name",
   "note.selection.create.name.taken": "There already is a folder of the same parent with this name",
   "note.selection.folder.created": "Created the new folder {0}",
-  "available.in.different.view": "Only available in different View",
+  "available.in.different.view": "Only available in Root Folder View",
   "note.selection.folder.description": "Folder last modified: {0}",
   "note.selection.note.description": "Note last modified: {0}",
   "note.selection.folder.needs.note": "This folder needs one note to not get deleted",
@@ -140,5 +140,6 @@
   "note.edit.rename.note.done": "The note was renamed from {0} to {1}",
   "note.edit.delete.note": "Delete note",
   "note.edit.delete.note.description": "Should the current note {0} really be deleted?",
-  "note.edit.delete.note.done": "Deleted the note at the path {0}"
+  "note.edit.delete.note.done": "Deleted the note at the path {0}",
+  "nota.about" : "Nota is a Cross-Platform Note-Taking App designed to work both locally offline, or server synchronized across all of your devices. Your notes are securely encrypted and can only be accessed by your local devices with your password. For more details visit\n"
 }

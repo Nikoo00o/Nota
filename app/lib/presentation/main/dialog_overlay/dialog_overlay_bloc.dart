@@ -225,9 +225,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
             children: <TextSpan>[
               TextSpan(
                   style: style,
-                  text: "Nota is a Cross-Platform Note-Taking App designed to work both offline locally, "
-                      "or synchronized with a server across all devices. "
-                      'For more details visit\n'),
+                  text: translate("nota.about")),
               TextSpan(
                 style: style?.copyWith(color: colors.primary),
                 text: "https://github.com/Nikoo00o/Nota",

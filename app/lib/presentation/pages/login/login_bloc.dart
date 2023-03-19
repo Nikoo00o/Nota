@@ -96,14 +96,20 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
       password: passwordController.text,
       confirmPassword: passwordConfirmController.text,
     )) {
-      await createAccount(CreateAccountParams(username: usernameController.text, password: passwordController.text));
-      dialogService.show(ShowInfoDialog(
-        titleKey: "page.login.account.created.title",
-        descriptionKey: "page.login.account.created.description",
-        descriptionKeyParams: <String>[usernameController.text],
-      ));
-      _createNewAccount = false;
-      add(const LoginEventInitialise());
+      if (InputValidator.validatePassword(passwordController.text) == false) {
+        dialogService.showErrorDialog(const ShowErrorDialog(descriptionKey: "page.login.insecure.password"));
+      } else if (passwordController.text != passwordConfirmController.text) {
+        dialogService.showErrorDialog(const ShowErrorDialog(descriptionKey: "page.login.no.password.match"));
+      } else {
+        await createAccount(CreateAccountParams(username: usernameController.text, password: passwordController.text));
+        dialogService.show(ShowInfoDialog(
+          titleKey: "page.login.account.created.title",
+          descriptionKey: "page.login.account.created.description",
+          descriptionKeyParams: <String>[usernameController.text],
+        ));
+        _createNewAccount = false;
+        add(const LoginEventInitialise());
+      }
     }
   }
 

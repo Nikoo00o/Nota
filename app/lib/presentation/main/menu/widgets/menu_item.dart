@@ -74,9 +74,9 @@ class MenuItem extends BlocPageChild<MenuBloc, MenuState> {
         return Icons.crop_portrait;
 
       case "notes.root":
-        return Icons.note;
+        return Icons.folder;
       case "notes.recent":
-        return Icons.note;
+        return Icons.folder;
 
       default:
         return null;

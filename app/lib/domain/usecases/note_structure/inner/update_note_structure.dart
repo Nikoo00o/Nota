@@ -113,8 +113,8 @@ class UpdateNoteStructure extends UseCase<void, UpdateNoteStructureParams> {
     // comparison if it is set and otherwise use the current item.
 
     if (compareItem == null) {
-      noteStructureRepository.currentItem = noteStructureRepository.recent!;
-      Logger.info("Updated the current item to the default recent"); // special case if there was no current item set before
+      noteStructureRepository.currentItem = noteStructureRepository.root!;
+      Logger.info("Updated the current item to the default root"); // special case if there was no current item set before
     } else {
       final StructureFolder topLevelFolder = _getTopLevelFolder(currentItem: currentItem, originalItem: originalItem);
       StructureItem? newCurrentItem;

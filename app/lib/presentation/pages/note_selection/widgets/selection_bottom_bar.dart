@@ -1,12 +1,15 @@
 import 'package:app/core/enums/custom_icon_button_type.dart';
 import 'package:app/core/enums/event_action.dart';
 import 'package:app/core/enums/search_status.dart';
+import 'package:app/core/get_it.dart';
+import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_event.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_state.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
 import 'package:app/presentation/widgets/custom_icon_button.dart';
 import 'package:app/presentation/widgets/custom_outlined_button.dart';
+import 'package:app/services/dialog_service.dart';
 import 'package:flutter/material.dart';
 
 class SelectionBottomBar extends BlocPageChild<NoteSelectionBloc, NoteSelectionState> {
@@ -72,7 +75,13 @@ class SelectionBottomBar extends BlocPageChild<NoteSelectionBloc, NoteSelectionS
             tooltipKey: state.currentFolder.isRecent ? "available.in.different.view" : "note.selection.create.folder",
             size: 30,
             buttonType: CustomIconButtonType.FILLED_SECONDARY,
-            onPressed: () => currentBloc(context).add(const NoteSelectionCreatedItem(isFolder: true)),
+            onPressed: () {
+              if (state.currentFolder.isRecent) {
+                sl<DialogService>().showInfoDialog(const ShowInfoDialog(descriptionKey: "available.in.different.view"));
+              } else {
+                currentBloc(context).add(const NoteSelectionCreatedItem(isFolder: true));
+              }
+            },
           ),
           CustomIconButton(
             icon: Icons.note_add,
