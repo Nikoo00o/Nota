@@ -152,10 +152,15 @@ class FileUtils {
     }
   }
 
-  /// Returns a list of files of either the directory at [path], or the parent directory if [path] is a file
-  static List<String> getFilesInDirectory(String path) {
+  /// Returns a list of files of either the directory at [path], or the parent directory if [path] is a file.
+  ///
+  /// The list will be empty if the directory does not exist
+  static Future<List<String>> getFilesInDirectory(String path) async {
     final Directory directory = _getDirectoryForPath(path);
-    final List<FileSystemEntity> files = directory.listSync();
+    if(directory.existsSync() == false){
+      return <String>[];
+    }
+    final List<FileSystemEntity> files = await directory.list().toList();
     return files.map((FileSystemEntity file) => file.path).toList();
   }
 
