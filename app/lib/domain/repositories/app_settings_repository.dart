@@ -1,5 +1,8 @@
 import 'dart:ui';
 
+import 'package:shared/core/enums/log_level.dart';
+import 'package:shared/core/utils/logger/log_message.dart';
+
 /// Contains all global app config options that the user can change which are not specific to the account!
 abstract class AppSettingsRepository {
   const AppSettingsRepository();
@@ -24,4 +27,13 @@ abstract class AppSettingsRepository {
 
   /// see [getLockscreenTimeout]
   Future<void> setLockscreenTimeout({required Duration duration});
+
+  Future<void> addLog(LogMessage log);
+
+  Future<List<LogMessage>> getLogs();
+
+  Future<void> setLogLevel(LogLevel logLevel);
+
+  Future<LogLevel> getLogLevel();
+
 }

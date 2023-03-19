@@ -19,4 +19,6 @@ class AppConfig extends SharedConfig {
   bool get showDeveloperOptions => true;
 
   LogLevel get defaultLogLevel => LogLevel.VERBOSE;
+
+  int get amountOfLogsToKeep => 350;
 }

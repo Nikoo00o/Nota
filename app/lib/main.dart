@@ -20,14 +20,14 @@ import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
 Future<void> main(List<String> arguments) async {
-  Logger.initLogger(AppLogger(logLevel: LogLevel.DEBUG));
+  Logger.initLogger(Logger(logLevel: LogLevel.DEBUG));
   try {
     DArgon2Flutter.init(); // enable flutter argon2 for better performance
     WidgetsFlutterBinding.ensureInitialized();
     await initializeGetIt();
     _initErrorCallbacks();
-    Logger.initLogger(AppLogger(logLevel: sl<AppConfig>().defaultLogLevel));
     await sl<LocalDataSource>().init();
+    Logger.initLogger(AppLogger(logLevel: sl<AppConfig>().defaultLogLevel, appConfig: sl(), appSettingsRepository: sl()));
     await sl<TranslationService>().init();
 
     final ThemeData theme = AppTheme.newTheme(darkTheme: await sl<AppSettingsRepository>().isDarkTheme());

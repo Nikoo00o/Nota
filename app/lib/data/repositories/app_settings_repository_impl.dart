@@ -4,6 +4,8 @@ import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/locales.dart';
 import 'package:app/data/datasources/local_data_source.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';
+import 'package:shared/core/enums/log_level.dart';
+import 'package:shared/core/utils/logger/log_message.dart';
 
 class AppSettingsRepositoryImpl extends AppSettingsRepository {
   final LocalDataSource localDataSource;
@@ -41,4 +43,16 @@ class AppSettingsRepositoryImpl extends AppSettingsRepository {
   @override
   Future<void> setLockscreenTimeout({required Duration duration}) =>
       localDataSource.setLockscreenTimeout(duration: duration);
+
+  @override
+  Future<void> addLog(LogMessage log) => localDataSource.addLog(log);
+
+  @override
+  Future<List<LogMessage>> getLogs() => localDataSource.getLogs();
+
+  @override
+  Future<void> setLogLevel(LogLevel logLevel) => localDataSource.setLogLevel(logLevel: logLevel);
+
+  @override
+  Future<LogLevel> getLogLevel() async => (await localDataSource.getLogLevel()) ?? appConfig.defaultLogLevel;
 }

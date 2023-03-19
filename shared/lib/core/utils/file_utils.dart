@@ -23,8 +23,19 @@ class FileUtils {
   /// Write the [content] as a file at the [path] and also creates the parent directories
   static void writeFile(String path, String content) {
     final File file = File(path);
-    file.createSync(recursive: true);
+    if (file.existsSync() == false) {
+      file.createSync(recursive: true);
+    }
     file.writeAsStringSync(content, flush: true);
+  }
+
+  /// Append the [content] to the file at the [path] and also creates the parent directories
+  static Future<void> addToFileAsync(String path, String content) async {
+    final File file = File(path);
+    if ((await file.exists()) == false) {
+      await file.create(recursive: true);
+    }
+    await file.writeAsString(content, mode: FileMode.append, flush: true);
   }
 
   /// Returns the [bytes] of the file at the [path], or returns [null] if the file was not found!
@@ -41,7 +52,9 @@ class FileUtils {
   /// Write the [bytes] as a file at the [path] and also creates the parent directories
   static Future<void> writeFileAsBytes(String path, List<int> bytes) async {
     final File file = File(path);
-    await file.create(recursive: true);
+    if ((await file.exists()) == false) {
+      await file.create(recursive: true);
+    }
     await file.writeAsBytes(bytes, flush: true);
   }
 

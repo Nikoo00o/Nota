@@ -6,7 +6,7 @@ import 'helper/server_test_helper.dart';
 
 // test for the specific account functions.
 
-const int _serverPort = 8194;
+const int _serverPort = 8294;
 
 void main() {
   setUp(() async {

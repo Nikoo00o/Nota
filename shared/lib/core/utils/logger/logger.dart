@@ -82,8 +82,13 @@ class Logger {
     if (canLog(level) == false) {
       return;
     }
-    final LogMessage logMessage =
-        LogMessage(message: message, level: level, error: error, stackTrace: stackTrace, timestamp: DateTime.now());
+    final LogMessage logMessage = LogMessage(
+      message: message,
+      level: level,
+      error: error?.toString(),
+      stackTrace: stackTrace?.toString(),
+      timestamp: DateTime.now(),
+    );
     _wrapLog(convertLogMessageToConsole(logMessage)).forEach(logToConsole);
     addConsoleDelimiter();
 
