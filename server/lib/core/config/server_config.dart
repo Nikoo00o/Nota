@@ -24,6 +24,9 @@ class ServerConfig extends SharedConfig {
   /// Local path to server notes path
   String get noteFolder => "$resourceFolderPath${Platform.pathSeparator}notes";
 
+  /// Local path to server log files
+  String get logFolder => "$resourceFolderPath${Platform.pathSeparator}logs";
+
   /// The remaining life time of a token after which the token will get refreshed.
   ///
   /// So a token gets refreshed after the time: [sessionTokenMaxLifetime] - [sessionTokenRefreshAfterRemainingTime].

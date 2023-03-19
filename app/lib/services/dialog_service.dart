@@ -127,5 +127,5 @@ class DialogServiceImpl extends DialogService {
   bool get isDialogVisible => dialogOverlayBloc.isCustomDialogVisible;
 
   @override
-  bool get isLoading => dialogOverlayBloc.isLoadingDialogVisible;
+  bool get isLoading => dialogOverlayBloc.loadingDialogCounter > 0;
 }

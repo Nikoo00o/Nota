@@ -146,4 +146,7 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
       topLevelFolders: noteFolders.keys.toList(),
     );
   }
+
+  @override
+  bool get enableLoadingDialog => false; // prevent loading dialog, because it would corrupt the about dialog
 }

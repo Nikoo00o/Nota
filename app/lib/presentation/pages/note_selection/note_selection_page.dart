@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:app/core/enums/custom_icon_button_type.dart';
+import 'package:app/core/enums/search_status.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/translation_string.dart';
@@ -10,6 +11,7 @@ import 'package:app/presentation/pages/note_selection/note_selection_state.dart'
 import 'package:app/presentation/pages/note_selection/widgets/current_folder_info.dart';
 import 'package:app/presentation/pages/note_selection/widgets/selection_bottom_bar.dart';
 import 'package:app/presentation/pages/note_selection/widgets/selection_popup_menu.dart';
+import 'package:app/presentation/pages/note_selection/widgets/selection_search_bar.dart';
 import 'package:app/presentation/pages/note_selection/widgets/structure_item_box.dart';
 import 'package:app/presentation/pages/settings/widgets/settings_toggle_option.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
@@ -55,17 +57,40 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
   @override
   PreferredSizeWidget buildAppBarWithState(BuildContext context, NoteSelectionState state) {
     if (state is NoteSelectionStateInitialised) {
-      final TranslationString translation = StructureItem.getTranslationStringForStructureItem(state.currentFolder);
-      return AppBar(
-        title: Text(translate(context, translation.translationKey, keyParams: translation.translationKeyParams),
-            overflow: TextOverflow.fade),
-        centerTitle: false,
-        actions: const <Widget>[
-          SelectionPopupMenu(),
-        ],
-      );
+      if (state.searchStatus != SearchStatus.DISABLED) {
+        return _buildSearchAppBar(context, state);
+      } else {
+        return _buildTitleAppBar(context, state);
+      }
     }
     return AppBar(); // use empty app bar at first, so that the element gets cached for performance
+  }
+
+  PreferredSizeWidget _buildTitleAppBar(BuildContext context, NoteSelectionStateInitialised state) {
+    final TranslationString translation = StructureItem.getTranslationStringForStructureItem(state.currentFolder);
+    return AppBar(
+      title: Text(
+        translate(context, translation.translationKey, keyParams: translation.translationKeyParams),
+        overflow: TextOverflow.fade,
+        style: textTitleLarge(context).copyWith(fontWeight: FontWeight.bold),
+      ),
+      centerTitle: false,
+      actions: const <Widget>[
+        SelectionPopupMenu(),
+      ],
+    );
+  }
+
+  PreferredSizeWidget _buildSearchAppBar(BuildContext context, NoteSelectionStateInitialised state) {
+    return AppBar(
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        tooltip: translate(context, "back"),
+        onPressed: () => currentBloc(context).add(const NoteSelectionNavigatedBack(completer: null, ignoreSearch: false)),
+      ),
+      title: const SelectionSearchBar(),
+      centerTitle: false,
+    );
   }
 
   @override
@@ -100,7 +125,7 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
   @override
   Future<bool> customBackNavigation(BuildContext context) async {
     final Completer<bool> completer = Completer<bool>();
-    currentBloc(context).add(NoteSelectionNavigatedBack(completer: completer));
+    currentBloc(context).add(NoteSelectionNavigatedBack(completer: completer, ignoreSearch: false));
     return completer.future;
   }
 

@@ -6,8 +6,10 @@ abstract class NoteEditEvent extends PageEvent {
   const NoteEditEvent();
 }
 
-class NoteEditUpdateState extends NoteEditEvent {
-  const NoteEditUpdateState();
+class NoteEditUpdatedState extends NoteEditEvent {
+  final bool didSearchChange;
+
+  const NoteEditUpdatedState({required this.didSearchChange});
 }
 
 class NoteEditInitialised extends NoteEditEvent {
@@ -30,8 +32,16 @@ class NoteEditDropDownMenuSelected extends NoteEditEvent {
   const NoteEditDropDownMenuSelected({required this.index});
 }
 
-class NoteEditInputStatusChanged extends NoteEditEvent {
-  final EventAction action;
+class NoteEditInputSaved extends NoteEditEvent {
+  const NoteEditInputSaved();
+}
 
-  const NoteEditInputStatusChanged({required this.action});
+class NoteEditSearchStepped extends NoteEditEvent {
+  final bool forward;
+
+  const NoteEditSearchStepped({required this.forward});
+}
+
+class NoteEditAppPaused extends NoteEditEvent {
+  const NoteEditAppPaused();
 }

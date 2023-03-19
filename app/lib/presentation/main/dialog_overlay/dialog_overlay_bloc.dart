@@ -28,10 +28,11 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
 
   final TranslationService translationService;
 
-  bool isLoadingDialogVisible = false;
+  /// 0 means that no loading dialog is visible
+  int loadingDialogCounter = 0;
   bool isCustomDialogVisible = false;
 
-  /// This is also updated the same as [isLoadingDialogVisible] and [isCustomDialogVisible] and it will be used when the
+  /// This is also updated the same as [loadingDialogCounter] and [isCustomDialogVisible] and it will be used when the
   /// user presses the back button to cancel the current dialog!
   ///
   /// This only counts for the confirm, input and selection dialogs.
@@ -59,7 +60,12 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
   }
 
   Future<void> _handleHideDialog(HideDialog event, Emitter<DialogOverlayState> emit) async {
-    _closeDialog(isLoadingDialog: false, dataForDialog: event.dataForDialog, cancelDialog: event.cancelDialog);
+    _closeDialog(
+      isLoadingDialog: false,
+      dataForDialog: event.dataForDialog,
+      cancelDialog: event.cancelDialog,
+      forceCloseLoadingDialog: true,
+    );
   }
 
   Future<void> _handleHideLoadingDialog(HideLoadingDialog event, Emitter<DialogOverlayState> emit) async {
@@ -197,9 +203,9 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
   }
 
   Future<void> _handleShowAboutDialog(ShowAboutDialog event, Emitter<DialogOverlayState> emit) async {
-    Logger.debug("Showing about dialog"); // special case
-    if (isLoadingDialogVisible) {
-      _closeDialog(cancelDialog: false, isLoadingDialog: true);
+    Logger.verbose("Showing about dialog"); // special case
+    if (loadingDialogCounter > 0) {
+      _closeDialog(cancelDialog: false, isLoadingDialog: true, forceCloseLoadingDialog: true);
     }
     final TextStyle? style = Theme.of(context).textTheme.bodyMedium;
     showAboutDialog(
@@ -318,6 +324,11 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
     if (_isDialogAlreadyVisible(isLoadingDialog: isLoadingDialog)) {
       return null;
     }
+    if (isLoadingDialog) {
+      Logger.verbose("showing loading dialog");
+    } else {
+      Logger.verbose("showing custom dialog");
+    }
     if (newCancelCallback != null) {
       _cancelCallback = newCancelCallback;
     }
@@ -334,19 +345,21 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
 
   bool _isDialogAlreadyVisible({required bool isLoadingDialog}) {
     if (isLoadingDialog) {
-      if (isLoadingDialogVisible || isCustomDialogVisible) {
-        Logger.verbose("a loading, or base dialog is already open");
+      if (isCustomDialogVisible) {
+        Logger.verbose("a base dialog is already open instead of a loading dialog");
         return true;
       }
-      Logger.verbose("showing loading dialog");
-      isLoadingDialogVisible = true;
+      if (loadingDialogCounter++ > 0) {
+        Logger.verbose("a loading dialog is already open, so only incremented: $loadingDialogCounter");
+        return true;
+      }
     } else {
       if (isCustomDialogVisible) {
         Logger.error("a base dialog is already open");
         return true;
-      } else if (isLoadingDialogVisible) {
+      } else if (loadingDialogCounter > 0) {
         Logger.verbose("closing loading dialog in favor of base dialog");
-        _closeDialog(cancelDialog: false, isLoadingDialog: true);
+        _closeDialog(cancelDialog: false, isLoadingDialog: true, forceCloseLoadingDialog: true);
       }
       Logger.verbose("showing some base dialog");
       isCustomDialogVisible = true;
@@ -367,7 +380,13 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
   ///
   /// If [cancelDialog] is true, then the custom onCancel callback of the dialog will be called as well.
   /// Otherwise it will not be called (for example internally after closing the dialog from the confirm button).
-  void _closeDialog({Object? dataForDialog, bool isLoadingDialog = false, required bool cancelDialog}) {
+  ///
+  /// [forceCloseLoadingDialog] will only be true when the loading dialog should be closed in favor of a base dialog
+  void _closeDialog(
+      {Object? dataForDialog,
+      bool isLoadingDialog = false,
+      required bool cancelDialog,
+      bool forceCloseLoadingDialog = false}) {
     if (isLoadingDialog == false) {
       if (isCustomDialogVisible) {
         Logger.verbose("closing custom dialog with $dataForDialog");
@@ -375,20 +394,31 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
           Logger.verbose("also calling the custom dialog cancel callback");
           _cancelCallback?.call();
         }
-        Navigator.of(context).pop(dataForDialog);
+        _pop(dataForDialog);
         isCustomDialogVisible = false;
         _cancelCallback = null;
       } else {
-        Logger.warn("tried to close custom dialog with $dataForDialog, but none was visible");
+        Logger.warn("tried to close an already closed custom dialog with $dataForDialog");
+        _pop(dataForDialog);
       }
     }
-    // if a loading dialog is also visible, then the context must be popped twice!
-    if (isLoadingDialogVisible) {
-      Logger.verbose("closing loading dialog");
-      Navigator.of(context).pop(dataForDialog);
-      isLoadingDialogVisible = false;
-    } else if (isLoadingDialog) {
-      Logger.warn("tried to close loading dialog, but none was visible");
+    if (loadingDialogCounter > 0) {
+      if ((--loadingDialogCounter <= 0 || forceCloseLoadingDialog) && isCustomDialogVisible == false) {
+        Logger.verbose("closing loading dialog");
+        _pop(dataForDialog);
+      } else {
+        Logger.verbose("only decrementing loading dialog $loadingDialogCounter");
+      }
+    } else if (isLoadingDialog && isCustomDialogVisible == false) {
+      Logger.warn("tried to close an already closed loading dialog");
+      _pop(dataForDialog);
+    }
+  }
+
+  void _pop(Object? dataForDialog) {
+    final NavigatorState navigator = Navigator.of(context);
+    if (navigator.canPop()) {
+      navigator.pop(dataForDialog);
     }
   }
 
@@ -397,7 +427,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
   ///
   /// If a loading dialog is visible, then nothing will happen, but any other dialog will be cancelled!
   Future<bool> _onWillPop(BuildContext context) async {
-    if (isLoadingDialogVisible) {
+    if (loadingDialogCounter > 0) {
       return false;
     } else if (isCustomDialogVisible) {
       _closeDialog(isLoadingDialog: false, dataForDialog: null, cancelDialog: true);

@@ -23,7 +23,7 @@ import 'helper/server_test_helper.dart';
 
 late ServerAccountModel _account;
 
-const int _serverPort = 8193;
+const int _serverPort = 8293;
 
 void main() {
   setUp(() async {

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class CustomCard extends WidgetBase {
   final Color color;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final IconData icon;
 
   /// The title (already translated value!)
@@ -35,6 +35,8 @@ class CustomCard extends WidgetBase {
     return Card(
       color: color,
       child: InkWell(
+        // rebuild ink will with on tap depending on title to prevent click feedback after navigation!
+        key: ValueKey<String>(title),
         onTap: onTap,
         borderRadius: BorderRadius.circular(10.0),
         child: _buildTooltipContainer(context),

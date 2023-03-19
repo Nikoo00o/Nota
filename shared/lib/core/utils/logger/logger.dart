@@ -74,13 +74,21 @@ class Logger {
   /// This can be used for performance improvement to prevent execution of some logging code!
   static bool canLog(LogLevel targetLevel) => targetLevel.index <= _instance!.logLevel.index;
 
+  /// returns the current log level of the logger
+  static LogLevel get currentLogLevel => _instance!.logLevel;
+
   /// The main log method that is called by the static log methods. will log to console, storage, etc...
   Future<void> log(String? message, LogLevel level, Object? error, StackTrace? stackTrace) async {
     if (canLog(level) == false) {
       return;
     }
-    final LogMessage logMessage =
-        LogMessage(message: message, level: level, error: error, stackTrace: stackTrace, timestamp: DateTime.now());
+    final LogMessage logMessage = LogMessage(
+      message: message,
+      level: level,
+      error: error?.toString(),
+      stackTrace: stackTrace?.toString(),
+      timestamp: DateTime.now(),
+    );
     _wrapLog(convertLogMessageToConsole(logMessage)).forEach(logToConsole);
     addConsoleDelimiter();
 
@@ -129,7 +137,6 @@ class Logger {
     }
     return color;
   }
-
 
   @override
   String toString() {

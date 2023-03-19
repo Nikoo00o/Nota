@@ -9,22 +9,22 @@ class EditPopupMenu extends BlocPageChild<NoteEditBloc, NoteEditState> {
 
   @override
   Widget buildWithNoState(BuildContext context, Widget partWithState) {
-    return partWithState;
-  }
-
-  @override
-  Widget buildWithState(BuildContext context, NoteEditState state) {
-    if (state is NoteEditStateInitialised) {
-      return PopupMenuButton<int>(
-        onSelected: (int value) => currentBloc(context).add(NoteEditDropDownMenuSelected(index: value)),
-        itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[
-          PopupMenuItem<int>(value: 0, child: Text(translate(context, "note.selection.rename"))),
-          PopupMenuItem<int>(value: 1, child: Text(translate(context, "note.selection.move"))),
-          PopupMenuItem<int>(value: 2, child: Text(translate(context, "note.selection.delete"))),
-          PopupMenuItem<int>(value: 3, child: Text(translate(context, "note.selection.search"))),
-        ],
-      );
-    }
-    return const SizedBox();
+    return createBlocSelector<bool>(
+      selector: (NoteEditState state) => state is NoteEditStateInitialised,
+      builder: (BuildContext context, bool isInitialized) {
+        if (isInitialized) {
+          return PopupMenuButton<int>(
+            onSelected: (int value) => currentBloc(context).add(NoteEditDropDownMenuSelected(index: value)),
+            itemBuilder: (BuildContext context) => <PopupMenuItem<int>>[
+              PopupMenuItem<int>(value: 0, child: Text(translate(context, "note.selection.rename"))),
+              PopupMenuItem<int>(value: 1, child: Text(translate(context, "note.selection.move"))),
+              PopupMenuItem<int>(value: 2, child: Text(translate(context, "note.selection.delete"))),
+            ],
+          );
+        } else {
+          return const SizedBox();
+        }
+      },
+    );
   }
 }

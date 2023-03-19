@@ -7,7 +7,9 @@ import 'package:app/data/datasources/local_data_source.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared/core/enums/log_level.dart';
 import 'package:shared/core/utils/file_utils.dart';
+import 'package:shared/core/utils/logger/log_message.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/data/datasources/hive_box_configuration.dart';
 import 'package:shared/data/datasources/shared_hive_data_source_mixin.dart';
@@ -24,6 +26,8 @@ class LocalDataSourceImpl extends LocalDataSource with SharedHiveDataSourceMixin
   @override
   Future<void> init() async {
     await Hive.initFlutter();
+    Hive.registerAdapter(LogLevelAdapter());
+    Hive.registerAdapter(LogMessageAdapter());
     _hiveKey = await generateHiveKey();
   }
 
@@ -32,6 +36,8 @@ class LocalDataSourceImpl extends LocalDataSource with SharedHiveDataSourceMixin
     assert(_hiveKey != null, "hive key must be set by calling init before");
     return <String, HiveBoxConfiguration>{
       LocalDataSource.HIVE_DATABASE: HiveBoxConfiguration(isLazy: false, name: "hive", encryptionKey: _hiveKey),
+      LocalDataSource.LOG_DATABASE:
+          HiveBoxConfiguration(isLazy: false, name: "logs", encryptionKey: _hiveKey, isGeneratedHiveObject: true),
     };
   }
 
@@ -99,6 +105,12 @@ class LocalDataSourceImpl extends LocalDataSource with SharedHiveDataSourceMixin
     await deleteAllHiveDatabases();
     await secureStorage.deleteAll();
   }
+
+  @override
+  Future<void> addLog(LogMessage log) => addHiveObject(object: log, databaseKey: LocalDataSource.LOG_DATABASE);
+
+  @override
+  Future<List<LogMessage>> getLogs() => loadHiveObjects(databaseKey: LocalDataSource.LOG_DATABASE);
 
   Future<String> _getAbsolutePath(String localFilePath) async {
     final Directory documents = await getApplicationDocumentsDirectory();

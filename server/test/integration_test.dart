@@ -23,7 +23,7 @@ import 'helper/server_test_helper.dart';
 
 // test for a combination of other tests. This tests the workflow which the app would follow
 
-const int _serverPort = 8195;
+const int _serverPort = 8295;
 
 void main() {
   setUp(() async {

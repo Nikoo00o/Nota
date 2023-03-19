@@ -19,7 +19,7 @@ import 'helper/server_test_helper.dart';
 
 // test for the general server functions
 
-const int _serverPort = 8192;
+const int _serverPort = 8292;
 
 // every test will be run in a separate process
 void main() {

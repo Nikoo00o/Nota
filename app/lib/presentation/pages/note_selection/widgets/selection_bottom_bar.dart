@@ -1,5 +1,6 @@
 import 'package:app/core/enums/custom_icon_button_type.dart';
 import 'package:app/core/enums/event_action.dart';
+import 'package:app/core/enums/search_status.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_event.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_state.dart';
@@ -49,19 +50,20 @@ class SelectionBottomBar extends BlocPageChild<NoteSelectionBloc, NoteSelectionS
   Widget _buildCompleteBar(BuildContext context, NoteSelectionStateInitialised state) {
     return BottomAppBar(
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
           CustomIconButton(
             icon: Icons.search,
             tooltipKey: "note.selection.search",
             size: 30,
-            onPressed: () {},
+            buttonType: CustomIconButtonType.OUTLINED,
+            onPressed: () => currentBloc(context).add(const NoteSelectionChangeSearch(searchStatus: SearchStatus.DEFAULT)),
           ),
           CustomIconButton(
             icon: Icons.sync,
             tooltipKey: "note.selection.sync",
             size: 30,
-            buttonType: CustomIconButtonType.OUTLINED,
+            buttonType: CustomIconButtonType.FILLED_TERTIARY,
             onPressed: () => currentBloc(context).add(const NoteSelectionServerSynced()),
           ),
           CustomIconButton(
@@ -69,7 +71,7 @@ class SelectionBottomBar extends BlocPageChild<NoteSelectionBloc, NoteSelectionS
             icon: Icons.create_new_folder_rounded,
             tooltipKey: state.currentFolder.isRecent ? "available.in.different.view" : "note.selection.create.folder",
             size: 30,
-            buttonType: CustomIconButtonType.FILLED_TONAL,
+            buttonType: CustomIconButtonType.FILLED_SECONDARY,
             onPressed: () => currentBloc(context).add(const NoteSelectionCreatedItem(isFolder: true)),
           ),
           CustomIconButton(

@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:app/core/config/app_config.dart';
 import 'package:app/core/config/app_theme.dart';
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/get_it.dart';
@@ -19,13 +20,14 @@ import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
 Future<void> main(List<String> arguments) async {
-  Logger.initLogger(AppLogger(logLevel: LogLevel.VERBOSE));
+  Logger.initLogger(Logger(logLevel: LogLevel.DEBUG));
   try {
     DArgon2Flutter.init(); // enable flutter argon2 for better performance
     WidgetsFlutterBinding.ensureInitialized();
     await initializeGetIt();
     _initErrorCallbacks();
     await sl<LocalDataSource>().init();
+    Logger.initLogger(AppLogger(logLevel: sl<AppConfig>().defaultLogLevel, appConfig: sl(), appSettingsRepository: sl()));
     await sl<TranslationService>().init();
 
     final ThemeData theme = AppTheme.newTheme(darkTheme: await sl<AppSettingsRepository>().isDarkTheme());

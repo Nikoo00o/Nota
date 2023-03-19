@@ -28,6 +28,7 @@ import 'package:app/domain/usecases/note_structure/create_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/finish_move_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/inner/add_new_structure_update_batch.dart';
+import 'package:app/domain/usecases/note_structure/load_all_structure_content.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/inner/get_original_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_folders.dart';
@@ -36,8 +37,10 @@ import 'package:app/domain/usecases/note_structure/navigation/get_structure_upda
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
 import 'package:app/domain/usecases/note_structure/start_move_structure_item.dart';
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
+import 'package:app/domain/usecases/note_transfer/load_note_buffer.dart';
 import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
 import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
+import 'package:app/domain/usecases/note_transfer/save_note_buffer.dart';
 import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
 import 'package:app/presentation/main/app/app_bloc.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
@@ -204,6 +207,18 @@ Future<void> initializeGetIt() async {
         fetchNewNoteStructure: sl(),
         addNewStructureUpdateBatch: sl(),
       ));
+  sl.registerLazySingleton<LoadNoteBuffer>(() => LoadNoteBuffer(
+        noteTransferRepository: sl(),
+        getLoggedInAccount: sl(),
+      ));
+  sl.registerLazySingleton<SaveNoteBuffer>(() => SaveNoteBuffer(
+        noteTransferRepository: sl(),
+        getLoggedInAccount: sl(),
+      ));
+  sl.registerLazySingleton<LoadAllStructureContent>(() => LoadAllStructureContent(
+        noteStructureRepository: sl(),
+        loadNoteContent: sl(),
+      ));
 
   // services
   sl.registerLazySingleton<SessionService>(() => SessionService());
@@ -240,6 +255,7 @@ Future<void> initializeGetIt() async {
         deleteCurrentStructureItem: sl(),
         changeCurrentStructureItem: sl(),
         transferNotes: sl(),
+        loadAllStructureContent: sl(),
         finishMoveStructureItem: sl(),
         navigateToItem: sl(),
         dialogService: sl(),
@@ -252,6 +268,10 @@ Future<void> initializeGetIt() async {
         changeCurrentStructureItem: sl(),
         loadNoteContent: sl(),
         dialogService: sl(),
+        deleteCurrentStructureItem: sl(),
+        startMoveStructureItem: sl(),
+        loadNoteBuffer: sl(),
+        saveNoteBuffer: sl(),
       ));
   sl.registerFactory<SettingsBloc>(() => SettingsBloc(
         appSettingsRepository: sl(),

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/enums/event_action.dart';
+import 'package:app/core/enums/search_status.dart';
 import 'package:app/core/utils/input_validator.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
@@ -10,6 +11,7 @@ import 'package:app/domain/usecases/note_structure/change_current_structure_item
 import 'package:app/domain/usecases/note_structure/create_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/finish_move_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/load_all_structure_content.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_updates_stream.dart';
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
@@ -40,6 +42,7 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
   final StartMoveStructureItem startMoveStructureItem;
   final FinishMoveStructureItem finishMoveStructureItem;
   final TransferNotes transferNotes;
+  final LoadAllStructureContent loadAllStructureContent;
 
   final GetCurrentStructureItem getCurrentStructureItem;
 
@@ -49,6 +52,14 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
   StreamSubscription<StructureUpdateBatch>? subscription;
 
   final ScrollController scrollController = ScrollController();
+  final FocusNode searchFocus = FocusNode();
+  final TextEditingController searchController = TextEditingController();
+
+  /// extended, or default search, or disabled for no search at all
+  SearchStatus searchStatus = SearchStatus.DISABLED;
+
+  /// this is only used  for the extended search and has the note content mapped to the note id
+  Map<int, String>? noteContentMap;
 
   NoteSelectionBloc({
     required this.navigationService,
@@ -60,12 +71,14 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     required this.startMoveStructureItem,
     required this.finishMoveStructureItem,
     required this.transferNotes,
+    required this.loadAllStructureContent,
     required this.getCurrentStructureItem,
     required this.getStructureUpdatesStream,
   }) : super(initialState: const NoteSelectionState());
 
   @override
   void registerEventHandlers() {
+    on<NoteSelectionUpdatedState>(_handleUpdatedState);
     on<NoteSelectionInitialised>(_handleInitialised);
     on<NoteSelectionStructureChanged>(_handleStructureChanged);
     on<NoteSelectionNavigatedBack>(_handleNavigatedBack);
@@ -74,6 +87,7 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     on<NoteSelectionItemClicked>(_handleItemClicked);
     on<NoteSelectionServerSynced>(_handleServerSync);
     on<NoteSelectionChangedMove>(_handleChangeMove);
+    on<NoteSelectionChangeSearch>(_handleChangeSearch);
   }
 
   @override
@@ -81,6 +95,9 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     await subscription?.cancel();
     return super.close();
   }
+
+  Future<void> _handleUpdatedState(NoteSelectionUpdatedState event, Emitter<NoteSelectionState> emit) async =>
+      emit(_buildState());
 
   Future<void> _handleInitialised(NoteSelectionInitialised event, Emitter<NoteSelectionState> emit) async {
     if (subscription != null) {
@@ -112,7 +129,11 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
   }
 
   Future<void> _handleNavigatedBack(NoteSelectionNavigatedBack event, Emitter<NoteSelectionState> emit) async {
-    if (currentItem?.isTopLevel ?? true) {
+    if (searchStatus != SearchStatus.DISABLED && event.ignoreSearch == false) {
+      event.completer?.complete(false);
+      _disableSearch(emit);
+      emit(_buildState());
+    } else if (currentItem?.isTopLevel ?? true) {
       event.completer?.complete(true);
     } else {
       event.completer?.complete(false);
@@ -131,6 +152,9 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
         break;
       case 2:
         await _deleteCurrentFolder();
+        break;
+      case 3:
+        await _activateSearch(SearchStatus.EXTENDED, emit);
         break;
     }
   }
@@ -177,6 +201,7 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
   }
 
   Future<void> _handleCreatedItem(NoteSelectionCreatedItem event, Emitter<NoteSelectionState> emit) async {
+    _disableSearch(emit);
     final Completer<String?> completer = Completer<String?>();
     dialogService.showInputDialog(ShowInputDialog(
       onConfirm: (String input) => completer.complete(input),
@@ -204,6 +229,7 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
   }
 
   Future<void> _handleServerSync(NoteSelectionServerSynced event, Emitter<NoteSelectionState> emit) async {
+    _disableSearch(emit);
     final bool confirmed = await transferNotes(const NoParams());
     if (confirmed) {
       dialogService.showInfoSnackBar(const ShowInfoSnackBar(textKey: "note.selection.transferred.notes"));
@@ -226,10 +252,51 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     }
   }
 
+  Future<void> _handleChangeSearch(NoteSelectionChangeSearch event, Emitter<NoteSelectionState> emit) async {
+    if (event.searchStatus == SearchStatus.DISABLED) {
+      if (searchFocus.hasFocus) {
+        searchFocus.unfocus(); // only unfocus
+      }
+    } else {
+      await _activateSearch(event.searchStatus, emit);
+    }
+  }
+
+  Future<void> _activateSearch(SearchStatus newStatus, Emitter<NoteSelectionState> emit) async {
+    searchStatus = newStatus;
+    if (newStatus == SearchStatus.EXTENDED) {
+      dialogService.showLoadingDialog();
+      noteContentMap = await loadAllStructureContent(const NoParams());
+      dialogService.hideLoadingDialog();
+    } else {
+      noteContentMap = null;
+    }
+    emit(_buildState());
+    if (searchFocus.hasFocus == false) {
+      searchFocus.requestFocus();
+    }
+  }
+
+  void _disableSearch(Emitter<NoteSelectionState> emit) {
+    if (searchFocus.hasFocus) {
+      searchFocus.unfocus();
+    }
+    searchStatus = SearchStatus.DISABLED;
+    noteContentMap = null;
+    searchController.clear();
+    emit(_buildState());
+  }
+
   /// only if [currentItem] is [StructureFolder]
   NoteSelectionState _buildState() {
     if (currentItem is StructureFolder) {
-      return NoteSelectionStateInitialised(currentFolder: currentItem as StructureFolder);
+      final bool containsSearch = searchStatus != SearchStatus.DISABLED && searchController.text.isNotEmpty;
+      return NoteSelectionStateInitialised(
+        currentFolder: currentItem as StructureFolder,
+        searchStatus: searchStatus,
+        searchInput: containsSearch ? searchController.text : null,
+        noteContentMap: noteContentMap,
+      );
     } else {
       return const NoteSelectionState();
     }

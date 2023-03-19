@@ -13,7 +13,7 @@ class SharedConfig {
   static String noteStructureDelimiter = "/";
 
   /// This is used as a part of [getServerUrl].
-  int get serverPort => 8191;
+  int get serverPort => 8291;
 
   /// The https domain of the server. Must be a valid url encoded domain that starts with "https://".
   /// This is used as a part of [getServerUrl].
@@ -50,4 +50,7 @@ class SharedConfig {
 
   /// The timeout for establishing the client-server connection.
   Duration get connectionTimeout => const Duration(seconds: 30);
+
+  /// if the logger should save log files
+  bool get logIntoStorage => true;
 }

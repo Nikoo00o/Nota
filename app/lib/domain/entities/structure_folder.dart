@@ -292,4 +292,17 @@ class StructureFolder extends StructureItem {
       changeCanBeModifiedOfChildrenRecursively: changeCanBeModifiedOfChildrenRecursively && newCanBeModified != null,
     );
   }
+
+  @override
+  bool containsName(String pattern) {
+    if (name.contains(pattern)) {
+      return true;
+    }
+    for (final StructureItem child in _children) {
+      if (child.containsName(pattern)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

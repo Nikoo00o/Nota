@@ -5,6 +5,8 @@ import 'dart:ui';
 import 'package:app/data/models/client_account_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared/core/config/shared_config.dart';
+import 'package:shared/core/enums/log_level.dart';
+import 'package:shared/core/utils/logger/log_message.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/core/utils/string_utils.dart';
 import 'package:shared/data/models/note_info_model.dart';
@@ -12,8 +14,11 @@ import 'package:shared/domain/entities/note_info.dart';
 
 /// Always call [init] first before using any other method!
 abstract class LocalDataSource {
-  /// The database identifier of the hive box that contains the stored values
+  /// The database identifier of the hive box that contains the stored key-value pairs with the json identifiers
   static const String HIVE_DATABASE = "HIVE_DATABASE";
+
+  /// The database identifier of the hive box that contains the stored generated log entry objects
+  static const String LOG_DATABASE = "LOG_DATABASE";
 
   /// The identifier for the hive encryption key
   static const String HIVE_KEY = "HIVE_KEY";
@@ -29,6 +34,8 @@ abstract class LocalDataSource {
   static const String CONFIG_PREFIX = "CONFIG_PREFIX";
 
   static const String LOCK_SCREEN_TIMEOUT = "LOCK_SCREEN_TIMEOUT";
+
+  static const String LOG_LEVEL = "LOG_LEVEL";
 
   /// Must be called first in the main function to initialize hive to the [getApplicationDocumentsDirectory].
   Future<void> init();
@@ -141,6 +148,22 @@ abstract class LocalDataSource {
   Future<void> setLockscreenTimeout({required Duration duration}) async {
     await write(key: LOCK_SCREEN_TIMEOUT, value: duration.inMilliseconds.toString(), secure: false);
   }
+
+  Future<LogLevel?> getLogLevel() async {
+    final String? value = await read(key: LOG_LEVEL, secure: false);
+    if (value == null) {
+      return null;
+    }
+    return LogLevel.fromString(value);
+  }
+
+  Future<void> setLogLevel({required LogLevel logLevel}) async {
+    await write(key: LOG_LEVEL, value: logLevel.toString(), secure: false);
+  }
+
+  Future<void> addLog(LogMessage log);
+
+  Future<List<LogMessage>> getLogs();
 
   /// Needs to be overridden in the subclasses.
   /// Writes a [value] that can be accessed with the [key].

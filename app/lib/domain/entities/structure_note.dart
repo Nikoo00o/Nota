@@ -43,4 +43,7 @@ class StructureNote extends StructureItem {
       lastModified: newLastModified ?? lastModified,
     );
   }
+
+  @override
+  bool containsName(String pattern) => name.contains(pattern);
 }

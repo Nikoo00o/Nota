@@ -9,13 +9,23 @@ class NoteEditState extends PageState {
 
 class NoteEditStateInitialised extends NoteEditState {
   final StructureNote currentNote;
-  final bool isInputFocused;
+  final bool isEditing;
+  final String currentSearchPosition;
+  final String searchPositionSize;
+  /// This is only needed to rebuild the state
+  final int searchLength;
 
   NoteEditStateInitialised({
     required this.currentNote,
-    required this.isInputFocused,
+    required this.isEditing,
+    required this.currentSearchPosition,
+    required this.searchPositionSize,
+    required this.searchLength,
   }) : super(<String, Object?>{
           "currentNote": currentNote,
-          "isInputFocused": isInputFocused,
+          "isEditing": isEditing,
+          "currentSearchPosition": currentSearchPosition,
+          "searchPositionSize": searchPositionSize,
+          "searchLength": searchLength,
         });
 }

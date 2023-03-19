@@ -1,6 +1,7 @@
 import 'package:app/core/constants/locales.dart';
 import 'package:flutter/material.dart';
 import 'package:shared/core/config/shared_config.dart';
+import 'package:shared/core/enums/log_level.dart';
 
 class AppConfig extends SharedConfig {
   /// Returns the relative path to the folder which contains the note files inside of the [getApplicationDocumentsDirectory]
@@ -16,4 +17,8 @@ class AppConfig extends SharedConfig {
 
   /// If the developer test pages should be shown inside of the menu drawer, or not.
   bool get showDeveloperOptions => true;
+
+  LogLevel get defaultLogLevel => LogLevel.VERBOSE;
+
+  int get amountOfLogsToKeep => 350;
 }

@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:app/data/datasources/local_data_source.dart';
+import 'package:shared/core/utils/logger/log_message.dart';
 
 class LocalDataSourceMock extends LocalDataSource {
   Map<String, String> hiveStorage = <String, String>{};
@@ -87,5 +88,15 @@ class LocalDataSourceMock extends LocalDataSource {
     hiveStorage.clear();
     secureStorage.clear();
     files.clear();
+  }
+
+  @override
+  Future<void> addLog(LogMessage log) async {
+    // todo: this could also write a test report file with the logs
+  }
+
+  @override
+  Future<List<LogMessage>> getLogs() async {
+    return <LogMessage>[];
   }
 }

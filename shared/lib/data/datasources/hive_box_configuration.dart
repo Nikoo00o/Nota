@@ -12,9 +12,15 @@ class HiveBoxConfiguration {
   /// The key itself should be stored in the secureStorage.
   final String? encryptionKey;
 
+  /// If this is true then this hive box stores a specific generated hive object instead of a string!
+  ///
+  /// [isLazy] will always be false in this case.
+  final bool isGeneratedHiveObject;
+
   const HiveBoxConfiguration({
     required this.name,
     required this.isLazy,
     this.encryptionKey,
+    this.isGeneratedHiveObject = false,
   });
 }
