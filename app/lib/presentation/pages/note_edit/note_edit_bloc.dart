@@ -57,6 +57,7 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
   final TextEditingController searchController = TextEditingController();
   final FocusNode searchFocus = FocusNode();
   final CustomEditController inputController = CustomEditController();
+  final ScrollController scrollController = ScrollController();
 
   /// the has focus is true if the user is currently editing the note
   final FocusNode inputFocus = FocusNode(); // todo: also add one for search field

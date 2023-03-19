@@ -21,8 +21,8 @@ class TranslationService {
 
   TranslationService({required this.appSettingsRepository});
 
-  /// The path to the "assets/" dir
-  static String get _basePath => "assets${Platform.pathSeparator}";
+  /// The path to the "assets/" dir. the asset path in flutter always uses the unit separator "/"!!!
+  static String get _basePath => "assets/";
 
   /// must be called at the beginning of the app to load the translated values.
   Future<void> init() async {

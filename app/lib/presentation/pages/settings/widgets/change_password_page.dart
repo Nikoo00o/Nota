@@ -15,8 +15,10 @@ class ChangePasswordPage extends ReuseBlocPage<SettingsBloc, SettingsState> {
   Widget buildBodyWithNoState(BuildContext context, Widget bodyWithState) {
     return Center(
       child: Scrollbar(
+        controller: currentBloc(context).passwordScrollController,
         scrollbarOrientation: ScrollbarOrientation.right,
         child: SingleChildScrollView(
+          controller: currentBloc(context).passwordScrollController,
           padding: const EdgeInsets.fromLTRB(40, 5, 40, 5),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

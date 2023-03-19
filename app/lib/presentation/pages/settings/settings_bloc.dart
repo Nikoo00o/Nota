@@ -30,6 +30,8 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
 
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController passwordConfirmController = TextEditingController();
+  final ScrollController scrollController = ScrollController();
+  final ScrollController passwordScrollController = ScrollController();
 
   SettingsBloc({
     required this.appSettingsRepository,

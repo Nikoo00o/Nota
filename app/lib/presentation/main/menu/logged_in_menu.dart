@@ -60,6 +60,7 @@ class LoggedInMenu extends BlocPage<MenuBloc, MenuState> {
           scrollbarOrientation: ScrollbarOrientation.left,
           controller: currentBloc(context).scrollController,
           child: ListView(
+            controller: currentBloc(context).scrollController,
             padding: EdgeInsets.zero,
             children: <Widget>[
               const MenuDrawerHeader(),

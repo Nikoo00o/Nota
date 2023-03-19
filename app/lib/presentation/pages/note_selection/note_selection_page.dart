@@ -28,7 +28,7 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
 
   @override
   Widget buildBodyWithNoState(BuildContext context, Widget bodyWithState) {
-    return Scrollbar(child: bodyWithState);
+    return Scrollbar(controller: currentBloc(context).scrollController, child: bodyWithState);
   }
 
   @override

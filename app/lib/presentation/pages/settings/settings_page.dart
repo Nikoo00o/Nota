@@ -24,7 +24,9 @@ class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
   @override
   Widget buildBodyWithNoState(BuildContext context, Widget bodyWithState) {
     return Scrollbar(
+      controller: currentBloc(context).scrollController,
       child: ListView(
+        controller: currentBloc(context).scrollController,
         children: <Widget>[
           bodyWithState,
         ],
