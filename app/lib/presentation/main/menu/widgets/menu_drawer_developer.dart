@@ -9,6 +9,7 @@ class MenuDrawerDeveloper extends WidgetBase {
   Widget build(BuildContext context) {
     return Column(
       children: const <Widget>[
+        MenuItem(pageTitleKey: "page.logs.title"),
         MenuItem(pageTitleKey: "page.dialog.test.title"),
         MenuItem(pageTitleKey: "page.material.color.test.title"),
         MenuItem(pageTitleKey: "page.splash.screen.test.title"),

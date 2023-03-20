@@ -68,7 +68,7 @@ class _CustomNavigatorObserver extends NavigatorObserver {
     if (previous != null && next != null && previous != next) {
       Logger.debug(log);
     } else {
-      Logger.verbose(log);
+      Logger.spam(log);
     }
   }
 
@@ -80,7 +80,7 @@ class _CustomNavigatorObserver extends NavigatorObserver {
     if (previous != null && next != null && previous != next) {
       Logger.debug(log);
     } else {
-      Logger.verbose(log);
+      Logger.spam(log);
     }
   }
 }

@@ -23,6 +23,8 @@ class LogLevelAdapter extends TypeAdapter<LogLevel> {
         return LogLevel.DEBUG;
       case 4:
         return LogLevel.VERBOSE;
+      case 5:
+        return LogLevel.SPAM;
       default:
         return LogLevel.ERROR;
     }
@@ -45,6 +47,9 @@ class LogLevelAdapter extends TypeAdapter<LogLevel> {
         break;
       case LogLevel.VERBOSE:
         writer.writeByte(4);
+        break;
+      case LogLevel.SPAM:
+        writer.writeByte(5);
         break;
     }
   }

@@ -27,7 +27,11 @@ Future<void> main(List<String> arguments) async {
     await initializeGetIt();
     _initErrorCallbacks();
     await sl<LocalDataSource>().init();
-    Logger.initLogger(AppLogger(logLevel: sl<AppConfig>().defaultLogLevel, appConfig: sl(), appSettingsRepository: sl()));
+    Logger.initLogger(AppLogger(
+      logLevel: await sl<AppSettingsRepository>().getLogLevel(),
+      appConfig: sl(),
+      appSettingsRepository: sl(),
+    ));
     await sl<TranslationService>().init();
 
     final ThemeData theme = AppTheme.newTheme(darkTheme: await sl<AppSettingsRepository>().isDarkTheme());

@@ -323,7 +323,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
       return null;
     }
     if (isLoadingDialog) {
-      Logger.verbose("showing loading dialog");
+      Logger.spam("showing loading dialog");
     } else {
       Logger.verbose("showing custom dialog");
     }
@@ -353,7 +353,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
       }
     } else {
       if (isCustomDialogVisible) {
-        Logger.error("a base dialog is already open");
+        Logger.warn("a base dialog is already open");
         return true;
       } else if (loadingDialogCounter > 0) {
         Logger.verbose("closing loading dialog in favor of base dialog");
@@ -402,10 +402,10 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
     }
     if (loadingDialogCounter > 0) {
       if ((--loadingDialogCounter <= 0 || forceCloseLoadingDialog) && isCustomDialogVisible == false) {
-        Logger.verbose("closing loading dialog");
+        Logger.spam("closing loading dialog");
         _pop(dataForDialog);
       } else {
-        Logger.verbose("only decrementing loading dialog $loadingDialogCounter");
+        Logger.spam("only decrementing loading dialog $loadingDialogCounter");
       }
     } else if (isLoadingDialog && isCustomDialogVisible == false) {
       Logger.warn("tried to close an already closed loading dialog");
