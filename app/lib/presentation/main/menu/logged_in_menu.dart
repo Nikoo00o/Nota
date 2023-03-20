@@ -68,6 +68,8 @@ class LoggedInMenu extends BlocPage<MenuBloc, MenuState> {
               const Divider(),
               const MenuDrawerSettings(),
               bodyWithState,
+              const Divider(),
+              const MenuItem(pageTitleKey: "menu.close"),
             ],
           ),
         ),

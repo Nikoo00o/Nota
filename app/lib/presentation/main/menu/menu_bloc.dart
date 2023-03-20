@@ -109,6 +109,12 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
         dialogService.showAboutDialog();
         emit(_buildState());
         break;
+      case "page.logs.title":
+        navigationService.navigateTo(Routes.logs);
+        break;
+      case "menu.close":
+        Navigator.of(drawerKey.currentContext!).pop();
+        break;
 
       case "page.dialog.test.title":
         navigationService.navigateTo(Routes.dialog_test);
