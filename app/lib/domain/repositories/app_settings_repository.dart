@@ -32,8 +32,15 @@ abstract class AppSettingsRepository {
 
   Future<List<LogMessage>> getLogs();
 
+  /// overrides the one from the app config
   Future<void> setLogLevel(LogLevel logLevel);
 
+  /// stored, or default from the app config
   Future<LogLevel> getLogLevel();
+
+  /// when navigating back from note editing
+  Future<void> setAutoSave({required bool autoSave});
+  /// when navigating back from note editing. default is false
+  Future<bool> getAutoSave();
 
 }

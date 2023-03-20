@@ -2,6 +2,7 @@ import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/routes.dart';
 import 'package:app/presentation/main/app/widgets/page_route_animation.dart';
 import 'package:app/presentation/pages/login/login_page.dart';
+import 'package:app/presentation/pages/logs/logs_page.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_page.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_page.dart';
 import 'package:app/presentation/pages/settings/settings_page.dart';
@@ -32,6 +33,8 @@ class CustomNavigator extends StatelessWidget {
         return const NoteEditPage();
       case Routes.settings:
         return const SettingsPage();
+      case Routes.logs:
+        return const LogsPage();
       case Routes.material_color_test:
         return const MaterialColorTestPage();
       case Routes.splash_screen_test:
@@ -59,11 +62,25 @@ class CustomNavigator extends StatelessWidget {
 class _CustomNavigatorObserver extends NavigatorObserver {
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    Logger.debug("push page from '${previousRoute?.settings.name}' to '${route.settings.name}'");
+    final String? previous = previousRoute?.settings.name;
+    final String? next = route.settings.name;
+    final String log = "push page from '$previous' to '$next'";
+    if (previous != null && next != null && previous != next) {
+      Logger.debug(log);
+    } else {
+      Logger.verbose(log);
+    }
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    Logger.debug("pop page from '${previousRoute?.settings.name}' to '${route.settings.name}'");
+    final String? previous = previousRoute?.settings.name;
+    final String? next = route.settings.name;
+    final String log = "pop page from '$previous' to '$next'";
+    if (previous != null && next != null && previous != next) {
+      Logger.debug(log);
+    } else {
+      Logger.verbose(log);
+    }
   }
 }

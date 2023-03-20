@@ -13,6 +13,8 @@ class AppSettingsRepositoryImpl extends AppSettingsRepository {
 
   static const String CONFIG_DARK_THEME = "DARK_THEME";
 
+  static const String CONFIG_AUTO_SAVE = "CONFIG_AUTO_SAVE";
+
   const AppSettingsRepositoryImpl({required this.localDataSource, required this.appConfig});
 
   @override
@@ -55,4 +57,11 @@ class AppSettingsRepositoryImpl extends AppSettingsRepository {
 
   @override
   Future<LogLevel> getLogLevel() async => (await localDataSource.getLogLevel()) ?? appConfig.defaultLogLevel;
+
+  @override
+  Future<void> setAutoSave({required bool autoSave}) =>
+      localDataSource.setConfigValue(configKey: CONFIG_AUTO_SAVE, configValue: autoSave);
+
+  @override
+  Future<bool> getAutoSave() => localDataSource.getConfigValue(configKey: CONFIG_AUTO_SAVE);
 }

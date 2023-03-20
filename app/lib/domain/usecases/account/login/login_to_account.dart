@@ -57,29 +57,34 @@ class LoginToAccount extends UseCase<void, LoginToAccountParams> {
     ClientAccount account = await _getMatchingAccount(params, passwordHash);
     await _checkForErrors(params, account, passwordHash);
 
-    if (params is LoginToAccountParamsRemote) {
-      account = await accountRepository.login(); //login to server and update the account (updates session token and enc
-      // data key)
+    try {
+      if (params is LoginToAccountParamsRemote) {
+        account = await accountRepository.login(); //login to server and update the account (updates session token and enc
+        // data key)
+      }
+
+      // decrypt the data key and cache it
+      account.decryptedDataKey = await SecurityUtilsExtension.decryptBytesAsync(
+        base64Decode(account.encryptedDataKey),
+        base64Decode(userKey),
+      );
+
+      // update the accounts login status
+      account.needsServerSideLogin = false;
+
+      if (params is LoginToAccountParamsRemote && params.reuseOldNotes) {
+        await _tryToReuseNotes(account); // see if the account had some notes cached that should be used, or otherwise get
+        // server notes
+      }
+
+      // save the account (and if the [ClientAccount.storeDecryptedDataKey] is set, then also the decrypted data key)
+      await accountRepository.saveAccount(account);
+
+      Logger.info("Logged in ${params.runtimeType} to the account: $account");
+    } catch (_) {
+      await accountRepository.getAccount(forceLoad: true); // reload cached account on error
+      rethrow;
     }
-
-    // decrypt the data key and cache it
-    account.decryptedDataKey = await SecurityUtilsExtension.decryptBytesAsync(
-      base64Decode(account.encryptedDataKey),
-      base64Decode(userKey),
-    );
-
-    // update the accounts login status
-    account.needsServerSideLogin = false;
-
-    if (params is LoginToAccountParamsRemote && params.reuseOldNotes) {
-      await _tryToReuseNotes(account); // see if the account had some notes cached that should be used, or otherwise get
-      // server notes
-    }
-
-    // save the account (and if the [ClientAccount.storeDecryptedDataKey] is set, then also the decrypted data key)
-    await accountRepository.saveAccount(account);
-
-    Logger.info("Logged in ${params.runtimeType} to the account: $account");
   }
 
   Future<void> _checkForErrors(LoginToAccountParams params, ClientAccount account, String passwordHash) async {

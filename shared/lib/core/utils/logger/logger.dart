@@ -138,6 +138,11 @@ class Logger {
     return color;
   }
 
+  /// returns the matching log color of the log message. returns null if there is no logger instance
+  static LogColor? getLogColorForMessage(LogMessage logMessage) {
+    return _instance?.addColorForConsole(logMessage.level);
+  }
+
   @override
   String toString() {
     return '$runtimeType{logLevel: $logLevel}';

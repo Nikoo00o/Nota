@@ -13,6 +13,8 @@ class Routes {
 
   static const String settings = "settings";
 
+  static const String logs = "logs";
+
   /// Test pages:
   static const String material_color_test = "material_color_test";
   static const String dialog_test = "dialog_test";

@@ -21,6 +21,7 @@ class LoginPage extends BlocPage<LoginBloc, LoginState> {
   Widget buildBodyWithNoState(BuildContext context, Widget bodyWithState) {
     return Center(
       child: Scrollbar(
+        controller: currentBloc(context).scrollController,
         scrollbarOrientation: ScrollbarOrientation.right,
         child: SingleChildScrollView(
           controller: currentBloc(context).scrollController,

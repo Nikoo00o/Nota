@@ -46,6 +46,7 @@ import 'package:app/presentation/main/app/app_bloc.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/presentation/main/menu/menu_bloc.dart';
 import 'package:app/presentation/pages/login/login_bloc.dart';
+import 'package:app/presentation/pages/logs/logs_bloc.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
 import 'package:app/presentation/pages/settings/settings_bloc.dart';
@@ -272,6 +273,7 @@ Future<void> initializeGetIt() async {
         startMoveStructureItem: sl(),
         loadNoteBuffer: sl(),
         saveNoteBuffer: sl(),
+        appSettingsRepository: sl(),
       ));
   sl.registerFactory<SettingsBloc>(() => SettingsBloc(
         appSettingsRepository: sl(),
@@ -292,6 +294,11 @@ Future<void> initializeGetIt() async {
         activateLockscreen: sl(),
         dialogService: sl(),
         navigateToItem: sl(),
+      ));
+  sl.registerFactory<LogsBloc>(() => LogsBloc(
+        appSettingsRepository: sl(),
+        navigationService: sl(),
+        dialogService: sl(),
       ));
 }
 

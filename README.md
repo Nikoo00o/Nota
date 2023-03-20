@@ -1,18 +1,24 @@
 # Nota
 
-## About the Project
-- Nota is a Cross-Platform Note-Taking App designed to work both offline locally, or synchronized with a server across 
-  all devices 
-- the users notes will be securely encrypted and the server stores them, but can't decrypt them
-- the notes can be accessed in a folder like structure
+## About the App
+- Nota is a Cross-Platform Note-Taking App designed to work both locally offline, or server synchronized across 
+  all of your devices 
+- your notes will be securely encrypted and the server only stores them, but can't decrypt them
+  - only your local devices can decrypt and view your notes
+- the notes can be accessed inside of the app with a folder like structure
 - currently the app is still in development
 
-## Building The Project
+## Using The App
+
+- todo:...
+
+## Technical Details on building the projects 
 
 - just import the project in android studio and have the flutter and dart sdks installed and the android studio flutter 
   plugin
   - instead of android studio, you can also use visual studio code with the flutter plugin
-- then edit the config like explained below
+- **first run** `dart pub get` inside of each subfolder "shared", "server" and "app"! 
+- **then edit the config** like explained [below](#configure-the-projects)
 - and afterwards you can use the run configurations in android studio to start the app and the server in debug mode
 - This project contains the sub projects **shared**, **server** and **app**
 
@@ -42,7 +48,7 @@ flutter build ipa --release           # ios
 ```
 
 
-## Config
+### Configure the projects
 
 - you have to run the run configuration "Create New Keys" at least once, because it will create the "sensitive_data.dart" 
   files with new random salts and keys
@@ -62,25 +68,26 @@ flutter build ipa --release           # ios
   certificate.pem`
 - always enter `.` except for the common name, where you can enter anything you want
 
-## The Different Projects
+### Project Structure
 
-### Server
+#### Server
 
 - contains the server specific code (dart project)
 - in the scope of the whole project and in relation to the app, the server is mostly written in the data layer without 
   many use cases
 - the server will be build as a command line tool with no gui
 
-### Shared
+#### Shared
 
 - contains the shared code used in server and app (dart project) and should not be used on its own
+- this also contains a shared config and shared sensitive data for both projects
 
-### App
+#### App
 
-- contains the app specific code (flutter project) 
+- contains the app specific code (flutter project) written with the "clean architecture"
 - this will build the final app for the device with the gui that the user interacts with
 
-## Testing
+### Testing
 
 - some of the server tests can fail on a slow processor, because of some time critical operations
 - if this happens, just increase the delays inside of the affected tests

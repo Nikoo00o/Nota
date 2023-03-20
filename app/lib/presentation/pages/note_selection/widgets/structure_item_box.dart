@@ -42,7 +42,7 @@ class StructureItemBox extends BlocPageChild<NoteSelectionBloc, NoteSelectionSta
       return CustomCard(
         color: item is StructureFolder ? colorSecondaryContainer(context) : colorPrimaryContainer(context),
         onTap: () => currentBloc(context).add(NoteSelectionItemClicked(index: index)),
-        icon: item is StructureFolder ? Icons.folder : Icons.edit_note,
+        icon: item is StructureFolder ? Icons.folder : Icons.sticky_note_2_outlined,
         title: item.name,
         description: _getDescription(context),
         alignDescriptionRight: true,

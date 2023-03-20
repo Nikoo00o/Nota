@@ -24,7 +24,9 @@ class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
   @override
   Widget buildBodyWithNoState(BuildContext context, Widget bodyWithState) {
     return Scrollbar(
+      controller: currentBloc(context).scrollController,
       child: ListView(
+        controller: currentBloc(context).scrollController,
         children: <Widget>[
           bodyWithState,
         ],
@@ -78,6 +80,13 @@ class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
             descriptionKey: "page.settings.password.description",
             icon: Icons.lock_reset,
             onTap: () => currentBloc(context).add(const SettingsNavigatedToChangePasswordPage()),
+          ),
+          SettingsToggleOption(
+            titleKey: "page.settings.auto.save",
+            descriptionKey: "page.settings.auto.save.description",
+            icon: Icons.save,
+            isActive: state.autoSave,
+            onChange: (bool value) => currentBloc(context).add(SettingsAutoSaveChanged(autoSave: value)),
           ),
         ],
       );

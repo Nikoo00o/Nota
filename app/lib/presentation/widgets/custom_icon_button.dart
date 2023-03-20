@@ -118,13 +118,27 @@ class CustomIconButton extends WidgetBase {
   }
 
   Widget _buildDefault(BuildContext context, ButtonStyle? style) {
-    return IconButton(
-      icon: Icon(icon),
-      onPressed: enabled ? onPressed : null,
-      iconSize: size,
-      padding: padding,
-      style: style,
-      tooltip: tooltipKey == null ? null : translate(context, tooltipKey!, keyParams: tooltipKeyParams),
-    );
+    if (enabled) {
+      return IconButton(
+        icon: Icon(icon),
+        onPressed: onPressed,
+        iconSize: size,
+        padding: padding,
+        style: style,
+        tooltip: tooltipKey == null ? null : translate(context, tooltipKey!, keyParams: tooltipKeyParams),
+      );
+    } else {
+      return GestureDetector(
+        onTap: onPressed,
+        child: IconButton(
+          icon: Icon(icon),
+          onPressed: null,
+          iconSize: size,
+          padding: padding,
+          style: style,
+          tooltip: tooltipKey == null ? null : translate(context, tooltipKey!, keyParams: tooltipKeyParams),
+        ),
+      );
+    }
   }
 }

@@ -65,6 +65,10 @@ class MenuItem extends BlocPageChild<MenuBloc, MenuState> {
         return Icons.settings;
       case "menu.about":
         return Icons.info;
+      case "menu.close":
+        return Icons.close;
+      case "page.logs.title":
+        return Icons.storage;
 
       case "page.dialog.test.title":
         return Icons.question_answer;
@@ -74,9 +78,9 @@ class MenuItem extends BlocPageChild<MenuBloc, MenuState> {
         return Icons.crop_portrait;
 
       case "notes.root":
-        return Icons.note;
+        return Icons.folder;
       case "notes.recent":
-        return Icons.note;
+        return Icons.folder;
 
       default:
         return null;

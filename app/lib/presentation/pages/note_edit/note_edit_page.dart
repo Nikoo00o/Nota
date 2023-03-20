@@ -24,18 +24,19 @@ class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
   Widget buildBodyWithNoState(BuildContext context, Widget bodyWithState) {
     return LifeCycleCallback(
       onPause: () => currentBloc(context).add(const NoteEditAppPaused()),
-      child: Scrollbar(
-        child: CustomScrollView(
-          slivers: <Widget>[
-            SliverFillRemaining(
-              hasScrollBody: false,
+      child: CustomScrollView(
+        slivers: <Widget>[
+          SliverFillRemaining(
+            hasScrollBody: true,
+            child: Scrollbar(
+              controller: currentBloc(context).scrollController,
               child: createBlocSelector<bool>(
                 selector: (NoteEditState state) => state is NoteEditStateInitialised,
                 builder: _buildEditField,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -43,6 +44,7 @@ class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
   Widget _buildEditField(BuildContext context, bool isInitialized) {
     if (isInitialized) {
       return TextField(
+        scrollController: currentBloc(context).scrollController,
         decoration: InputDecoration(
           border: InputBorder.none,
           hintText: translate(context, "note.edit.input.text"),
