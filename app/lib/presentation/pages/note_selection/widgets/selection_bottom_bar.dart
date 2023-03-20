@@ -75,13 +75,9 @@ class SelectionBottomBar extends BlocPageChild<NoteSelectionBloc, NoteSelectionS
             tooltipKey: state.currentFolder.isRecent ? "available.in.different.view" : "note.selection.create.folder",
             size: 30,
             buttonType: CustomIconButtonType.FILLED_SECONDARY,
-            onPressed: () {
-              if (state.currentFolder.isRecent) {
-                sl<DialogService>().showInfoDialog(const ShowInfoDialog(descriptionKey: "available.in.different.view"));
-              } else {
-                currentBloc(context).add(const NoteSelectionCreatedItem(isFolder: true));
-              }
-            },
+            onDisabledPress: () =>
+                sl<DialogService>().showInfoDialog(const ShowInfoDialog(descriptionKey: "available.in.different.view")),
+            onPressed: () => currentBloc(context).add(const NoteSelectionCreatedItem(isFolder: true)),
           ),
           CustomIconButton(
             icon: Icons.note_add,

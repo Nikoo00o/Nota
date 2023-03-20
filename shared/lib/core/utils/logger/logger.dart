@@ -68,6 +68,11 @@ class Logger {
     _instance?.log(message, LogLevel.VERBOSE, error, stackTrace);
   }
 
+  static void spam(String? message, [Object? error, StackTrace? stackTrace]) {
+    assert(_instance != null, "logger not initialised");
+    _instance?.log(message, LogLevel.SPAM, error, stackTrace);
+  }
+
   /// Returns if the current [logLevel] is set high enough, so that the [targetLevel] would be logged into the console and
   /// storage!
   ///
@@ -133,6 +138,9 @@ class Logger {
         break;
       case LogLevel.VERBOSE:
         color = VERBOSE_COLOR;
+        break;
+      case LogLevel.SPAM:
+        color = _RESET_COLOR;
         break;
     }
     return color;

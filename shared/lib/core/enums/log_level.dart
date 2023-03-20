@@ -23,7 +23,11 @@ enum LogLevel {
 
   /// 4
   @HiveField(4)
-  VERBOSE;
+  VERBOSE,
+
+  /// 5
+  @HiveField(5)
+  SPAM;
 
   @override
   String toString() {

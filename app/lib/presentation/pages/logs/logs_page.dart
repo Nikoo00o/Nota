@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/translation_string.dart';
@@ -32,14 +30,41 @@ class LogsPage extends BlocPage<LogsBloc, LogsState> {
         createBlocBuilder(builder: _buildLogLevelSelection),
         const SizedBox(height: 5),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-              child: Text(translate(context, "page.logs.filtered"), style: textLabelLarge(context)),
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(10, 0, 5, 0),
+                child: Container(
+                  height: 34.0,
+                  decoration: BoxDecoration(
+                    color: colorPrimary(context).withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(32),
+                  ),
+                  padding: const EdgeInsets.only(right: 10),
+                  child: TextField(
+                    focusNode: currentBloc(context).searchFocus,
+                    controller: currentBloc(context).searchController,
+                    onChanged: (String _) => currentBloc(context).add(const LogsEventUpdateState()),
+                    decoration: InputDecoration(
+                      hintText: translate(context, "page.logs.filtered"),
+                      prefixIcon: const Icon(Icons.search),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.only(bottom: 12),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 45,
+              height: 40,
+              child: TextButton(
+                onPressed: () => currentBloc(context).searchFocus.unfocus(),
+                child: Text(translate(context, "ok")),
+              ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+              padding: const EdgeInsets.fromLTRB(15, 0, 10, 0),
               child: createBlocBuilder(builder: _buildFilterDropDown),
             ),
           ],
@@ -60,7 +85,7 @@ class LogsPage extends BlocPage<LogsBloc, LogsState> {
         titleKey: "page.logs.choose.title",
         descriptionKey: "page.logs.choose.description",
         descriptionKeyParams: <String>[LogLevel.values.elementAt(state.currentLogLevelIndex).toString()],
-        icon: Icons.filter_5,
+        icon: Icons.filter_6,
         dialogTitleKey: "log.level",
         initialOptionIndex: state.currentLogLevelIndex,
         options: LogLevel.values
@@ -77,7 +102,6 @@ class LogsPage extends BlocPage<LogsBloc, LogsState> {
     if (state is LogsStateInitialised) {
       return DropdownButton<LogLevel>(
         value: state.filterLevel,
-        //isDense: true,
         items: List<DropdownMenuItem<LogLevel>>.generate(
           LogLevel.values.length,
           (int index) => DropdownMenuItem<LogLevel>(
@@ -102,8 +126,13 @@ class LogsPage extends BlocPage<LogsBloc, LogsState> {
         itemCount: state.logMessages.length,
         itemBuilder: (BuildContext context, int index) {
           final LogMessage logMessage = state.logMessages.elementAt(state.logMessages.length - index - 1);
-          final LogColor logColor = Logger.getLogColorForMessage(logMessage)!;
+          final String logString = logMessage.toString();
 
+          if (state.searchText.isNotEmpty && logString.contains(state.searchText) == false) {
+            return const SizedBox();
+          }
+
+          final LogColor logColor = Logger.getLogColorForMessage(logMessage)!;
           return Padding(
             padding: const EdgeInsets.fromLTRB(0, 2, 0, 2),
             child: Card(
@@ -111,7 +140,7 @@ class LogsPage extends BlocPage<LogsBloc, LogsState> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(4, 4, 4, 4),
                 child: Text(
-                  logMessage.toString(),
+                  logString,
                   style: textBodyMedium(context).copyWith(color: Color.fromRGBO(logColor.r, logColor.g, logColor.b, 1.0)),
                 ),
               ),

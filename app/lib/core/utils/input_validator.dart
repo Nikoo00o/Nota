@@ -4,6 +4,8 @@ import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:app/services/translation_service.dart';
+import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
 class InputValidator {
@@ -48,8 +50,12 @@ class InputValidator {
     }
     try {
       StructureItem.throwErrorForName(name);
-    } catch (_) {
-      return sl<TranslationService>().translate("note.selection.create.invalid.name");
+    } on ClientException catch (e) {
+      if (e.message == ErrorCodes.INVALID_PARAMS) {
+        return sl<TranslationService>().translate("note.selection.create.invalid.char");
+      } else if (e.message == ErrorCodes.NAME_ALREADY_USED) {
+        return sl<TranslationService>().translate("note.selection.create.name.taken");
+      }
     }
     if (isFolder && parent?.getDirectFolderByName(name, deepCopy: false) != null) {
       return sl<TranslationService>().translate("note.selection.create.name.taken");

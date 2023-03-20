@@ -9,6 +9,10 @@ class LogsEventInitialise extends LogsEvent {
   const LogsEventInitialise();
 }
 
+class LogsEventUpdateState extends LogsEvent {
+  const LogsEventUpdateState();
+}
+
 class LogsEventChangeLogLevel extends LogsEvent {
   final int newLogLevelIndex;
 

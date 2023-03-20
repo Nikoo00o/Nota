@@ -13,7 +13,6 @@ class MenuDrawerSettings extends WidgetBase {
         MenuItem(pageTitleKey: "menu.lock.screen.title"),
         MenuItem(pageTitleKey: "menu.logout.title"),
         MenuItem(pageTitleKey: "menu.about"),
-        MenuItem(pageTitleKey: "page.logs.title"),
       ],
     );
   }
