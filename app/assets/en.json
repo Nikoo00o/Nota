@@ -92,6 +92,8 @@
   "page.settings.password.description": "All other devices will get logged out",
   "page.change.password.description": "Enter and confirm your new Password",
   "page.change.password.changed": "Password changed successfully",
+  "page.settings.auto.save": "Auto Save",
+  "page.settings.auto.save.description": "Your note changes will always be saved when navigating back",
   "notes.root": "Root Folder",
   "notes.recent": "Recent Notes",
   "notes.move": "Select Target Folder",
@@ -141,5 +143,5 @@
   "note.edit.delete.note": "Delete note",
   "note.edit.delete.note.description": "Should the current note {0} really be deleted?",
   "note.edit.delete.note.done": "Deleted the note at the path {0}",
-  "nota.about" : "Nota is a Cross-Platform Note-Taking App designed to work both locally offline, or server synchronized across all of your devices. Your notes are securely encrypted and can only be accessed by your local devices with your password. For more details visit\n"
+  "nota.about": "Nota is a Cross-Platform Note-Taking App designed to work both locally offline, or server synchronized across all of your devices. Your notes are securely encrypted and can only be accessed by your local devices with your password. For more details visit\n"
 }

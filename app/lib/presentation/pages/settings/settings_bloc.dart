@@ -52,6 +52,7 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
     on<SettingsLockscreenTimeoutChanged>(_handleLockscreenTimeoutChanged);
     on<SettingsNavigatedToChangePasswordPage>(_handleNavigatedToChangePasswordPage);
     on<SettingsPasswordChanged>(_handlePasswordChanged);
+    on<SettingsAutoSaveChanged>(_handleAutoSaveChanged);
   }
 
   Future<void> _handleInitialise(SettingsEventInitialise event, Emitter<SettingsState> emit) async {
@@ -84,7 +85,8 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
     emit(await _buildState());
   }
 
-  Future<void> _handleNavigatedToChangePasswordPage(SettingsNavigatedToChangePasswordPage event, Emitter<SettingsState> emit) async {
+  Future<void> _handleNavigatedToChangePasswordPage(
+      SettingsNavigatedToChangePasswordPage event, Emitter<SettingsState> emit) async {
     passwordController.clear(); // if the change password page is opened multiple times
     passwordConfirmController.clear();
     navigationService.pushPage(ChangePasswordPage(bloc: this));
@@ -92,7 +94,7 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
   }
 
   Future<void> _handlePasswordChanged(SettingsPasswordChanged event, Emitter<SettingsState> emit) async {
-    if(event.cancel == true){
+    if (event.cancel == true) {
       navigationService.navigateBack();
       return;
     }
@@ -106,6 +108,11 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
     }
   }
 
+  Future<void> _handleAutoSaveChanged(SettingsAutoSaveChanged event, Emitter<SettingsState> emit) async {
+    await appSettingsRepository.setAutoSave(autoSave: event.autoSave);
+    emit(await _buildState());
+  }
+
   Future<SettingsState> _buildState() async {
     final Duration timeout = await appSettingsRepository.getLockscreenTimeout();
     return SettingsStateInitialised(
@@ -114,6 +121,7 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
       localeOptions: Locales.localeTranslationKeys,
       autoLogin: await getAutoLogin.call(const NoParams()),
       lockscreenTimeoutInSeconds: timeout.inSeconds.toString(),
+      autoSave: await appSettingsRepository.getAutoSave(),
     );
   }
 

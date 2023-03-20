@@ -272,6 +272,7 @@ Future<void> initializeGetIt() async {
         startMoveStructureItem: sl(),
         loadNoteBuffer: sl(),
         saveNoteBuffer: sl(),
+        appSettingsRepository: sl(),
       ));
   sl.registerFactory<SettingsBloc>(() => SettingsBloc(
         appSettingsRepository: sl(),

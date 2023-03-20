@@ -40,3 +40,9 @@ class SettingsPasswordChanged extends SettingsEvent {
   final bool cancel;
   const SettingsPasswordChanged({required this.cancel});
 }
+
+class SettingsAutoSaveChanged extends SettingsEvent {
+  final bool autoSave;
+
+  const SettingsAutoSaveChanged({required this.autoSave});
+}

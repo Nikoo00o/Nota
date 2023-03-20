@@ -92,6 +92,8 @@
   "page.settings.password.description": "Alle anderen Geräte werden ausgeloggt",
   "page.change.password.description": "Geben Sie ihr neues Passwort ein und Bestätigen Sie dieses",
   "page.change.password.changed": "Ihr Passwort wurde erfolgreich geändert",
+  "page.settings.auto.save": "Automatisches Speichern",
+  "page.settings.auto.save.description": "Ihre Änderungen an Notizen werden beim zurück navigieren automatisch gespeichert",
   "notes.root": "Stammordner",
   "notes.recent": "Zuletzt Bearbeitet",
   "notes.move": "Zielordner Auswählen",

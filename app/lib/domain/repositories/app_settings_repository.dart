@@ -36,4 +36,9 @@ abstract class AppSettingsRepository {
 
   Future<LogLevel> getLogLevel();
 
+  /// when navigating back from note editing
+  Future<void> setAutoSave({required bool autoSave});
+  /// when navigating back from note editing. default is false
+  Future<bool> getAutoSave();
+
 }

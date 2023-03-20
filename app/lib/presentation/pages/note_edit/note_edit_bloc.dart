@@ -10,6 +10,7 @@ import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/entities/structure_update_batch.dart';
+import 'package:app/domain/repositories/app_settings_repository.dart';
 import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
@@ -44,6 +45,7 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
   final DialogService dialogService;
   final SaveNoteBuffer saveNoteBuffer;
   final LoadNoteBuffer loadNoteBuffer;
+  final AppSettingsRepository appSettingsRepository;
   final GetCurrentStructureItem getCurrentStructureItem;
 
   final GetStructureUpdatesStream getStructureUpdatesStream;
@@ -72,6 +74,7 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
     required this.navigateToItem,
     required this.saveNoteBuffer,
     required this.loadNoteBuffer,
+    required this.appSettingsRepository,
     required this.dialogService,
     required this.getCurrentStructureItem,
     required this.getStructureUpdatesStream,
@@ -161,7 +164,14 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
   Future<void> _handleNavigatedBack(NoteEditNavigatedBack event, Emitter<NoteEditState> emit) async {
     await _clearFocus(); // always clear focus. only show confirm dialog if is editing and if content has changed!
     final bool contentChanged = await hasContentChanged(updateOldHash: false);
-    if (contentChanged == false || await _userConfirmedDrop()) {
+    final bool autoSave = await appSettingsRepository.getAutoSave();
+    if (autoSave) {
+      dialogService.showLoadingDialog();
+      await _saveInputIfChanged();
+      dialogService.hideLoadingDialog();
+    }
+
+    if (contentChanged == false || autoSave || await _userConfirmedDrop()) {
       Logger.verbose("navigated back to ${currentItem.getParent()?.path}");
       inputController.clear(); // also clear text input on navigating
       await navigateToItem.call(const NavigateToItemParamsParent());
@@ -241,13 +251,17 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
   Future<void> _handleInputSaved(NoteEditInputSaved event, Emitter<NoteEditState> emit) async {
     dialogService.showLoadingDialog();
     await _clearFocus();
+    await _saveInputIfChanged();
+    emit(_buildState());
+    dialogService.hideLoadingDialog();
+  }
+
+  Future<void> _saveInputIfChanged() async {
     final List<int> newData = utf8.encode(inputController.text);
     if (await hasContentChanged(updateOldHash: true)) {
       await changeCurrentStructureItem.call(ChangeCurrentNoteParam(newName: currentItem.name, newContent: newData));
       dialogService.showInfoSnackBar(const ShowInfoSnackBar(textKey: "saved", duration: Duration(seconds: 1)));
     }
-    emit(_buildState());
-    dialogService.hideLoadingDialog();
   }
 
   Future<void> _handleSearchStep(NoteEditSearchStepped event, Emitter<NoteEditState> emit) async {
