@@ -62,11 +62,25 @@ class CustomNavigator extends StatelessWidget {
 class _CustomNavigatorObserver extends NavigatorObserver {
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    Logger.debug("push page from '${previousRoute?.settings.name}' to '${route.settings.name}'");
+    final String? previous = previousRoute?.settings.name;
+    final String? next = route.settings.name;
+    final String log = "push page from '$previous' to '$next'";
+    if (previous != null && next != null && previous != next) {
+      Logger.debug(log);
+    } else {
+      Logger.verbose(log);
+    }
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    Logger.debug("pop page from '${previousRoute?.settings.name}' to '${route.settings.name}'");
+    final String? previous = previousRoute?.settings.name;
+    final String? next = route.settings.name;
+    final String log = "pop page from '$previous' to '$next'";
+    if (previous != null && next != null && previous != next) {
+      Logger.debug(log);
+    } else {
+      Logger.verbose(log);
+    }
   }
 }

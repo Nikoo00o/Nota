@@ -18,4 +18,5 @@ class LogColor {
     }
     return "\x1B[38;2;$r;$g;${b}m";
   }
+
 }

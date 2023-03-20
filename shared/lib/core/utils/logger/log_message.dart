@@ -53,4 +53,7 @@ class LogMessage extends HiveObject {
     }
     return buffer.toString();
   }
+
+  /// If this log [level] could be logged for the [targetLevel]!
+  bool canLog(LogLevel targetLevel) => level.index <= targetLevel.index;
 }

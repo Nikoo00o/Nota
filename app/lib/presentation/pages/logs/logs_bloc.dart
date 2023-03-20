@@ -6,6 +6,8 @@ import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared/core/enums/log_level.dart';
+import 'package:shared/core/utils/logger/log_message.dart';
 
 class LogsBloc extends PageBloc<LogsEvent, LogsState> {
   final AppSettingsRepository appSettingsRepository;
@@ -13,6 +15,10 @@ class LogsBloc extends PageBloc<LogsEvent, LogsState> {
   final DialogService dialogService;
 
   final ScrollController scrollController = ScrollController();
+
+  late int logLevelIndex;
+
+  LogLevel? filterLevel;
 
   LogsBloc({
     required this.appSettingsRepository,
@@ -28,20 +34,30 @@ class LogsBloc extends PageBloc<LogsEvent, LogsState> {
   }
 
   Future<void> _handleInitialise(LogsEventInitialise event, Emitter<LogsState> emit) async {
+    filterLevel = await appSettingsRepository.getLogLevel();
+    logLevelIndex = filterLevel!.index;
     emit(await _buildState());
   }
 
   Future<void> _handleChangeLogLevel(LogsEventChangeLogLevel event, Emitter<LogsState> emit) async {
+    logLevelIndex = event.newLogLevelIndex;
+    await appSettingsRepository.setLogLevel(LogLevel.values.elementAt(logLevelIndex));
     emit(await _buildState());
   }
 
   Future<void> _handleFilterLogLevel(LogsEventFilterLogLevel event, Emitter<LogsState> emit) async {
+    filterLevel = event.logLevel;
     emit(await _buildState());
   }
 
   Future<LogsState> _buildState() async {
+    final List<LogMessage> messages = await appSettingsRepository.getLogs();
+    final LogLevel filter = filterLevel ?? await appSettingsRepository.getLogLevel();
+
     return LogsStateInitialised(
-      logMessages: await appSettingsRepository.getLogs(),
+      logMessages: messages.where((LogMessage message) => message.canLog(filter)).toList(),
+      filterLevel: filter,
+      currentLogLevelIndex: logLevelIndex,
     );
   }
 }
