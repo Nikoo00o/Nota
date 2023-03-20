@@ -30,10 +30,7 @@ class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
             hasScrollBody: true,
             child: Scrollbar(
               controller: currentBloc(context).scrollController,
-              child: createBlocSelector<bool>(
-                selector: (NoteEditState state) => state is NoteEditStateInitialised,
-                builder: _buildEditField,
-              ),
+              child: createBlocBuilder(builder: _buildEditField),
             ),
           ),
         ],
@@ -41,8 +38,8 @@ class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
     );
   }
 
-  Widget _buildEditField(BuildContext context, bool isInitialized) {
-    if (isInitialized) {
+  Widget _buildEditField(BuildContext context, NoteEditState state) {
+    if (state is NoteEditStateInitialised) {
       return TextField(
         scrollController: currentBloc(context).scrollController,
         decoration: InputDecoration(

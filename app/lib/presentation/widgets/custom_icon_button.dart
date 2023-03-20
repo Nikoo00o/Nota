@@ -4,7 +4,12 @@ import 'package:flutter/material.dart';
 
 class CustomIconButton extends WidgetBase {
   final IconData icon;
+
+  /// this will be called when the button is [enabled] and pressed
   final VoidCallback onPressed;
+
+  /// this will be called when the button is not [enabled] and pressed.
+  final VoidCallback? onDisabledPress;
   final bool enabled;
   final CustomIconButtonType buttonType;
   final EdgeInsets? padding;
@@ -15,6 +20,7 @@ class CustomIconButton extends WidgetBase {
   const CustomIconButton({
     required this.icon,
     required this.onPressed,
+    this.onDisabledPress,
     this.enabled = true,
     this.buttonType = CustomIconButtonType.DEFAULT,
     this.padding,
@@ -129,7 +135,7 @@ class CustomIconButton extends WidgetBase {
       );
     } else {
       return GestureDetector(
-        onTap: onPressed,
+        onTap: onDisabledPress,
         child: IconButton(
           icon: Icon(icon),
           onPressed: null,

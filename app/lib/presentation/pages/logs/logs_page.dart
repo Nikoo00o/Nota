@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/translation_string.dart';
@@ -104,7 +102,6 @@ class LogsPage extends BlocPage<LogsBloc, LogsState> {
     if (state is LogsStateInitialised) {
       return DropdownButton<LogLevel>(
         value: state.filterLevel,
-        //isDense: true,
         items: List<DropdownMenuItem<LogLevel>>.generate(
           LogLevel.values.length,
           (int index) => DropdownMenuItem<LogLevel>(

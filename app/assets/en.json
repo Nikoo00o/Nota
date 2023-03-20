@@ -111,10 +111,10 @@
   "note.selection.sync": "Server Sync",
   "note.selection.create.folder": "Create Folder",
   "note.selection.create.note": "Create Note",
-  "note.selection.create.note.description": "The new note name may not contain the character \"/\"",
-  "note.selection.create.folder.description": "The new folder name may not contain the character \"/\" and it must be unique. Folders also need to contain at least one note to not be deleted.",
-  "note.selection.create.invalid.name": "Invalid name",
-  "note.selection.create.name.taken": "There already is a folder of the same parent with this name",
+  "note.selection.create.note.description": "Enter a new name",
+  "note.selection.create.folder.description": "Enter a new name. Folders need to contain at least one note to not be deleted.",
+  "note.selection.create.invalid.char": "Invalid Character \"/\"",
+  "note.selection.create.name.taken": "The name is already taken",
   "note.selection.folder.created": "Created the new folder {0}",
   "available.in.different.view": "Only available in Root Folder View",
   "note.selection.folder.description": "Folder last modified: {0}",
@@ -149,5 +149,5 @@
   "page.logs.choose.title": "Choose App Log Level",
   "page.logs.choose.description": "You can change which logs will be saved inside of the app. \"Verbose\" will save everything and \"Error\" will only save errors messages. Currently it is set to \"{0}\".",
   "log.level": "Log Level",
-  "page.logs.filtered": "Filtered App Logs"
+  "page.logs.filtered": "Search Logs"
 }

@@ -148,14 +148,14 @@ abstract class StructureItem extends Entity {
   /// [StructureItem.rootFolderNames], or [StructureItem.moveFolderNames] contain the name.
   static void throwErrorForName(String nameToValidate) {
     if (nameToValidate.isEmpty || nameToValidate.contains(StructureItem.delimiter)) {
-      Logger.error("The name $nameToValidate is empty, or it contains a ${StructureItem.delimiter}");
+      Logger.warn("The name $nameToValidate is empty, or it contains a ${StructureItem.delimiter}");
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
 
     if (recentFolderNames.contains(nameToValidate.toLowerCase()) ||
         rootFolderNames.contains(nameToValidate.toLowerCase()) ||
         moveFolderNames.contains(nameToValidate.toLowerCase())) {
-      Logger.error("The name $nameToValidate is a reserved name");
+      Logger.warn("The name $nameToValidate is a reserved name");
       throw const ClientException(message: ErrorCodes.NAME_ALREADY_USED);
     }
   }

@@ -93,13 +93,13 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
   }
 
   Future<void> _handleShowInfoSnackBar(ShowInfoSnackBar event, Emitter<DialogOverlayState> emit) async {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context!).showSnackBar(SnackBar(
       duration: event.duration,
       content: Text(translate(event.textKey, keyParams: event.textKeyParams), style: event.textStyle),
       action: SnackBarAction(
         label: translate("dialog.button.confirm"),
         onPressed: () {
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context!).hideCurrentSnackBar();
         },
       ),
     ));
@@ -127,10 +127,13 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
   }
 
   Future<void> _handleShowErrorDialog(ShowErrorDialog event, Emitter<DialogOverlayState> emit) async {
+    if(context==null){
+      return;
+    }
     await _showDialog(
       titleKey: event.titleKey ?? "dialog.error.title",
       titleKeyParams: event.titleKeyParams,
-      titleStyle: Theme.of(context).textTheme.titleLarge?.copyWith(color: colors.error),
+      titleStyle: Theme.of(context!).textTheme.titleLarge?.copyWith(color: colors.error),
       titleIcon: event.titleIcon,
       content: Text(
         translate(event.descriptionKey, keyParams: event.descriptionKeyParams),
@@ -207,9 +210,9 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
     if (loadingDialogCounter > 0) {
       _closeDialog(cancelDialog: false, isLoadingDialog: true, forceCloseLoadingDialog: true);
     }
-    final TextStyle? style = Theme.of(context).textTheme.bodyMedium;
+    final TextStyle? style = Theme.of(context!).textTheme.bodyMedium;
     showAboutDialog(
-      context: context,
+      context: context!,
       applicationIcon: SvgPicture.asset(
         Assets.nota_letter_logo,
         height: 55,
@@ -331,7 +334,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
       _cancelCallback = newCancelCallback;
     }
     return showDialog(
-      context: context,
+      context: context!,
       barrierDismissible: false,
       builder: (BuildContext context) {
         // the custom willpop is needed, because the dialog will be pushed with its own route and the default pages can
@@ -414,7 +417,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
   }
 
   void _pop(Object? dataForDialog) {
-    final NavigatorState navigator = Navigator.of(context);
+    final NavigatorState navigator = Navigator.of(context!);
     if (navigator.canPop()) {
       navigator.pop(dataForDialog);
     }
@@ -439,8 +442,8 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
   }
 
   /// The build context of the dialog widget
-  BuildContext get context => dialogOverlayKey.currentContext!;
+  BuildContext? get context => dialogOverlayKey.currentContext;
 
   /// The colors of the theme
-  ColorScheme get colors => Theme.of(context).colorScheme;
+  ColorScheme get colors => Theme.of(context!).colorScheme;
 }
