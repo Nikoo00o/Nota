@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';

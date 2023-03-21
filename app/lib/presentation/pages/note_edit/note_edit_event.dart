@@ -1,4 +1,3 @@
-import 'package:app/core/enums/event_action.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/presentation/widgets/base_pages/page_event.dart';
 

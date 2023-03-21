@@ -15,9 +15,6 @@ import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/domain/entities/note_info.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
-import '../../../server/test/helper/server_test_helper.dart' as server; // relative import of the server test helpers, so
-// that the real server responses can be used for testing instead of mocks! The server tests should be run before!
-import '../fetch_new_note_structure_test.dart';
 import '../helper/app_test_helper.dart';
 
 const int _serverPort = 9294; // also needs to be a different port for each test file. The app tests dont have to care
@@ -38,6 +35,8 @@ void main() {
       await createSomeTestNotes();
       await sl<FetchNewNoteStructure>().call(const NoParams());
     });
+
+    //todo: also add error tests and more different tests, etc
 
     test("deleting a deeper folder of root", () async {
       sl<NoteStructureRepository>().currentItem =

@@ -1,7 +1,6 @@
 import 'package:shared/core/utils/list_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/core/utils/string_utils.dart';
-import 'package:shared/domain/entities/entity.dart';
 import 'package:shared/domain/entities/note_info.dart';
 import 'package:shared/domain/entities/session_token.dart';
 
@@ -37,9 +36,8 @@ class SharedAccount {
     required this.noteInfoList,
   });
 
-  @override
-
   /// Does not compare runtime type, because the comparison should also return true if its compared to the model
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other)) {
       return true;

@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:app/core/config/app_config.dart';
@@ -10,7 +9,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared/core/enums/log_level.dart';
 import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/core/utils/logger/log_message.dart';
-import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/data/datasources/hive_box_configuration.dart';
 import 'package:shared/data/datasources/shared_hive_data_source_mixin.dart';
 

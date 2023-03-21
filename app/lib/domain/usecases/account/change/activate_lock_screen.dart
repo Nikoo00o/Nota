@@ -1,11 +1,8 @@
-import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/routes.dart';
 import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/repositories/account_repository.dart';
 import 'package:app/domain/usecases/account/change/logout_of_account.dart';
 import 'package:app/services/navigation_service.dart';
-import 'package:shared/core/constants/error_codes.dart';
-import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 

@@ -1,5 +1,4 @@
 import 'dart:ui';
-import 'package:app/core/config/app_config.dart';
 import 'package:app/core/config/app_theme.dart';
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/get_it.dart';

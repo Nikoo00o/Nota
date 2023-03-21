@@ -1,5 +1,4 @@
 import 'package:shared/data/dtos/account/account_change_password_response.dart';
-import 'package:shared/data/dtos/response_dto.dart';
 import 'package:shared/data/models/session_token_model.dart';
 import 'package:shared/data/models/shared_account_model_mixin.dart';
 

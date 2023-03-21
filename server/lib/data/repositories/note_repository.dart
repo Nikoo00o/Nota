@@ -22,6 +22,8 @@ import 'package:shared/domain/entities/note_info.dart';
 import 'package:shared/domain/entities/note_update.dart';
 import 'package:synchronized/synchronized.dart';
 
+// ignore_for_file: always_specify_types
+
 /// Manages and synchronizes the note operations on the server by using the [NoteDataSource].
 ///
 /// No Other Repository, or DataSource should access the notes from the [NoteDataSource] directly!!!

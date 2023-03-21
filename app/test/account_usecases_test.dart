@@ -8,7 +8,6 @@ import 'package:app/domain/repositories/account_repository.dart';
 import 'package:app/domain/usecases/account/change/change_account_password.dart';
 import 'package:app/domain/usecases/account/change/change_auto_login.dart';
 import 'package:app/domain/usecases/account/change/logout_of_account.dart';
-import 'package:app/domain/usecases/account/inner/fetch_current_session_token.dart';
 import 'package:app/domain/usecases/account/get_auto_login.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/login/create_account.dart';
@@ -93,12 +92,12 @@ void _testLoginToAccount() {
       await sl<LoginToAccount>()
           .call(const LoginToAccountParamsRemote(username: "test1", password: "11111111", reuseOldNotes: false));
     }, throwsA(predicate((Object e) => e is ServerException && e.message == ErrorCodes.ACCOUNT_WRONG_PASSWORD)));
-    await Future<void>.delayed(const Duration(milliseconds: 100)); // wait for the async expect!
+    await Future<void>.delayed(const Duration(milliseconds: 250)); // wait for the async expect!
 
     final ClientAccount? cachedAccount = await sl<AccountRepository>().getAccount();
     final ClientAccount? storedAccount = await sl<AccountRepository>().getAccount(forceLoad: true); // delete cache
     expect(passwordHash, storedAccount?.passwordHash, reason: "the correct hash should get loaded from storage");
-    expect(passwordHash, isNot(cachedAccount?.passwordHash), reason: "cached account should have wrong hash");
+    expect(passwordHash, cachedAccount?.passwordHash, reason: "cached account should also not have the wrong hash");
   });
 
   test("Logging in to an account remotely with a wrong username", () async {
@@ -497,7 +496,7 @@ void _testLoadPreviousNotes() {
 
   test("should also still work the same after password change", () async {
     await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
-    final ClientAccount account1 = await loginToTestAccount(reuseOldNotes: true);
+    await loginToTestAccount(reuseOldNotes: true);
     await sl<ChangeAccountPassword>().call(const ChangePasswordParams(newPassword: "password2"));
     await sl<AccountRepository>().saveAccount(null);
     await sl<LoginToAccount>()

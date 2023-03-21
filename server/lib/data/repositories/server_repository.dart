@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:server/core/config/server_config.dart';
+import 'package:server/data/datasources/rest_server.dart';
 import 'package:server/data/repositories/account_repository.dart';
 import 'package:server/data/repositories/note_repository.dart';
 import 'package:server/domain/entities/network/rest_callback.dart';
 import 'package:server/domain/entities/network/rest_callback_params.dart';
 import 'package:server/domain/entities/network/rest_callback_result.dart';
-import 'package:server/data/datasources/rest_server.dart';
 import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/constants/rest_json_parameter.dart';
 import 'package:shared/core/utils/logger/logger.dart';

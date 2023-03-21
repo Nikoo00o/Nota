@@ -1,9 +1,9 @@
 import 'package:app/core/get_it.dart';
 import 'package:app/presentation/main/menu/menu_bloc.dart';
-import 'package:app/presentation/main/menu/widgets/menu_drawer_developer.dart';
-import 'package:app/presentation/main/menu/widgets/menu_drawer_header.dart';
 import 'package:app/presentation/main/menu/menu_event.dart';
 import 'package:app/presentation/main/menu/menu_state.dart';
+import 'package:app/presentation/main/menu/widgets/menu_drawer_developer.dart';
+import 'package:app/presentation/main/menu/widgets/menu_drawer_header.dart';
 import 'package:app/presentation/main/menu/widgets/menu_drawer_settings.dart';
 import 'package:app/presentation/main/menu/widgets/menu_item.dart';
 import 'package:app/presentation/main/menu/widgets/menu_notes.dart';

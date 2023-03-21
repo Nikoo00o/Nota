@@ -1,5 +1,4 @@
 import 'package:args/args.dart';
-import 'package:server/core/config/server_config.dart';
 import 'package:server/core/get_it.dart';
 import 'package:server/core/logger/server_logger.dart';
 import 'package:server/data/datasources/local_data_source.dart';

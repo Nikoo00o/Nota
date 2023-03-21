@@ -1,5 +1,4 @@
 import 'package:app/core/enums/note_sorting.dart';
-import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
@@ -9,9 +8,8 @@ import 'package:app/domain/usecases/note_structure/create_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/finish_move_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/inner/add_new_structure_update_batch.dart';
-import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/inner/get_original_structure_item.dart';
-import 'package:app/domain/usecases/note_structure/navigation/get_structure_folders.dart';
+import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_updates_stream.dart';
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:shared/core/constants/error_codes.dart';

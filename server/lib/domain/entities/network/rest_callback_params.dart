@@ -3,7 +3,6 @@ import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/enums/http_method.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/domain/entities/entity.dart';
-import 'package:shared/domain/entities/shared_account.dart';
 
 /// The Parameter that a rest callback method will be called with.
 ///

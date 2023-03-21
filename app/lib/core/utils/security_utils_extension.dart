@@ -7,6 +7,8 @@ import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/security_utils.dart';
 import 'package:shared/core/utils/string_utils.dart';
 
+// ignore_for_file: use_setters_to_change_properties
+
 /// Offers the flutter specific security method which are faster and async in addition to the basic sync shared methods of
 /// [SecurityUtils]
 class SecurityUtilsExtension {
