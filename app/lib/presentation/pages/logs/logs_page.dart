@@ -5,6 +5,7 @@ import 'package:app/presentation/main/menu/logged_in_menu.dart';
 import 'package:app/presentation/pages/logs/logs_bloc.dart';
 import 'package:app/presentation/pages/logs/logs_event.dart';
 import 'package:app/presentation/pages/logs/logs_state.dart';
+import 'package:app/presentation/pages/logs/widgets/filte_logs_bar.dart';
 import 'package:app/presentation/pages/settings/widgets/settings_selection_option.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:app/services/navigation_service.dart';
@@ -29,46 +30,7 @@ class LogsPage extends BlocPage<LogsBloc, LogsState> {
       children: <Widget>[
         createBlocBuilder(builder: _buildLogLevelSelection),
         const SizedBox(height: 5),
-        Row(
-          children: <Widget>[
-            Flexible(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(10, 0, 5, 0),
-                child: Container(
-                  height: 34.0,
-                  decoration: BoxDecoration(
-                    color: colorPrimary(context).withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(32),
-                  ),
-                  padding: const EdgeInsets.only(right: 10),
-                  child: TextField(
-                    focusNode: currentBloc(context).searchFocus,
-                    controller: currentBloc(context).searchController,
-                    onChanged: (String _) => currentBloc(context).add(const LogsEventUpdateState()),
-                    decoration: InputDecoration(
-                      hintText: translate(context, "page.logs.filtered"),
-                      prefixIcon: const Icon(Icons.search),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.only(bottom: 12),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(
-              width: 45,
-              height: 40,
-              child: TextButton(
-                onPressed: () => currentBloc(context).searchFocus.unfocus(),
-                child: Text(translate(context, "ok")),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(15, 0, 10, 0),
-              child: createBlocBuilder(builder: _buildFilterDropDown),
-            ),
-          ],
-        ),
+        const FilterLogsBar(),
         Expanded(
           child: Scrollbar(
             controller: currentBloc(context).scrollController,
@@ -98,27 +60,8 @@ class LogsPage extends BlocPage<LogsBloc, LogsState> {
     }
   }
 
-  Widget _buildFilterDropDown(BuildContext context, LogsState state) {
-    if (state is LogsStateInitialised) {
-      return DropdownButton<LogLevel>(
-        value: state.filterLevel,
-        items: List<DropdownMenuItem<LogLevel>>.generate(
-          LogLevel.values.length,
-          (int index) => DropdownMenuItem<LogLevel>(
-            value: LogLevel.values.elementAt(index),
-            child: Text(LogLevel.values.elementAt(index).toString(), style: textLabelMedium(context)),
-          ),
-        ),
-        onChanged: (LogLevel? logLevel) => currentBloc(context).add(LogsEventFilterLogLevel(logLevel: logLevel)),
-      );
-    } else {
-      return const SizedBox();
-    }
-  }
-
-  @override
-
   /// builds the list view of the log entries
+  @override
   Widget buildBodyWithState(BuildContext context, LogsState state) {
     if (state is LogsStateInitialised) {
       return ListView.builder(
