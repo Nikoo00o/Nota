@@ -3,11 +3,11 @@ import 'package:hive/hive.dart';
 import 'package:server/data/datasources/account_data_source.dart.dart';
 import 'package:server/data/datasources/local_data_source.dart';
 import 'package:server/data/datasources/note_data_source.dart';
+import 'package:server/data/datasources/rest_server.dart';
 import 'package:server/data/models/server_account_model.dart';
 import 'package:server/data/repositories/account_repository.dart';
 import 'package:server/data/repositories/note_repository.dart';
 import 'package:server/data/repositories/server_repository.dart';
-import 'package:server/data/datasources/rest_server.dart';
 import 'package:server/domain/entities/server_account.dart';
 import 'package:server/domain/usecases/fetch_authenticated_account.dart';
 import 'package:server/domain/usecases/start_note_server.dart';
@@ -26,8 +26,8 @@ import 'package:shared/domain/usecases/usecase.dart';
 import 'package:test/expect.dart';
 
 import '../mocks/fetch_authenticated_account_mock.dart';
-import '../mocks/server_config_mock.dart';
 import '../mocks/fetch_session_token_mock.dart';
+import '../mocks/server_config_mock.dart';
 
 // Helper methods for the tests that are used by multiple tests. mostly used for initialisation!
 

@@ -1,6 +1,4 @@
-import 'package:app/core/get_it.dart';
 import 'package:app/presentation/main/app/widgets/custom_app_localizations.dart';
-import 'package:app/services/translation_service.dart';
 import 'package:flutter/material.dart';
 
 abstract class WidgetBase extends StatelessWidget {

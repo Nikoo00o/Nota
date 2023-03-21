@@ -7,7 +7,6 @@ import 'package:shared/core/constants/rest_json_parameter.dart';
 import 'package:shared/core/enums/note_transfer_status.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
-import 'package:shared/core/utils/string_utils.dart';
 import 'package:shared/data/dtos/account/account_change_password_request.dart';
 import 'package:shared/data/dtos/account/account_change_password_response.dart';
 import 'package:shared/data/dtos/account/account_login_request.dart.dart';

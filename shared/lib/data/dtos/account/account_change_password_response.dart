@@ -3,7 +3,6 @@ import 'package:shared/data/models/session_token_model.dart';
 import 'package:shared/data/models/shared_account_model_mixin.dart';
 
 class AccountChangePasswordResponse extends ResponseDTO {
-  /// Base64 encoded
   final SessionTokenModel sessionToken;
 
   const AccountChangePasswordResponse({

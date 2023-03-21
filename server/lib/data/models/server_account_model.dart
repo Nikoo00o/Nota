@@ -1,5 +1,4 @@
 import 'package:server/domain/entities/server_account.dart';
-import 'package:shared/core/utils/nullable.dart';
 import 'package:shared/data/models/model.dart';
 import 'package:shared/data/models/note_info_model.dart';
 import 'package:shared/data/models/session_token_model.dart';

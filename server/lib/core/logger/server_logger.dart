@@ -1,10 +1,10 @@
 import 'dart:io';
 
+import 'package:intl/intl.dart';
 import 'package:server/core/config/server_config.dart';
 import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/core/utils/logger/log_message.dart';
 import 'package:shared/core/utils/logger/logger.dart';
-import 'package:intl/intl.dart';
 
 class ServerLogger extends Logger {
   final ServerConfig serverConfig;

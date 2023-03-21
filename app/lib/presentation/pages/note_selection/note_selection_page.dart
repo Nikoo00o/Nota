@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:app/core/enums/custom_icon_button_type.dart';
 import 'package:app/core/enums/search_status.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/structure_item.dart';
@@ -13,9 +12,7 @@ import 'package:app/presentation/pages/note_selection/widgets/selection_bottom_b
 import 'package:app/presentation/pages/note_selection/widgets/selection_popup_menu.dart';
 import 'package:app/presentation/pages/note_selection/widgets/selection_search_bar.dart';
 import 'package:app/presentation/pages/note_selection/widgets/structure_item_box.dart';
-import 'package:app/presentation/pages/settings/widgets/settings_toggle_option.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
-import 'package:app/presentation/widgets/custom_icon_button.dart';
 import 'package:flutter/material.dart';
 
 class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> {

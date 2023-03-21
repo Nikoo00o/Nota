@@ -1,22 +1,18 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 
 import 'package:http/io_client.dart';
 import 'package:shared/core/config/shared_config.dart';
 import 'package:shared/core/constants/endpoints.dart';
-import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/constants/error_codes.dart';
-import 'package:shared/core/enums/http_method.dart';
 import 'package:shared/core/constants/rest_json_parameter.dart';
+import 'package:shared/core/enums/http_method.dart';
+import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/network/endpoint.dart';
 import 'package:shared/core/network/network_utils.dart';
-import 'package:shared/domain/entities/response_data.dart';
-import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
+import 'package:shared/domain/entities/response_data.dart';
 import 'package:shared/domain/entities/session_token.dart';
-import 'package:shared/domain/usecases/shared_fetch_current_session_token.dart';
-import 'package:shared/domain/usecases/usecase.dart';
 
 /// Wrapper around a http client to connect to the REST API web server.
 ///

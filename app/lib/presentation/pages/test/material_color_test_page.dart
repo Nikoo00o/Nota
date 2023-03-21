@@ -1,13 +1,10 @@
-import 'package:app/core/config/app_config.dart';
 import 'package:app/core/config/app_theme.dart';
-import 'package:app/core/constants/assets.dart';
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/presentation/main/menu/logged_in_menu.dart';
 import 'package:app/presentation/widgets/base_pages/no_bloc_page.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class MaterialColorTestPage extends NoBlocPage {
   const MaterialColorTestPage() : super(pagePadding: const EdgeInsets.fromLTRB(0, 0, 0, 0));

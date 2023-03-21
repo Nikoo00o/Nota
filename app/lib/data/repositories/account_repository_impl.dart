@@ -13,7 +13,6 @@ import 'package:shared/data/dtos/account/account_change_password_response.dart';
 import 'package:shared/data/dtos/account/account_login_request.dart.dart';
 import 'package:shared/data/dtos/account/account_login_response.dart';
 import 'package:shared/data/dtos/account/create_account_request.dart';
-import 'package:shared/data/models/note_info_model.dart';
 import 'package:shared/domain/entities/note_info.dart';
 
 class AccountRepositoryImpl extends AccountRepository {

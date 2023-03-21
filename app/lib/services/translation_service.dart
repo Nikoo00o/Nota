@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:ui';
 import 'package:app/domain/repositories/app_settings_repository.dart';
-import 'package:app/presentation/main/app/app_bloc.dart';
 import 'package:flutter/services.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';

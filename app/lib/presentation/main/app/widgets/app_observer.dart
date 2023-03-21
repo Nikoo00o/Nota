@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:app/core/config/app_config.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';
 import 'package:app/domain/usecases/account/change/activate_lock_screen.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';

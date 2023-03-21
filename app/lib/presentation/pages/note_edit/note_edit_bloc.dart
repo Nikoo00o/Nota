@@ -1,12 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:app/core/constants/routes.dart';
-import 'package:app/core/enums/event_action.dart';
 import 'package:app/core/utils/input_validator.dart';
 import 'package:app/core/utils/security_utils_extension.dart';
-import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/entities/structure_update_batch.dart';
@@ -17,7 +14,6 @@ import 'package:app/domain/usecases/note_structure/navigation/get_current_struct
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_updates_stream.dart';
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
 import 'package:app/domain/usecases/note_structure/start_move_structure_item.dart';
-import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
 import 'package:app/domain/usecases/note_transfer/load_note_buffer.dart';
 import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
 import 'package:app/domain/usecases/note_transfer/save_note_buffer.dart';

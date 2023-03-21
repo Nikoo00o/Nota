@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:app/core/constants/locales.dart';
 import 'package:app/core/utils/input_validator.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';

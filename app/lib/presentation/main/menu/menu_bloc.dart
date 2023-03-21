@@ -7,7 +7,6 @@ import 'package:app/domain/usecases/account/change/change_auto_login.dart';
 import 'package:app/domain/usecases/account/change/logout_of_account.dart';
 import 'package:app/domain/usecases/account/get_user_name.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_folders.dart';
-import 'package:app/domain/usecases/note_structure/navigation/get_structure_updates_stream.dart';
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/presentation/main/menu/menu_event.dart';

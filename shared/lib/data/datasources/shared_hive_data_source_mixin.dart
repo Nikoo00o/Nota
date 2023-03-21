@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:hive/hive.dart';
-import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/hive_aes_gcm_cipher.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/data/datasources/hive_box_configuration.dart';

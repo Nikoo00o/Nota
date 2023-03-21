@@ -13,7 +13,6 @@ import 'package:app/domain/usecases/account/login/login_to_account.dart';
 import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:shared/core/enums/log_level.dart';
-import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/data/datasources/rest_client.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
@@ -28,6 +27,8 @@ late DialogServiceMock dialogServiceMock;
 
 /// The [serverPort] also needs to be unique across the app and server tests. Afterwards you can replace more app
 /// implementations with mocks!
+///
+/// You can also set a new default [logLevel] in this method params for all tests.
 Future<void> createCommonTestObjects({required int serverPort, LogLevel logLevel = LogLevel.VERBOSE}) async {
   await server.createCommonTestObjects(serverPort: serverPort, logLevel: logLevel); // init the server test helper objects
   // this will also init the dart console logger
