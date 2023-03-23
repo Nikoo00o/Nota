@@ -179,4 +179,7 @@ abstract class WidgetBase extends StatelessWidget {
   /// Returns only the size, weight and spacing of the [ThemeData.textTheme], so that the text color will not be
   /// overridden when using this in widgets! (and so that something like a disabled color still works!)
   TextStyle textBodySmall(BuildContext context) => _textParams(theme(context).textTheme.bodySmall);
+
+  /// Returns if the current theme is dark
+  bool isDarkTheme(BuildContext context) => theme(context).brightness == Brightness.dark;
 }

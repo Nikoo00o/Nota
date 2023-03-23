@@ -30,7 +30,11 @@ mixin SharedHiveDataSourceMixin {
         }
 
         if (config.value.isGeneratedHiveObject) {
-          hiveBox = await Hive.openBox(config.value.name, encryptionCipher: cipher);
+          if (config.value.isLazy) {
+            hiveBox = await Hive.openLazyBox(config.value.name, encryptionCipher: cipher);
+          } else {
+            hiveBox = await Hive.openBox(config.value.name, encryptionCipher: cipher);
+          }
         } else if (config.value.isLazy) {
           hiveBox = await Hive.openLazyBox<String>(config.value.name, encryptionCipher: cipher);
         } else {

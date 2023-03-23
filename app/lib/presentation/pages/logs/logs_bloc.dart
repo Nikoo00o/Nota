@@ -40,9 +40,12 @@ class LogsBloc extends PageBloc<LogsEvent, LogsState> {
   }
 
   Future<void> _handleInitialise(LogsEventInitialise event, Emitter<LogsState> emit) async {
+    dialogService.showLoadingDialog();
+    await appSettingsRepository.getLogs(); // load logs into memory once while showing loading dialog
     filterLevel = await appSettingsRepository.getLogLevel();
     logLevelIndex = filterLevel!.index;
     emit(await _buildState());
+    dialogService.hideLoadingDialog();
   }
 
   Future<void> _handleUpdateState(LogsEventUpdateState event, Emitter<LogsState> emit) async {

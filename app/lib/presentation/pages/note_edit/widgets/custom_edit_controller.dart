@@ -85,6 +85,9 @@ class CustomEditController extends TextEditingController {
       offset += charsBefore + searchSize;
     }
 
+    // todo: improve performance for long texts with many search results. it would be better to then only already render
+    // those results that are near the current scroll offset and rebuild when scrolling
+
     if (offset > 0) {
       if (offset < text.length) {
         children.add(TextSpan(text: text.substring(offset), style: style));
