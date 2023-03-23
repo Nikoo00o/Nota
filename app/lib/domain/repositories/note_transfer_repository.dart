@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:app/core/config/app_config.dart';
+import 'package:app/data/datasources/local_data_source.dart';
 import 'package:app/data/datasources/remote_note_data_source.dart';
 import 'package:app/domain/usecases/note_transfer/load_note_buffer.dart';
 import 'package:app/domain/usecases/note_transfer/save_note_buffer.dart';
@@ -12,16 +13,16 @@ import 'package:shared/domain/entities/note_update.dart';
 abstract class NoteTransferRepository {
   /// Stores the content of the note which is encrypted with the users data key.
   ///
-  /// The Note will be stored at "[getApplicationDocumentsDirectory()] / [AppConfig.noteFolder] / [noteId] .note"
+  /// The Note will be stored at "[LocalDataSource.getBasePath] / [AppConfig.noteFolder] / [noteId] .note"
   ///
-  /// So for example on android /data/user/0/com.nota.nota_app/app_flutter/notes/10.note
+  /// So for example on android /data/user/0/com.nota.nota_app/app_flutter/nota/notes/10.note
   Future<void> storeEncryptedNote({required int noteId, required List<int> encryptedBytes});
 
   /// Returns the content of the note which is encrypted with the users data key.
   ///
-  /// The Note will be stored at "[getApplicationDocumentsDirectory()] / [AppConfig.noteFolder] / [noteId] .note"
+  /// The Note will be stored at "[LocalDataSource.getBasePath] / [AppConfig.noteFolder] / [noteId] .note"
   ///
-  /// So for example on android /data/user/0/com.nota.nota_app/app_flutter/notes/10.note
+  /// So for example on android /data/user/0/com.nota.nota_app/app_flutter/nota/notes/10.note
   ///
   /// If the note could not be found, this will throw a [FileException] with [ErrorCodes.FILE_NOT_FOUND]!
   Future<Uint8List> loadEncryptedNote({required int noteId});
@@ -63,16 +64,16 @@ abstract class NoteTransferRepository {
   /// If the [oldNoteId] file did not exist, it will throw a [FileException] with [ErrorCodes.FILE_NOT_FOUND]!
   Future<bool> renameNote({required int oldNoteId, required int newNoteId});
 
-  /// Returns if the file at [getApplicationDocumentsDirectory()] / [getLocalNotePath] existed and if it was deleted, or not.
+  /// Returns if the file at [LocalDataSource.getBasePath] / [getLocalNotePath] existed and if it was deleted, or not.
   ///
-  /// The application documents directory will for example be: /data/user/0/com.nota.nota_app/app_flutter/
+  /// The application documents directory will for example be: /data/user/0/com.nota.nota_app/app_flutter/nota/
   Future<bool> deleteNote({required int noteId});
 
   /// Returns the relative filePath to a specific note from the application documents directory.
   ///
-  /// The Note will be stored at "[getApplicationDocumentsDirectory()] / [AppConfig.noteFolder] / [noteId] .note"
+  /// The Note will be stored at "[LocalDataSource.getBasePath] / [AppConfig.noteFolder] / [noteId] .note"
   ///
-  /// So for example on android /data/user/0/com.nota.nota_app/app_flutter/notes/10.note
+  /// So for example on android /data/user/0/com.nota.nota_app/app_flutter/nota/notes/10.note
   ///
   /// If [isTempNote] is true, then the note ending will be ".temp" instead.
   String getLocalNotePath({required int noteId, required bool isTempNote});

@@ -98,4 +98,7 @@ class LocalDataSourceMock extends LocalDataSource {
   Future<List<LogMessage>> getLogs() async {
     return <LogMessage>[];
   }
+
+  @override
+  Future<String> getBasePath() async => "";
 }

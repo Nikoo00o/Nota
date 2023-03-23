@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:app/core/config/app_config.dart';
 import 'package:app/data/models/client_account_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared/core/config/shared_config.dart';
@@ -37,7 +38,8 @@ abstract class LocalDataSource {
 
   static const String LOG_LEVEL = "LOG_LEVEL";
 
-  /// Must be called first in the main function to initialize hive to the [getApplicationDocumentsDirectory].
+  /// Must be called first in the main function to initialize hive to the [AppConfig.baseFolder]
+  /// of [getApplicationDocumentsDirectory]. This will also create the base folder if it does not exist yet!
   Future<void> init();
 
   /// Returns the hive encryption key that is stored in the secure storage, or generates a new one and saves it
@@ -184,21 +186,21 @@ abstract class LocalDataSource {
   /// Will write to the hive database if [secure] is false. Otherwise it will write to the secure storage!
   Future<void> delete({required String key, required bool secure});
 
-  /// Creates all parent folders and writes the [bytes] to the specified [getApplicationDocumentsDirectory()] / [localFilePath]
+  /// Creates all parent folders and writes the [bytes] to the specified [getBasePath] / [localFilePath]
   ///
-  /// The application documents directory will for example be: /data/user/0/com.nota.nota_app/app_flutter/
+  /// The application documents directory will for example be: /data/user/0/com.nota.nota_app/app_flutter/nota/
   Future<void> writeFile({required String localFilePath, required List<int> bytes});
 
-  /// Returns the bytes of the file at [getApplicationDocumentsDirectory()] / [localFilePath].
+  /// Returns the bytes of the file at [getBasePath] / [localFilePath].
   ///
-  /// Returns null if the [getApplicationDocumentsDirectory()] / [localFilePath] was not found
+  /// Returns null if the [getBasePath] / [localFilePath] was not found
   ///
-  /// The application documents directory will for example be: /data/user/0/com.nota.nota_app/app_flutter/
+  /// The application documents directory will for example be: /data/user/0/com.nota.nota_app/app_flutter/nota/
   Future<Uint8List?> readFile({required String localFilePath});
 
-  /// Returns if the file at [getApplicationDocumentsDirectory()] / [localFilePath] existed and if it was deleted, or not.
+  /// Returns if the file at [getBasePath] / [localFilePath] existed and if it was deleted, or not.
   ///
-  /// The application documents directory will for example be: /data/user/0/com.nota.nota_app/app_flutter/
+  /// The application documents directory will for example be: /data/user/0/com.nota.nota_app/app_flutter/nota/
   Future<bool> deleteFile({required String localFilePath});
 
   /// Renames the file from [oldLocalFilePath] to [newLocalFilePath] and returns if the old file existed, or not.
@@ -216,4 +218,8 @@ abstract class LocalDataSource {
   ///
   /// Also deletes all files!
   Future<void> deleteEverything();
+
+  /// This returns the [getApplicationDocumentsDirectory] combined with the [AppConfig.baseFolder] as the folder where all
+  /// files and folders of the app are stored!
+  Future<String> getBasePath();
 }
