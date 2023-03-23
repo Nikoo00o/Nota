@@ -64,7 +64,9 @@ class StructureItemBox extends BlocPageChild<NoteSelectionBloc, NoteSelectionSta
     for (final int id in noteIds) {
       final String? content = noteContentMap[id];
       if (content != null && searchString != null) {
-        return content.contains(searchString);
+        if (content.contains(searchString)) {
+          return true;
+        }
       }
     }
     return false;

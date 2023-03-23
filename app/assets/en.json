@@ -145,7 +145,7 @@
   "note.edit.delete.note": "Delete note",
   "note.edit.delete.note.description": "Should the current note {0} really be deleted?",
   "note.edit.delete.note.done": "Deleted the note at the path {0}",
-  "nota.about": "Nota is a Cross-Platform Note-Taking App designed to work both locally offline, or server synchronized across all of your devices. Your notes are securely encrypted and can only be accessed by your local devices with your password. For more details visit\n",
+  "nota.about": "Nota is a Cross-Platform Note-Taking App designed to work both locally offline, or server synchronized across all of your devices with a big focus on the security and privacy of your data. Your notes are securely encrypted and can only be accessed by your local devices with your password. For more details visit\n",
   "page.logs.choose.title": "Choose App Log Level",
   "page.logs.choose.description": "You can change which logs will be saved inside of the app. \"Verbose\" will save everything and \"Error\" will only save errors messages. Currently it is set to \"{0}\".",
   "log.level": "Log Level",

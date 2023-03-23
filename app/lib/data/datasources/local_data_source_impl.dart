@@ -23,7 +23,8 @@ class LocalDataSourceImpl extends LocalDataSource with SharedHiveDataSourceMixin
 
   @override
   Future<void> init() async {
-    await Hive.initFlutter();
+    FileUtils.createDirectory(await getBasePath());
+    await Hive.initFlutter(appConfig.baseFolder);
     Hive.registerAdapter(LogLevelAdapter());
     Hive.registerAdapter(LogMessageAdapter());
     _hiveKey = await generateHiveKey();
@@ -110,14 +111,22 @@ class LocalDataSourceImpl extends LocalDataSource with SharedHiveDataSourceMixin
   @override
   Future<List<LogMessage>> getLogs() => loadHiveObjects(databaseKey: LocalDataSource.LOG_DATABASE);
 
+  /// This returns the [getApplicationDocumentsDirectory] combined with the [AppConfig.baseFolder] and then the
+  /// [localFilePath]
   Future<String> _getAbsolutePath(String localFilePath) async {
-    final Directory documents = await getApplicationDocumentsDirectory();
+    final String basePath = await getBasePath();
     if (localFilePath.isEmpty) {
-      return documents.path;
-    } else if (localFilePath.startsWith(documents.path)) {
+      return basePath;
+    } else if (localFilePath.startsWith(basePath)) {
       return localFilePath;
     } else {
-      return "${documents.path}${Platform.pathSeparator}$localFilePath";
+      return "$basePath${Platform.pathSeparator}$localFilePath";
     }
+  }
+
+  @override
+  Future<String> getBasePath() async {
+    final Directory documents = await getApplicationDocumentsDirectory();
+    return "${documents.path}${Platform.pathSeparator}${appConfig.baseFolder}";
   }
 }

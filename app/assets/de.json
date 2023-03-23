@@ -145,7 +145,7 @@
   "note.edit.delete.note": "Notiz löschen",
   "note.edit.delete.note.description": "Soll die aktuelle Notiz {0} wirklich gelöscht werden?",
   "note.edit.delete.note.done": "Die Notiz mit dem Pfad {0} wurde gelöscht",
-  "nota.about" : "Note ist eine plattformübergreifende Notizen App, die lokal, aber auch Server synchronisiert zwischen all ihren Geräten Notizen speichern und austauschen kann. Dabei werden ihre Notizen sicher verschlüsselt und diese können auch nur auf ihren lokalen Geräten mit ihrem Passwort abgerufen werden. Mehr Details sind unter dem folgenden Link verfügbar\n",
+  "nota.about" : "Note ist eine plattformübergreifende Notizen App, die lokal, aber auch Server synchronisiert zwischen all ihren Geräten Notizen speichern und austauschen kann und dabei einen großen Wert auf die Sicherheit und Privatsphäre ihrer Daten legt. Dabei werden ihre Notizen sicher verschlüsselt und diese können auch nur auf ihren lokalen Geräten mit ihrem Passwort abgerufen werden. Mehr Details sind unter dem folgenden Link verfügbar\n",
   "page.logs.choose.title": "Log Level der App ändern",
   "page.logs.choose.description": "Sie können einstellen welche Logs in der App gespeichert werden sollen. \"Verbose\" speichert alles und \"Error\" speichert nur Fehlermeldungen. Aktuell ist \"{0}\" ausgewählt.",
   "log.level": "Log Level",

@@ -3,7 +3,8 @@
 ## About the App
 - Nota is a Cross-Platform Note-Taking App designed to work both locally offline, or server synchronized across 
   all of your devices 
-- your notes will be securely encrypted and the server only stores them, but can't decrypt them
+- Nota is focused on the security and privacy of your data and your notes will be securely encrypted, so that the server only
+  stores them, but can't read them
   - only your local devices can decrypt and view your notes
 - the notes can be accessed inside of the app with a folder like structure
 - currently the app is still in development
