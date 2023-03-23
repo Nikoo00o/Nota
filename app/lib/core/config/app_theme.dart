@@ -158,27 +158,29 @@ class AppTheme {
   /// [10] is the material color tone [99].
   static MaterialColor convertColor(Color color) {
     final Map<int, Color> colorMap = <int, Color>{
-      0: _tintColor(color, 1.0),
-      10: _tintColor(color, 0.98),
-      50: _tintColor(color, 0.9),
-      100: _tintColor(color, 0.8),
-      200: _tintColor(color, 0.6),
-      300: _tintColor(color, 0.4),
-      400: _tintColor(color, 0.2),
+      0: tintColor(color, 1.0),
+      10: tintColor(color, 0.98),
+      50: tintColor(color, 0.9),
+      100: tintColor(color, 0.8),
+      200: tintColor(color, 0.6),
+      300: tintColor(color, 0.4),
+      400: tintColor(color, 0.2),
       500: color,
-      600: _shadeColor(color, 0.2),
-      700: _shadeColor(color, 0.4),
-      800: _shadeColor(color, 0.6),
-      900: _shadeColor(color, 0.8),
-      1000: _shadeColor(color, 1.0),
+      600: shadeColor(color, 0.2),
+      700: shadeColor(color, 0.4),
+      800: shadeColor(color, 0.6),
+      900: shadeColor(color, 0.8),
+      1000: shadeColor(color, 1.0),
     };
     return MaterialColor(color.value, colorMap);
   }
 
-  static Color _tintColor(Color color, double factor) =>
+  /// Makes a color brighter
+  static Color tintColor(Color color, double factor) =>
       Color.fromRGBO(_tint(color.red, factor), _tint(color.green, factor), _tint(color.blue, factor), 1);
 
-  static Color _shadeColor(Color color, double factor) =>
+  /// Makes a color darker
+  static Color shadeColor(Color color, double factor) =>
       Color.fromRGBO(_shade(color.red, factor), _shade(color.green, factor), _shade(color.blue, factor), 1);
 
   /// makes color brighter

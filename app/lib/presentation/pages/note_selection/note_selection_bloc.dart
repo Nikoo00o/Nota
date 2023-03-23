@@ -104,11 +104,13 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
       Logger.warn("this should not happen, note selection bloc already initialised");
       return;
     }
+    dialogService.showLoadingDialog();
     add(NoteSelectionStructureChanged(newCurrentItem: await getCurrentStructureItem.call(const NoParams())));
     subscription =
         await getStructureUpdatesStream.call(GetStructureUpdatesStreamParams(callbackFunction: (StructureUpdateBatch batch) {
       add(NoteSelectionStructureChanged(newCurrentItem: batch.currentItem));
     }));
+    dialogService.hideLoadingDialog();
   }
 
   Future<void> _handleStructureChanged(NoteSelectionStructureChanged event, Emitter<NoteSelectionState> emit) async {
@@ -230,10 +232,12 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
 
   Future<void> _handleServerSync(NoteSelectionServerSynced event, Emitter<NoteSelectionState> emit) async {
     _disableSearch(emit);
+    dialogService.showLoadingDialog();
     final bool confirmed = await transferNotes(const NoParams());
     if (confirmed) {
       dialogService.showInfoSnackBar(const ShowInfoSnackBar(textKey: "note.selection.transferred.notes"));
     }
+    dialogService.hideLoadingDialog();
   }
 
   Future<void> _handleChangeMove(NoteSelectionChangedMove event, Emitter<NoteSelectionState> emit) async {

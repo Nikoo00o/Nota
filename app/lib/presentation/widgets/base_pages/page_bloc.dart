@@ -9,14 +9,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// with use cases (or in some cases repositories instead).
 ///
 /// The template types are first [Event], then [State].
+///
+/// You can also override [enableLoadingDialog] in your subclass if every event handler should automatically display a
+/// loading dialog during its work!
 abstract class PageBloc<Event extends PageEvent, State extends PageState> extends Bloc<Event, State> {
   /// Initial state reference
   final State initialState;
 
   /// You can override this in the subclass bloc to decide if every event handler should display a loading dialog during
-  /// its work. for this to work, of course the bloc would need a dialogService in its constructor in addition to the
-  /// initial state
-  bool get enableLoadingDialog => true;
+  /// its work, or not. If you have an event handler that is called many times, then its best to leave this at [false]!
+  ///
+  /// Only override this if you only have events that are time consuming and are not called often!
+  bool get enableLoadingDialog => false;
 
   PageBloc({
     required this.initialState,
@@ -72,7 +76,7 @@ abstract class PageBloc<Event extends PageEvent, State extends PageState> extend
     super.on((E event, Emitter<State> emit) async {
       try {
         if (enableLoadingDialog) {
-          sl<DialogService>().showLoadingDialog();
+          sl<DialogService>().showLoadingDialog(); // direct access, same as below
         }
         await handler(event, emit);
       } finally {

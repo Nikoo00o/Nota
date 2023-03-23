@@ -172,4 +172,8 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
       });
     }
   }
+
+  /// always show a loading dialog during the event handlers
+  @override
+  bool get enableLoadingDialog => true;
 }

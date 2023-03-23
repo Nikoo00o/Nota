@@ -320,7 +320,4 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
   }
 
   bool get isEditing => inputFocus.hasFocus || searchFocus.hasFocus;
-
-  @override
-  bool get enableLoadingDialog => false; // prevent loading dialog for all small changes
 }

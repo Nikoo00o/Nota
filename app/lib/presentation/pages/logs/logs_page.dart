@@ -1,3 +1,4 @@
+import 'package:app/core/config/app_theme.dart';
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/translation_string.dart';
@@ -76,6 +77,13 @@ class LogsPage extends BlocPage<LogsBloc, LogsState> {
           }
 
           final LogColor logColor = Logger.getLogColorForMessage(logMessage)!;
+          late final Color color;
+          if (isDarkTheme(context)) {
+            color = Color.fromRGBO(logColor.r, logColor.g, logColor.b, 1.0);
+          } else {
+            color = AppTheme.shadeColor(Color.fromRGBO(logColor.r, logColor.g, logColor.b, 1.0), 0.4);
+          }
+
           return Padding(
             padding: const EdgeInsets.fromLTRB(0, 2, 0, 2),
             child: Card(
@@ -84,7 +92,7 @@ class LogsPage extends BlocPage<LogsBloc, LogsState> {
                 padding: const EdgeInsets.fromLTRB(4, 4, 4, 4),
                 child: Text(
                   logString,
-                  style: textBodyMedium(context).copyWith(color: Color.fromRGBO(logColor.r, logColor.g, logColor.b, 1.0)),
+                  style: textBodyMedium(context).copyWith(color: color),
                 ),
               ),
             ),
