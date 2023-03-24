@@ -21,6 +21,7 @@ class CustomCard extends WidgetBase {
   static const double iconSize = 30;
 
   const CustomCard({
+    super.key,
     required this.color,
     required this.onTap,
     required this.icon,
