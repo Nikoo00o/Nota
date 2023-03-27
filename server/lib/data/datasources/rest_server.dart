@@ -10,6 +10,7 @@ import 'package:shared/core/enums/http_method.dart';
 import 'package:shared/core/network/network_utils.dart';
 import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
+import 'package:shared/domain/entities/session_token.dart';
 
 /// A https REST API Webserver that you can add callbacks to which will be called for specific http requests.
 ///
@@ -145,8 +146,8 @@ class RestServer {
     await httpResponse.close();
   }
 
-  /// Calls the [fetchAuthenticatedAccount] to return the attached [ServerAccount] to a valid [sessionToken], or otherwise
-  /// [null]
+  /// Calls the [fetchAuthenticatedAccountCallback] to return the attached [ServerAccount] for a valid [SessionToken], or
+  /// otherwise [null]
   Future<ServerAccount?> _getAuthenticatedAccount(Map<String, String> queryParams) async {
     final String sessionToken = queryParams[RestJsonParameter.SESSION_TOKEN] ?? "";
     return fetchAuthenticatedAccountCallback.call(sessionToken);
@@ -190,8 +191,8 @@ class RestServer {
   ///
   /// For http request where no callback is found, the StatusCode 404 (not found) will be returned.
   ///
-  /// If the [endpoint] needs a session token for authentication, then the [fetchAuthenticatedAccountCallback] callback is
-  /// used to return the attached account which the callback then can use.
+  /// If the [RestCallback.endpoint] needs a session token for authentication, then the
+  /// [fetchAuthenticatedAccountCallback] callback is used to return the attached account which the callback then can use.
   /// If the session token was invalid and the returned account was [null], the StatusCode 401 (unauthorized) will be
   /// returned.
   ///
@@ -201,7 +202,7 @@ class RestServer {
   ///
   /// The session token must be present in the query parameter with the tag [RestJsonParameter.SESSION_TOKEN].
   ///
-  /// [endpoint] should be one of the [Endpoints]
+  /// [RestCallback.endpoint] should be one of the [Endpoints]
   void addCallback({required RestCallback callback}) {
     _restCallbacks.add(callback);
   }

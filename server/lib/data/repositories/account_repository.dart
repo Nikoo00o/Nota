@@ -60,7 +60,7 @@ class AccountRepository {
     await _lock.synchronized(() async => accountDataSource.storeAccount(account));
   }
 
-  /// Creates a new random session token that is valid for [serverConfig.sessionTokenMaxLifetime] from now on.
+  /// Creates a new random session token that is valid for [ServerConfig.sessionTokenMaxLifetime] from now on.
   ///
   /// Also makes sure that the base64 encoded session token is not already contained in the cached accounts
   Future<SessionToken> createNewSessionToken() async {

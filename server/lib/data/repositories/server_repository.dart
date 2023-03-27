@@ -9,6 +9,7 @@ import 'package:server/domain/entities/network/rest_callback_params.dart';
 import 'package:server/domain/entities/network/rest_callback_result.dart';
 import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/constants/rest_json_parameter.dart';
+import 'package:shared/core/network/endpoint.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
 // following the clean architecture, this would be its own use case and also all of the callbacks for the requests would
@@ -83,8 +84,8 @@ class ServerRepository {
   ///
   /// For http request where no callback is found, the StatusCode 404 (not found) will be returned.
   ///
-  /// If the [endpoint] needs a session token for authentication, then the [fetchAuthenticatedAccountCallback] callback is
-  /// used to return the attached account which the callback then can use.
+  /// If the [Endpoint] needs a session token for authentication, then the [RestServer.fetchAuthenticatedAccountCallback]
+  /// callback is used to return the attached account which the callback then can use.
   /// If the session token was invalid and the returned account was [null], the StatusCode 401 (unauthorized) will be
   /// returned.
   ///
@@ -94,7 +95,7 @@ class ServerRepository {
   ///
   /// The session token must be present in the query parameter with the tag [RestJsonParameter.SESSION_TOKEN].
   ///
-  /// [endpoint] should be one of the [Endpoints]
+  /// every [Endpoint] of [endpointCallbacks] should be one of the [Endpoints]
   ///
   /// For example: <RestCallback>[RestCallback(endpoint: Endpoints.ABOUT, callback: ServerRepository.handleAbout)]
   Future<void> initEndpoints(List<RestCallback> endpointCallbacks) async {
@@ -102,7 +103,6 @@ class ServerRepository {
       return;
     } else {
       _callbacksAdded = true;
-
     }
     for (final RestCallback callback in endpointCallbacks) {
       restServer.addCallback(callback: callback);
@@ -111,9 +111,11 @@ class ServerRepository {
 
   /// An example callback for the endpoint [Endpoints.ABOUT]
   Future<RestCallbackResult> handleAbout(RestCallbackParams params) async {
-    return RestCallbackResult(jsonResult: const <String, dynamic>{
-      RestJsonParameter.NOTA_ABOUT: "This Webserver is used with the Nota App for"
-          " synchronized note taking!",
-    }, statusCode: HttpStatus.ok);
+    return RestCallbackResult(
+      jsonResult: const <String, dynamic>{
+        RestJsonParameter.NOTA_ABOUT: "This Webserver is used with the Nota App for synchronized note taking!",
+      },
+      statusCode: HttpStatus.ok,
+    );
   }
 }
