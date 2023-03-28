@@ -51,7 +51,7 @@
   "page.login.title.create": "Account Erstellung",
   "page.login.title.remote.login": "Server Login",
   "page.login.title.local.login": "Lokaler Login",
-  "page.login.description.create": "Erstellen Sie ihre neuen Benutzerdaten. Das Password muss mindestens 4 Zeichen lang sein und eine Zahl, einen Großbuchstaben und einen Kleinbuchstaben enthalten.",
+  "page.login.description.create": "Erstellen Sie ihre neuen Benutzerdaten. Das Passwort muss mindestens 4 Zeichen lang sein und eine Zahl, einen Großbuchstaben und einen Kleinbuchstaben enthalten.",
   "page.login.description.remote.login": "Loggen Sie sich mit ihren Benutzerdaten ein",
   "page.login.description.local.login.1": "Willkommen zurück ",
   "page.login.description.local.login.2": "Loggen Sie sich mit ihrem Passwort ein",
