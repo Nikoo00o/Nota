@@ -19,6 +19,7 @@ class LoginDescription extends BlocPageChild<LoginBloc, LoginState> {
         Text(
           translate(context, _getPageDescription(state)),
           style: textBodyLarge(context),
+          textAlign: TextAlign.center,
           // textAlign: TextAlign.center,
         ),
       ],
@@ -43,11 +44,13 @@ class LoginDescription extends BlocPageChild<LoginBloc, LoginState> {
               ),
             ],
           ),
+          textAlign: TextAlign.center,
         ),
         const SizedBox(height: 5),
         Text(
           translate(context, "page.login.description.local.login.2"),
           style: textBodyLarge(context),
+          textAlign: TextAlign.center,
         ),
       ],
     );
