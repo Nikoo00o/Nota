@@ -16,6 +16,7 @@ import 'package:app/domain/usecases/note_structure/navigation/get_current_struct
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_updates_stream.dart';
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
 import 'package:app/domain/usecases/note_structure/start_move_structure_item.dart';
+import 'package:app/domain/usecases/note_transfer/get_last_note_transfer_time.dart';
 import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_event.dart';
@@ -30,36 +31,42 @@ import 'package:shared/domain/usecases/usecase.dart';
 import 'package:tuple/tuple.dart';
 
 class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState> {
-  /// This will be updated as deep copies (so it can be used as a reference inside of the state)
-  StructureItem? currentItem;
-
   final NavigationService navigationService;
   final DialogService dialogService;
+
   final NavigateToItem navigateToItem;
+
   final CreateStructureItem createStructureItem;
   final ChangeCurrentStructureItem changeCurrentStructureItem;
   final DeleteCurrentStructureItem deleteCurrentStructureItem;
+
   final StartMoveStructureItem startMoveStructureItem;
   final FinishMoveStructureItem finishMoveStructureItem;
+
   final TransferNotes transferNotes;
+  final GetLastNoteTransferTime getLastNoteTransferTime;
   final LoadAllStructureContent loadAllStructureContent;
 
   final GetCurrentStructureItem getCurrentStructureItem;
-
   final GetStructureUpdatesStream getStructureUpdatesStream;
-
-  /// for the [getStructureUpdatesStream]
-  StreamSubscription<StructureUpdateBatch>? subscription;
 
   final ScrollController scrollController = ScrollController();
   final FocusNode searchFocus = FocusNode();
   final TextEditingController searchController = TextEditingController();
+
+  /// for the [getStructureUpdatesStream]
+  StreamSubscription<StructureUpdateBatch>? subscription;
+
+  /// This will be updated as deep copies (so it can be used as a reference inside of the state for navigation)
+  StructureItem? currentItem;
 
   /// extended, or default search, or disabled for no search at all
   SearchStatus searchStatus = SearchStatus.DISABLED;
 
   /// this is only used  for the extended search and has the note content mapped to the note id
   Map<int, String>? noteContentMap;
+
+  late DateTime lastNoteTransferTime;
 
   NoteSelectionBloc({
     required this.navigationService,
@@ -71,6 +78,7 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     required this.startMoveStructureItem,
     required this.finishMoveStructureItem,
     required this.transferNotes,
+    required this.getLastNoteTransferTime,
     required this.loadAllStructureContent,
     required this.getCurrentStructureItem,
     required this.getStructureUpdatesStream,
@@ -105,6 +113,7 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
       return;
     }
     dialogService.showLoadingDialog();
+    lastNoteTransferTime = await getLastNoteTransferTime(const NoParams());
     add(NoteSelectionStructureChanged(newCurrentItem: await getCurrentStructureItem.call(const NoParams())));
     subscription =
         await getStructureUpdatesStream.call(GetStructureUpdatesStreamParams(callbackFunction: (StructureUpdateBatch batch) {
@@ -235,6 +244,8 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     dialogService.showLoadingDialog();
     final bool confirmed = await transferNotes(const NoParams());
     if (confirmed) {
+      lastNoteTransferTime = await getLastNoteTransferTime(const NoParams());
+      emit(_buildState());
       dialogService.showInfoSnackBar(const ShowInfoSnackBar(textKey: "note.selection.transferred.notes"));
     }
     dialogService.hideLoadingDialog();
@@ -300,6 +311,7 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
         searchStatus: searchStatus,
         searchInput: containsSearch ? searchController.text : null,
         noteContentMap: noteContentMap,
+        lastNoteTransferTime: lastNoteTransferTime,
       );
     } else {
       return const NoteSelectionState();

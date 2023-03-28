@@ -6,6 +6,9 @@ class CustomCard extends WidgetBase {
   final VoidCallback? onTap;
   final IconData icon;
 
+  /// Optional smaller icon displayed at the right side
+  final IconData? trailingIcon;
+
   /// The title (already translated value!)
   final String title;
 
@@ -20,7 +23,10 @@ class CustomCard extends WidgetBase {
 
   static const double iconSize = 30;
 
+  static const double trailingIconSize = 24;
+
   const CustomCard({
+    super.key,
     required this.color,
     required this.onTap,
     required this.icon,
@@ -28,6 +34,7 @@ class CustomCard extends WidgetBase {
     this.toolTip,
     required this.description,
     required this.alignDescriptionRight,
+    this.trailingIcon,
   });
 
   @override
@@ -80,9 +87,15 @@ class CustomCard extends WidgetBase {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
+              if (trailingIcon != null)
+                Icon(
+                  trailingIcon,
+                  size: trailingIconSize,
+                  color: colorOnSurfaceVariant(context),
+                ),
             ],
           ),
-          const SizedBox(width: 50),
+          const SizedBox(height: 3),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: alignDescriptionRight ? MainAxisAlignment.end : MainAxisAlignment.start,

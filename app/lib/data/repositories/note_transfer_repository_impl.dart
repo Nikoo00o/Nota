@@ -103,6 +103,7 @@ class NoteTransferRepositoryImpl extends NoteTransferRepository {
         transferToken: _currentCachedTransfer!.transferToken, shouldCancel: shouldCancel));
 
     _currentCachedTransfer = null;
+    await localDataSource.setLastNoteTransferTime(timeStamp: DateTime.now());
     Logger.debug("Finished note transfer");
   }
 

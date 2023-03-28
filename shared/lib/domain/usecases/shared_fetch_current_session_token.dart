@@ -6,7 +6,8 @@ import 'package:shared/domain/usecases/usecase.dart';
 ///
 /// Otherwise null should be returned.
 ///
-/// This use case will be used inside of the [RestClient]
+/// This class is a shared base class for the real implementation and the mock that are used within of the
+/// [RestClient.fetchSessionTokenCallback]
 abstract class SharedFetchCurrentSessionToken extends UseCase<SessionToken?, NoParams> {
-    const SharedFetchCurrentSessionToken();
+  const SharedFetchCurrentSessionToken();
 }

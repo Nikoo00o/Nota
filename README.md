@@ -61,7 +61,7 @@ flutter build ipa --release           # ios
 - you can also adjust the log level with `-l "number"`, or `--loglevel="number"` where the number can be 0 for errors 
   only, 1 for warning, 2 for info, 3 for debug and 4 for verbose
 
-### Creating a Self-Signed OpenSSL Certificate and Private Key
+#### Creating a Self-Signed OpenSSL Certificate and Private Key
 
 - first install openssl 
 - then open a terminal and navigate to the folder `server/notaRes`
@@ -93,14 +93,14 @@ flutter build ipa --release           # ios
 - some of the server tests can fail on a slow processor, because of some time critical operations
 - if this happens, just increase the delays inside of the affected tests
 
-### Server
+#### Server
 
 - navigate to the `nota/server` folder with the terminal and run `dart test`, or just start the "All Server Tests" run
   configuration
 - the default log level for the tests can be changed inside of the file `nota/server/test/helper/server_test_helper.dart` in
   the method `createCommonTestObjects`
 
-### App
+#### App
 
 - navigate to the `nota/app` folder with the terminal and run `flutter test`, or just start the "All App Tests" run
   configuration

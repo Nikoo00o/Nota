@@ -18,6 +18,7 @@ class CustomIconButton extends WidgetBase {
   final List<String>? tooltipKeyParams;
 
   const CustomIconButton({
+    super.key,
     required this.icon,
     required this.onPressed,
     this.onDisabledPress,

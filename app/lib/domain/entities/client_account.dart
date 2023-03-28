@@ -68,6 +68,7 @@ class ClientAccount extends SharedAccount {
   Map<String, Object?> getProperties() {
     return super.getProperties()
       ..addAll(<String, Object?>{
+        // the decrypted key is not displayed in logs
         "decryptedDataKey": isLoggedIn ? "Not empty" : "Empty",
         "storeDecryptedDataKey": storeDecryptedDataKey,
         "needsServerSideLogin": needsServerSideLogin,

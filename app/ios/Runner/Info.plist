@@ -5,6 +5,11 @@
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
+	<key>CFBundleLocalizations</key>
+    <array>
+      <string>en</string>
+      <string>de</string>
+    </array>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
 	<string>Nota</string>

@@ -48,7 +48,7 @@ abstract class NoteTransferRepository {
   /// And also a [ClientException] with [ErrorCodes.CLIENT_NO_TRANSFER] if there is no active transfer.
   ///
   /// This will apply the changes on the server side and now the client should also apply its temp changes afterwards.
-  /// This also resets the cached transfer.
+  /// This also resets the cached transfer and updates the last note transfer time.
   Future<void> finishNoteTransfer({required bool shouldCancel});
 
   /// Deletes all temp notes
