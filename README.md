@@ -11,7 +11,13 @@
 
 ## Using The App
 
-- todo:...
+![](res/login.gif)
+
+![](res/navigating.gif)
+
+![](res/sync_edit.gif)
+
+![](res/menu.gif)
 
 ## Technical Details on building the projects 
 
