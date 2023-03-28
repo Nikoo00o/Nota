@@ -14,15 +14,20 @@ class NoteSelectionStateInitialised extends NoteSelectionState {
   /// only used for extended search
   final Map<int, String>? noteContentMap;
 
+  /// Used to display a sync indicator symbol for edited notes since the last transfer
+  final DateTime lastNoteTransferTime;
+
   NoteSelectionStateInitialised({
     required this.currentFolder,
     required this.searchStatus,
     required this.searchInput,
     required this.noteContentMap,
+    required this.lastNoteTransferTime,
   }) : super(<String, Object?>{
           "currentFolder": currentFolder,
           "searchStatus": searchStatus,
           "searchInput": searchInput,
           "noteContentMap": noteContentMap,
+          "lastNoteTransferTime": lastNoteTransferTime,
         });
 }

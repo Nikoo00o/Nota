@@ -32,17 +32,30 @@ class StructureItemBox extends BlocPageChild<NoteSelectionBloc, NoteSelectionSta
         }
         return null;
       }, builder: (BuildContext context, Map<int, String>? noteContentMap) {
-        return _buildDependingOnSearch(context, searchString, noteContentMap);
+        return createBlocSelector<DateTime>(selector: (NoteSelectionState state) {
+          if (state is NoteSelectionStateInitialised) {
+            return state.lastNoteTransferTime;
+          }
+          return DateTime.fromMillisecondsSinceEpoch(0);
+        }, builder: (BuildContext context, DateTime lastNoteTransferTime) {
+          return _buildDependingOnSearch(context, searchString, noteContentMap, lastNoteTransferTime);
+        });
       });
     });
   }
 
-  Widget _buildDependingOnSearch(BuildContext context, String? searchString, Map<int, String>? noteContentMap) {
+  Widget _buildDependingOnSearch(
+    BuildContext context,
+    String? searchString,
+    Map<int, String>? noteContentMap,
+    DateTime lastNoteTransferTime,
+  ) {
     if (searchString == null || item.containsName(searchString) || _containsNoteContent(searchString, noteContentMap)) {
       return CustomCard(
         color: item is StructureFolder ? colorSecondaryContainer(context) : colorPrimaryContainer(context),
         onTap: () => currentBloc(context).add(NoteSelectionItemClicked(index: index)),
         icon: item is StructureFolder ? Icons.folder : Icons.sticky_note_2_outlined,
+        trailingIcon: item.lastModified.isBefore(lastNoteTransferTime) ? null : Icons.sync_problem,
         title: item.name,
         description: _getDescription(context),
         alignDescriptionRight: true,

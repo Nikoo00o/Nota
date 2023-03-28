@@ -36,6 +36,7 @@ import 'package:app/domain/usecases/note_structure/navigation/get_structure_fold
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_updates_stream.dart';
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
 import 'package:app/domain/usecases/note_structure/start_move_structure_item.dart';
+import 'package:app/domain/usecases/note_transfer/get_last_note_transfer_time.dart';
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
 import 'package:app/domain/usecases/note_transfer/load_note_buffer.dart';
@@ -220,6 +221,9 @@ Future<void> initializeGetIt() async {
         noteStructureRepository: sl(),
         loadNoteContent: sl(),
       ));
+  sl.registerLazySingleton<GetLastNoteTransferTime>(() => GetLastNoteTransferTime(
+        localDataSource: sl(),
+      ));
 
   // services
   sl.registerLazySingleton<SessionService>(() => SessionService());
@@ -256,6 +260,7 @@ Future<void> initializeGetIt() async {
         deleteCurrentStructureItem: sl(),
         changeCurrentStructureItem: sl(),
         transferNotes: sl(),
+        getLastNoteTransferTime: sl(),
         loadAllStructureContent: sl(),
         finishMoveStructureItem: sl(),
         navigateToItem: sl(),

@@ -38,6 +38,8 @@ abstract class LocalDataSource {
 
   static const String LOG_LEVEL = "LOG_LEVEL";
 
+  static const String LAST_NOTE_TRANSFER_TIME = "LAST_NOTE_TRANSFER_TIME";
+
   /// Must be called first in the main function to initialize hive to the [AppConfig.baseFolder]
   /// of [getApplicationDocumentsDirectory]. This will also create the base folder if it does not exist yet!
   Future<void> init();
@@ -166,6 +168,18 @@ abstract class LocalDataSource {
   Future<void> addLog(LogMessage log);
 
   Future<List<LogMessage>> getLogs();
+
+  Future<DateTime> getLastNoteTransferTime() async {
+    final String? value = await read(key: LAST_NOTE_TRANSFER_TIME, secure: false);
+    if (value == null) {
+      return DateTime.fromMillisecondsSinceEpoch(0);
+    }
+    return DateTime.fromMillisecondsSinceEpoch(int.parse(value));
+  }
+
+  Future<void> setLastNoteTransferTime({required DateTime timeStamp}) async {
+    await write(key: LAST_NOTE_TRANSFER_TIME, value: timeStamp.millisecondsSinceEpoch.toString(), secure: false);
+  }
 
   /// Needs to be overridden in the subclasses.
   /// Writes a [value] that can be accessed with the [key].

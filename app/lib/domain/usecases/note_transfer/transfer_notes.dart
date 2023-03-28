@@ -5,6 +5,7 @@ import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/repositories/note_transfer_repository.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/save_account.dart';
+import 'package:app/domain/usecases/note_transfer/get_last_note_transfer_time.dart';
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/services/dialog_service.dart';
@@ -26,6 +27,8 @@ import 'package:shared/domain/usecases/usecase.dart';
 ///
 /// This always returns [true] except when the user cancels the internally opened dialog which displays the remote changes
 /// which would override local files!
+///
+/// This also updates the last note transfer time which is returned with [GetLastNoteTransferTime].
 class TransferNotes extends UseCase<bool, NoParams> {
   final GetLoggedInAccount getLoggedInAccount;
   final SaveAccount saveAccount;
@@ -106,7 +109,7 @@ class TransferNotes extends UseCase<bool, NoParams> {
       if (replaced == false && newTimeStamp != null && newFileName != null) {
         Logger.verbose("Added new note");
         account.noteInfoList.add(NoteInfo(id: newId ?? oldId, encFileName: newFileName, lastEdited: newTimeStamp));
-      } else if(newId == null) {
+      } else if (newId == null) {
         Logger.warn("No note changed and also none added!");
       }
 

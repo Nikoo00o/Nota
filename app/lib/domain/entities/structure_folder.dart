@@ -154,7 +154,7 @@ class StructureFolder extends StructureItem {
     return null;
   }
 
-  /// Returns a reference, or deep copy of the children folder recursively for which its full path starts with [path], or
+  /// Returns a reference, or deep copy of the children folder recursively for which its full path equals [path], or
   /// null if none was found!
   StructureFolder? getFolderByPath(String path, {required bool deepCopy}) {
     if (path == this.path) {
@@ -165,8 +165,12 @@ class StructureFolder extends StructureItem {
       }
     }
     for (final StructureItem child in _children) {
-      if (child is StructureFolder && path.startsWith(child.path)) {
-        return child.getFolderByPath(path, deepCopy: deepCopy);
+      if (child is StructureFolder) {
+        if (path == child.path) {
+          return child;
+        } else if (path.startsWith("${child.path}${StructureItem.delimiter}")) {
+          return child.getFolderByPath(path, deepCopy: deepCopy);
+        }
       }
     }
     return null;
