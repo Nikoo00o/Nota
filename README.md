@@ -13,17 +13,23 @@
 
 - Before using the app, you have to create a new account and login to that account 
 
-<img src="example/gifs/login.gif" width="165" height="358"/>
+<p align="center">
+  <img src="example/gifs/login.gif" width="165" height="358"/>
+</p>
 
 - Then you can create notes and folders and navigate through them
 - By default those are sorted by name
 
-<img src="example/gifs/navigating.gif" width="165" height="358"/>
+<p align="center">
+  <img src="example/gifs/navigating.gif" width="165" height="358"/>
+</p>
 
 - You can of course also edit notes and synchronize the notes with the server 
 - And you can also search for file names
 
-<img src="example/gifs/sync_edit.gif" width="165" height="358"/>
+<p align="center">
+  <img src="example/gifs/sync_edit.gif" width="165" height="358"/>
+</p>
 
 - Additionally on the top right you can open a menu to rename, delete, or move notes and folders except the top level folder 
 - You can also open the top left menu to navigate to another view of the notes which shows all notes without folders 
@@ -31,17 +37,21 @@
 - And of course the app also has some settings like for example activating the dark mode, but also an auto save and an 
   auto login feature 
 
-<img src="example/gifs/menu.gif" width="165" height="358"/>
+<p align="center">
+  <img src="example/gifs/menu.gif" width="165" height="358"/>
+</p>
 
 - The note selection looks like this on windows in dark mode: 
 
-<img src="example/gifs/darkMode.png" width="330" height="716"/>
+<p align="center">
+  <img src="example/gifs/darkMode.png" width="330" height="716"/>
+</p>
 
 ### Preview on Windows
 
-- Before installing the app on your phone, you can also use the test binaries for windows inside of the folders 
+- Before installing the app on your phone, you can also use the preview test binaries for windows inside of the folders 
   `nota/example/NotaAppWindows` and `nota/example/NotaServerWindows`
-- For the test, you have to start the server before the app and both must be run on the same windows machine 
+- For the preview, you have to start the server before the app and both must be run on the same windows machine 
 - Currently the desktop version is not really supported tho and only looks like the phone version, so this is just for 
   getting a quick first impression of the app! 
 
