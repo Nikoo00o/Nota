@@ -1,23 +1,67 @@
 # Nota
 
 ## About the App
-- Nota is a Cross-Platform Note-Taking App designed to work both locally offline, or server synchronized across 
+- Nota is a Cross-Platform Note-Taking app designed to work both locally offline, or server synchronized across 
   all of your devices 
 - Nota is focused on the security and privacy of your data and your notes will be securely encrypted, so that the server only
   stores them, but can't read them
   - only your local devices can decrypt and view your notes
 - the notes can be accessed inside of the app with a folder like structure
-- currently the app is still in development
+- currently the app is still in development **and is not released** for the app stores yet! 
 
 ## Using The App
 
-![](res/login.gif)
+- Before using the app, you have to create a new account and login to that account 
 
-![](res/navigating.gif)
+<img src="example/gifs/login.gif" width="165" height="358"/>
 
-![](res/sync_edit.gif)
+- Then you can create notes and folders and navigate through them
+- By default those are sorted by name
 
-![](res/menu.gif)
+<img src="example/gifs/navigating.gif" width="165" height="358"/>
+
+- You can of course also edit notes and synchronize the notes with the server 
+- And you can also search for file names
+
+<img src="example/gifs/sync_edit.gif" width="165" height="358"/>
+
+- Additionally on the top right you can open a menu to rename, delete, or move notes and folders except the top level folder 
+- You can also open the top left menu to navigate to another view of the notes which shows all notes without folders 
+  sorted by the latest edit 
+- And of course the app also has some settings like for example activating the dark mode, but also an auto save and an 
+  auto login feature 
+
+<img src="example/gifs/menu.gif" width="165" height="358"/>
+
+- The note selection looks like this on windows in dark mode: 
+
+<img src="example/gifs/darkMode.png" width="330" height="716"/>
+
+### Preview on Windows
+
+- Before installing the app on your phone, you can also use the test binaries for windows inside of the folders 
+  `nota/example/NotaAppWindows` and `nota/example/NotaServerWindows`
+- For the test, you have to start the server before the app and both must be run on the same windows machine 
+- Currently the desktop version is not really supported tho and only looks like the phone version, so this is just for 
+  getting a quick first impression of the app! 
+
+## Privacy Policy 
+
+- This short section describes the data collected by the Nota app
+- The data is stored in a way that ensures maximum security and privacy
+- Because this project is open source, this can always be verified
+
+### Account Information
+
+- The username you enter is stored encrypted locally and on the the server
+- Your clear text password is never saved. Only a salted hash of the password is stored encrypted locally and on the server.
+
+### Notes
+
+- The content of the notes is encrypted in a way that it can only be decrypted on your device locally, so the server 
+  stores the content, but can't read it. The content is of course also saved the same way locally.
+- If you disable the auto login feature, then the key to decrypt the note content will only be kept in memory and it will 
+  only be saved encrypted locally if you enable the auto login feature
 
 ## Technical Details on building the projects 
 

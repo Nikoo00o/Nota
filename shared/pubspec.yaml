@@ -2,7 +2,7 @@ name: shared
 description: Shared Component with Code for both Server and App
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.1
 
 environment:
   sdk: '>=2.19.2 <3.0.0'
