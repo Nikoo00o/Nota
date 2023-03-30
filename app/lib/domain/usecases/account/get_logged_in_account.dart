@@ -17,6 +17,8 @@ import 'package:shared/domain/usecases/usecase.dart';
 ///
 /// This can also throw a [ServerException] if another device changed the password before, or a [ClientException] or if the
 /// decrypted data key is not available. Both will have the error code [ErrorCodes.ACCOUNT_WRONG_PASSWORD].
+/// For other active devices on changing the password, the old session tokens will also be invalidated and the server will
+/// return a [ErrorCodes.HTTP_STATUS] with 401 (Unauthorized) instead.
 ///
 /// This has to be called every time an account is logged out and logged in again to update the reference!
 class GetLoggedInAccount extends UseCase<ClientAccount, NoParams> {
