@@ -11,7 +11,7 @@
   "error.server.invalid.request.values": "Ungültige Datenwerte für die Serveranfrage",
   "error.server.account.exists": "Ein Account mit dem Benutzernamen existiert schon auf dem Server",
   "error.server.unknown.account": "Zu diesem Benutzernamen existiert kein Account auf dem Server",
-  "error.account.wrong.password": "Ungültiges Passwort",
+  "error.account.wrong.password": "Ungültiges Passwort. Bitte loggen Sie sich erneut in ihren Account ein.",
   "error.server.invalid.note.transfer.token": "Die Synchronisierung der Notizen wurde abgebrochen",
   "error.client.no.account": "Ein Account wird dafür benötigt",
   "error.client.no.transfer": "Es existiert keine Übertragung",
