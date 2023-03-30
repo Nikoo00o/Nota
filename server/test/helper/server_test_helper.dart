@@ -126,8 +126,6 @@ Future<void> _setup(LogLevel logLevel) async {
 
   final bool started = await startNotaServer(const StartNotaServerParams(autoRestart: false));
   expect(started, true); // start the server and expect it to run
-
-  FileUtils.getLocalFilePath("notaRes");
 }
 
 /// Should be the last call in the [tearDown] function of each test.
