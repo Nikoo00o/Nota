@@ -119,7 +119,7 @@ flutter build ipa --release           # ios
     - if your private key is password protected, you can pass the password to the server exe as a command line argument 
       with `-r "password"`, or `--rsaPassword="password"`
 - you can also adjust the log level with `-l "number"`, or `--loglevel="number"` where the number can be 0 for errors 
-  only, 1 for warning, 2 for info, 3 for debug and 4 for verbose
+  only, 1 for warning, 2 for info, 3 for debug, 4 for verbose and 5 for spam
 
 #### Creating a Self-Signed OpenSSL Certificate and Private Key
 
