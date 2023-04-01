@@ -30,7 +30,7 @@ class CurrentFolderInfo extends BlocPageChild<NoteSelectionBloc, NoteSelectionSt
           alignDescriptionRight: false,
         );
       } else {
-        return createBlocBuilder(builder: _buildSearchInfoOrNothing);
+        return createBlocBuilder(builder: _buildInfo);
       }
     }
     return CustomCard(
@@ -40,29 +40,46 @@ class CurrentFolderInfo extends BlocPageChild<NoteSelectionBloc, NoteSelectionSt
       title: "..${StructureItem.delimiter}${_getParentName(context)}",
       description: translate(context, "note.selection.current.folder.info", keyParams: <String>[_getParentPath(context)]),
       alignDescriptionRight: false,
-      toolTip: "note.selection.navigate.to.parent",
+      toolTip: translate(context, "note.selection.navigate.to.parent"),
     );
   }
 
-  Widget _buildSearchInfoOrNothing(BuildContext context, NoteSelectionState state) {
+  Widget _buildInfo(BuildContext context, NoteSelectionState state) {
     if (state is NoteSelectionStateInitialised && state.searchStatus != SearchStatus.DISABLED && state.searchInput == null) {
-      final String titleKey = state.searchStatus == SearchStatus.EXTENDED
-          ? "note.selection.search.mode.extended"
-          : "note.selection.search.mode.default";
-      final String descriptionKey = state.searchStatus == SearchStatus.EXTENDED
-          ? "note.selection.search.mode.extended.description"
-          : "note.selection.search.mode.default.description";
-      return CustomCard(
-        color: colorSurfaceVariant(context),
-        onTap: null,
-        icon: Icons.info,
-        title: translate(context, titleKey),
-        description: translate(context, descriptionKey),
-        alignDescriptionRight: false,
-      );
+      return _buildSearchInfo(context, state);
+    } else if (state is NoteSelectionStateInitialised && state.currentFolder.amountOfChildren == 0) {
+      return _buildEmptyInfo(context, state);
     } else {
       return const SizedBox();
     }
+  }
+
+  Widget _buildEmptyInfo(BuildContext context, NoteSelectionStateInitialised state) {
+    return CustomCard(
+      color: colorSurfaceVariant(context),
+      onTap: null,
+      icon: Icons.info,
+      title: translate(context, "note.selection.empty.title"),
+      description: translate(context, "note.selection.empty.description"),
+      alignDescriptionRight: false,
+    );
+  }
+
+  Widget _buildSearchInfo(BuildContext context, NoteSelectionStateInitialised state) {
+    final String titleKey = state.searchStatus == SearchStatus.EXTENDED
+        ? "note.selection.search.mode.extended"
+        : "note.selection.search.mode.default";
+    final String descriptionKey = state.searchStatus == SearchStatus.EXTENDED
+        ? "note.selection.search.mode.extended.description"
+        : "note.selection.search.mode.default.description";
+    return CustomCard(
+      color: colorSurfaceVariant(context),
+      onTap: null,
+      icon: Icons.info,
+      title: translate(context, titleKey),
+      description: translate(context, descriptionKey),
+      alignDescriptionRight: false,
+    );
   }
 
   String _getParentName(BuildContext context) {
