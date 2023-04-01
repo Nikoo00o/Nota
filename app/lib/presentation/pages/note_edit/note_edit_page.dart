@@ -23,16 +23,9 @@ class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
   Widget buildBodyWithNoState(BuildContext context, Widget bodyWithState) {
     return LifeCycleCallback(
       onPause: () => currentBloc(context).add(const NoteEditAppPaused()),
-      child: CustomScrollView(
-        slivers: <Widget>[
-          SliverFillRemaining(
-            hasScrollBody: true,
-            child: Scrollbar(
-              controller: currentBloc(context).scrollController,
-              child: createBlocBuilder(builder: _buildEditField),
-            ),
-          ),
-        ],
+      child: Scrollbar(
+        controller: currentBloc(context).scrollController,
+        child: createBlocBuilder(builder: _buildEditField),
       ),
     );
   }
