@@ -5,6 +5,7 @@ import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/domain/entities/note_info.dart';
 
+/// Most of the Requests also directly modify the cached account!
 abstract class AccountRepository {
   const AccountRepository();
 
