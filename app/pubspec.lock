@@ -723,14 +723,14 @@ packages:
       path: "../server"
       relative: true
     source: path
-    version: "1.0.1"
+    version: "1.0.2"
   shared:
     dependency: "direct main"
     description:
       path: "../shared"
       relative: true
     source: path
-    version: "1.0.1"
+    version: "1.0.2"
   shelf:
     dependency: transitive
     description:
