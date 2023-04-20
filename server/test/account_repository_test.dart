@@ -25,7 +25,8 @@ void main() {
   });
 
   tearDown(() async {
-    await cleanupTestFilesAndServer(deleteTestFolderAfterwards: true); // cleanup server and hive test data after every test
+    await cleanupTestFilesAndServer(
+        deleteTestFolderAfterwards: true); // cleanup server and hive test data after every test
     // (this callback will be run after each test)
   });
 
@@ -115,11 +116,28 @@ void _testLoginToAccounts() {
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.httpStatusWith(400)));
   });
 
+  test("throw an exception on sending the wrong account token", () async {
+    expect(() async {
+      await restClient.sendRequest(
+        endpoint: Endpoints.ACCOUNT_LOGIN,
+        bodyData: const AccountLoginRequest(
+          username: "test",
+          passwordHash: "test",
+          createAccountToken: "test",
+        ).toJson(),
+      );
+    }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.httpStatusWith(HttpStatus.unauthorized)));
+  });
+
   test("throw an exception on sending empty request values", () async {
     expect(() async {
       await restClient.sendRequest(
         endpoint: Endpoints.ACCOUNT_LOGIN,
-        bodyData: const AccountLoginRequest(username: "", passwordHash: "").toJson(),
+        bodyData: AccountLoginRequest(
+          username: "",
+          passwordHash: "",
+          createAccountToken: serverConfigMock.createAccountToken,
+        ).toJson(),
       );
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
   });
@@ -128,7 +146,11 @@ void _testLoginToAccounts() {
     expect(() async {
       await restClient.sendRequest(
         endpoint: Endpoints.ACCOUNT_LOGIN,
-        bodyData: const AccountLoginRequest(username: "unknownUsername", passwordHash: "unknownPassword").toJson(),
+        bodyData: AccountLoginRequest(
+          username: "unknownUsername",
+          passwordHash: "unknownPassword",
+          createAccountToken: serverConfigMock.createAccountToken,
+        ).toJson(),
       );
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_UNKNOWN_ACCOUNT));
   });
@@ -137,7 +159,11 @@ void _testLoginToAccounts() {
     expect(() async {
       await restClient.sendRequest(
         endpoint: Endpoints.ACCOUNT_LOGIN,
-        bodyData: AccountLoginRequest(username: getTestAccount(0).username, passwordHash: "unknownPassword").toJson(),
+        bodyData: AccountLoginRequest(
+          username: getTestAccount(0).username,
+          passwordHash: "unknownPassword",
+          createAccountToken: serverConfigMock.createAccountToken,
+        ).toJson(),
       );
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.ACCOUNT_WRONG_PASSWORD));
   });
@@ -187,7 +213,8 @@ void _testSessionTokens() {
     expect(response1.sessionToken, isNot(response2.sessionToken));
   });
 
-  test("after login the account should be able to be accessed by username from the cache and contain a valid session token",
+  test(
+      "after login the account should be able to be accessed by username from the cache and contain a valid session token",
       () async {
     await loginToTestAccount(0);
     final ServerAccount? account = await accountRepository.getAccountByUsername(getTestAccount(0).username);
@@ -241,10 +268,12 @@ void _testSessionTokens() {
     final AccountLoginResponse response1 = await loginToTestAccount(0);
     await Future<void>.delayed(const Duration(milliseconds: 80));
     final AccountLoginResponse response2 = await loginToTestAccount(0);
-    expect(response1.sessionToken, isNot(response2.sessionToken), reason: "Both responses should contain a different token");
+    expect(response1.sessionToken, isNot(response2.sessionToken),
+        reason: "Both responses should contain a different token");
     await Future<void>.delayed(const Duration(milliseconds: 80));
     final ServerAccount? account = await accountRepository.getAccountByUsername(getTestAccount(0).username);
-    expect(response2.sessionToken, isNot(account?.sessionToken), reason: "The account should contain a different token");
+    expect(response2.sessionToken, isNot(account?.sessionToken),
+        reason: "The account should contain a different token");
     final ServerAccount? noAccount = await accountRepository.getAccountBySessionToken(response1.sessionToken.token);
     expect(noAccount, null);
   });

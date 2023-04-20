@@ -140,6 +140,11 @@ class AccountRepository {
         return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_REQUEST_VALUES);
       }
 
+      if (request.createAccountToken != serverConfig.createAccountToken) {
+        Logger.error("Error logging in to account, because the account token is invalid: ${request.username}");
+        return RestCallbackResult(statusCode: HttpStatus.unauthorized);
+      }
+
       ServerAccountModel? account = await accountDataSource.getAccountByUsername(request.username); // get account
 
       if (account == null) {

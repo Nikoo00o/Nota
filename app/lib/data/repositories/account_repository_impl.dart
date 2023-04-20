@@ -65,9 +65,9 @@ class AccountRepositoryImpl extends AccountRepository {
   Future<void> createNewAccount() async {
     final ClientAccount account = await getAccountAndThrowIfNull();
     await remoteAccountDataSource.createAccountRequest(CreateAccountRequest(
-      createAccountToken: appConfig.createAccountToken,
       username: account.username,
       passwordHash: account.passwordHash,
+      createAccountToken: appConfig.createAccountToken,
       encryptedDataKey: account.encryptedDataKey,
     ));
   }
@@ -78,6 +78,7 @@ class AccountRepositoryImpl extends AccountRepository {
     final AccountLoginResponse response = await remoteAccountDataSource.loginRequest(AccountLoginRequest(
       username: account.username,
       passwordHash: account.passwordHash,
+      createAccountToken: appConfig.createAccountToken,
     ));
     account.sessionToken = response.sessionToken;
     account.encryptedDataKey = response.encryptedDataKey;

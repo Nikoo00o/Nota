@@ -265,6 +265,7 @@ Future<AccountLoginResponse> _loginToAccount(ServerAccountModel account) async {
     bodyData: AccountLoginRequest(
       username: account.username,
       passwordHash: account.passwordHash,
+      createAccountToken: serverConfigMock.createAccountToken,
     ).toJson(),
   );
   return AccountLoginResponse.fromJson(json);
