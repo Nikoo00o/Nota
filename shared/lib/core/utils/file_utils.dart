@@ -1,14 +1,31 @@
 import 'dart:io';
 import 'dart:typed_data';
+import "package:path/path.dart";
 
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
 class FileUtils {
-  /// Returns the absolute full file path for a local relative file path inside of the working directory (server, or client
-  /// root)
-  static String getLocalFilePath(String localPath) => "${Directory.current.path}${Platform.pathSeparator}$localPath";
+  /// Returns the absolute full file path for a local relative file path inside of the parent directory of the script
+  /// (server, or client root application).
+  ///
+  /// Important: the working directory (accessed with [workingDirectory]) might be different depending on how the
+  /// script was run!!!!
+  ///
+  /// If the script is not compiled, then it will return [workingDirectory] so that tests work without any errors!
+  ///
+  static String getLocalFilePath(String localPath) {
+    if (_isCompiled == false) {
+      return "$workingDirectory${Platform.pathSeparator}$localPath";
+    }
+    return "${dirname(Platform.script.toFilePath())}${Platform.pathSeparator}$localPath";
+  }
+
+  static bool get _isCompiled => basename(Platform.resolvedExecutable) == basename(Platform.script.path);
+
+  /// Returns the path to the working directory from where the script was executed
+  static String get workingDirectory => Directory.current.path;
 
   /// Read the content of the file as string.
   ///
@@ -156,7 +173,7 @@ class FileUtils {
   /// The list will be empty if the directory does not exist
   static Future<List<String>> getFilesInDirectory(String path) async {
     final Directory directory = _getDirectoryForPath(path);
-    if(directory.existsSync() == false){
+    if (directory.existsSync() == false) {
       return <String>[];
     }
     final List<FileSystemEntity> files = await directory.list().toList();

@@ -60,6 +60,7 @@ void _initErrorCallbacks() {
     FlutterError.presentError(details);
     _handleError(details.exception, details.stack ?? StackTrace.current);
   };
+  // also handles the zone errors
   PlatformDispatcher.instance.onError = (Object error, StackTrace trace) {
     try {
       _handleError(error, trace);
