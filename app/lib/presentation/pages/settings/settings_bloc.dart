@@ -22,7 +22,6 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
   final NavigationService navigationService;
   final DialogService dialogService;
   final ChangeAccountPassword changeAccountPassword;
-  final AppBloc appBloc;
   final GetAutoLogin getAutoLogin;
   final ChangeAutoLogin changeAutoLogin;
 
@@ -36,7 +35,6 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
     required this.navigationService,
     required this.dialogService,
     required this.changeAccountPassword,
-    required this.appBloc,
     required this.getAutoLogin,
     required this.changeAutoLogin,
   }) : super(initialState: const SettingsState());
@@ -59,7 +57,6 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
 
   Future<void> _handleDarkThemeChange(SettingsDarkThemeChanged event, Emitter<SettingsState> emit) async {
     await appSettingsRepository.setDarkTheme(useDarkTheme: event.isDarkTheme);
-    appBloc.add(AppUpdateTheme(useDarkTheme: event.isDarkTheme)); // update the app and force a rebuild
     emit(await _buildState());
   }
 
@@ -69,7 +66,6 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
       newLocale = Locales.supportedLocales[event.index];
     }
     await appSettingsRepository.setLocale(newLocale);
-    appBloc.add(AppUpdateLocale(await appSettingsRepository.getCurrentLocale())); // update the app and force a rebuild
     emit(await _buildState());
   }
 

@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:ui';
 
+import 'package:app/core/enums/app_update.dart';
+import 'package:app/presentation/main/app/app_bloc.dart';
 import 'package:shared/core/enums/log_level.dart';
 import 'package:shared/core/utils/logger/log_message.dart';
 
@@ -14,12 +17,13 @@ abstract class AppSettingsRepository {
   /// Returns the stored locale if one was stored and null otherwise
   Future<Locale?> getStoredLocale();
 
-  /// Stores the [locale]
+  /// Stores the [locale] and also updates the [AppBloc]
   Future<void> setLocale(Locale? locale);
 
   /// If the dark theme should be used (default false).
   Future<bool> isDarkTheme();
 
+  /// Updates the dark theme and also updates the [AppBloc]
   Future<void> setDarkTheme({required bool useDarkTheme});
 
   /// the time the app needs to be in the background to require a local password login again.
@@ -43,4 +47,6 @@ abstract class AppSettingsRepository {
   /// when navigating back from note editing. default is false
   Future<bool> getAutoSave();
 
+  /// Called from the [AppBloc] to listen to updates
+  StreamSubscription<AppUpdate> listen(void Function(AppUpdate) callback);
 }

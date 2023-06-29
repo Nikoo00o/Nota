@@ -100,7 +100,8 @@ Future<void> initializeGetIt() async {
         localDataSource: sl(),
         appConfig: sl(),
       ));
-  sl.registerLazySingleton<AppSettingsRepository>(() => AppSettingsRepositoryImpl(localDataSource: sl(), appConfig: sl()));
+  sl.registerLazySingleton<AppSettingsRepository>(
+      () => AppSettingsRepositoryImpl(localDataSource: sl(), appConfig: sl()));
   sl.registerLazySingleton<NoteStructureRepository>(() => NoteStructureRepositoryImpl(localDataSource: sl()));
 
   // domain layer (use cases)
@@ -131,9 +132,11 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<GetLoggedInAccount>(() => GetLoggedInAccount(accountRepository: sl()));
   sl.registerLazySingleton<GetUsername>(() => GetUsername(accountRepository: sl()));
   sl.registerLazySingleton<SaveAccount>(() => SaveAccount(accountRepository: sl()));
-  sl.registerLazySingleton<ActivateLockscreen>(() => ActivateLockscreen(accountRepository: sl(), navigationService: sl()));
+  sl.registerLazySingleton<ActivateLockscreen>(
+      () => ActivateLockscreen(accountRepository: sl(), navigationService: sl()));
 
-  sl.registerLazySingleton<LoadNoteContent>(() => LoadNoteContent(getLoggedInAccount: sl(), noteTransferRepository: sl()));
+  sl.registerLazySingleton<LoadNoteContent>(
+      () => LoadNoteContent(getLoggedInAccount: sl(), noteTransferRepository: sl()));
   sl.registerLazySingleton<StoreNoteEncrypted>(() => StoreNoteEncrypted(
         getLoggedInAccount: sl(),
         noteTransferRepository: sl(),
@@ -227,20 +230,17 @@ Future<void> initializeGetIt() async {
 
   // services
   sl.registerLazySingleton<SessionService>(() => SessionService());
-  sl.registerLazySingleton<DialogService>(() => DialogServiceImpl(dialogOverlayBloc: sl()));
+  sl.registerLazySingleton<DialogService>(() => DialogServiceImpl());
   sl.registerLazySingleton<NavigationService>(() => NavigationService());
   sl.registerLazySingleton<TranslationService>(() => TranslationService(appSettingsRepository: sl()));
 
   // presentation layer (blocs)
-
-  // important: the next two blocs are singletons and no factory functions, because they are used within the app and are
-  // only created once!
-  sl.registerLazySingleton<AppBloc>(() => AppBloc(translationService: sl()));
-  sl.registerLazySingleton<DialogOverlayBloc>(() => DialogOverlayBloc(
+  sl.registerFactory<AppBloc>(() => AppBloc(translationService: sl(), appSettingsRepository: sl()));
+  sl.registerFactory<DialogOverlayBloc>(() => DialogOverlayBloc(
         dialogOverlayKey: GlobalKey(),
         translationService: sl(),
+        dialogService: sl(),
       ));
-
   // the blocs below are factory functions, because they should be newly created each time the user navigates to the page!
   sl.registerFactory<LoginBloc>(() => LoginBloc(
         navigationService: sl(),
@@ -282,7 +282,6 @@ Future<void> initializeGetIt() async {
       ));
   sl.registerFactory<SettingsBloc>(() => SettingsBloc(
         appSettingsRepository: sl(),
-        appBloc: sl(),
         changeAutoLogin: sl(),
         getAutoLogin: sl(),
         navigationService: sl(),

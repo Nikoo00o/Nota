@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:flutter/material.dart';
 
@@ -51,81 +53,83 @@ abstract class DialogService {
   /// Only hides loading dialog
   void hideLoadingDialog();
 
-  /// returns if a dialog is visible
-  bool get isDialogVisible;
-
-  /// returns if a loading dialog is visible
-  bool get isLoading;
+  /// This is used inside of the [DialogOverlayBloc] to listen for events that this service adds.
+  /// For testing this just returns null!
+  StreamSubscription<DialogOverlayEvent>? listen(void Function(DialogOverlayEvent) callback);
 }
 
 class DialogServiceImpl extends DialogService {
-  final DialogOverlayBloc dialogOverlayBloc;
+  /// stream controller to add the update events
+  final StreamController<DialogOverlayEvent> _updateController = StreamController<DialogOverlayEvent>();
 
-  const DialogServiceImpl({required this.dialogOverlayBloc});
+  /// broadcast stream that is used to listen for update events for the [DialogOverlayBloc]
+  late final Stream<DialogOverlayEvent> _updateStream;
+
+  DialogServiceImpl() {
+    _updateStream = _updateController.stream.asBroadcastStream();
+  }
 
   @override
   void show(DialogOverlayEvent params) {
-    dialogOverlayBloc.add(params);
+    _updateController.add(params);
   }
 
   @override
   void showLoadingDialog([ShowLoadingDialog? params]) {
-    dialogOverlayBloc.add(params ?? const ShowLoadingDialog());
+    _updateController.add(params ?? const ShowLoadingDialog());
   }
 
   @override
   void showCustomDialog(ShowCustomDialog params) {
-    dialogOverlayBloc.add(params);
+    _updateController.add(params);
   }
 
   @override
   void showInfoSnackBar(ShowInfoSnackBar params) {
-    dialogOverlayBloc.add(params);
+    _updateController.add(params);
   }
 
   @override
   void showInfoDialog(ShowInfoDialog params) {
-    dialogOverlayBloc.add(params);
+    _updateController.add(params);
   }
 
   @override
   void showErrorDialog(ShowErrorDialog params) {
-    dialogOverlayBloc.add(params);
+    _updateController.add(params);
   }
 
   @override
   void showConfirmDialog(ShowConfirmDialog params) {
-    dialogOverlayBloc.add(params);
+    _updateController.add(params);
   }
 
   @override
   void showInputDialog(ShowInputDialog params) {
-    dialogOverlayBloc.add(params);
+    _updateController.add(params);
   }
 
   @override
   void showSelectionDialog(ShowSelectDialog params) {
-    dialogOverlayBloc.add(params);
+    _updateController.add(params);
   }
 
   @override
   void showAboutDialog() {
-    dialogOverlayBloc.add(const ShowAboutDialog());
+    _updateController.add(const ShowAboutDialog());
   }
 
   @override
   void hideDialog() {
-    dialogOverlayBloc.add(const HideDialog(cancelDialog: true));
+    _updateController.add(const HideDialog(cancelDialog: true));
   }
 
   @override
   void hideLoadingDialog() {
-    dialogOverlayBloc.add(const HideLoadingDialog());
+    _updateController.add(const HideLoadingDialog());
   }
 
   @override
-  bool get isDialogVisible => dialogOverlayBloc.isCustomDialogVisible;
-
-  @override
-  bool get isLoading => dialogOverlayBloc.loadingDialogCounter > 0;
+  StreamSubscription<DialogOverlayEvent>? listen(void Function(DialogOverlayEvent) callback) =>
+      _updateStream.listen(callback);
 }

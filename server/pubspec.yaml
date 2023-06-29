@@ -15,7 +15,7 @@ dependencies:
   hive: ^2.2.3 # nosql database
   args: ^2.4.0 # command line argument parsing
   synchronized: ^3.0.1 # locks for concurrent access
-  intl: ^0.17.0 # internationalization
+  intl: ^0.18.0 # internationalization
 
 dev_dependencies:
   flutter_lints: ^2.0.1 # linter rules

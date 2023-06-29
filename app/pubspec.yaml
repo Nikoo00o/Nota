@@ -31,7 +31,7 @@ dependencies:
   flutter_launcher_icons: ^0.12.0 # app launcher icon
   flutter_keyboard_visibility: 5.4.0 # keyboard visibility callback
   url_launcher: 6.1.10 # open urls
-  intl: ^0.17.0 # internationalization
+  intl: ^0.18.0 # internationalization
   localization: 2.1.0 # localization
   flutter_localizations:
     sdk: flutter

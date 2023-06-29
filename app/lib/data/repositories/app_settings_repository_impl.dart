@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/locales.dart';
+import 'package:app/core/enums/app_update.dart';
 import 'package:app/data/datasources/local_data_source.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';
 import 'package:shared/core/enums/log_level.dart';
@@ -11,11 +13,18 @@ class AppSettingsRepositoryImpl extends AppSettingsRepository {
   final LocalDataSource localDataSource;
   final AppConfig appConfig;
 
+  /// stream controller to add the updates
+  final StreamController<AppUpdate> _updateController = StreamController<AppUpdate>();
+  /// broadcast stream that is used to listen for updates for the app bloc
+  late final Stream<AppUpdate> _updateStream;
+
   static const String CONFIG_DARK_THEME = "DARK_THEME";
 
   static const String CONFIG_AUTO_SAVE = "CONFIG_AUTO_SAVE";
 
-  const AppSettingsRepositoryImpl({required this.localDataSource, required this.appConfig});
+  AppSettingsRepositoryImpl({required this.localDataSource, required this.appConfig}){
+    _updateStream = _updateController.stream.asBroadcastStream();
+  }
 
   @override
   Future<Locale> getCurrentLocale() async {
@@ -27,14 +36,20 @@ class AppSettingsRepositoryImpl extends AppSettingsRepository {
   Future<Locale?> getStoredLocale() => localDataSource.getLocale();
 
   @override
-  Future<void> setLocale(Locale? locale) => localDataSource.setLocale(locale);
+  Future<void> setLocale(Locale? locale) async {
+    await localDataSource.setLocale(locale);
+    _updateController.add(AppUpdate.LOCALE); // update app bloc and force a rebuild
+  }
 
   @override
   Future<bool> isDarkTheme() => localDataSource.getConfigValue(configKey: CONFIG_DARK_THEME);
 
   @override
-  Future<void> setDarkTheme({required bool useDarkTheme}) =>
-      localDataSource.setConfigValue(configKey: CONFIG_DARK_THEME, configValue: useDarkTheme);
+  Future<void> setDarkTheme({required bool useDarkTheme}) async {
+    await localDataSource.setConfigValue(configKey: CONFIG_DARK_THEME, configValue: useDarkTheme);
+    _updateController.add(AppUpdate.DARK_THEME); // update app bloc and force a rebuild
+  }
+
 
   @override
   Future<Duration> getLockscreenTimeout() async {
@@ -64,4 +79,7 @@ class AppSettingsRepositoryImpl extends AppSettingsRepository {
 
   @override
   Future<bool> getAutoSave() => localDataSource.getConfigValue(configKey: CONFIG_AUTO_SAVE);
+
+  @override
+  StreamSubscription<AppUpdate> listen(void Function(AppUpdate) callback) => _updateStream.listen(callback);
 }

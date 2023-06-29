@@ -85,12 +85,7 @@ abstract class PageBase extends WidgetBase with PageHelperMixin {
               child: Container(
                 padding: pagePadding,
                 decoration: BoxDecoration(image: getBackgroundImage(), color: getBackgroundColor(context)),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Expanded(child: body),
-                  ],
-                ),
+                child: body,
               ),
             ),
           );
