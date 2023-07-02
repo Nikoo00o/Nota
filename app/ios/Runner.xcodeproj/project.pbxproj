@@ -365,7 +365,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.nota.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Nikoo00o.nota.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRIP_STYLE = all;
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -496,7 +496,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.nota.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Nikoo00o.nota.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRIP_STYLE = all;
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -521,7 +521,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.nota.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Nikoo00o.nota.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRIP_STYLE = all;
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";

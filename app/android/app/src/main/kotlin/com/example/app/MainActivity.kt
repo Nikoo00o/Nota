@@ -1,4 +1,4 @@
-package com.nota.app
+package com.Nikoo00o.nota.app
 
 import io.flutter.embedding.android.FlutterActivity
 
