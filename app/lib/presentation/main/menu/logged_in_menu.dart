@@ -80,8 +80,8 @@ class LoggedInMenu extends BlocPage<MenuBloc, MenuState> {
   @override
   Widget buildBodyWithState(BuildContext context, MenuState state) {
     if (state is MenuStateInitialised && state.showDeveloperOptions) {
-      return Column(
-        children: const <Widget>[
+      return const Column(
+        children: <Widget>[
           Divider(),
           MenuDrawerDeveloper(),
         ],
