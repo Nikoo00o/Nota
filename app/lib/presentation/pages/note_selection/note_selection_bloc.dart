@@ -26,6 +26,7 @@ import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 import 'package:tuple/tuple.dart';
@@ -115,8 +116,8 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     dialogService.showLoadingDialog();
     lastNoteTransferTime = await getLastNoteTransferTime(const NoParams());
     add(NoteSelectionStructureChanged(newCurrentItem: await getCurrentStructureItem.call(const NoParams())));
-    subscription =
-        await getStructureUpdatesStream.call(GetStructureUpdatesStreamParams(callbackFunction: (StructureUpdateBatch batch) {
+    subscription = await getStructureUpdatesStream
+        .call(GetStructureUpdatesStreamParams(callbackFunction: (StructureUpdateBatch batch) {
       add(NoteSelectionStructureChanged(newCurrentItem: batch.currentItem));
     }));
     dialogService.hideLoadingDialog();
@@ -153,7 +154,8 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     }
   }
 
-  Future<void> _handleDropDownMenuSelected(NoteSelectionDropDownMenuSelected event, Emitter<NoteSelectionState> emit) async {
+  Future<void> _handleDropDownMenuSelected(
+      NoteSelectionDropDownMenuSelected event, Emitter<NoteSelectionState> emit) async {
     switch (event.index) {
       case 0:
         await _renameCurrentFolder();
@@ -219,13 +221,18 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
       onCancel: () => completer.complete(null),
       titleKey: event.isFolder ? "note.selection.create.folder" : "note.selection.create.note",
       inputLabelKey: "name",
-      descriptionKey: event.isFolder ? "note.selection.create.folder.description" : "note.selection.create.note.description",
+      descriptionKey:
+          event.isFolder ? "note.selection.create.folder.description" : "note.selection.create.note.description",
       validatorCallback: (String? input) =>
           InputValidator.validateNewItem(input, isFolder: event.isFolder, parent: currentItem as StructureFolder?),
     ));
     final String? name = await completer.future;
     if (name != null) {
-      await createStructureItem.call(CreateStructureItemParams(name: name, isFolder: event.isFolder));
+      // todo: currently only creating either a folder, or a raw text note
+      await createStructureItem.call(CreateStructureItemParams(
+        name: name,
+        noteType: event.isFolder ? NoteType.FOLDER : NoteType.RAW_TEXT,
+      ));
       if (event.isFolder) {
         dialogService.showInfoSnackBar(ShowInfoSnackBar(
           textKey: "note.selection.folder.created",
@@ -261,8 +268,8 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
         dialogService.showInfoSnackBar(
             ShowInfoSnackBar(textKey: "note.selection.moved.folder.top", textKeyParams: <String>[result.item1]));
       } else {
-        dialogService.showInfoSnackBar(
-            ShowInfoSnackBar(textKey: "note.selection.moved.folder", textKeyParams: <String>[result.item1, result.item2]));
+        dialogService.showInfoSnackBar(ShowInfoSnackBar(
+            textKey: "note.selection.moved.folder", textKeyParams: <String>[result.item1, result.item2]));
       }
     }
   }

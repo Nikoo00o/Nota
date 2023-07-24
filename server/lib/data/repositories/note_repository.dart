@@ -281,6 +281,7 @@ class NoteRepository {
       id: noteUpdate.serverId,
       encFileName: noteUpdate.newEncFileName ?? "",
       lastEdited: noteUpdate.newLastEdited,
+      noteType: noteUpdate.noteType,
     ));
   }
 
@@ -402,6 +403,7 @@ class NoteRepository {
       newEncFileName: newNote.encFileName != oldEncFileName ? newNote.encFileName : null,
       newLastEdited: newNote.lastEdited,
       noteTransferStatus: noteTransferStatus,
+      noteType: newNote.noteType,
     );
   }
 

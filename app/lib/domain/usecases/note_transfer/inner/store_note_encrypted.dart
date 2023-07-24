@@ -6,6 +6,7 @@ import 'package:app/domain/repositories/note_transfer_repository.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/save_account.dart';
 import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/entities/note_info.dart';
@@ -57,7 +58,7 @@ class StoreNoteEncrypted extends UseCase<DateTime, StoreNoteEncryptedParams> {
     return now;
   }
 
-  Future<void> _delete(StoreNoteEncryptedParams params, ClientAccount account, DateTime now) async {
+  Future<void> _delete(DeleteNoteEncryptedParams params, ClientAccount account, DateTime now) async {
     if (params.decryptedContent?.isNotEmpty ?? false) {
       Logger.warn("Delete called with content which is not empty");
     }
@@ -74,7 +75,7 @@ class StoreNoteEncrypted extends UseCase<DateTime, StoreNoteEncryptedParams> {
     }
   }
 
-  Future<void> _create(StoreNoteEncryptedParams params, ClientAccount account, DateTime now) async {
+  Future<void> _create(CreateNoteEncryptedParams params, ClientAccount account, DateTime now) async {
     final bool containsNote = account.getNoteById(params.noteId) != null;
     if (containsNote) {
       Logger.error("The note file to be created with the id ${params.noteId} was already contained in the account");
@@ -91,6 +92,7 @@ class StoreNoteEncrypted extends UseCase<DateTime, StoreNoteEncryptedParams> {
       id: params.noteId,
       encFileName: encryptedFileName!,
       lastEdited: now,
+      noteType: params.noteType,
     ));
 
     await noteTransferRepository.storeEncryptedNote(
@@ -99,7 +101,7 @@ class StoreNoteEncrypted extends UseCase<DateTime, StoreNoteEncryptedParams> {
     );
   }
 
-  Future<void> _change(StoreNoteEncryptedParams params, ClientAccount account, DateTime now) async {
+  Future<void> _change(ChangeNoteEncryptedParams params, ClientAccount account, DateTime now) async {
     if (params.decryptedContent == null && params.decryptedName == null) {
       Logger.warn("Change called with no content and no file name");
     }
@@ -153,10 +155,17 @@ abstract class StoreNoteEncryptedParams {
 }
 
 class CreateNoteEncryptedParams extends StoreNoteEncryptedParams {
+  /// What kind of note is created
+  final NoteType noteType;
+
   /// This constructor is used when the note was newly created.
   /// The file name may not be empty!
-  CreateNoteEncryptedParams({required int noteId, required String decryptedName, required Uint8List decryptedContent})
-      : super(noteId: noteId, decryptedName: decryptedName, decryptedContent: decryptedContent) {
+  CreateNoteEncryptedParams({
+    required int noteId,
+    required String decryptedName,
+    required Uint8List decryptedContent,
+    required this.noteType,
+  }) : super(noteId: noteId, decryptedName: decryptedName, decryptedContent: decryptedContent) {
     if (decryptedName.isEmpty) {
       Logger.error("CreateNoteEncryptedParams: file name may not be empty");
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
@@ -167,7 +176,11 @@ class CreateNoteEncryptedParams extends StoreNoteEncryptedParams {
 class ChangeNoteEncryptedParams extends StoreNoteEncryptedParams {
   /// This constructor is used when the note was changed (renamed, or content changed).
   /// One of both must be not null and the file name may not be empty.
-  ChangeNoteEncryptedParams({required super.noteId, required super.decryptedName, required super.decryptedContent}) {
+  ChangeNoteEncryptedParams({
+    required super.noteId,
+    required super.decryptedName,
+    required super.decryptedContent,
+  }) {
     if (decryptedName == null && decryptedContent == null) {
       Logger.error("ChangeNoteEncryptedParams: One of the params must be non null");
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);

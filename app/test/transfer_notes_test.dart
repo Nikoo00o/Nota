@@ -11,6 +11,7 @@ import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
 import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/security_utils.dart';
 import 'package:shared/domain/usecases/usecase.dart';
@@ -95,7 +96,8 @@ void main() {
 
       expect(() async {
         await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
-      }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)), reason: "no file");
+      }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)),
+          reason: "no file");
     });
 
     test("Should do nothing without notes", () async {
@@ -196,7 +198,8 @@ void main() {
 
     expect(() async {
       await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
-    }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)), reason: "no file");
+    }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)),
+        reason: "no file");
   });
 
   test("Delete note on server side and delete local note as well", () async {
@@ -214,12 +217,14 @@ void main() {
 
     expect(() async {
       await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
-    }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)), reason: "no file");
+    }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)),
+        reason: "no file");
   });
 
   test("Directly sending the server a deleted note", () async {
     final ClientAccount account = await _loginAndCreateNote();
-    final DateTime secondTime = await sl<StoreNoteEncrypted>().call(DeleteNoteEncryptedParams(noteId: -1)); //delete note
+    final DateTime secondTime =
+        await sl<StoreNoteEncrypted>().call(DeleteNoteEncryptedParams(noteId: -1)); //delete note
 
     dialogServiceMock.confirmedOverride = true; // should confirm the note transfer
     await sl<TransferNotes>().call(const NoParams()); // first transfer to upload note
@@ -230,7 +235,8 @@ void main() {
 
     expect(() async {
       await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
-    }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)), reason: "no file");
+    }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)),
+        reason: "no file");
   });
 
   test("Getting a deleted note from the server with cached data", () async {
@@ -251,7 +257,8 @@ void main() {
     account.username = "dontCacheData"; // pretend that this is someone else, so that the logout does not cache!
     await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
     await loginToTestAccount(reuseOldNotes: true);
-    account = await sl<GetLoggedInAccount>().call(const NoParams()); //refresh account because of logout and get the old cached
+    account = await sl<GetLoggedInAccount>()
+        .call(const NoParams()); //refresh account because of logout and get the old cached
     // data
 
     expect(account.noteInfoList.length, 1, reason: "first account should have 1 note");
@@ -266,7 +273,8 @@ void main() {
 
     expect(() async {
       await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
-    }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)), reason: "no file");
+    }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)),
+        reason: "no file");
   });
 
   test("Directly getting a deleted note from the server", () async {
@@ -300,7 +308,8 @@ void main() {
 
     expect(() async {
       await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
-    }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)), reason: "no file");
+    }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)),
+        reason: "no file");
   });
 }
 
@@ -308,7 +317,10 @@ Future<ClientAccount> _loginAndCreateNote() async {
   await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
   await loginToTestAccount();
   await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
-      noteId: -1, decryptedName: "name", decryptedContent: Uint8List.fromList(utf8.encode("test"))));
+      noteId: -1,
+      decryptedName: "name",
+      decryptedContent: Uint8List.fromList(utf8.encode("test")),
+      noteType: NoteType.RAW_TEXT));
   final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
   return account;
 }

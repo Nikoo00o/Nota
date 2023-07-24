@@ -15,6 +15,7 @@ import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure
 import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/list_utils.dart';
 import 'package:shared/domain/usecases/usecase.dart';
@@ -86,7 +87,10 @@ void _testWithAccount() {
 
 Future<void> _testSimpleNoteStructure({required bool callFetchNewStructure}) async {
   await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
-      noteId: -1, decryptedName: "name", decryptedContent: Uint8List.fromList(utf8.encode("test"))));
+      noteId: -1,
+      decryptedName: "name",
+      decryptedContent: Uint8List.fromList(utf8.encode("test")),
+      noteType: NoteType.RAW_TEXT));
 
   if (callFetchNewStructure) {
     await sl<FetchNewNoteStructure>().call(const NoParams());
@@ -107,12 +111,14 @@ Future<void> _testSimpleNoteStructure({required bool callFetchNewStructure}) asy
   expect(folders[0].amountOfChildren, folders[1].amountOfChildren, reason: "same children");
   expect(folders[0].amountOfChildren, 1, reason: "1 child");
   expect(folders[0].getChild(0).name, folders[1].getChild(0).name, reason: "same child name");
-  expect(folders[0].getChild(0).directParent, isNot(folders[1].getChild(0).directParent), reason: "but different parents");
+  expect(folders[0].getChild(0).directParent, isNot(folders[1].getChild(0).directParent),
+      reason: "but different parents");
 
   expect(folders[0].getChild(0).name, "name", reason: "note name match");
   expect((folders[0].getChild(0) as StructureNote).id, -1, reason: "note id match");
   expect(folders[0].getChild(0).directParent, folders[0], reason: "parent of root child should be root");
-  expect(folders[1].getChild(0).directParent, folders[1], reason: "the parent of a direct recent child should be recent");
+  expect(folders[1].getChild(0).directParent, folders[1],
+      reason: "the parent of a direct recent child should be recent");
 }
 
 Future<void> _testComplexStructure() async {
@@ -162,11 +168,13 @@ Future<void> _testComplexStructure() async {
 
   expect(recent.getChild(0).directParent?.path, deepestFolder.path,
       reason: "fourth should have correct direct parent folder for recent");
-  expect(recent.getChild(0).getParent(), recent, reason: "but the getParent() should return recent as the top most folder");
+  expect(recent.getChild(0).getParent(), recent,
+      reason: "but the getParent() should return recent as the top most folder");
 
   expect(recent.getChild(3).directParent!.directParent, recent,
       reason: "in recent the direct parent of dir1 should be recent itself!");
-  expect(recent.getChild(4).directParent, recent, reason: "in recent the direct parent of first should be recent itself!");
+  expect(recent.getChild(4).directParent, recent,
+      reason: "in recent the direct parent of first should be recent itself!");
   expect(recent.getChild(0).directParent!.getParent(), recent,
       reason: "getParent() should also work for a folder in recent");
 

@@ -13,10 +13,12 @@ import 'package:app/domain/usecases/account/login/login_to_account.dart';
 import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:shared/core/enums/log_level.dart';
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/data/datasources/rest_client.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
-import '../../../server/test/helper/server_test_helper.dart' as server; // relative import of the server test helpers, so
+import '../../../server/test/helper/server_test_helper.dart'
+    as server; // relative import of the server test helpers, so
 // that the real server responses can be used for testing instead of mocks! The server tests should be run before!
 import '../mocks/app_config_mock.dart';
 import '../mocks/argon_wrapper_mock.dart';
@@ -30,7 +32,8 @@ late DialogServiceMock dialogServiceMock;
 ///
 /// You can also set a new default [logLevel] in this method params for all tests.
 Future<void> createCommonTestObjects({required int serverPort, LogLevel logLevel = LogLevel.VERBOSE}) async {
-  await server.createCommonTestObjects(serverPort: serverPort, logLevel: logLevel); // init the server test helper objects
+  await server.createCommonTestObjects(
+      serverPort: serverPort, logLevel: logLevel); // init the server test helper objects
   // this will also init the dart console logger
 
   await initializeGetIt(); // init the app singletons
@@ -103,20 +106,20 @@ Future<ClientAccount> loginToTestAccount({bool reuseOldNotes = false}) async {
 Future<void> createSomeTestNotes() async {
   int counter = -1;
   final Uint8List content = Uint8List.fromList(utf8.encode("123"));
-  await sl<StoreNoteEncrypted>()
-      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "first", decryptedContent: content));
+  await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
+      noteId: counter--, decryptedName: "first", decryptedContent: content, noteType: NoteType.RAW_TEXT));
   await Future<void>.delayed(const Duration(milliseconds: 10));
-  await sl<StoreNoteEncrypted>()
-      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir1/second", decryptedContent: content));
+  await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
+      noteId: counter--, decryptedName: "dir1/second", decryptedContent: content, noteType: NoteType.RAW_TEXT));
   await Future<void>.delayed(const Duration(milliseconds: 10));
-  await sl<StoreNoteEncrypted>()
-      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir2/second", decryptedContent: content));
+  await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
+      noteId: counter--, decryptedName: "dir2/second", decryptedContent: content, noteType: NoteType.RAW_TEXT));
   await Future<void>.delayed(const Duration(milliseconds: 10));
-  await sl<StoreNoteEncrypted>()
-      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir1/a_third", decryptedContent: content));
+  await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
+      noteId: counter--, decryptedName: "dir1/a_third", decryptedContent: content, noteType: NoteType.RAW_TEXT));
   await Future<void>.delayed(const Duration(milliseconds: 10));
-  await sl<StoreNoteEncrypted>()
-      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir1/dir3/fourth", decryptedContent: content));
+  await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
+      noteId: counter--, decryptedName: "dir1/dir3/fourth", decryptedContent: content, noteType: NoteType.RAW_TEXT));
 
   await sl<LocalDataSource>().setClientNoteCounter(counter); // important: update counter
 }

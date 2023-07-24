@@ -1,4 +1,5 @@
 import 'package:shared/core/enums/note_transfer_status.dart';
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/domain/entities/entity.dart';
 
 // ignore_for_file: hash_and_equals
@@ -28,18 +29,23 @@ class NoteUpdate extends Entity {
   /// If Server, or client had a newer version of the file and the other one needs updating
   final NoteTransferStatus noteTransferStatus;
 
+  /// What kind of note this is
+  final NoteType noteType;
+
   NoteUpdate({
     required this.clientId,
     required this.serverId,
     required this.newEncFileName,
     required this.newLastEdited,
     required this.noteTransferStatus,
+    required this.noteType,
   }) : super(<String, Object?>{
           "clientId": clientId,
           "serverId": serverId,
           "newEncFileName": newEncFileName,
           "newLastEdited": newLastEdited,
           "noteTransferStatus": noteTransferStatus,
+          "noteType": noteType,
         });
 
   /// The notes had a different file name

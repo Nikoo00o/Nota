@@ -6,6 +6,7 @@ import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/constants/rest_json_parameter.dart';
 import 'package:shared/core/enums/note_transfer_status.dart';
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/data/dtos/notes/finish_note_request.dart';
 import 'package:shared/data/dtos/notes/start_note_transfer_request.dart';
@@ -33,7 +34,8 @@ void main() {
   });
 
   tearDown(() async {
-    await cleanupTestFilesAndServer(deleteTestFolderAfterwards: true); // cleanup server and hive test data after every test
+    await cleanupTestFilesAndServer(
+        deleteTestFolderAfterwards: true); // cleanup server and hive test data after every test
     // (this callback will be run after each test)
   });
 
@@ -168,22 +170,25 @@ void _testStartTransfer() {
   });
 
   test("A start request with a client id should return the correct update", () async {
-    final StartNoteTransferResponse response =
-        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    final StartNoteTransferResponse response = await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
     final NoteUpdateModel matchingUpdate = NoteUpdateModel(
         clientId: -1,
         serverId: 1,
         newEncFileName: "c1",
         newLastEdited: _now,
-        noteTransferStatus: NoteTransferStatus.SERVER_NEEDS_NEW);
+        noteTransferStatus: NoteTransferStatus.SERVER_NEEDS_NEW,
+        noteType: NoteType.RAW_TEXT);
 
     expect(response.transferToken.isEmpty, false, reason: "token not empty");
     expect(jsonEncode(response.noteUpdates), jsonEncode(<NoteUpdateModel>[matchingUpdate]), reason: "update matches");
   });
 
-  test("A start request with a server id that is not contained in the server account should throw an exception", () async {
+  test("A start request with a server id that is not contained in the server account should throw an exception",
+      () async {
     expect(() async {
-      await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: 1, encFileName: "c1", lastEdited: _now)]);
+      await _startTransfer(
+          <NoteInfoModel>[NoteInfoModel(id: 1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
   });
 }
@@ -194,55 +199,56 @@ void _testUploadNote() {
   });
 
   test("An upload request with an invalid transfer token should throw an exception ", () async {
-    await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
     expect(() async {
       await _upload("_invalid_token_912830958891023905980129803895099182", -1, <int>[1, 2]);
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN));
   });
 
   test("An upload request with no bytes should throw an exception ", () async {
-    final StartNoteTransferResponse response =
-        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    final StartNoteTransferResponse response = await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
     expect(() async {
       await _upload(response.transferToken, -1, null);
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
   });
 
   test("An upload request with empty bytes should throw an exception ", () async {
-    final StartNoteTransferResponse response =
-        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    final StartNoteTransferResponse response = await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
     expect(() async {
       await _upload(response.transferToken, -1, <int>[]);
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
   });
 
   test("An upload request with no client id should throw an exception ", () async {
-    final StartNoteTransferResponse response =
-        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    final StartNoteTransferResponse response = await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
     expect(() async {
       await _upload(response.transferToken, null, <int>[1, 2]);
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
   });
 
   test("An upload request with an invalid client id should throw an exception ", () async {
-    final StartNoteTransferResponse response =
-        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    final StartNoteTransferResponse response = await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
     expect(() async {
       await _upload(response.transferToken, -1010, <int>[1, 2]);
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
   });
 
   test("An upload request with an invalid server id should throw an exception ", () async {
-    final StartNoteTransferResponse response =
-        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    final StartNoteTransferResponse response = await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
     expect(() async {
       await _upload(response.transferToken, 1010, <int>[1, 2]);
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
   });
 
   test("An upload request with correct values should not instantly create a file", () async {
-    final StartNoteTransferResponse response =
-        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    final StartNoteTransferResponse response = await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
     expect(response.noteUpdates.first.serverId, 1, reason: "note transfer should have serverId 1");
     await _upload(response.transferToken, 1, <int>[1, 2, 3, 4, 5]);
     expect(() async {
@@ -251,16 +257,16 @@ void _testUploadNote() {
   });
 
   test("An upload request with a valid client id should work", () async {
-    final StartNoteTransferResponse response =
-    await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    final StartNoteTransferResponse response = await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
     expect(response.noteUpdates.first.serverId, 1, reason: "note transfer should have serverId 1");
     expect(response.noteUpdates.first.clientId, -1, reason: "note transfer should have clientId 1");
     await _upload(response.transferToken, -1, <int>[1, 2, 3, 4, 5]);
   });
 
   test("An upload request with correct values should succeed twice", () async {
-    final StartNoteTransferResponse response =
-        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    final StartNoteTransferResponse response = await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
     expect(response.noteUpdates.first.serverId, 1, reason: "note transfer should have serverId 1");
     final List<int> bytes = <int>[1, 2, 3, 4, 5];
 
@@ -278,15 +284,16 @@ void _testFinishTransfer() {
   });
 
   test("A finish request with an invalid transfer token should throw an exception ", () async {
-    await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
     expect(() async {
       await _finishTransfer("_invalid_token_912830958891023905980129803895099182", shouldCancel: false);
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN));
   });
 
   test("A finish request with correct values should succeed", () async {
-    final StartNoteTransferResponse response =
-        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    final StartNoteTransferResponse response = await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
     final List<int> bytes = <int>[1, 2, 3, 4, 5];
     await _upload(response.transferToken, 1, bytes);
 
@@ -295,7 +302,8 @@ void _testFinishTransfer() {
     final ServerAccount? account =
         await accountRepository.getAccountBySessionToken(fetchCurrentSessionTokenMock.sessionTokenOverride!.token);
     expect(account?.noteInfoList.length, 1, reason: "server account should have 1 note");
-    expect(account?.noteInfoList.first, NoteInfoModel(id: 1, encFileName: "c1", lastEdited: _now),
+    expect(account?.noteInfoList.first,
+        NoteInfoModel(id: 1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT),
         reason: "note info should match");
 
     final List<int> newBytes = await noteDataSource.loadNoteData(1);
@@ -303,14 +311,15 @@ void _testFinishTransfer() {
   });
 
   test("A finish request with no bytes should also succeed", () async {
-    final StartNoteTransferResponse response =
-        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    final StartNoteTransferResponse response = await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
     await _finishTransfer(response.transferToken, shouldCancel: false);
 
     final ServerAccount? account =
         await accountRepository.getAccountBySessionToken(fetchCurrentSessionTokenMock.sessionTokenOverride!.token);
     expect(account?.noteInfoList.length, 1, reason: "server account should have 1 note");
-    expect(account?.noteInfoList.first, NoteInfoModel(id: 1, encFileName: "c1", lastEdited: _now),
+    expect(account?.noteInfoList.first,
+        NoteInfoModel(id: 1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT),
         reason: "note info should match");
     expect(() async {
       await noteDataSource.loadNoteData(1);
@@ -330,8 +339,8 @@ void _testFinishTransfer() {
   });
 
   test("A cancelled finish request should not change anything", () async {
-    final StartNoteTransferResponse response =
-        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    final StartNoteTransferResponse response = await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
     final List<int> bytes = <int>[1, 2, 3, 4, 5];
     await _upload(response.transferToken, 1, bytes);
     await _finishTransfer(response.transferToken, shouldCancel: true);
@@ -345,10 +354,10 @@ void _testFinishTransfer() {
   });
 
   test("A finish request should cancel a different transfer", () async {
-    final StartNoteTransferResponse transfer1 =
-        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c2", lastEdited: _now)]);
-    final StartNoteTransferResponse transfer2 =
-        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c3", lastEdited: _now)]);
+    final StartNoteTransferResponse transfer1 = await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c2", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
+    final StartNoteTransferResponse transfer2 = await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c3", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
     expect(transfer2.noteUpdates.length, 1, reason: "only one note update");
     expect(transfer2.noteUpdates.first.serverId, 2, reason: "serverId should be unique, so 2");
 
@@ -364,8 +373,10 @@ void _testFinishTransfer() {
 
     final ServerAccount? account =
         await accountRepository.getAccountBySessionToken(fetchCurrentSessionTokenMock.sessionTokenOverride!.token);
-    expect(account?.noteInfoList.length, transfer1.noteUpdates.first.serverId, reason: "server account should have 1 note");
-    expect(account?.noteInfoList.first, NoteInfoModel(id: 1, encFileName: "c2", lastEdited: _now),
+    expect(account?.noteInfoList.length, transfer1.noteUpdates.first.serverId,
+        reason: "server account should have 1 note");
+    expect(account?.noteInfoList.first,
+        NoteInfoModel(id: 1, encFileName: "c2", lastEdited: _now, noteType: NoteType.RAW_TEXT),
         reason: "note info should match");
 
     final List<int> newBytes = await noteDataSource.loadNoteData(1);
@@ -373,10 +384,10 @@ void _testFinishTransfer() {
   });
 
   test("A cancelled finish request should not cancel a different transfer", () async {
-    final StartNoteTransferResponse transfer1 =
-        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c2", lastEdited: _now)]);
-    final StartNoteTransferResponse transfer2 =
-        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c3", lastEdited: _now)]);
+    final StartNoteTransferResponse transfer1 = await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c2", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
+    final StartNoteTransferResponse transfer2 = await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c3", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
 
     final List<int> bytes = <int>[1, 2, 3, 4, 5];
     await _upload(transfer1.transferToken, transfer1.noteUpdates.first.serverId, bytes);
@@ -387,8 +398,10 @@ void _testFinishTransfer() {
 
     final ServerAccount? account =
         await accountRepository.getAccountBySessionToken(fetchCurrentSessionTokenMock.sessionTokenOverride!.token);
-    expect(account?.noteInfoList.length, transfer1.noteUpdates.first.serverId, reason: "server account should have 1 note");
-    expect(account?.noteInfoList.first, NoteInfoModel(id: 1, encFileName: "c2", lastEdited: _now),
+    expect(account?.noteInfoList.length, transfer1.noteUpdates.first.serverId,
+        reason: "server account should have 1 note");
+    expect(account?.noteInfoList.first,
+        NoteInfoModel(id: 1, encFileName: "c2", lastEdited: _now, noteType: NoteType.RAW_TEXT),
         reason: "note info should match");
 
     final List<int> newBytes = await noteDataSource.loadNoteData(1);
@@ -402,15 +415,16 @@ void _testDownloadNote() {
   });
 
   test("A download request with an invalid transfer token should throw an exception ", () async {
-    await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
     expect(() async {
       await _download("_invalid_token_912830958891023905980129803895099182", -1);
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN));
   });
 
   test("A download request with no client id should throw an exception ", () async {
-    final StartNoteTransferResponse response =
-        await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+    final StartNoteTransferResponse response = await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
     expect(() async {
       await _download(response.transferToken, null);
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
@@ -418,8 +432,10 @@ void _testDownloadNote() {
 
   test("A download request with an invalid server id should throw an exception ", () async {
     await _uploadNote1();
-    final StartNoteTransferResponse response = await _startTransfer(
-        <NoteInfoModel>[NoteInfoModel(id: 1, encFileName: "c1", lastEdited: _now.subtract(const Duration(days: 1)))]);
+    final StartNoteTransferResponse response = await _startTransfer(<NoteInfoModel>[
+      NoteInfoModel(
+          id: 1, encFileName: "c1", lastEdited: _now.subtract(const Duration(days: 1)), noteType: NoteType.RAW_TEXT)
+    ]);
     expect(() async {
       await _download(response.transferToken, 1010);
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
@@ -427,8 +443,10 @@ void _testDownloadNote() {
 
   test("A download request with a valid client id should throw a file not found exception ", () async {
     await _uploadNote1();
-    final StartNoteTransferResponse response = await _startTransfer(
-        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now.subtract(const Duration(days: 1)))]);
+    final StartNoteTransferResponse response = await _startTransfer(<NoteInfoModel>[
+      NoteInfoModel(
+          id: -1, encFileName: "c1", lastEdited: _now.subtract(const Duration(days: 1)), noteType: NoteType.RAW_TEXT)
+    ]);
     expect(() async {
       await _download(response.transferToken, -1);
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.FILE_NOT_FOUND));
@@ -436,12 +454,13 @@ void _testDownloadNote() {
 
   test("A download request with correct values should succeed", () async {
     await _uploadNote1();
-    final StartNoteTransferResponse response = await _startTransfer(
-        <NoteInfoModel>[NoteInfoModel(id: 1, encFileName: "c1", lastEdited: _now.subtract(const Duration(days: 1)))]);
+    final StartNoteTransferResponse response = await _startTransfer(<NoteInfoModel>[
+      NoteInfoModel(
+          id: 1, encFileName: "c1", lastEdited: _now.subtract(const Duration(days: 1)), noteType: NoteType.RAW_TEXT)
+    ]);
     final List<int> newBytes = await _download(response.transferToken, 1);
     expect(jsonEncode(<int>[1, 2, 3, 4, 5]), jsonEncode(newBytes), reason: "downloaded bytes should match");
   });
-
 }
 
 Future<StartNoteTransferResponse> _startTransfer(List<NoteInfoModel> clientNotes) async {
@@ -495,8 +514,8 @@ Future<List<int>> _download(String? transferToken, int? serverId) async {
 }
 
 Future<void> _uploadNote1() async {
-  final StartNoteTransferResponse response =
-      await _startTransfer(<NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now)]);
+  final StartNoteTransferResponse response = await _startTransfer(
+      <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
   await _upload(response.transferToken, 1, <int>[1, 2, 3, 4, 5]);
   await _finishTransfer(response.transferToken, shouldCancel: false);
 }
@@ -504,91 +523,118 @@ Future<void> _uploadNote1() async {
 DateTime _now = DateTime.now();
 
 List<NoteInfoModel> get _clientList1 => <NoteInfoModel>[
-      NoteInfoModel(id: -10, encFileName: "c10", lastEdited: _now.subtract(const Duration(seconds: 1))),
-      NoteInfoModel(id: -20, encFileName: "c20", lastEdited: _now.subtract(const Duration(days: 10))),
-      NoteInfoModel(id: 11, encFileName: "c11", lastEdited: _now.subtract(const Duration(days: 1))),
-      NoteInfoModel(id: 12, encFileName: "c12", lastEdited: _now.subtract(const Duration(days: 2))),
-      NoteInfoModel(id: 13, encFileName: "c13", lastEdited: _now.subtract(const Duration(days: 1))),
-      NoteInfoModel(id: 14, encFileName: "c14", lastEdited: _now.subtract(const Duration(days: 2))),
-      NoteInfoModel(id: 15, encFileName: "c15", lastEdited: _now.subtract(const Duration(days: 1))),
-      NoteInfoModel(id: 16, encFileName: "c16", lastEdited: _now.subtract(const Duration(days: 1))),
-      NoteInfoModel(id: 17, encFileName: "c11", lastEdited: _now.subtract(const Duration(days: 2))),
+      NoteInfoModel(
+          id: -10,
+          encFileName: "c10",
+          lastEdited: _now.subtract(const Duration(seconds: 1)),
+          noteType: NoteType.RAW_TEXT),
+      NoteInfoModel(
+          id: -20,
+          encFileName: "c20",
+          lastEdited: _now.subtract(const Duration(days: 10)),
+          noteType: NoteType.RAW_TEXT),
+      NoteInfoModel(
+          id: 11, encFileName: "c11", lastEdited: _now.subtract(const Duration(days: 1)), noteType: NoteType.RAW_TEXT),
+      NoteInfoModel(
+          id: 12, encFileName: "c12", lastEdited: _now.subtract(const Duration(days: 2)), noteType: NoteType.RAW_TEXT),
+      NoteInfoModel(
+          id: 13, encFileName: "c13", lastEdited: _now.subtract(const Duration(days: 1)), noteType: NoteType.RAW_TEXT),
+      NoteInfoModel(
+          id: 14, encFileName: "c14", lastEdited: _now.subtract(const Duration(days: 2)), noteType: NoteType.RAW_TEXT),
+      NoteInfoModel(
+          id: 15, encFileName: "c15", lastEdited: _now.subtract(const Duration(days: 1)), noteType: NoteType.RAW_TEXT),
+      NoteInfoModel(
+          id: 16, encFileName: "c16", lastEdited: _now.subtract(const Duration(days: 1)), noteType: NoteType.RAW_TEXT),
+      NoteInfoModel(
+          id: 17, encFileName: "c11", lastEdited: _now.subtract(const Duration(days: 2)), noteType: NoteType.RAW_TEXT),
     ];
 
 List<NoteInfoModel> get _serverList1 => <NoteInfoModel>[
-      NoteInfoModel(id: 11, encFileName: "c11", lastEdited: _now.subtract(const Duration(days: 1))),
-      NoteInfoModel(id: 12, encFileName: "s12", lastEdited: _now.subtract(const Duration(days: 1))),
-      NoteInfoModel(id: 13, encFileName: "s13", lastEdited: _now.subtract(const Duration(days: 2))),
-      NoteInfoModel(id: 14, encFileName: "c14", lastEdited: _now.subtract(const Duration(days: 1))),
-      NoteInfoModel(id: 15, encFileName: "c15", lastEdited: _now.subtract(const Duration(days: 2))),
-      NoteInfoModel(id: 16, encFileName: "s16", lastEdited: _now.subtract(const Duration(days: 1))),
-      NoteInfoModel(id: 17, encFileName: "c12", lastEdited: _now.subtract(const Duration(days: 1))),
-      NoteInfoModel(id: 21, encFileName: "s21", lastEdited: _now.subtract(const Duration(seconds: 1))),
-      NoteInfoModel(id: 20, encFileName: "s20", lastEdited: _now.subtract(const Duration(days: 10))),
+      NoteInfoModel(
+          id: 11, encFileName: "c11", lastEdited: _now.subtract(const Duration(days: 1)), noteType: NoteType.RAW_TEXT),
+      NoteInfoModel(
+          id: 12, encFileName: "s12", lastEdited: _now.subtract(const Duration(days: 1)), noteType: NoteType.RAW_TEXT),
+      NoteInfoModel(
+          id: 13, encFileName: "s13", lastEdited: _now.subtract(const Duration(days: 2)), noteType: NoteType.RAW_TEXT),
+      NoteInfoModel(
+          id: 14, encFileName: "c14", lastEdited: _now.subtract(const Duration(days: 1)), noteType: NoteType.RAW_TEXT),
+      NoteInfoModel(
+          id: 15, encFileName: "c15", lastEdited: _now.subtract(const Duration(days: 2)), noteType: NoteType.RAW_TEXT),
+      NoteInfoModel(
+          id: 16, encFileName: "s16", lastEdited: _now.subtract(const Duration(days: 1)), noteType: NoteType.RAW_TEXT),
+      NoteInfoModel(
+          id: 17, encFileName: "c12", lastEdited: _now.subtract(const Duration(days: 1)), noteType: NoteType.RAW_TEXT),
+      NoteInfoModel(
+          id: 21,
+          encFileName: "s21",
+          lastEdited: _now.subtract(const Duration(seconds: 1)),
+          noteType: NoteType.RAW_TEXT),
+      NoteInfoModel(
+          id: 20, encFileName: "s20", lastEdited: _now.subtract(const Duration(days: 10)), noteType: NoteType.RAW_TEXT),
     ];
 
 List<NoteUpdateModel> get _updateList1 => <NoteUpdateModel>[
       NoteUpdateModel(
-        clientId: -20,
-        serverId: 1,
-        newEncFileName: "c20",
-        newLastEdited: _now.subtract(const Duration(days: 10)),
-        noteTransferStatus: NoteTransferStatus.SERVER_NEEDS_NEW,
-      ),
+          clientId: -20,
+          serverId: 1,
+          newEncFileName: "c20",
+          newLastEdited: _now.subtract(const Duration(days: 10)),
+          noteTransferStatus: NoteTransferStatus.SERVER_NEEDS_NEW,
+          noteType: NoteType.RAW_TEXT),
       NoteUpdateModel(
-        clientId: -10,
-        serverId: 2,
-        newEncFileName: "c10",
-        newLastEdited: _now.subtract(const Duration(seconds: 1)),
-        noteTransferStatus: NoteTransferStatus.SERVER_NEEDS_NEW,
-      ),
+          clientId: -10,
+          serverId: 2,
+          newEncFileName: "c10",
+          newLastEdited: _now.subtract(const Duration(seconds: 1)),
+          noteTransferStatus: NoteTransferStatus.SERVER_NEEDS_NEW,
+          noteType: NoteType.RAW_TEXT),
       NoteUpdateModel(
-        clientId: 12,
-        serverId: 12,
-        newEncFileName: "s12",
-        newLastEdited: _now.subtract(const Duration(days: 1)),
-        noteTransferStatus: NoteTransferStatus.CLIENT_NEEDS_UPDATE,
-      ),
+          clientId: 12,
+          serverId: 12,
+          newEncFileName: "s12",
+          newLastEdited: _now.subtract(const Duration(days: 1)),
+          noteTransferStatus: NoteTransferStatus.CLIENT_NEEDS_UPDATE,
+          noteType: NoteType.RAW_TEXT),
       NoteUpdateModel(
-        clientId: 13,
-        serverId: 13,
-        newEncFileName: "c13",
-        newLastEdited: _now.subtract(const Duration(days: 1)),
-        noteTransferStatus: NoteTransferStatus.SERVER_NEEDS_UPDATE,
-      ),
+          clientId: 13,
+          serverId: 13,
+          newEncFileName: "c13",
+          newLastEdited: _now.subtract(const Duration(days: 1)),
+          noteTransferStatus: NoteTransferStatus.SERVER_NEEDS_UPDATE,
+          noteType: NoteType.RAW_TEXT),
       NoteUpdateModel(
-        clientId: 14,
-        serverId: 14,
-        newEncFileName: null,
-        newLastEdited: _now.subtract(const Duration(days: 1)),
-        noteTransferStatus: NoteTransferStatus.CLIENT_NEEDS_UPDATE,
-      ),
+          clientId: 14,
+          serverId: 14,
+          newEncFileName: null,
+          newLastEdited: _now.subtract(const Duration(days: 1)),
+          noteTransferStatus: NoteTransferStatus.CLIENT_NEEDS_UPDATE,
+          noteType: NoteType.RAW_TEXT),
       NoteUpdateModel(
-        clientId: 15,
-        serverId: 15,
-        newEncFileName: null,
-        newLastEdited: _now.subtract(const Duration(days: 1)),
-        noteTransferStatus: NoteTransferStatus.SERVER_NEEDS_UPDATE,
-      ),
+          clientId: 15,
+          serverId: 15,
+          newEncFileName: null,
+          newLastEdited: _now.subtract(const Duration(days: 1)),
+          noteTransferStatus: NoteTransferStatus.SERVER_NEEDS_UPDATE,
+          noteType: NoteType.RAW_TEXT),
       NoteUpdateModel(
-        clientId: 17,
-        serverId: 17,
-        newEncFileName: "c12",
-        newLastEdited: _now.subtract(const Duration(days: 1)),
-        noteTransferStatus: NoteTransferStatus.CLIENT_NEEDS_UPDATE,
-      ),
+          clientId: 17,
+          serverId: 17,
+          newEncFileName: "c12",
+          newLastEdited: _now.subtract(const Duration(days: 1)),
+          noteTransferStatus: NoteTransferStatus.CLIENT_NEEDS_UPDATE,
+          noteType: NoteType.RAW_TEXT),
       NoteUpdateModel(
-        clientId: 20,
-        serverId: 20,
-        newEncFileName: "s20",
-        newLastEdited: _now.subtract(const Duration(days: 10)),
-        noteTransferStatus: NoteTransferStatus.CLIENT_NEEDS_NEW,
-      ),
+          clientId: 20,
+          serverId: 20,
+          newEncFileName: "s20",
+          newLastEdited: _now.subtract(const Duration(days: 10)),
+          noteTransferStatus: NoteTransferStatus.CLIENT_NEEDS_NEW,
+          noteType: NoteType.RAW_TEXT),
       NoteUpdateModel(
-        clientId: 21,
-        serverId: 21,
-        newEncFileName: "s21",
-        newLastEdited: _now.subtract(const Duration(seconds: 1)),
-        noteTransferStatus: NoteTransferStatus.CLIENT_NEEDS_NEW,
-      ),
+          clientId: 21,
+          serverId: 21,
+          newEncFileName: "s21",
+          newLastEdited: _now.subtract(const Duration(seconds: 1)),
+          noteTransferStatus: NoteTransferStatus.CLIENT_NEEDS_NEW,
+          noteType: NoteType.RAW_TEXT),
     ];

@@ -11,6 +11,7 @@ import 'package:app/domain/usecases/note_structure/navigation/get_current_struct
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/utils/security_utils.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
@@ -42,7 +43,7 @@ void main() {
     test("creating a new note inside of a subfolder from root", () async {
       sl<NoteStructureRepository>().currentItem = sl<NoteStructureRepository>().root!.getChild(0); // dir1
 
-      await sl<CreateStructureItem>().call(const CreateStructureItemParams(name: "fifth", isFolder: false));
+      await sl<CreateStructureItem>().call(const CreateStructureItemParams(name: "fifth", noteType: NoteType.RAW_TEXT));
       final StructureItem current = await sl<GetCurrentStructureItem>().call(const NoParams());
 
       expect(current.path, "dir1/fifth", reason: "path of the new note should match");
@@ -67,7 +68,7 @@ void main() {
     test("creating a new note inside of recent", () async {
       sl<NoteStructureRepository>().currentItem = sl<NoteStructureRepository>().recent!;
 
-      await sl<CreateStructureItem>().call(const CreateStructureItemParams(name: "fifth", isFolder: false));
+      await sl<CreateStructureItem>().call(const CreateStructureItemParams(name: "fifth", noteType: NoteType.RAW_TEXT));
       final StructureItem current = await sl<GetCurrentStructureItem>().call(const NoParams());
 
       expect(current.path, "fifth", reason: "path of the new note should match");
