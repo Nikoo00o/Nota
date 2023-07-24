@@ -31,7 +31,7 @@ import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 import 'package:tuple/tuple.dart';
 
-class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState> {
+final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState> {
   final NavigationService navigationService;
   final DialogService dialogService;
 

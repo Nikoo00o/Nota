@@ -28,7 +28,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// The Template types are first [Bloc], then [State].
 ///
 /// You can also override [customBackNavigation] to provide a custom back navigation.
-abstract class BlocPage<Bloc extends PageBloc<PageEvent, State>, State extends PageState> extends PageBase {
+abstract base class BlocPage<Bloc extends PageBloc<PageEvent, State>, State extends PageState> extends PageBase {
   /// Used for building the app bar
   static const double defaultAppBarHeight = 56.0;
 

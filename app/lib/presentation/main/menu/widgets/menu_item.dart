@@ -4,7 +4,7 @@ import 'package:app/presentation/main/menu/menu_state.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
 import 'package:flutter/material.dart';
 
-class MenuItem extends BlocPageChild<MenuBloc, MenuState> {
+final class MenuItem extends BlocPageChild<MenuBloc, MenuState> {
   /// This is also used to identify the current page of the menu and it is also used to return the fitting icon internally!
   final String pageTitleKey;
   final List<String>? pageTitleKeyParams;

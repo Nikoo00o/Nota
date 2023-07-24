@@ -8,7 +8,7 @@ import 'package:app/presentation/pages/login/widgets/login_inputs.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:flutter/material.dart';
 
-class LoginPage extends BlocPage<LoginBloc, LoginState> {
+final class LoginPage extends BlocPage<LoginBloc, LoginState> {
   const LoginPage() : super();
 
   @override

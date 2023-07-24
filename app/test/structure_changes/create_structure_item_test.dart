@@ -66,19 +66,17 @@ void main() {
     });
 
     test("creating a new note inside of recent", () async {
+      await Future<void>.delayed(const Duration(milliseconds: 10));
       sl<NoteStructureRepository>().currentItem = sl<NoteStructureRepository>().recent!;
-
       await sl<CreateStructureItem>().call(const CreateStructureItemParams(name: "fifth", noteType: NoteType.RAW_TEXT));
       final StructureItem current = await sl<GetCurrentStructureItem>().call(const NoParams());
-
       expect(current.path, "fifth", reason: "path of the new note should match");
 
       final StructureFolder recent = sl<NoteStructureRepository>().recent!;
       expect(recent.amountOfChildren, 6, reason: "recent should now have 6 children");
 
       expect((recent.getChild(0) as StructureNote).id, (current as StructureNote).id,
-          reason: "the new note should be the "
-              "newest");
+          reason: "the new note should be the newest");
       expect(current.topMostParent.isRecent, true, reason: "current should also exist in recent");
 
       final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());

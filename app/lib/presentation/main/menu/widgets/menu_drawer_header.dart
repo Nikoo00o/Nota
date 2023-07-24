@@ -5,7 +5,7 @@ import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
 import 'package:app/presentation/widgets/nota_icon.dart';
 import 'package:flutter/material.dart';
 
-class MenuDrawerHeader extends BlocPageChild<MenuBloc, MenuState> {
+final class MenuDrawerHeader extends BlocPageChild<MenuBloc, MenuState> {
   const MenuDrawerHeader();
 
   @override

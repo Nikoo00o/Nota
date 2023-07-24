@@ -7,7 +7,7 @@ import 'package:app/services/navigation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class SplashScreenTestPage extends NoBlocPage {
+final class SplashScreenTestPage extends NoBlocPage {
   const SplashScreenTestPage() : super(pagePadding: const EdgeInsets.fromLTRB(0, 0, 0, 0));
 
   @override

@@ -5,7 +5,7 @@ import 'package:app/presentation/main/menu/widgets/menu_item.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
 import 'package:flutter/material.dart';
 
-class MenuNotes extends BlocPageChild<MenuBloc, MenuState> {
+final class MenuNotes extends BlocPageChild<MenuBloc, MenuState> {
   const MenuNotes();
 
   @override

@@ -12,7 +12,7 @@ import 'package:shared/core/enums/log_level.dart';
 import 'package:shared/core/utils/logger/log_message.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
-class LogsBloc extends PageBloc<LogsEvent, LogsState> {
+final class LogsBloc extends PageBloc<LogsEvent, LogsState> {
   final AppSettingsRepository appSettingsRepository;
   final NavigationService navigationService;
   final DialogService dialogService;

@@ -15,7 +15,7 @@ import 'package:app/presentation/pages/note_selection/widgets/structure_item_box
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:flutter/material.dart';
 
-class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> {
+final class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> {
   const NoteSelectionPage() : super(pagePadding: const EdgeInsets.fromLTRB(5, 0, 5, 0));
 
   @override

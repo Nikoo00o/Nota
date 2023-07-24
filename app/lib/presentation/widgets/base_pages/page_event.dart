@@ -7,6 +7,6 @@ import 'package:shared/core/utils/immutable_equatable.dart';
 ///
 /// Better only have final members and make deep copies of the parameters inside of the constructor!
 @immutable
-abstract class PageEvent extends ImmutableEquatable {
+abstract base class PageEvent extends ImmutableEquatable {
   const PageEvent([super.properties = const <String, Object?>{}]);
 }

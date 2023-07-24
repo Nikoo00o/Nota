@@ -1,7 +1,7 @@
 import 'package:app/presentation/widgets/base_pages/page_state.dart';
 import 'package:flutter/cupertino.dart';
 
-class DialogOverlayState extends PageState {
+final class DialogOverlayState extends PageState {
   final GlobalKey dialogOverlayKey;
 
   /// The global key is not used for comparison inside of the state, because it will not change!

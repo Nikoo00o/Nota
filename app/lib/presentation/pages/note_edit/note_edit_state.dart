@@ -1,11 +1,11 @@
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/presentation/widgets/base_pages/page_state.dart';
 
-class NoteEditState extends PageState {
+base class NoteEditState extends PageState {
   const NoteEditState([super.properties = const <String, Object?>{}]);
 }
 
-class NoteEditStateInitialised extends NoteEditState {
+final class NoteEditStateInitialised extends NoteEditState {
   final StructureNote currentNote;
   final bool isEditing;
   final String currentSearchPosition;

@@ -17,7 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
-class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
+final class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
   final AppSettingsRepository appSettingsRepository;
   final NavigationService navigationService;
   final DialogService dialogService;

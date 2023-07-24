@@ -18,7 +18,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
-class MenuBloc extends PageBloc<MenuEvent, MenuState> {
+final class MenuBloc extends PageBloc<MenuEvent, MenuState> {
   final GetUsername getUsername;
 
   // todo: currently the menu is recreated each time it is opened, so it does not need streamed changes. in the future it

@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 /// bottom bar!
 ///
 /// You can also override [customBackNavigation] to provide a custom back navigation.
-abstract class NoBlocPage extends PageBase {
+abstract base class NoBlocPage extends PageBase {
   const NoBlocPage({
     super.key,
     super.backGroundImage,

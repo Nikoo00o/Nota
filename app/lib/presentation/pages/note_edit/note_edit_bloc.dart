@@ -30,7 +30,7 @@ import 'package:shared/core/utils/list_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
-class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
+final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
   /// This will be updated as deep copies (so it can be used as a reference inside of the state)
   late StructureItem currentItem;
 

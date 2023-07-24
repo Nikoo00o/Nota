@@ -55,6 +55,7 @@
   "page.login.description.remote.login": "Loggen Sie sich mit ihren Benutzerdaten ein",
   "page.login.description.local.login.1": "Willkommen zurück ",
   "page.login.description.local.login.2": "Loggen Sie sich mit ihrem Passwort ein",
+  "page.login.description.restart": "Bitte starten Sie die App mit der korrekten Version neu, oder löschen Sie die Daten der App {0}",
   "page.login.name": "Benutzername",
   "page.login.password": "Passwort",
   "page.login.password.confirm": "Passwort bestätigen",

@@ -11,7 +11,7 @@ import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:app/presentation/widgets/life_cycle_callback.dart';
 import 'package:flutter/material.dart';
 
-class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
+final class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
   const NoteEditPage() : super(pagePadding: EdgeInsets.zero);
 
   @override

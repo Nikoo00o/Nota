@@ -8,7 +8,7 @@ import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
 import 'package:app/presentation/widgets/custom_card.dart';
 import 'package:flutter/material.dart';
 
-class CurrentFolderInfo extends BlocPageChild<NoteSelectionBloc, NoteSelectionState> {
+final class CurrentFolderInfo extends BlocPageChild<NoteSelectionBloc, NoteSelectionState> {
   final StructureFolder folder;
 
   static const double iconSize = 30;

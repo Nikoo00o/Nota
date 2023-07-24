@@ -20,7 +20,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// Only the [pageName] and the [customBackNavigation] should not be used.
 ///
 /// This overrides [createBloc] and [createBlocProvider] to return the [bloc].
-abstract class ReuseBlocPage<Bloc extends PageBloc<PageEvent, State>, State extends PageState>
+abstract base class ReuseBlocPage<Bloc extends PageBloc<PageEvent, State>, State extends PageState>
     extends BlocPage<Bloc, State> {
   /// The bloc of the other page
   final Bloc bloc;

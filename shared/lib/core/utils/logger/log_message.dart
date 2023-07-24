@@ -16,8 +16,9 @@ class LogMessage extends HiveObject {
   @HiveField(4)
   final String? stackTrace;
 
-  /// Only print these first stack trace lines and not spam the log with the full stack trace
-  static const int stackTraceLines = 15;
+  /// Only print these first stack trace lines and not spam the log with the full stack trace.
+  /// They are taken from beginning and end!
+  static const int stackTraceLines = 16;
 
   LogMessage({
     this.message,
@@ -47,11 +48,21 @@ class LogMessage extends HiveObject {
     }
     if (stackTrace != null) {
       final String stackTraceText = stackTrace!.toString();
-      stackTraceText.split("\n").take(stackTraceLines).forEach((String line) {
-        buffer.write("\n$line");
-      });
+      final List<String> lines = stackTraceText.split("\n");
+      if (lines.length > stackTraceLines) {
+        _write(lines.take(stackTraceLines ~/ 2), buffer);
+        _write(lines.sublist(lines.length - stackTraceLines ~/ 2), buffer);
+      } else {
+        _write(lines, buffer);
+      }
     }
     return buffer.toString();
+  }
+
+  void _write(Iterable<String> lines, StringBuffer buffer) {
+    for (final String line in lines) {
+      buffer.write("\n$line");
+    }
   }
 
   /// If this log [level] could be logged for the [targetLevel]!

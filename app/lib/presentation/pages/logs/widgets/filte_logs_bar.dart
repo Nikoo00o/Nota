@@ -5,7 +5,7 @@ import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
 import 'package:flutter/material.dart';
 import 'package:shared/core/enums/log_level.dart';
 
-class FilterLogsBar extends BlocPageChild<LogsBloc, LogsState> {
+final class FilterLogsBar extends BlocPageChild<LogsBloc, LogsState> {
   const FilterLogsBar();
 
   @override

@@ -11,7 +11,7 @@ import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:flutter/material.dart';
 
 /// The side menu drawer that is displayed on every page except on the login page!
-class LoggedInMenu extends BlocPage<MenuBloc, MenuState> {
+final class LoggedInMenu extends BlocPage<MenuBloc, MenuState> {
   final String currentPageTranslationKey;
   final List<String>? currentPageTranslationKeyParams;
 

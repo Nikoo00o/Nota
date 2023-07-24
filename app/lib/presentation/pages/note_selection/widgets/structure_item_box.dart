@@ -8,7 +8,7 @@ import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
 import 'package:app/presentation/widgets/custom_card.dart';
 import 'package:flutter/material.dart';
 
-class StructureItemBox extends BlocPageChild<NoteSelectionBloc, NoteSelectionState> {
+final class StructureItemBox extends BlocPageChild<NoteSelectionBloc, NoteSelectionState> {
   final StructureItem item;
   final int index;
   static const double iconSize = 30;

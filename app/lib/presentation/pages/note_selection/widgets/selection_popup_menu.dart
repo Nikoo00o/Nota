@@ -4,7 +4,7 @@ import 'package:app/presentation/pages/note_selection/note_selection_state.dart'
 import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
 import 'package:flutter/material.dart';
 
-class SelectionPopupMenu extends BlocPageChild<NoteSelectionBloc, NoteSelectionState> {
+final class SelectionPopupMenu extends BlocPageChild<NoteSelectionBloc, NoteSelectionState> {
   const SelectionPopupMenu();
 
   @override

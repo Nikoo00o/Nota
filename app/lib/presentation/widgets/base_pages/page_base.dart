@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 /// You can also override [customBackNavigation] to provide a custom back navigation.
 /// Per default, a confirmation dialog will be opened if the app should be closed.
 /// But if the menu is open, then it will be closed.
-abstract class PageBase extends WidgetBase with PageHelperMixin {
+abstract base class PageBase extends WidgetBase with PageHelperMixin {
   /// The default page padding
   static const EdgeInsets defaultPagePadding = EdgeInsets.fromLTRB(8, 8, 8, 8);
 

@@ -10,7 +10,7 @@ import 'package:app/services/navigation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
-class DialogTestPage extends NoBlocPage {
+final class DialogTestPage extends NoBlocPage {
   const DialogTestPage() : super(pagePadding: const EdgeInsets.fromLTRB(0, 0, 0, 0));
 
   @override

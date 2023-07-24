@@ -1,11 +1,11 @@
 part of "dialog_overlay_bloc.dart";
 
 /// For Documentation on how to use the dialogs, look at [DialogOverlayBloc].
-abstract class DialogOverlayEvent extends PageEvent {
+sealed class DialogOverlayEvent extends PageEvent {
   const DialogOverlayEvent();
 }
 
-abstract class _BaseDialog extends DialogOverlayEvent {
+sealed class _BaseDialog extends DialogOverlayEvent {
   final String? titleKey;
   final List<String>? titleKeyParams;
   final TextStyle? titleStyle;
@@ -20,7 +20,7 @@ abstract class _BaseDialog extends DialogOverlayEvent {
 }
 
 /// Shows a loading dialog with a title and a description and the loading indicator
-class ShowLoadingDialog extends DialogOverlayEvent {
+final class ShowLoadingDialog extends DialogOverlayEvent {
   final String? titleKey;
   final List<String>? titleKeyParams;
   final String? descriptionKey;
@@ -47,7 +47,7 @@ class ShowLoadingDialog extends DialogOverlayEvent {
 /// The [onData] callback will be called with the data of the [HideDialog] event if there was any data.
 ///
 /// If the dialog was cancelled, this callback will also additionally receive [null] as data.
-class ShowCustomDialog extends DialogOverlayEvent {
+final class ShowCustomDialog extends DialogOverlayEvent {
   final WidgetBuilder builder;
   final VoidCallback? onBackPressed;
   final FutureOr<void> Function(Object?)? onData;
@@ -57,7 +57,7 @@ class ShowCustomDialog extends DialogOverlayEvent {
 
 /// Shows a small info [SnackBar] at the bottom of the screen. this should only be used for small status updates.
 /// For bigger more relevant info, use [ShowInfoDialog].
-class ShowInfoSnackBar extends DialogOverlayEvent {
+final class ShowInfoSnackBar extends DialogOverlayEvent {
   final String textKey;
   final List<String>? textKeyParams;
   final TextStyle? textStyle;
@@ -73,7 +73,7 @@ class ShowInfoSnackBar extends DialogOverlayEvent {
 }
 
 /// Does not include the on confirm callback!
-class _ConfirmDialog extends _BaseDialog {
+final class _ConfirmDialog extends _BaseDialog {
   final String descriptionKey;
   final List<String>? descriptionKeyParams;
   final TextStyle? descriptionStyle;
@@ -99,7 +99,7 @@ class _ConfirmDialog extends _BaseDialog {
 /// consider using [ShowInfoSnackBar] instead!
 ///
 /// This is also used to display an error dialog!
-class ShowInfoDialog extends _ConfirmDialog {
+final class ShowInfoDialog extends _ConfirmDialog {
   /// Callback that gets called when the confirm button of the dialog was pressed
   final VoidCallback? onConfirm;
 
@@ -120,7 +120,7 @@ class ShowInfoDialog extends _ConfirmDialog {
 
 /// This is the same as [ShowInfoDialog] except that you should not set the [titleStyle] and the [titleKey] will also have
 /// a different default value!
-class ShowErrorDialog extends _ConfirmDialog {
+final class ShowErrorDialog extends _ConfirmDialog {
   /// Callback that gets called when the confirm button of the dialog was pressed
   final VoidCallback? onConfirm;
 
@@ -139,7 +139,7 @@ class ShowErrorDialog extends _ConfirmDialog {
 }
 
 /// Does not include the on confirm callback!
-class _CancelDialog extends _ConfirmDialog {
+sealed class _CancelDialog extends _ConfirmDialog {
   final String? cancelButtonKey;
   final List<String>? cancelButtonKeyParams;
   final ButtonStyle? cancelButtonStyle;
@@ -166,7 +166,7 @@ class _CancelDialog extends _ConfirmDialog {
 }
 
 /// Shows a confirm dialog with a title, text and a confirm button and also a cancel button.
-class ShowConfirmDialog extends _CancelDialog {
+final class ShowConfirmDialog extends _CancelDialog {
   /// Callback that gets called when the confirm button of the dialog was pressed
   final VoidCallback? onConfirm;
 
@@ -201,7 +201,7 @@ class ShowConfirmDialog extends _CancelDialog {
 ///
 /// The [descriptionKey] is used for an additional description above the input if its not null.
 /// The [inputLabelKey] combined with the [validatorCallback] are used to show a label around the input field.
-class ShowInputDialog extends _CancelDialog {
+final class ShowInputDialog extends _CancelDialog {
   final String? inputLabelKey;
 
   /// Callback that gets called when the confirm button of the dialog was pressed and also contains the data the user put in
@@ -245,7 +245,7 @@ class ShowInputDialog extends _CancelDialog {
 /// The [translationStrings] will be translated by the dialog.
 ///
 /// The confirm button will only be clickable if one of the elements was selected
-class ShowSelectDialog extends _CancelDialog {
+final class ShowSelectDialog extends _CancelDialog {
   /// The translation keys for the elements which will be translated!
   final List<TranslationString> translationStrings;
 
@@ -277,7 +277,7 @@ class ShowSelectDialog extends _CancelDialog {
 }
 
 /// Hides both loading and custom dialog if visible
-class HideDialog extends DialogOverlayEvent {
+final class HideDialog extends DialogOverlayEvent {
   final Object? dataForDialog;
 
   /// If this is true, then the custom onCancel callback of the dialog will be called as well.
@@ -290,10 +290,10 @@ class HideDialog extends DialogOverlayEvent {
 }
 
 /// Only hides the current loading dialog if no custom dialog is visible!
-class HideLoadingDialog extends DialogOverlayEvent {
+final class HideLoadingDialog extends DialogOverlayEvent {
   const HideLoadingDialog();
 }
 
-class ShowAboutDialog extends DialogOverlayEvent {
+final class ShowAboutDialog extends DialogOverlayEvent {
   const ShowAboutDialog();
 }

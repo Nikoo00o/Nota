@@ -16,7 +16,7 @@ import 'package:shared/core/utils/logger/log_color.dart';
 import 'package:shared/core/utils/logger/log_message.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
-class LogsPage extends BlocPage<LogsBloc, LogsState> {
+final class LogsPage extends BlocPage<LogsBloc, LogsState> {
   const LogsPage() : super();
 
   @override

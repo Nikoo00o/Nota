@@ -12,7 +12,7 @@ import 'package:app/presentation/widgets/custom_outlined_button.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:flutter/material.dart';
 
-class SelectionBottomBar extends BlocPageChild<NoteSelectionBloc, NoteSelectionState> {
+final class SelectionBottomBar extends BlocPageChild<NoteSelectionBloc, NoteSelectionState> {
   const SelectionBottomBar();
 
   @override

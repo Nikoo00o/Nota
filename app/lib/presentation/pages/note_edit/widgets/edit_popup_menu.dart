@@ -4,7 +4,7 @@ import 'package:app/presentation/pages/note_edit/note_edit_state.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
 import 'package:flutter/material.dart';
 
-class EditPopupMenu extends BlocPageChild<NoteEditBloc, NoteEditState> {
+final class EditPopupMenu extends BlocPageChild<NoteEditBloc, NoteEditState> {
   const EditPopupMenu();
 
   @override
