@@ -10,7 +10,7 @@ class FileKeyGen {
 
   static final String _slash = Platform.pathSeparator;
 
-  static final String templatePath = FileUtils.getLocalFilePath("lib${_slash}keygen$_slash");
+  static final String templatePath = FileUtils.getLocalFilePath("lib${_slash}keygen");
 
   static final String serverDataPath =
       FileUtils.getLocalFilePath("..${_slash}server${_slash}lib${_slash}core${_slash}config${_slash}sensitive_data.dart");
@@ -18,20 +18,27 @@ class FileKeyGen {
   static final String sharedDataPath =
       FileUtils.getLocalFilePath("lib${_slash}core${_slash}config${_slash}sensitive_data.dart");
 
+  static final String appDataPath =
+  FileUtils.getLocalFilePath("..${_slash}app${_slash}lib${_slash}core${_slash}config${_slash}sensitive_data.dart");
+
+
   static void updateSensitiveData() {
     Logger.initLogger(Logger(logLevel: LogLevel.VERBOSE));
 
-    String serverTemplate = FileUtils.readFile("${templatePath}server_sensitive_data.template");
-    String sharedTemplate = FileUtils.readFile("${templatePath}shared_sensitive_data.template");
+    String serverTemplate = FileUtils.readFile("$templatePath${_slash}server_sensitive_data.template");
+    String appTemplate = FileUtils.readFile("$templatePath${_slash}app_sensitive_data.template");
+    String sharedTemplate = FileUtils.readFile("$templatePath${_slash}shared_sensitive_data.template");
 
     serverTemplate = updateKeys(serverTemplate);
+    appTemplate = updateKeys(appTemplate);
 
     sharedTemplate = updateKeys(sharedTemplate);
     sharedTemplate = keepServerHostName(sharedTemplate);
 
     FileUtils.writeFile(serverDataPath, serverTemplate);
+    FileUtils.writeFile(appDataPath, appTemplate);
     FileUtils.writeFile(sharedDataPath, sharedTemplate);
-    Logger.info("Created new Keys and updated $serverDataPath and $sharedDataPath");
+    Logger.info("Created new Keys and updated the following: \n$serverDataPath\n$appDataPath\n$sharedDataPath\n");
   }
 
   static String updateKeys(String input) {

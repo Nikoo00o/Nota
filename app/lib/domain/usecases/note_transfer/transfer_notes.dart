@@ -131,6 +131,7 @@ class TransferNotes extends UseCase<bool, NoParams> {
 
       if (newId != null) {
         await noteTransferRepository.renameNote(oldNoteId: oldId, newNoteId: newId);
+        // todo: change favourite: ...
       }
     }
   }

@@ -17,9 +17,9 @@ class FileUtils {
   ///
   static String getLocalFilePath(String localPath) {
     if (_isCompiled == false) {
-      return "$workingDirectory${Platform.pathSeparator}$localPath";
+      return canonicalize("$workingDirectory${Platform.pathSeparator}$localPath");
     }
-    return "${dirname(Platform.script.toFilePath())}${Platform.pathSeparator}$localPath";
+    return canonicalize("${dirname(Platform.script.toFilePath())}${Platform.pathSeparator}$localPath");
   }
 
   static bool get _isCompiled => basename(Platform.resolvedExecutable) == basename(Platform.script.path);

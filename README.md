@@ -73,6 +73,17 @@
 - If you disable the auto login feature, then the key to decrypt the note content will only be kept in memory and it will 
   only be saved encrypted locally if you enable the auto login feature
 
+## Changelog 
+
+### Version 1.1.0 
+
+- improved some file handling and updated sdk and package versions and changed the apps bundle id 
+- added biometric login and the possibility to mark notes, or folders as favourites
+
+### Version 1.0.2
+
+- initial release
+
 ## Technical Details on building the projects 
 
 - just import the project in android studio and have the flutter and dart sdks installed and the android studio flutter 
@@ -112,7 +123,7 @@ flutter build ipa --release           # ios
 ### Configure the projects
 
 - you have to run the run configuration "Create New Keys" at least once, because it will create the "sensitive_data.dart" 
-  files with new random salts and keys
+  files inside of the config folders of each project with new random salts and keys
   - then you have to set the server hostname in `/shared/lib/core/config/sensitive_data.dart`
 - you also have to add a RSA private key named `key.pem` and the matching certificate named `certificate.pem`in the 
   folder `nota/server/notaRes` for debug mode, or inside of a folder named `data` next to the server exe in release mode
@@ -125,8 +136,7 @@ flutter build ipa --release           # ios
 
 - first install openssl 
 - then open a terminal and navigate to the folder `server/notaRes`
-- now enter the command `openssl req -x509 -sha256 -nodes -days 36500 -newkey rsa:4096 -keyout key.pem -out 
-  certificate.pem`
+- now enter the command `openssl req -x509 -sha256 -nodes -days 36500 -newkey rsa:4096 -keyout key.pem -out certificate.pem`
 - always enter `.` except for the common name, where you can enter anything you want
 
 ### Project Structure

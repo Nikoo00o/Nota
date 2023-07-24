@@ -72,6 +72,7 @@ final class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionS
         style: textTitleLarge(context).copyWith(fontWeight: FontWeight.bold),
       ),
       centerTitle: false,
+      titleSpacing: 8,
       actions: const <Widget>[
         SelectionPopupMenu(),
       ],

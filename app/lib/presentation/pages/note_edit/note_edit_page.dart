@@ -71,6 +71,7 @@ final class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
                 onPressed: () => currentBloc(context).add(const NoteEditNavigatedBack()),
               ),
               title: _buildAppBarTitle(context),
+              titleSpacing: 8,
               centerTitle: false,
               actions: const <Widget>[
                 EditPopupMenu(),

@@ -31,9 +31,6 @@ class SharedConfig {
   /// Used when creating the password hash from the password (which will be send to the server)
   String get passwordHashSalt => SensitiveData.passwordHashSalt;
 
-  /// Used when creating the user key from the password (which will only be stored inside the app)
-  String get userKeySalt => SensitiveData.userKeySalt;
-
   /// Used when creating a new account to prevent account creation from outside of the app.
   String get createAccountToken => SensitiveData.createAccountToken;
 

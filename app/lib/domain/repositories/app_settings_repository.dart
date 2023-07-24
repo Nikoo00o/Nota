@@ -6,7 +6,8 @@ import 'package:app/presentation/main/app/app_bloc.dart';
 import 'package:shared/core/enums/log_level.dart';
 import 'package:shared/core/utils/logger/log_message.dart';
 
-/// Contains all global app config options that the user can change which are not specific to the account!
+/// Contains all global app config options that the user can change which are not specific to the account (so they
+/// are only locally stored and  not on the server)!
 abstract class AppSettingsRepository {
   const AppSettingsRepository();
 
