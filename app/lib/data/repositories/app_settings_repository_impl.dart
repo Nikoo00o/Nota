@@ -5,6 +5,8 @@ import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/locales.dart';
 import 'package:app/core/enums/app_update.dart';
 import 'package:app/data/datasources/local_data_source.dart';
+import 'package:app/data/models/favourites_model.dart';
+import 'package:app/domain/entities/favourites.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';
 import 'package:shared/core/enums/log_level.dart';
 import 'package:shared/core/utils/logger/log_message.dart';
@@ -15,6 +17,7 @@ class AppSettingsRepositoryImpl extends AppSettingsRepository {
 
   /// stream controller to add the updates
   final StreamController<AppUpdate> _updateController = StreamController<AppUpdate>();
+
   /// broadcast stream that is used to listen for updates for the app bloc
   late final Stream<AppUpdate> _updateStream;
 
@@ -22,7 +25,9 @@ class AppSettingsRepositoryImpl extends AppSettingsRepository {
 
   static const String CONFIG_AUTO_SAVE = "CONFIG_AUTO_SAVE";
 
-  AppSettingsRepositoryImpl({required this.localDataSource, required this.appConfig}){
+  static const String CONFIG_BIOMETRICS = "CONFIG_BIOMETRICS";
+
+  AppSettingsRepositoryImpl({required this.localDataSource, required this.appConfig}) {
     _updateStream = _updateController.stream.asBroadcastStream();
   }
 
@@ -49,7 +54,6 @@ class AppSettingsRepositoryImpl extends AppSettingsRepository {
     await localDataSource.setConfigValue(configKey: CONFIG_DARK_THEME, configValue: useDarkTheme);
     _updateController.add(AppUpdate.DARK_THEME); // update app bloc and force a rebuild
   }
-
 
   @override
   Future<Duration> getLockscreenTimeout() async {
@@ -79,6 +83,26 @@ class AppSettingsRepositoryImpl extends AppSettingsRepository {
 
   @override
   Future<bool> getAutoSave() => localDataSource.getConfigValue(configKey: CONFIG_AUTO_SAVE);
+
+  @override
+  Future<void> setFavourites(Favourites favourites) =>
+      localDataSource.setFavourites(favourites: FavouritesModel.fromFavourites(favourites));
+
+  @override
+  Future<Favourites> getFavourites() => localDataSource.getFavourites();
+
+  @override
+  Future<void> setBiometrics({required bool enabled}) =>
+      localDataSource.setConfigValue(configKey: CONFIG_BIOMETRICS, configValue: enabled);
+
+  @override
+  Future<bool> isBiometricsEnabled() => localDataSource.getConfigValue(configKey: CONFIG_BIOMETRICS);
+
+  @override
+  Future<void> resetAccountBoundSettings() async {
+    await setFavourites(Favourites(favourites: const <Favourite>[]));
+    await setBiometrics(enabled: false);
+  }
 
   @override
   StreamSubscription<AppUpdate> listen(void Function(AppUpdate) callback) => _updateStream.listen(callback);

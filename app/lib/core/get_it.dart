@@ -117,6 +117,7 @@ Future<void> initializeGetIt() async {
       ));
   sl.registerLazySingleton<LogoutOfAccount>(() => LogoutOfAccount(
         accountRepository: sl(),
+        appSettingsRepository: sl(),
         navigationService: sl(),
         appConfig: sl(),
         dialogService: sl(),

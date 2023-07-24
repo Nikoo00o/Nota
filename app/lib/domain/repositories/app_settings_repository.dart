@@ -2,12 +2,16 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:app/core/enums/app_update.dart';
+import 'package:app/domain/entities/favourites.dart';
+import 'package:app/domain/usecases/account/change/logout_of_account.dart';
 import 'package:app/presentation/main/app/app_bloc.dart';
 import 'package:shared/core/enums/log_level.dart';
 import 'package:shared/core/utils/logger/log_message.dart';
 
-/// Contains all global app config options that the user can change which are not specific to the account (so they
-/// are only locally stored and  not on the server)!
+/// Contains all global app config options that the user can change which are not specific to the account, so the
+/// settings are only locally stored and not on the server
+///
+/// Most of the settings will will also not be reset when the account is changed (look at [resetAccountBoundSettings])!
 abstract class AppSettingsRepository {
   const AppSettingsRepository();
 
@@ -45,8 +49,27 @@ abstract class AppSettingsRepository {
 
   /// when navigating back from note editing
   Future<void> setAutoSave({required bool autoSave});
+
   /// when navigating back from note editing. default is false
   Future<bool> getAutoSave();
+
+  /// saves the favourite notes/folders of the user to the local storage (this will be reset when switching accounts!)
+  Future<void> setFavourites(Favourites favourites);
+
+  /// returns the favourite notes and folders of the current user (this will be reset when switching accounts!)
+  Future<Favourites> getFavourites();
+
+  /// changes biometrics to on/off. it will also be turned off when logging out
+  Future<void> setBiometrics({required bool enabled});
+
+  /// if biometric login is activated. (will be used instead of a password for every protected request except the
+  /// first login after starting the app)
+  Future<bool> isBiometricsEnabled();
+
+  /// This calls [setFavourites] and [setBiometrics] and is called by [LogoutOfAccount]
+  ///
+  /// So this clears the settings that are reset when the account changes
+  Future<void> resetAccountBoundSettings();
 
   /// Called from the [AppBloc] to listen to updates
   StreamSubscription<AppUpdate> listen(void Function(AppUpdate) callback);

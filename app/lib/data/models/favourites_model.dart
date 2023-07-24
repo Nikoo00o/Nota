@@ -13,8 +13,16 @@ class FavouritesModel extends Favourites implements Model {
   @override
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
-      JSON_FAVOURITES: favourites.map((Favourite fav) => favouriteToJson(fav)),
+      JSON_FAVOURITES: favourites.map((Favourite fav) => favouriteToJson(fav)).toList(),
     };
+  }
+
+  factory FavouritesModel.fromJson(Map<String, dynamic> json) {
+    final List<dynamic> favouritesDynList = json[JSON_FAVOURITES] as List<dynamic>;
+    final List<Favourite> favouritesList =
+        favouritesDynList.map<Favourite>((dynamic map) => favouriteFromJson(map as Map<String, dynamic>)).toList();
+
+    return FavouritesModel(favourites: favouritesList);
   }
 
   static Favourite favouriteFromJson(Map<String, dynamic> map) {
@@ -33,14 +41,6 @@ class FavouritesModel extends Favourites implements Model {
       return <String, dynamic>{JSON_PATH: favourite.path};
     }
     throw UnimplementedError();
-  }
-
-  factory FavouritesModel.fromJson(Map<String, dynamic> json) {
-    final List<dynamic> favouritesDynList = json[JSON_FAVOURITES] as List<dynamic>;
-    final List<Favourite> favouritesList =
-        favouritesDynList.map<Favourite>((dynamic map) => favouriteFromJson(map as Map<String, dynamic>)).toList();
-
-    return FavouritesModel(favourites: favouritesList);
   }
 
   factory FavouritesModel.fromFavourites(Favourites entity) {

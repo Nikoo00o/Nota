@@ -4,6 +4,8 @@ import 'dart:ui';
 
 import 'package:app/core/config/app_config.dart';
 import 'package:app/data/models/client_account_model.dart';
+import 'package:app/data/models/favourites_model.dart';
+import 'package:app/domain/entities/favourites.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared/core/config/shared_config.dart';
 import 'package:shared/core/enums/log_level.dart';
@@ -39,6 +41,8 @@ abstract class LocalDataSource {
   static const String LOG_LEVEL = "LOG_LEVEL";
 
   static const String LAST_NOTE_TRANSFER_TIME = "LAST_NOTE_TRANSFER_TIME";
+
+  static const String FAVOURITES = "FAVOURITES";
 
   /// Must be called first in the main function to initialize hive to the [AppConfig.baseFolder]
   /// of [getApplicationDocumentsDirectory]. This will also create the base folder if it does not exist yet!
@@ -93,7 +97,8 @@ abstract class LocalDataSource {
   /// Stores the usernames matched to the note info lists of old logged in accounts, so that the notes don't get lost
   Future<void> saveOldAccounts(Map<String, List<NoteInfo>> oldAccounts) async {
     final Map<String, List<NoteInfoModel>> mapped = oldAccounts.map((String key, List<NoteInfo> value) =>
-        MapEntry<String, List<NoteInfoModel>>(key, value.map((NoteInfo note) => NoteInfoModel.fromNoteInfo(note)).toList()));
+        MapEntry<String, List<NoteInfoModel>>(
+            key, value.map((NoteInfo note) => NoteInfoModel.fromNoteInfo(note)).toList()));
     await write(key: OLD_ACCOUNTS, value: jsonEncode(mapped), secure: false);
   }
 
@@ -179,6 +184,18 @@ abstract class LocalDataSource {
 
   Future<void> setLastNoteTransferTime({required DateTime timeStamp}) async {
     await write(key: LAST_NOTE_TRANSFER_TIME, value: timeStamp.millisecondsSinceEpoch.toString(), secure: false);
+  }
+
+  Future<Favourites> getFavourites() async {
+    final String? value = await read(key: FAVOURITES, secure: false);
+    if (value == null) {
+      return Favourites(favourites: const <Favourite>[]);
+    }
+    return FavouritesModel.fromJson(jsonDecode(value) as Map<String, dynamic>);
+  }
+
+  Future<void> setFavourites({required FavouritesModel favourites}) async {
+    await write(key: FAVOURITES, value: jsonEncode(favourites), secure: false);
   }
 
   /// Needs to be overridden in the subclasses.

@@ -1,6 +1,7 @@
 # Sensitive Data Files
 shared/lib/core/config/sensitive_data.dart
 server/lib/core/config/sensitive_data.dart
+app/lib/core/config/sensitive_data.dart
 server/notaRes/*
 !server/notaRes/.gitkeep
 
