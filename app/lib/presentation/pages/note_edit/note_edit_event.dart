@@ -44,3 +44,9 @@ final class NoteEditSearchStepped extends NoteEditEvent {
 final class NoteEditAppPaused extends NoteEditEvent {
   const NoteEditAppPaused();
 }
+
+final class NoteEditChangeFavourite extends NoteEditEvent {
+  final bool isFavourite;
+
+  const NoteEditChangeFavourite({required this.isFavourite});
+}

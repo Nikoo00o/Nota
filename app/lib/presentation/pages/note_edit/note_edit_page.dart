@@ -6,6 +6,7 @@ import 'package:app/presentation/pages/note_edit/note_edit_event.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_state.dart';
 import 'package:app/presentation/pages/note_edit/widgets/edit_app_bar.dart';
 import 'package:app/presentation/pages/note_edit/widgets/edit_bottom_bar.dart';
+import 'package:app/presentation/pages/note_edit/widgets/edit_favourite_toggle.dart';
 import 'package:app/presentation/pages/note_edit/widgets/edit_popup_menu.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:app/presentation/widgets/life_cycle_callback.dart';
@@ -74,6 +75,7 @@ final class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
               titleSpacing: 8,
               centerTitle: false,
               actions: const <Widget>[
+                EditFavouriteToggle(),
                 EditPopupMenu(),
               ],
             );

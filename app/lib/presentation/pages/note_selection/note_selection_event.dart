@@ -26,6 +26,7 @@ final class NoteSelectionStructureChanged extends NoteSelectionEvent {
 final class NoteSelectionNavigatedBack extends NoteSelectionEvent {
   /// The completer returns true if the current item is a top level folder and otherwise false(if it can navigate to parent)
   final Completer<bool>? completer;
+
   /// If this is true, then the search will not be cancelled and instead the other navigate logic will be executed.
   /// This is the case for the folder info item
   final bool ignoreSearch;
@@ -65,4 +66,10 @@ final class NoteSelectionChangeSearch extends NoteSelectionEvent {
   final SearchStatus searchStatus;
 
   const NoteSelectionChangeSearch({required this.searchStatus});
+}
+
+final class NoteSelectionChangeFavourite extends NoteSelectionEvent {
+  final bool isFavourite;
+
+  const NoteSelectionChangeFavourite({required this.isFavourite});
 }

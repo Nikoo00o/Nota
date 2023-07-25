@@ -8,6 +8,8 @@ import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/entities/structure_update_batch.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';
+import 'package:app/domain/usecases/favourites/change_favourite.dart';
+import 'package:app/domain/usecases/favourites/is_favourite.dart';
 import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
@@ -43,6 +45,8 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
   final LoadNoteBuffer loadNoteBuffer;
   final AppSettingsRepository appSettingsRepository;
   final GetCurrentStructureItem getCurrentStructureItem;
+  final IsFavourite isFavourite;
+  final ChangeFavourite changeFavourite;
 
   final GetStructureUpdatesStream getStructureUpdatesStream;
 
@@ -63,6 +67,8 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
   /// calculated from the loaded note to test if the user changed something
   List<int>? noteHash;
 
+  bool favourite = false;
+
   NoteEditBloc({
     required this.navigationService,
     required this.startMoveStructureItem,
@@ -76,6 +82,8 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
     required this.getStructureUpdatesStream,
     required this.loadNoteContent,
     required this.changeCurrentStructureItem,
+    required this.isFavourite,
+    required this.changeFavourite,
   }) : super(initialState: const NoteEditState());
 
   @override
@@ -88,6 +96,7 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
     on<NoteEditInputSaved>(_handleInputSaved);
     on<NoteEditSearchStepped>(_handleSearchStep);
     on<NoteEditAppPaused>(_handleAppPaused);
+    on<NoteEditChangeFavourite>(_handleChangeFavourite);
   }
 
   @override
@@ -150,6 +159,7 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
           inputController.text = utf8.decode(data);
         }
       }
+      favourite = await isFavourite.call(IsFavouriteParams.fromItem(currentItem));
       emit(_buildState());
     } else {
       navigationService.navigateTo(Routes.note_selection); // will be called automatically from _handleNavigatedBack below
@@ -289,6 +299,12 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
     await saveNoteBuffer(const SaveNoteBufferParams(content: null));
   }
 
+  Future<void> _handleChangeFavourite(NoteEditChangeFavourite event, Emitter<NoteEditState> emit) async {
+    favourite = event.isFavourite;
+    await changeFavourite.call(ChangeFavouriteParams(isFavourite: favourite, item: currentItem));
+    emit(_buildState());
+  }
+
   /// only if [currentItem] is [StructureNote]
   NoteEditState _buildState() {
     if (currentItem is StructureNote) {
@@ -298,6 +314,7 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
         currentSearchPosition: inputController.currentSearchPosition.toString(),
         searchPositionSize: inputController.searchPositionAmount.toString(),
         searchLength: inputController.searchSize,
+        isFavourite: favourite,
       );
     } else {
       return const NoteEditState();

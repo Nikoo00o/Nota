@@ -9,6 +9,7 @@ import 'package:app/presentation/pages/note_selection/note_selection_event.dart'
 import 'package:app/presentation/pages/note_selection/note_selection_state.dart';
 import 'package:app/presentation/pages/note_selection/widgets/current_folder_info.dart';
 import 'package:app/presentation/pages/note_selection/widgets/selection_bottom_bar.dart';
+import 'package:app/presentation/pages/note_selection/widgets/selection_favourite_toggle.dart';
 import 'package:app/presentation/pages/note_selection/widgets/selection_popup_menu.dart';
 import 'package:app/presentation/pages/note_selection/widgets/selection_search_bar.dart';
 import 'package:app/presentation/pages/note_selection/widgets/structure_item_box.dart';
@@ -74,6 +75,7 @@ final class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionS
       centerTitle: false,
       titleSpacing: 8,
       actions: const <Widget>[
+        SelectionFavouriteToggle(),
         SelectionPopupMenu(),
       ],
     );

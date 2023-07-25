@@ -139,12 +139,7 @@ final class MenuBloc extends PageBloc<MenuEvent, MenuState> {
 
   Future<void> _topLevelNoteFolderClicked(MenuItemClicked event, Emitter<MenuState> emit) async {
     await navigateToItem.call(NavigateToItemParamsTopLevelName(folderName: currentPageTranslationKey));
-    if (navigationService.currentRoute != Routes.note_selection) {
-      // for performance, if already on the note selection page, the event stream will handle the updating
-      navigationService.navigateTo(Routes.note_selection);
-    } else {
-      Navigator.of(drawerKey.currentContext!).pop();
-    }
+    _navigateToNoteSelection();
   }
 
   Future<void> _userMenuEntryClicked(MenuItemClicked event, Emitter<MenuState> emit) async {
@@ -153,6 +148,16 @@ final class MenuBloc extends PageBloc<MenuEvent, MenuState> {
       await navigateToItem.call(NavigateToItemParamsExact.note(data.id));
     } else if (data is FolderFavourite) {
       await navigateToItem.call(NavigateToItemParamsExact.folder(data.path));
+    }
+    _navigateToNoteSelection();
+  }
+
+  void _navigateToNoteSelection(){
+    if (navigationService.currentRoute != Routes.note_selection) {
+      // for performance, if already on the note selection page, the event stream will handle the updating
+      navigationService.navigateTo(Routes.note_selection);
+    } else {
+      Navigator.of(drawerKey.currentContext!).pop();
     }
   }
 

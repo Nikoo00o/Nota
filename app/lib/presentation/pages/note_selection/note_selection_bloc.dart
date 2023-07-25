@@ -7,6 +7,8 @@ import 'package:app/core/utils/input_validator.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_update_batch.dart';
+import 'package:app/domain/usecases/favourites/change_favourite.dart';
+import 'package:app/domain/usecases/favourites/is_favourite.dart';
 import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/create_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
@@ -50,6 +52,8 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
 
   final GetCurrentStructureItem getCurrentStructureItem;
   final GetStructureUpdatesStream getStructureUpdatesStream;
+  final IsFavourite isFavourite;
+  final ChangeFavourite changeFavourite;
 
   final ScrollController scrollController = ScrollController();
   final FocusNode searchFocus = FocusNode();
@@ -69,6 +73,11 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
 
   late DateTime lastNoteTransferTime;
 
+  bool favourite = false;
+
+  // todo: maybe in the future make this bloc leaner (and put some of the selection and edit stuff together like the
+  //  favourite handling, etc)
+
   NoteSelectionBloc({
     required this.navigationService,
     required this.dialogService,
@@ -83,6 +92,8 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
     required this.loadAllStructureContent,
     required this.getCurrentStructureItem,
     required this.getStructureUpdatesStream,
+    required this.isFavourite,
+    required this.changeFavourite,
   }) : super(initialState: const NoteSelectionState());
 
   @override
@@ -97,6 +108,7 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
     on<NoteSelectionServerSynced>(_handleServerSync);
     on<NoteSelectionChangedMove>(_handleChangeMove);
     on<NoteSelectionChangeSearch>(_handleChangeSearch);
+    on<NoteSelectionChangeFavourite>(_handleChangeFavourite);
   }
 
   @override
@@ -128,6 +140,7 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
     currentItem = event.newCurrentItem;
     Logger.verbose("handling structure change with new item ${currentItem!.path}");
     if (currentItem is StructureFolder) {
+      favourite = await isFavourite.call(IsFavouriteParams.fromItem(currentItem!));
       emit(_buildState());
       if (lastItem != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -309,6 +322,12 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
     emit(_buildState());
   }
 
+  Future<void> _handleChangeFavourite(NoteSelectionChangeFavourite event, Emitter<NoteSelectionState> emit) async {
+    favourite = event.isFavourite;
+    await changeFavourite.call(ChangeFavouriteParams(isFavourite: favourite, item: currentItem!));
+    emit(_buildState());
+  }
+
   /// only if [currentItem] is [StructureFolder]
   NoteSelectionState _buildState() {
     if (currentItem is StructureFolder) {
@@ -319,6 +338,7 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
         searchInput: containsSearch ? searchController.text : null,
         noteContentMap: noteContentMap,
         lastNoteTransferTime: lastNoteTransferTime,
+        isFavourite: favourite,
       );
     } else {
       return const NoteSelectionState();

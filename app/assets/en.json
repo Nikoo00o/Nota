@@ -47,6 +47,7 @@
   "dialog.input.label": "Enter Text",
   "dialog.input.label.number": "Enter Number",
   "dialog.logged.out": "You were logged out of your Account",
+  "widget.favourite": "Favourite",
   "page.app.should.close": "Should the App be terminated?",
   "page.login.title.create": "Account Creation",
   "page.login.title.remote.login": "Remote Login",

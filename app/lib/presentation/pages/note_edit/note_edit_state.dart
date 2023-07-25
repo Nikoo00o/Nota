@@ -13,17 +13,22 @@ final class NoteEditStateInitialised extends NoteEditState {
   /// This is only needed to rebuild the state
   final int searchLength;
 
+  /// if this is currently marked as favourite
+  final bool isFavourite;
+
   NoteEditStateInitialised({
     required this.currentNote,
     required this.isEditing,
     required this.currentSearchPosition,
     required this.searchPositionSize,
     required this.searchLength,
+    required this.isFavourite,
   }) : super(<String, Object?>{
           "currentNote": currentNote,
           "isEditing": isEditing,
           "currentSearchPosition": currentSearchPosition,
           "searchPositionSize": searchPositionSize,
           "searchLength": searchLength,
+          "isFavourite": isFavourite,
         });
 }
