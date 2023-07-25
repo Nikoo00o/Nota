@@ -189,7 +189,7 @@ abstract class LocalDataSource {
   Future<Favourites> getFavourites() async {
     final String? value = await read(key: FAVOURITES, secure: false);
     if (value == null) {
-      return Favourites(favourites: const <Favourite>[]);
+      return Favourites(favourites: List<Favourite>.empty(growable: true));
     }
     return FavouritesModel.fromJson(jsonDecode(value) as Map<String, dynamic>);
   }

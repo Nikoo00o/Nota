@@ -19,7 +19,7 @@ import 'package:shared/domain/usecases/usecase.dart';
 
 import 'helper/app_test_helper.dart';
 
-const int _serverPort = 9195; // also needs to be a different port for each test file. The app tests dont have to care
+const int _serverPort = 9196; // also needs to be a different port for each test file. The app tests dont have to care
 // about the server errors!
 
 void main() {

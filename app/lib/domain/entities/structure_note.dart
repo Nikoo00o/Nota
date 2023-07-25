@@ -6,7 +6,9 @@ import 'package:shared/domain/entities/note_info.dart';
 ///
 /// The decrypted name of a note is the [path] and note the [name]!
 ///
-/// The [id] and [lastModified] are the same as in [NoteInfo]
+/// The [id] and [lastModified] are the same as in [NoteInfo].
+///
+/// Here a note is deleted when it is [null] (removed from the structure)!
 class StructureNote extends StructureItem {
   /// The noteId
   final int id;

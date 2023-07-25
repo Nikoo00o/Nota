@@ -100,7 +100,7 @@ class AppSettingsRepositoryImpl extends AppSettingsRepository {
 
   @override
   Future<void> resetAccountBoundSettings() async {
-    await setFavourites(Favourites(favourites: const <Favourite>[]));
+    await setFavourites(Favourites(favourites: List<Favourite>.empty(growable: true)));
     await setBiometrics(enabled: false);
   }
 

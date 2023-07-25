@@ -32,8 +32,10 @@
 </p>
 
 - Additionally on the top right you can open a menu to rename, delete, or move notes and folders except the top level folder 
-- You can also open the top left menu to navigate to another view of the notes which shows all notes without folders 
-  sorted by the latest edit 
+- You can also open the top left menu to navigate to other views of the notes via the quick access menu
+  - the "Root Folder" view shows all of your notes with the folder structure 
+  - the "Recent Notes" view which shows all notes without folders sorted by the latest edit
+  - other than that you can also mark your own notes, or folders as favourites, so they can also be accessed here
 - And of course the app also has some settings like for example activating the dark mode, but also an auto save and an 
   auto login feature 
 

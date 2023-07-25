@@ -23,6 +23,10 @@ import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/account/login/get_required_login_status.dart';
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
 import 'package:app/domain/usecases/account/save_account.dart';
+import 'package:app/domain/usecases/favourites/change_favourite.dart';
+import 'package:app/domain/usecases/favourites/get_favourites.dart';
+import 'package:app/domain/usecases/favourites/is_favourite.dart';
+import 'package:app/domain/usecases/favourites/update_favourite.dart';
 import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/create_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
@@ -149,6 +153,7 @@ Future<void> initializeGetIt() async {
         saveAccount: sl(),
         dialogService: sl(),
         fetchNewNoteStructure: sl(),
+        updateFavourite: sl(),
       ));
 
   sl.registerLazySingleton<FetchNewNoteStructure>(() => FetchNewNoteStructure(
@@ -227,6 +232,21 @@ Future<void> initializeGetIt() async {
       ));
   sl.registerLazySingleton<GetLastNoteTransferTime>(() => GetLastNoteTransferTime(
         localDataSource: sl(),
+      ));
+  sl.registerLazySingleton<ChangeFavourite>(() => ChangeFavourite(
+        appSettingsRepository: sl(),
+      ));
+  sl.registerLazySingleton<GetFavourites>(() => GetFavourites(
+        appSettingsRepository: sl(),
+        noteStructureRepository: sl(),
+        fetchNewNoteStructure: sl(),
+      ));
+  sl.registerLazySingleton<IsFavourite>(() => IsFavourite(
+        appSettingsRepository: sl(),
+      ));
+  sl.registerLazySingleton<UpdateFavourite>(() => UpdateFavourite(
+        appSettingsRepository: sl(),
+        isFavourite: sl(),
       ));
 
   // services

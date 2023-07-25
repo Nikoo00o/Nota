@@ -5,6 +5,7 @@ import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/repositories/note_transfer_repository.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/save_account.dart';
+import 'package:app/domain/usecases/favourites/update_favourite.dart';
 import 'package:app/domain/usecases/note_transfer/get_last_note_transfer_time.dart';
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
@@ -36,6 +37,7 @@ class TransferNotes extends UseCase<bool, NoParams> {
   final NoteTransferRepository noteTransferRepository;
   final DialogService dialogService;
   final FetchNewNoteStructure fetchNewNoteStructure;
+  final UpdateFavourite updateFavourite;
 
   const TransferNotes({
     required this.getLoggedInAccount,
@@ -43,6 +45,7 @@ class TransferNotes extends UseCase<bool, NoParams> {
     required this.noteTransferRepository,
     required this.dialogService,
     required this.fetchNewNoteStructure,
+    required this.updateFavourite,
   });
 
   @override
@@ -131,7 +134,8 @@ class TransferNotes extends UseCase<bool, NoParams> {
 
       if (newId != null) {
         await noteTransferRepository.renameNote(oldNoteId: oldId, newNoteId: newId);
-        // todo: change favourite: ...
+        await updateFavourite.call(UpdateFavouriteParams(fromId: oldId, toId: newId)); // update the favourite status
+        // of a note if its id changed! (removing favourites is done automatically when receiving the new favourites)
       }
     }
   }
