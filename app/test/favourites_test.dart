@@ -83,6 +83,8 @@ void main() {
 
       favourites = await sl<GetFavourites>().call(const NoParams());
       expect(favourites.favourites.length == 2, true, reason: "now two favourites");
+      expect(favourites.favourites[0].name == "dir1", true, reason: "first fav is dir1");
+      expect(favourites.favourites[1].name == "a_third", true, reason: "second fav is a_third");
 
       await sl<ChangeFavourite>().call(ChangeFavouriteParams(isFavourite: false, item: dir1));
       await sl<ChangeFavourite>().call(ChangeFavouriteParams(isFavourite: false, item: note1));

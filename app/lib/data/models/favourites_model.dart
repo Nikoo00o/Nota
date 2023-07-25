@@ -3,6 +3,7 @@ import 'package:shared/data/models/model.dart';
 
 class FavouritesModel extends Favourites implements Model {
   static const String JSON_FAVOURITES = "JSON_FAVOURITES";
+  static const String JSON_NAME = "JSON_NAME";
   static const String JSON_PATH = "JSON_PATH";
   static const String JSON_ID = "JSON_ID";
 
@@ -27,18 +28,18 @@ class FavouritesModel extends Favourites implements Model {
 
   static Favourite favouriteFromJson(Map<String, dynamic> map) {
     if (map.containsKey(JSON_ID)) {
-      return NoteFavourite(id: map[JSON_ID] as int);
+      return NoteFavourite(name: map[JSON_NAME] as String, id: map[JSON_ID] as int);
     } else if (map.containsKey(JSON_PATH)) {
-      return FolderFavourite(path: map[JSON_PATH] as String);
+      return FolderFavourite(name: map[JSON_NAME] as String, path: map[JSON_PATH] as String);
     }
     throw UnimplementedError();
   }
 
   static Map<String, dynamic> favouriteToJson(Favourite favourite) {
     if (favourite is NoteFavourite) {
-      return <String, dynamic>{JSON_ID: favourite.id};
+      return <String, dynamic>{JSON_NAME: favourite.name, JSON_ID: favourite.id};
     } else if (favourite is FolderFavourite) {
-      return <String, dynamic>{JSON_PATH: favourite.path};
+      return <String, dynamic>{JSON_NAME: favourite.name, JSON_PATH: favourite.path};
     }
     throw UnimplementedError();
   }

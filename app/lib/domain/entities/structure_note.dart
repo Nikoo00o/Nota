@@ -9,6 +9,8 @@ import 'package:shared/domain/entities/note_info.dart';
 /// The [id] and [lastModified] are the same as in [NoteInfo].
 ///
 /// Here a note is deleted when it is [null] (removed from the structure)!
+///
+/// A note is uniquely identified by its [id], but the [name] might be shared across multiple notes!
 class StructureNote extends StructureItem {
   /// The noteId
   final int id;

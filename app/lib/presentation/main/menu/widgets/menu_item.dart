@@ -1,3 +1,4 @@
+import 'package:app/domain/entities/favourites.dart';
 import 'package:app/presentation/main/menu/menu_bloc.dart';
 import 'package:app/presentation/main/menu/menu_event.dart';
 import 'package:app/presentation/main/menu/menu_state.dart';
@@ -10,11 +11,23 @@ final class MenuItem extends BlocPageChild<MenuBloc, MenuState> {
   final List<String>? pageTitleKeyParams;
   final double iconSize;
 
+  /// this is used for the custom user menu entries to store the [Favourite] object used for identification!
+  final Object? additionalData;
+
   const MenuItem({
     required this.pageTitleKey,
     this.pageTitleKeyParams,
     this.iconSize = 30,
+    this.additionalData,
   });
+
+  factory MenuItem.fromFavourite(Favourite favourite) {
+    return MenuItem(
+      pageTitleKey: "empty.param.1",
+      pageTitleKeyParams: <String>[favourite.name],
+      additionalData: favourite,
+    );
+  }
 
   @override
   Widget buildWithState(BuildContext context, MenuState state) {
@@ -39,12 +52,14 @@ final class MenuItem extends BlocPageChild<MenuBloc, MenuState> {
           currentBloc(context).add(MenuItemClicked(
             targetPageTranslationKey: pageTitleKey,
             targetPageTranslationKeyParams: pageTitleKeyParams,
+            additionalData: additionalData,
           ));
         },
       ),
     );
   }
 
+  // todo: important: this does not show the custom user entries highlighted
   bool _isCurrentPage(MenuState state) {
     return state is MenuStateInitialised &&
         state.currentPageTranslationKey == pageTitleKey &&
@@ -89,9 +104,12 @@ final class MenuItem extends BlocPageChild<MenuBloc, MenuState> {
 
   /// user generated menu entries that do not have a translation key
   IconData? _getCustomUserIcon() {
-    switch (pageTitleKeyParams) {
-      default:
-        return null;
+    if (additionalData is NoteFavourite) {
+      return Icons.folder;
+    } else if (additionalData is FolderFavourite) {
+      return Icons.note;
     }
+
+    return null;
   }
 }

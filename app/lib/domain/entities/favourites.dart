@@ -18,9 +18,9 @@ class Favourites extends Entity {
 
   void addFavourite(StructureItem item) {
     if (item is StructureFolder) {
-      _favourites.add(FolderFavourite(path: item.path));
+      _favourites.add(FolderFavourite(name: item.name, path: item.path));
     } else if (item is StructureNote) {
-      _favourites.add(NoteFavourite(id: item.id));
+      _favourites.add(NoteFavourite(name: item.name, id: item.id));
     }
   }
 
@@ -43,7 +43,7 @@ class Favourites extends Entity {
     for (int i = 0; i < _favourites.length; ++i) {
       final Favourite favourite = _favourites.elementAt(i);
       if (favourite is NoteFavourite && favourite.id == oldId) {
-        _favourites[i] = NoteFavourite(id: newId);
+        _favourites[i] = NoteFavourite(name: favourite.name, id: newId);
         found = true;
       }
     }
@@ -73,7 +73,9 @@ class Favourites extends Entity {
 }
 
 sealed class Favourite extends Entity {
-  const Favourite(super.properties);
+  final String name;
+
+  const Favourite(super.properties, {required this.name});
 }
 
 final class FolderFavourite extends Favourite {
@@ -81,7 +83,11 @@ final class FolderFavourite extends Favourite {
 
   FolderFavourite({
     required this.path,
-  }) : super(<String, dynamic>{"path": path});
+    required super.name,
+  }) : super(<String, dynamic>{
+          "name": name,
+          "path": path,
+        });
 }
 
 final class NoteFavourite extends Favourite {
@@ -89,5 +95,9 @@ final class NoteFavourite extends Favourite {
 
   NoteFavourite({
     required this.id,
-  }) : super(<String, dynamic>{"id": id});
+    required super.name,
+  }) : super(<String, dynamic>{
+          "name": name,
+          "id": id,
+        });
 }

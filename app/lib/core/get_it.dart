@@ -319,6 +319,7 @@ Future<void> initializeGetIt() async {
         activateLockscreen: sl(),
         dialogService: sl(),
         navigateToItem: sl(),
+        getFavourites: sl(),
       ));
   sl.registerFactory<LogsBloc>(() => LogsBloc(
         appSettingsRepository: sl(),

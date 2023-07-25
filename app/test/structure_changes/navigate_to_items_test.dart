@@ -11,6 +11,8 @@ import 'package:app/domain/usecases/note_structure/navigation/get_structure_upda
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
 import '../helper/app_test_helper.dart';
@@ -42,7 +44,8 @@ void main() {
     });
 
     test("navigating to root top level folder root by name", () async {
-      await sl<NavigateToItem>().call(NavigateToItemParamsTopLevelName(folderName: StructureItem.rootFolderNames.first));
+      await sl<NavigateToItem>()
+          .call(NavigateToItemParamsTopLevelName(folderName: StructureItem.rootFolderNames.first));
       expect(sl<NoteStructureRepository>().currentItem, sl<NoteStructureRepository>().root);
     });
 
@@ -68,6 +71,28 @@ void main() {
       sl<NoteStructureRepository>().currentItem = sl<NoteStructureRepository>().root!.getChild(0);
       await sl<NavigateToItem>().call(const NavigateToItemParamsParent());
       expect(sl<NoteStructureRepository>().currentItem, sl<NoteStructureRepository>().root);
+    });
+
+    test("navigating to exact folder", () async {
+      await sl<NavigateToItem>().call(const NavigateToItemParamsExact.folder("dir1/dir3"));
+      expect(sl<NoteStructureRepository>().currentItem?.name == "dir3", true);
+    });
+
+    test("navigating to exact note", () async {
+      await sl<NavigateToItem>().call(const NavigateToItemParamsExact.note(-4));
+      expect(sl<NoteStructureRepository>().currentItem?.name == "a_third", true);
+    });
+
+    test("navigating to invalid note", () async {
+      expect(() async {
+        await sl<NavigateToItem>().call(const NavigateToItemParamsExact.note(-100));
+      }, throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.INVALID_PARAMS)));
+    });
+
+    test("navigating to invalid folder", () async {
+      expect(() async {
+        await sl<NavigateToItem>().call(const NavigateToItemParamsExact.folder("dir1/dir1000"));
+      }, throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.INVALID_PARAMS)));
     });
 
     test("navigating should also update listeners", () async {
@@ -108,7 +133,8 @@ void main() {
       expect(listenerCallAmount, 3, reason: "listener1 should have only been called 3 times");
     });
 
-    test("getting top level parents without the move selection should contain all top level folders except move", () async {
+    test("getting top level parents without the move selection should contain all top level folders except move",
+        () async {
       final Map<TranslationString, StructureFolder> folders =
           await sl<GetStructureFolders>().call(const GetStructureFoldersParams(includeMoveFolder: false));
       expect(folders[TranslationString(StructureItem.rootFolderNames.first)]?.isRoot, true, reason: "root");

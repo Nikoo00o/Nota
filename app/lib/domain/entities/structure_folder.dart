@@ -5,6 +5,7 @@ import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
+/// A folder is uniquely identified by its full [path]!
 class StructureFolder extends StructureItem {
   /// The folders and files within this folder.
   ///

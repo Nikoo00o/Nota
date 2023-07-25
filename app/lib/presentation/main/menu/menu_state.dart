@@ -1,3 +1,4 @@
+import 'package:app/domain/entities/favourites.dart';
 import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/presentation/widgets/base_pages/page_state.dart';
 
@@ -11,6 +12,7 @@ final class MenuStateInitialised extends MenuState {
   final List<String>? currentPageTranslationKeyParams;
   final bool showDeveloperOptions;
   final List<TranslationString> topLevelFolders;
+  final Favourites userMenuEntries;
 
   MenuStateInitialised({
     required this.username,
@@ -18,11 +20,13 @@ final class MenuStateInitialised extends MenuState {
     this.currentPageTranslationKeyParams,
     required this.showDeveloperOptions,
     required this.topLevelFolders,
+    required this.userMenuEntries,
   }) : super(<String, Object?>{
           "username": username,
           "currentPageTranslationKey": currentPageTranslationKey,
           "currentPageTranslationKeyParams": currentPageTranslationKeyParams,
           "showDeveloperOptions": showDeveloperOptions,
           "topLevelFolders": topLevelFolders,
+          "userMenuEntries": userMenuEntries,
         });
 }

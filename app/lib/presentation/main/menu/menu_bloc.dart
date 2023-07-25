@@ -1,11 +1,13 @@
 import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/routes.dart';
+import 'package:app/domain/entities/favourites.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/domain/usecases/account/change/activate_lock_screen.dart';
 import 'package:app/domain/usecases/account/change/change_auto_login.dart';
 import 'package:app/domain/usecases/account/change/logout_of_account.dart';
 import 'package:app/domain/usecases/account/get_user_name.dart';
+import 'package:app/domain/usecases/favourites/get_favourites.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_folders.dart';
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
@@ -30,6 +32,7 @@ final class MenuBloc extends PageBloc<MenuEvent, MenuState> {
   final ChangeAutoLogin changeAutoLogin;
   final ActivateLockscreen activateLockscreen;
   final LogoutOfAccount logoutOfAccount;
+  final GetFavourites getFavourites;
   final AppConfig appConfig;
   late String? username;
 
@@ -49,6 +52,8 @@ final class MenuBloc extends PageBloc<MenuEvent, MenuState> {
   /// key for closing the menu here
   final GlobalKey drawerKey = GlobalKey();
 
+  late Favourites userMenuEntries;
+
   MenuBloc({
     required this.getUsername,
     required this.getStructureFolders,
@@ -59,6 +64,7 @@ final class MenuBloc extends PageBloc<MenuEvent, MenuState> {
     required this.changeAutoLogin,
     required this.activateLockscreen,
     required this.logoutOfAccount,
+    required this.getFavourites,
   }) : super(initialState: const MenuState());
 
   @override
@@ -73,6 +79,7 @@ final class MenuBloc extends PageBloc<MenuEvent, MenuState> {
     currentPageTranslationKey = event.currentPageTranslationKey;
     currentPageTranslationKeyParams = event.currentPageTranslationKeyParams;
     noteFolders = await getStructureFolders.call(const GetStructureFoldersParams(includeMoveFolder: false));
+    userMenuEntries = await getFavourites.call(const NoParams());
     emit(_buildState());
   }
 
@@ -140,7 +147,14 @@ final class MenuBloc extends PageBloc<MenuEvent, MenuState> {
     }
   }
 
-  Future<void> _userMenuEntryClicked(MenuItemClicked event, Emitter<MenuState> emit) async {}
+  Future<void> _userMenuEntryClicked(MenuItemClicked event, Emitter<MenuState> emit) async {
+    final Object? data = event.additionalData;
+    if (data is NoteFavourite) {
+      await navigateToItem.call(NavigateToItemParamsExact.note(data.id));
+    } else if (data is FolderFavourite) {
+      await navigateToItem.call(NavigateToItemParamsExact.folder(data.path));
+    }
+  }
 
   MenuState _buildState() {
     return MenuStateInitialised(
@@ -149,6 +163,7 @@ final class MenuBloc extends PageBloc<MenuEvent, MenuState> {
       currentPageTranslationKeyParams: currentPageTranslationKeyParams,
       showDeveloperOptions: appConfig.showDeveloperOptions,
       topLevelFolders: noteFolders.keys.toList(),
+      userMenuEntries: userMenuEntries,
     );
   }
 }
