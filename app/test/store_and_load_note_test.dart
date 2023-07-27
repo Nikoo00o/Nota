@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/client_account.dart';
+import 'package:app/domain/entities/note_content.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
 import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/enums/note_type.dart';
@@ -27,22 +29,59 @@ void main() {
     await testCleanup();
   });
 
+  group("note content tests: ", () {
+    test("raw text file", () async {
+      const String data = "test ü";
+      final NoteContentRawText saved =
+          NoteContent.saveFile(decryptedContent: utf8.encode(data), noteType: NoteType.RAW_TEXT) as NoteContentRawText;
+      expect(saved.version, NoteContentRawText.RAW_TEXT_VERSION, reason: "save version match");
+      expect(saved.headerSize, NoteContentRawText.headerSizeIncludingText, reason: "save header size match");
+      expect(saved.textSize, utf8.encode(data).length, reason: "save text size match");
+      expect(saved.textSize, saved.text.length, reason: "text size should also be same as length of text");
+      expect(saved.fullBytes.length, saved.textSize + saved.headerSize, reason: "bytes should be text + header big");
+      expect(utf8.decode(saved.text), data, reason: "save content match");
+
+      final NoteContentRawText loaded =
+          NoteContent.loadFile(bytes: saved.fullBytes, noteType: NoteType.RAW_TEXT) as NoteContentRawText;
+      expect(loaded.version, NoteContentRawText.RAW_TEXT_VERSION, reason: "load version match");
+      expect(loaded.headerSize, NoteContentRawText.headerSizeIncludingText, reason: "load header size match");
+      expect(loaded.textSize, utf8.encode(data).length, reason: "load text size match");
+      expect(utf8.decode(loaded.text), data, reason: "load content match");
+
+      expect(listEquals(saved.fullBytes, loaded.fullBytes), true, reason: "bytes of both should match");
+    });
+
+    test("empty raw text file", () async {
+      final NoteContentRawText saved =
+          NoteContent.saveFile(decryptedContent: <int>[], noteType: NoteType.RAW_TEXT) as NoteContentRawText;
+      expect(saved.isEmpty, true, reason: "save is empty");
+      expect(saved.fullBytes.isEmpty, false, reason: "save bytes are still not empty");
+      expect(saved.headerSize, NoteContentRawText.headerSizeIncludingText, reason: "save header size match");
+
+      final NoteContentRawText loaded =
+          NoteContent.loadFile(bytes: saved.fullBytes, noteType: NoteType.RAW_TEXT) as NoteContentRawText;
+      expect(loaded.isEmpty, true, reason: "load is empty");
+      expect(loaded.fullBytes.isEmpty, false, reason: "load bytes are still not empty");
+      expect(loaded.headerSize, NoteContentRawText.headerSizeIncludingText, reason: "load header size match");
+    });
+  });
+
   group("Store and load note use cases: ", () {
     test("Load note with no logged in account should not work", () async {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
       expect(() async {
         await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
-            noteId: -1,
-            decryptedName: "name",
-            decryptedContent: Uint8List.fromList(utf8.encode("test")),
-            noteType: NoteType.RAW_TEXT));
+          noteId: -1,
+          decryptedName: "name",
+          decryptedContent: NoteContent.saveFile(decryptedContent: utf8.encode("test"), noteType: NoteType.RAW_TEXT),
+        ));
       }, throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.ACCOUNT_WRONG_PASSWORD)));
     });
 
     test("Store note with no logged in account should not work", () async {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
       expect(() async {
-        await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: -1));
+        await loadNoteBytes(noteId: -1, noteType: NoteType.RAW_TEXT);
       }, throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.ACCOUNT_WRONG_PASSWORD)));
     });
 
@@ -50,7 +89,7 @@ void main() {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
       await loginToTestAccount();
       expect(() async {
-        await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: -1));
+        await loadNoteBytes(noteId: -1, noteType: NoteType.RAW_TEXT);
       }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)));
     });
 
@@ -58,12 +97,12 @@ void main() {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
       await loginToTestAccount();
       await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
-          noteId: -1,
-          decryptedName: "name",
-          decryptedContent: Uint8List.fromList(utf8.encode("test")),
-          noteType: NoteType.RAW_TEXT));
+        noteId: -1,
+        decryptedName: "name",
+        decryptedContent: NoteContent.saveFile(decryptedContent: utf8.encode("test"), noteType: NoteType.RAW_TEXT),
+      ));
       expect(() async {
-        await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: -100));
+        await loadNoteBytes(noteId: -100, noteType: NoteType.RAW_TEXT);
       }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)));
     });
 
@@ -73,7 +112,10 @@ void main() {
 
       expect(() async {
         await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
-            noteId: -1, decryptedName: "", decryptedContent: Uint8List(0), noteType: NoteType.RAW_TEXT));
+          noteId: -1,
+          decryptedName: "",
+          decryptedContent: NoteContent.saveFile(decryptedContent: <int>[], noteType: NoteType.RAW_TEXT),
+        ));
       }, throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.INVALID_PARAMS)));
     });
 
@@ -81,11 +123,11 @@ void main() {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
       await loginToTestAccount();
       await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
-          noteId: -1,
-          decryptedName: "name",
-          decryptedContent: Uint8List.fromList(utf8.encode("test")),
-          noteType: NoteType.RAW_TEXT));
-      final List<int> bytes = await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: -1));
+        noteId: -1,
+        decryptedName: "name",
+        decryptedContent: NoteContent.saveFile(decryptedContent: utf8.encode("test"), noteType: NoteType.RAW_TEXT),
+      ));
+      final List<int> bytes = await loadNoteBytes(noteId: -1, noteType: NoteType.RAW_TEXT);
       expect(utf8.decode(bytes), "test", reason: "bytes should match");
     });
 
@@ -93,16 +135,16 @@ void main() {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
       await loginToTestAccount();
       await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
-          noteId: -1,
-          decryptedName: "name",
-          decryptedContent: Uint8List.fromList(utf8.encode("test")),
-          noteType: NoteType.RAW_TEXT));
+        noteId: -1,
+        decryptedName: "name",
+        decryptedContent: NoteContent.saveFile(decryptedContent: utf8.encode("test"), noteType: NoteType.RAW_TEXT),
+      ));
       expect(() async {
         await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
-            noteId: -1,
-            decryptedName: "name",
-            decryptedContent: Uint8List.fromList(utf8.encode("test")),
-            noteType: NoteType.RAW_TEXT));
+          noteId: -1,
+          decryptedName: "name",
+          decryptedContent: NoteContent.saveFile(decryptedContent: utf8.encode("test"), noteType: NoteType.RAW_TEXT),
+        ));
       }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)));
     });
 
@@ -111,7 +153,10 @@ void main() {
       await loginToTestAccount();
       expect(() async {
         await sl<StoreNoteEncrypted>().call(ChangeNoteEncryptedParams(
-            noteId: -1, decryptedName: "name", decryptedContent: Uint8List.fromList(utf8.encode("test"))));
+          noteId: -1,
+          decryptedName: "name",
+          decryptedContent: NoteContent.saveFile(decryptedContent: utf8.encode("test"), noteType: NoteType.RAW_TEXT),
+        ));
       }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)));
     });
 
@@ -127,17 +172,17 @@ void main() {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
       await loginToTestAccount();
       await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
-          noteId: -1,
-          decryptedName: "name",
-          decryptedContent: Uint8List.fromList(utf8.encode("test")),
-          noteType: NoteType.RAW_TEXT));
+        noteId: -1,
+        decryptedName: "name",
+        decryptedContent: NoteContent.saveFile(decryptedContent: utf8.encode("test"), noteType: NoteType.RAW_TEXT),
+      ));
       await sl<StoreNoteEncrypted>().call(DeleteNoteEncryptedParams(noteId: -1));
 
       final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
       expect(account.noteInfoList.first.isDeleted, true, reason: "note should be marked as deleted");
 
       expect(() async {
-        await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: -1));
+        await loadNoteBytes(noteId: -1, noteType: NoteType.RAW_TEXT);
       }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)));
     });
 
@@ -145,16 +190,19 @@ void main() {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
       await loginToTestAccount();
       await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
-          noteId: -1,
-          decryptedName: "name",
-          decryptedContent: Uint8List.fromList(utf8.encode("test")),
-          noteType: NoteType.RAW_TEXT));
+        noteId: -1,
+        decryptedName: "name",
+        decryptedContent: NoteContent.saveFile(decryptedContent: utf8.encode("test"), noteType: NoteType.RAW_TEXT),
+      ));
 
       await sl<StoreNoteEncrypted>().call(ChangeNoteEncryptedParams(
-          noteId: -1, decryptedName: "diff", decryptedContent: Uint8List.fromList(utf8.encode("bytes"))));
+        noteId: -1,
+        decryptedName: "diff",
+        decryptedContent: NoteContent.saveFile(decryptedContent: utf8.encode("bytes"), noteType: NoteType.RAW_TEXT),
+      ));
 
       final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
-      final List<int> bytes = await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: -1));
+      final List<int> bytes = await loadNoteBytes(noteId: -1, noteType: NoteType.RAW_TEXT);
       expect(
           "diff",
           SecurityUtils.decryptString(
@@ -168,8 +216,11 @@ void main() {
       await loginToTestAccount();
 
       expect(() async {
-        await sl<StoreNoteEncrypted>()
-            .call(ChangeNoteEncryptedParams(noteId: -1, decryptedName: "", decryptedContent: Uint8List(0)));
+        await sl<StoreNoteEncrypted>().call(ChangeNoteEncryptedParams(
+          noteId: -1,
+          decryptedName: "",
+          decryptedContent: NoteContent.saveFile(decryptedContent: <int>[], noteType: NoteType.RAW_TEXT),
+        ));
       }, throwsA(predicate((Object e) => e is ClientException && e.message == ErrorCodes.INVALID_PARAMS)));
     });
 
@@ -187,16 +238,19 @@ void main() {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
       await loginToTestAccount();
       await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
-          noteId: -1,
-          decryptedName: "name",
-          decryptedContent: Uint8List.fromList(utf8.encode("test")),
-          noteType: NoteType.RAW_TEXT));
+        noteId: -1,
+        decryptedName: "name",
+        decryptedContent: NoteContent.saveFile(decryptedContent: utf8.encode("test"), noteType: NoteType.RAW_TEXT),
+      ));
 
-      final DateTime time = await sl<StoreNoteEncrypted>()
-          .call(ChangeNoteEncryptedParams(noteId: -1, decryptedName: null, decryptedContent: Uint8List(0)));
+      final DateTime time = await sl<StoreNoteEncrypted>().call(ChangeNoteEncryptedParams(
+        noteId: -1,
+        decryptedName: null,
+        decryptedContent: NoteContent.saveFile(decryptedContent: <int>[], noteType: NoteType.RAW_TEXT),
+      ));
 
       final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
-      final List<int> bytes = await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: -1));
+      final List<int> bytes = await loadNoteBytes(noteId: -1, noteType: NoteType.RAW_TEXT);
       expect(
           "name",
           SecurityUtils.decryptString(
@@ -210,16 +264,16 @@ void main() {
       await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
       await loginToTestAccount();
       await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
-          noteId: -1,
-          decryptedName: "name",
-          decryptedContent: Uint8List.fromList(utf8.encode("test")),
-          noteType: NoteType.RAW_TEXT));
+        noteId: -1,
+        decryptedName: "name",
+        decryptedContent: NoteContent.saveFile(decryptedContent: utf8.encode("test"), noteType: NoteType.RAW_TEXT),
+      ));
 
       final DateTime time = await sl<StoreNoteEncrypted>()
           .call(ChangeNoteEncryptedParams(noteId: -1, decryptedName: "file", decryptedContent: null));
 
       final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
-      final List<int> bytes = await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: -1));
+      final List<int> bytes = await loadNoteBytes(noteId: -1, noteType: NoteType.RAW_TEXT);
       expect(
           "file",
           SecurityUtils.decryptString(

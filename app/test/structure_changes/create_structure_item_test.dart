@@ -55,11 +55,13 @@ void main() {
       expect(current.directParent?.path, dir1.path, reason: "and the parent reference should also match");
 
       final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
-      expect(current.path,
-          SecurityUtils.decryptString(account.noteInfoList.last.encFileName, base64UrlEncode(account.decryptedDataKey!)),
-          reason: "enc file name should match");
+      expect(
+        current.path,
+        SecurityUtils.decryptString(account.noteInfoList.last.encFileName, base64UrlEncode(account.decryptedDataKey!)),
+        reason: "enc file name should match",
+      );
 
-      final List<int> bytes = await sl<LoadNoteContent>().call(LoadNoteContentParams(noteId: current.id));
+      final List<int> bytes = await loadNoteBytes(noteId: current.id, noteType: current.noteType);
       expect(bytes, utf8.encode(""), reason: "bytes should be empty");
 
       expect(sl<NoteStructureRepository>().recent!.getChild(0).path, "dir1/fifth", reason: "recent should be updated");
@@ -84,7 +86,7 @@ void main() {
           SecurityUtils.decryptString(account.noteInfoList.last.encFileName, base64UrlEncode(account.decryptedDataKey!)),
           reason: "enc file name should match");
 
-      final List<int> bytes = await sl<LoadNoteContent>().call(LoadNoteContentParams(noteId: current.id));
+      final List<int> bytes = await loadNoteBytes(noteId: current.id, noteType: current.noteType);
       expect(bytes, utf8.encode(""), reason: "bytes should be empty");
 
       expect(sl<NoteStructureRepository>().root!.getChild(2).path, "fifth", reason: "root should be updated");

@@ -29,7 +29,7 @@ class LoadNoteContent extends UseCase<NoteContent, LoadNoteContentParams> {
     final Uint8List uncompressedBytes = await _decryptAndDecompressBytes(encryptedBytes, account);
 
     Logger.debug("Decrypted and returned note content for note ${params.noteId}");
-    return NoteContent.loadFile(uncompressedBytes, params.noteType);
+    return NoteContent.loadFile(bytes: uncompressedBytes, noteType: params.noteType);
   }
 
   Future<Uint8List> _decryptAndDecompressBytes(Uint8List encryptedBytes, ClientAccount account) async {
@@ -45,4 +45,3 @@ class LoadNoteContentParams {
 
   const LoadNoteContentParams({required this.noteId, required this.noteType});
 }
-

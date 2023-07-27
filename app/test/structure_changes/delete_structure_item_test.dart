@@ -63,7 +63,7 @@ void main() {
 
       expect(
         () async {
-          await sl<LoadNoteContent>().call(LoadNoteContentParams(noteId: deletedNote.id));
+          await loadNoteBytes(noteId: deletedNote.id, noteType: deletedNote.noteType);
         },
         throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)),
         reason: "file should not exist anymore",

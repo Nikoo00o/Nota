@@ -6,11 +6,13 @@ import 'package:app/core/get_it.dart';
 import 'package:app/core/utils/security_utils_extension.dart';
 import 'package:app/data/datasources/local_data_source.dart';
 import 'package:app/domain/entities/client_account.dart';
+import 'package:app/domain/entities/note_content.dart';
 import 'package:app/domain/repositories/account_repository.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
 import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
+import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:shared/core/enums/log_level.dart';
 import 'package:shared/core/enums/note_type.dart';
@@ -73,6 +75,12 @@ Future<ClientAccount> loginToTestAccount({bool reuseOldNotes = false}) async {
   return account;
 }
 
+Future<List<int>> loadNoteBytes({required int noteId, required NoteType noteType}) async {
+  final NoteContent content =
+      await sl<LoadNoteContent>().call(LoadNoteContentParams(noteId: noteId, noteType: noteType));
+  return content.text;
+}
+
 /// For recent the notes are ordered as followed:
 ///
 /// fourth
@@ -105,21 +113,21 @@ Future<ClientAccount> loginToTestAccount({bool reuseOldNotes = false}) async {
 /// first.
 Future<void> createSomeTestNotes() async {
   int counter = -1;
-  final Uint8List content = Uint8List.fromList(utf8.encode("123"));
-  await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
-      noteId: counter--, decryptedName: "first", decryptedContent: content, noteType: NoteType.RAW_TEXT));
+  final NoteContent content = NoteContent.saveFile(decryptedContent: utf8.encode("123"), noteType: NoteType.RAW_TEXT);
+  await sl<StoreNoteEncrypted>()
+      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "first", decryptedContent: content));
   await Future<void>.delayed(const Duration(milliseconds: 10));
-  await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
-      noteId: counter--, decryptedName: "dir1/second", decryptedContent: content, noteType: NoteType.RAW_TEXT));
+  await sl<StoreNoteEncrypted>()
+      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir1/second", decryptedContent: content));
   await Future<void>.delayed(const Duration(milliseconds: 10));
-  await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
-      noteId: counter--, decryptedName: "dir2/second", decryptedContent: content, noteType: NoteType.RAW_TEXT));
+  await sl<StoreNoteEncrypted>()
+      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir2/second", decryptedContent: content));
   await Future<void>.delayed(const Duration(milliseconds: 10));
-  await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
-      noteId: counter--, decryptedName: "dir1/a_third", decryptedContent: content, noteType: NoteType.RAW_TEXT));
+  await sl<StoreNoteEncrypted>()
+      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir1/a_third", decryptedContent: content));
   await Future<void>.delayed(const Duration(milliseconds: 10));
-  await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
-      noteId: counter--, decryptedName: "dir1/dir3/fourth", decryptedContent: content, noteType: NoteType.RAW_TEXT));
+  await sl<StoreNoteEncrypted>()
+      .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "dir1/dir3/fourth", decryptedContent: content));
 
   await sl<LocalDataSource>().setClientNoteCounter(counter); // important: update counter
 }

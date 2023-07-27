@@ -117,7 +117,7 @@ void _testValid() {
         SecurityUtils.decryptString(account.noteInfoList.last.encFileName, base64UrlEncode(account.decryptedDataKey!)),
         reason: "enc file name should match");
 
-    final List<int> bytes = await sl<LoadNoteContent>().call(LoadNoteContentParams(noteId: current.id));
+    final List<int> bytes = await loadNoteBytes(noteId: current.id, noteType: current.noteType);
     expect(bytes, utf8.encode("123"), reason: "bytes should match");
 
     expect(sl<NoteStructureRepository>().recent!.getChild(0).path, "dir1/dir3/fourthNew",
@@ -141,7 +141,7 @@ void _testValid() {
         SecurityUtils.decryptString(account.noteInfoList.last.encFileName, base64UrlEncode(account.decryptedDataKey!)),
         reason: "enc file name should match");
 
-    final List<int> bytes = await sl<LoadNoteContent>().call(LoadNoteContentParams(noteId: currentNote.id));
+    final List<int> bytes = await loadNoteBytes(noteId: currentNote.id, noteType: currentNote.noteType);
     expect(bytes, utf8.encode("123"), reason: "bytes should match");
 
     expect(sl<NoteStructureRepository>().recent!.getChild(0).path, "dir1/dir3New/fourth",
@@ -175,7 +175,7 @@ void _testValid() {
         SecurityUtils.decryptString(account.noteInfoList.last.encFileName, base64UrlEncode(account.decryptedDataKey!)),
         reason: "enc file name should match");
 
-    final List<int> bytes = await sl<LoadNoteContent>().call(LoadNoteContentParams(noteId: currentNote.id));
+    final List<int> bytes = await loadNoteBytes(noteId: currentNote.id, noteType: currentNote.noteType);
     expect(bytes, utf8.encode("123"), reason: "bytes should match");
   });
 }
@@ -197,6 +197,6 @@ Future<void> _defaultNoteTest(String newName, Uint8List? newContent) async {
       SecurityUtils.decryptString(account.noteInfoList.first.encFileName, base64UrlEncode(account.decryptedDataKey!)),
       reason: "enc file name should match");
 
-  final List<int> bytes = await sl<LoadNoteContent>().call(LoadNoteContentParams(noteId: current.id));
+  final List<int> bytes = await loadNoteBytes(noteId: current.id, noteType: current.noteType);
   expect(bytes, newContent ?? utf8.encode("123"), reason: "bytes should match");
 }

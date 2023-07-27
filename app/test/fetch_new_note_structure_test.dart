@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:app/core/enums/note_sorting.dart';
 import 'package:app/core/get_it.dart';
+import 'package:app/domain/entities/note_content.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
@@ -87,10 +88,10 @@ void _testWithAccount() {
 
 Future<void> _testSimpleNoteStructure({required bool callFetchNewStructure}) async {
   await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
-      noteId: -1,
-      decryptedName: "name",
-      decryptedContent: Uint8List.fromList(utf8.encode("test")),
-      noteType: NoteType.RAW_TEXT));
+    noteId: -1,
+    decryptedName: "name",
+    decryptedContent: NoteContent.saveFile(decryptedContent: utf8.encode("test"), noteType: NoteType.RAW_TEXT),
+  ));
 
   if (callFetchNewStructure) {
     await sl<FetchNewNoteStructure>().call(const NoParams());

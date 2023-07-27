@@ -76,7 +76,7 @@ void main() {
       expect(note.path, SecurityUtils.decryptString(noteInfo.encFileName, base64UrlEncode(account.decryptedDataKey!)),
           reason: "enc file name should match");
 
-      final List<int> bytes = await sl<LoadNoteContent>().call(LoadNoteContentParams(noteId: note.id));
+      final List<int> bytes = await loadNoteBytes(noteId: note.id, noteType: note.noteType);
       expect(bytes, utf8.encode("123"), reason: "bytes should be still the same");
 
       expect(sl<NoteStructureRepository>().recent!.amountOfChildren, 5,

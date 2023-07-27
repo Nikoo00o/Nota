@@ -17,7 +17,10 @@ import 'package:shared/core/utils/logger/logger.dart';
 /// constructors of the sub classes. If there are no additional params needed, then use the factory constructor
 /// [NoteContent.saveFile]
 ///
-/// This can return a [FileException] with [ErrorCodes.INVALID_PARAMS]
+/// This can return a [FileException] with [ErrorCodes.INVALID_PARAMS].
+///
+///
+/// To access the full [_bytes] for saving, use [fullBytes] and to access only the content bytes for reading, use [text]
 sealed class NoteContent {
   /// The raw decrypted bytes of the note file (the full content with no offsets including the header)!
   /// The public access should use [text]
@@ -92,8 +95,12 @@ sealed class NoteContent {
     throw const FileException(message: ErrorCodes.INVALID_PARAMS);
   }
 
+  /// this returns the full [_bytes] including the header part and should be used to save the data into a file.
+  Uint8List get fullBytes => _bytes;
+
   /// This needs to be overridden in the sub classes to return the main data part of the [_bytes] with the correct
-  /// offset!
+  /// offset! This is used to get the data part without the headers which is used to retrieve the data inside of the
+  /// ui, etc!
   Uint8List get text {
     Logger.error("tried to get the text of $this, but it was not overridden");
     throw const FileException(message: ErrorCodes.INVALID_PARAMS);
@@ -101,7 +108,7 @@ sealed class NoteContent {
 
   /// This is called when loading decrypted [_bytes] from a note file. It will reference those bytes internally as a
   /// reference and perform some error checks and return the correct sub type of [NoteContent] for the [noteType]
-  factory NoteContent.loadFile(Uint8List bytes, NoteType noteType) {
+  factory NoteContent.loadFile({required Uint8List bytes, required NoteType noteType}) {
     if (noteType == NoteType.FOLDER) {
       Logger.error("tried to load a file while the note type was folder: $noteType");
     }
@@ -133,14 +140,14 @@ sealed class NoteContent {
 /// [NoteContentRawText._saveFile]
 final class NoteContentRawText extends NoteContent {
   /// The next 4 bytes are used for the size of the raw [text] which directly follows the header
-  late final int textSize;
+  int get textSize => _data.getUint32(NoteContent.baseNoteContentHeaderSize, Endian.big);
 
   static const int TEXT_SIZE_BYTES = 4;
 
   /// a maximum of 4 gb text is supported inside of notes
   static const int MAX_TEXT_BYTES = 4000000000;
 
-  /// The [NoteContent.baseNoteContentHeaderSize] with the addition of the [TEXT_SIZE_BYTES] 4 bytes.
+  /// The [NoteContent.baseNoteContentHeaderSize] with the addition of the [TEXT_SIZE_BYTES] 4 bytes. So 8 bytes
   static int get headerSizeIncludingText => NoteContent.baseNoteContentHeaderSize + TEXT_SIZE_BYTES;
 
   /// the current version for when writing raw text files (used for migration)
@@ -162,7 +169,7 @@ final class NoteContentRawText extends NoteContent {
     _data.setUint32(NoteContent.baseNoteContentHeaderSize, textSize, Endian.big);
     _checkRawTextHeaderFields();
     for (int i = 0; i < decryptedContent.length; ++i) {
-      bytes[i + headerSize] = decryptedContent[i]; // headerSize is the offset
+      bytes[i + headerSize] = decryptedContent[i]; // headerSize is the offset for the text part
     }
   }
 
@@ -182,9 +189,9 @@ final class NoteContentRawText extends NoteContent {
   /// app.
   /// This will create the [_bytes] list with the header information and copies the [decryptedContent] into it
   factory NoteContentRawText._saveFile({required List<int> decryptedContent}) {
-    final int textSize = decryptedContent.length;
     final int headerSize = headerSizeIncludingText;
-    final Uint8List bytes = Uint8List(decryptedContent.length + headerSize);
+    final int textSize = decryptedContent.length;
+    final Uint8List bytes = Uint8List(headerSize + textSize);
     return NoteContentRawText._save(
       bytes: bytes,
       headerSize: headerSize,
