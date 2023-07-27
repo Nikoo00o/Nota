@@ -16,6 +16,10 @@ import 'package:shared/data/models/note_info_model.dart';
 import 'package:shared/domain/entities/note_info.dart';
 
 /// Always call [init] first before using any other method!
+///
+/// The local hive database is encrypted with a hive key that is stored in the secure storage.
+///
+/// All other data is stored inside of the local hive database.
 abstract class LocalDataSource {
   /// The database identifier of the hive box that contains the stored key-value pairs with the json identifiers
   static const String HIVE_DATABASE = "HIVE_DATABASE";
@@ -43,6 +47,8 @@ abstract class LocalDataSource {
   static const String LAST_NOTE_TRANSFER_TIME = "LAST_NOTE_TRANSFER_TIME";
 
   static const String FAVOURITES = "FAVOURITES";
+
+  static const String BIOMETRIC_KEY = "BIOMETRIC_KEY";
 
   /// Must be called first in the main function to initialize hive to the [AppConfig.baseFolder]
   /// of [getApplicationDocumentsDirectory]. This will also create the base folder if it does not exist yet!
@@ -197,6 +203,13 @@ abstract class LocalDataSource {
   Future<void> setFavourites({required FavouritesModel favourites}) async {
     await write(key: FAVOURITES, value: jsonEncode(favourites), secure: false);
   }
+
+  /// saved in secure storage
+  Future<String?> getBiometricKey() => read(key: BIOMETRIC_KEY, secure: true); // secure
+
+  /// saved in secure storage
+  Future<void> setBiometricKey({required String? biometricKey}) =>
+      write(key: BIOMETRIC_KEY, value: biometricKey, secure: true); // secure
 
   /// Needs to be overridden in the subclasses.
   /// Writes a [value] that can be accessed with the [key].

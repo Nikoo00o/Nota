@@ -5,6 +5,7 @@ import 'package:app/core/config/app_config.dart';
 import 'package:app/core/utils/security_utils_extension.dart';
 import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/repositories/account_repository.dart';
+import 'package:app/domain/repositories/biometrics_repository.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
@@ -23,8 +24,14 @@ class ChangeAccountPassword extends UseCase<void, ChangePasswordParams> {
   final AccountRepository accountRepository;
   final AppConfig appConfig;
   final GetLoggedInAccount getLoggedInAccount;
+  final BiometricsRepository biometricsRepository;
 
-  const ChangeAccountPassword({required this.accountRepository, required this.appConfig, required this.getLoggedInAccount});
+  const ChangeAccountPassword({
+    required this.accountRepository,
+    required this.appConfig,
+    required this.getLoggedInAccount,
+    required this.biometricsRepository,
+  });
 
   @override
   Future<void> execute(ChangePasswordParams params) async {
@@ -49,6 +56,9 @@ class ChangeAccountPassword extends UseCase<void, ChangePasswordParams> {
 
     // save the account
     await accountRepository.saveAccount(account);
+
+    await biometricsRepository.cacheUserKey(newUserKey); // if biometrics are enabled, update cached key!
+
     Logger.info("Changed password of $account");
   }
 }

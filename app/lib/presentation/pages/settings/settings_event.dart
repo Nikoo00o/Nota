@@ -46,3 +46,9 @@ final class SettingsAutoSaveChanged extends SettingsEvent {
 
   const SettingsAutoSaveChanged({required this.autoSave});
 }
+
+final class SettingsBiometricsChanged extends SettingsEvent {
+  final bool enabled;
+
+  const SettingsBiometricsChanged({required this.enabled});
+}

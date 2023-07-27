@@ -5,10 +5,12 @@ import 'package:app/data/datasources/remote_account_data_source.dart';
 import 'package:app/data/datasources/remote_note_data_source.dart';
 import 'package:app/data/repositories/account_repository_impl.dart';
 import 'package:app/data/repositories/app_settings_repository_impl.dart';
+import 'package:app/data/repositories/biometrics_repository_impl.dart';
 import 'package:app/data/repositories/note_structure_repository_impl.dart';
 import 'package:app/data/repositories/note_transfer_repository_impl.dart';
 import 'package:app/domain/repositories/account_repository.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';
+import 'package:app/domain/repositories/biometrics_repository.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
 import 'package:app/domain/repositories/note_transfer_repository.dart';
 import 'package:app/domain/usecases/account/change/activate_lock_screen.dart';
@@ -19,6 +21,7 @@ import 'package:app/domain/usecases/account/get_auto_login.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/get_user_name.dart';
 import 'package:app/domain/usecases/account/inner/fetch_current_session_token.dart';
+import 'package:app/domain/usecases/account/login/can_login_with_biometrics.dart';
 import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/account/login/get_required_login_status.dart';
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
@@ -105,7 +108,12 @@ Future<void> initializeGetIt() async {
         appConfig: sl(),
       ));
   sl.registerLazySingleton<AppSettingsRepository>(
-      () => AppSettingsRepositoryImpl(localDataSource: sl(), appConfig: sl()));
+      () => AppSettingsRepositoryImpl(localDataSource: sl(), appConfig: sl(), biometricsRepository: sl()));
+  sl.registerLazySingleton<BiometricsRepository>(() => BiometricsRepositoryImpl(
+        localDataSource: sl(),
+        appConfig: sl(),
+        dialogService: sl(),
+      ));
   sl.registerLazySingleton<NoteStructureRepository>(() => NoteStructureRepositoryImpl(localDataSource: sl()));
 
   // domain layer (use cases)
@@ -113,11 +121,13 @@ Future<void> initializeGetIt() async {
       () => FetchCurrentSessionToken(accountRepository: sl(), appConfig: sl()));
   sl.registerLazySingleton<CreateAccount>(() => CreateAccount(accountRepository: sl(), appConfig: sl()));
   sl.registerLazySingleton<GetRequiredLoginStatus>(() => GetRequiredLoginStatus(accountRepository: sl()));
+  sl.registerLazySingleton<CanLoginWithBiometrics>(() => CanLoginWithBiometrics(biometricsRepository: sl()));
   sl.registerLazySingleton<LoginToAccount>(() => LoginToAccount(
         accountRepository: sl(),
         appConfig: sl(),
         getRequiredLoginStatus: sl(),
         transferNotes: sl(),
+        biometricsRepository: sl(),
       ));
   sl.registerLazySingleton<LogoutOfAccount>(() => LogoutOfAccount(
         accountRepository: sl(),
@@ -131,6 +141,7 @@ Future<void> initializeGetIt() async {
         accountRepository: sl(),
         appConfig: sl(),
         getLoggedInAccount: sl(),
+        biometricsRepository: sl(),
       ));
   sl.registerLazySingleton<GetAutoLogin>(() => GetAutoLogin(accountRepository: sl()));
   sl.registerLazySingleton<ChangeAutoLogin>(() => ChangeAutoLogin(accountRepository: sl()));
@@ -271,6 +282,7 @@ Future<void> initializeGetIt() async {
         createAccount: sl(),
         loginToAccount: sl(),
         logoutOfAccount: sl(),
+        canLoginWithBiometrics: sl(),
       ));
   sl.registerFactory<NoteSelectionBloc>(() => NoteSelectionBloc(
         getCurrentStructureItem: sl(),
@@ -312,6 +324,7 @@ Future<void> initializeGetIt() async {
         navigationService: sl(),
         changeAccountPassword: sl(),
         dialogService: sl(),
+        biometricsRepository: sl(),
       ));
   sl.registerFactory<MenuBloc>(() => MenuBloc(
         getUsername: sl(),

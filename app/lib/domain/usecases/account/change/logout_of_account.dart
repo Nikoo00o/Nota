@@ -16,7 +16,7 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// for later use and caches the note info for the account! After this, a remote login is needed!
 ///
 /// Important: because this resets the account, references to the old should be updated afterwards, so they are not used
-/// anymore!!!
+/// anymore!!! This also calls [AppSettingsRepository.resetAccountBoundSettings]
 ///
 /// This can throw a [ClientException] with [ErrorCodes.CLIENT_NO_ACCOUNT].
 ///

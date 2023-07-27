@@ -8,12 +8,14 @@ import 'package:app/data/datasources/local_data_source.dart';
 import 'package:app/data/models/favourites_model.dart';
 import 'package:app/domain/entities/favourites.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';
+import 'package:app/domain/repositories/biometrics_repository.dart';
 import 'package:shared/core/enums/log_level.dart';
 import 'package:shared/core/utils/logger/log_message.dart';
 
 class AppSettingsRepositoryImpl extends AppSettingsRepository {
   final LocalDataSource localDataSource;
   final AppConfig appConfig;
+  final BiometricsRepository biometricsRepository;
 
   /// stream controller to add the updates
   final StreamController<AppUpdate> _updateController = StreamController<AppUpdate>();
@@ -25,9 +27,11 @@ class AppSettingsRepositoryImpl extends AppSettingsRepository {
 
   static const String CONFIG_AUTO_SAVE = "CONFIG_AUTO_SAVE";
 
-  static const String CONFIG_BIOMETRICS = "CONFIG_BIOMETRICS";
-
-  AppSettingsRepositoryImpl({required this.localDataSource, required this.appConfig}) {
+  AppSettingsRepositoryImpl({
+    required this.localDataSource,
+    required this.appConfig,
+    required this.biometricsRepository,
+  }) {
     _updateStream = _updateController.stream.asBroadcastStream();
   }
 
@@ -92,16 +96,9 @@ class AppSettingsRepositoryImpl extends AppSettingsRepository {
   Future<Favourites> getFavourites() => localDataSource.getFavourites();
 
   @override
-  Future<void> setBiometrics({required bool enabled}) =>
-      localDataSource.setConfigValue(configKey: CONFIG_BIOMETRICS, configValue: enabled);
-
-  @override
-  Future<bool> isBiometricsEnabled() => localDataSource.getConfigValue(configKey: CONFIG_BIOMETRICS);
-
-  @override
   Future<void> resetAccountBoundSettings() async {
     await setFavourites(Favourites(favourites: List<Favourite>.empty(growable: true)));
-    await setBiometrics(enabled: false);
+    await biometricsRepository.enableBiometrics(enabled: false);
   }
 
   @override

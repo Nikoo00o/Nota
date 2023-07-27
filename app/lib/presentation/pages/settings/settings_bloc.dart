@@ -1,6 +1,7 @@
 import 'package:app/core/constants/locales.dart';
 import 'package:app/core/utils/input_validator.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';
+import 'package:app/domain/repositories/biometrics_repository.dart';
 import 'package:app/domain/usecases/account/change/change_account_password.dart';
 import 'package:app/domain/usecases/account/change/change_auto_login.dart';
 import 'package:app/domain/usecases/account/get_auto_login.dart';
@@ -24,6 +25,7 @@ final class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
   final ChangeAccountPassword changeAccountPassword;
   final GetAutoLogin getAutoLogin;
   final ChangeAutoLogin changeAutoLogin;
+  final BiometricsRepository biometricsRepository;
 
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController passwordConfirmController = TextEditingController();
@@ -37,6 +39,7 @@ final class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
     required this.changeAccountPassword,
     required this.getAutoLogin,
     required this.changeAutoLogin,
+    required this.biometricsRepository,
   }) : super(initialState: const SettingsState());
 
   @override
@@ -49,6 +52,7 @@ final class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
     on<SettingsNavigatedToChangePasswordPage>(_handleNavigatedToChangePasswordPage);
     on<SettingsPasswordChanged>(_handlePasswordChanged);
     on<SettingsAutoSaveChanged>(_handleAutoSaveChanged);
+    on<SettingsBiometricsChanged>(_handleBiometricsChanged);
   }
 
   Future<void> _handleInitialise(SettingsEventInitialise event, Emitter<SettingsState> emit) async {
@@ -74,7 +78,8 @@ final class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
     emit(await _buildState());
   }
 
-  Future<void> _handleLockscreenTimeoutChanged(SettingsLockscreenTimeoutChanged event, Emitter<SettingsState> emit) async {
+  Future<void> _handleLockscreenTimeoutChanged(
+      SettingsLockscreenTimeoutChanged event, Emitter<SettingsState> emit) async {
     await appSettingsRepository.setLockscreenTimeout(duration: Duration(seconds: int.parse(event.timeoutInSeconds)));
     emit(await _buildState());
   }
@@ -107,6 +112,11 @@ final class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
     emit(await _buildState());
   }
 
+  Future<void> _handleBiometricsChanged(SettingsBiometricsChanged event, Emitter<SettingsState> emit) async {
+    await biometricsRepository.enableBiometrics(enabled: event.enabled);
+    emit(await _buildState());
+  }
+
   Future<SettingsState> _buildState() async {
     final Duration timeout = await appSettingsRepository.getLockscreenTimeout();
     return SettingsStateInitialised(
@@ -116,6 +126,7 @@ final class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
       autoLogin: await getAutoLogin.call(const NoParams()),
       lockscreenTimeoutInSeconds: timeout.inSeconds.toString(),
       autoSave: await appSettingsRepository.getAutoSave(),
+      biometrics: await biometricsRepository.isBiometricsEnabled(),
     );
   }
 

@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:app/core/enums/app_update.dart';
 import 'package:app/domain/entities/favourites.dart';
+import 'package:app/domain/repositories/biometrics_repository.dart';
 import 'package:app/domain/usecases/account/change/logout_of_account.dart';
 import 'package:app/presentation/main/app/app_bloc.dart';
 import 'package:shared/core/enums/log_level.dart';
@@ -59,14 +60,7 @@ abstract class AppSettingsRepository {
   /// returns the favourite notes and folders of the current user (this will be reset when switching accounts!)
   Future<Favourites> getFavourites();
 
-  /// changes biometrics to on/off. it will also be turned off when logging out
-  Future<void> setBiometrics({required bool enabled});
-
-  /// if biometric login is activated. (will be used instead of a password for every protected request except the
-  /// first login after starting the app)
-  Future<bool> isBiometricsEnabled();
-
-  /// This calls [setFavourites] and [setBiometrics] and is called by [LogoutOfAccount]
+  /// This calls [setFavourites] and [BiometricsRepository.enableBiometrics] and is called by [LogoutOfAccount]
   ///
   /// So this clears the settings that are reset when the account changes
   Future<void> resetAccountBoundSettings();

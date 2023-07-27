@@ -88,6 +88,13 @@ final class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
             isActive: state.autoSave,
             onChange: (bool value) => currentBloc(context).add(SettingsAutoSaveChanged(autoSave: value)),
           ),
+          SettingsToggleOption(
+            titleKey: "page.settings.biometrics",
+            descriptionKey: "page.settings.biometrics.description",
+            icon: Icons.fingerprint,
+            isActive: state.biometrics,
+            onChange: (bool value) => currentBloc(context).add(SettingsBiometricsChanged(enabled: value)),
+          ),
         ],
       );
     }

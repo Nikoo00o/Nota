@@ -79,12 +79,12 @@
 
 ### Version 1.1.0 
 
-- improved some file handling and updated sdk and package versions and changed the apps bundle id 
-- added biometric login and the possibility to mark notes, or folders as favourites
+- improved some internal data handling and updated sdk and package versions and changed the apps bundle id 
+- added biometrics login and the possibility to mark notes, or folders as favourites
 
 ### Version 1.0.2
 
-- initial release
+- initial release and beginning of changelog 
 
 ## Technical Details on building the projects 
 
