@@ -13,27 +13,27 @@ import 'package:shared/domain/usecases/usecase.dart';
 /// the note was not found.
 ///
 /// This can throw the exceptions of [GetLoggedInAccount]!
-class LoadNoteContent extends UseCase<List<int>, LoadNoteContentParams> {
+class LoadNoteContent extends UseCase<Uint8List, LoadNoteContentParams> {
   final GetLoggedInAccount getLoggedInAccount;
   final NoteTransferRepository noteTransferRepository;
 
   const LoadNoteContent({required this.getLoggedInAccount, required this.noteTransferRepository});
 
   @override
-  Future<List<int>> execute(LoadNoteContentParams params) async {
+  Future<Uint8List> execute(LoadNoteContentParams params) async {
     final ClientAccount account = await getLoggedInAccount.call(const NoParams());
 
     final Uint8List encryptedBytes = await noteTransferRepository.loadEncryptedNote(noteId: params.noteId);
-    final List<int> uncompressedBytes = await _decryptAndDecompressBytes(encryptedBytes, account);
+    final Uint8List uncompressedBytes = await _decryptAndDecompressBytes(encryptedBytes, account);
 
     Logger.debug("Decrypted and returned note content for note ${params.noteId}");
     return uncompressedBytes;
   }
 
-  Future<List<int>> _decryptAndDecompressBytes(Uint8List encryptedBytes, ClientAccount account) async {
+  Future<Uint8List> _decryptAndDecompressBytes(Uint8List encryptedBytes, ClientAccount account) async {
     final Uint8List decryptedBytes =
         await SecurityUtilsExtension.decryptBytesAsync(encryptedBytes, account.decryptedDataKey!);
-    return gzip.decode(decryptedBytes);
+    return gzip.decode(decryptedBytes) as Uint8List;
   }
 }
 
