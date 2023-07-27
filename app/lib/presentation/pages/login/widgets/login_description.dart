@@ -67,7 +67,6 @@ final class LoginDescription extends BlocPageChild<LoginBloc, LoginState> {
       return "page.login.description.remote.login";
     }
     if (state is LoginErrorState) {
-      if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {}
       return "page.login.description.restart";
     }
     return "empty";

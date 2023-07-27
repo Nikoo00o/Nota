@@ -44,7 +44,7 @@ android {
 
     defaultConfig {
         applicationId "com.nota.nota_app"
-        minSdkVersion 21
+        minSdkVersion 23 // local_auth needs at least android 6.0
         targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -65,4 +65,6 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'androidx.appcompat:appcompat:1.6.1' // needed for AppCompatTheme for local_auth with
+    // android below 9.0
 }

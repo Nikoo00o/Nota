@@ -4,6 +4,7 @@ import 'package:cryptography/cryptography.dart';
 import 'package:cryptography/dart.dart';
 import 'package:shared/core/config/shared_config.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
+import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/core/utils/string_utils.dart';
 
 /// Offers the shared basic synchronous security methods. For the async methods, look at [SecurityUtilsExtension]
@@ -62,6 +63,7 @@ class SecurityUtils {
       return Uint8List(0);
     }
     if (inputBytes.length <= GCM_INFO_LENGTH) {
+      Logger.error("$inputBytes are smaller than $GCM_INFO_LENGTH");
       throw const BaseException(message: "Decryption error");
     }
     final Uint8List ivBytes = Uint8List.view(inputBytes.buffer, inputBytes.offsetInBytes, IV_LENGTH);

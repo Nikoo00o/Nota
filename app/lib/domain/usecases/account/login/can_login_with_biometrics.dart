@@ -14,8 +14,9 @@ class CanLoginWithBiometrics extends UseCase<bool, NoParams> {
   @override
   Future<bool> execute(NoParams params) async {
     final bool active = await biometricsRepository.isBiometricsActive();
-    if (active && biometricsRepository.hasKey) {
-      Logger.info("can log in with biometrics ( is active and has key)");
+    final bool hasKey = biometricsRepository.hasKey;
+    Logger.debug("can log in with biometrics, active: $active, has key: $hasKey");
+    if (active && hasKey) {
       return true;
     }
     return false;

@@ -83,6 +83,7 @@ class StructureFolder extends StructureItem {
   /// Can throw [ErrorCodes.INVALID_PARAMS].
   void removeChild(int position) {
     if (position >= _children.length) {
+      Logger.error("$position was too high");
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
     _children.removeAt(position);
@@ -93,6 +94,7 @@ class StructureFolder extends StructureItem {
   void removeChildRef(StructureItem oldChild) {
     final bool removed = _children.remove(oldChild);
     if (removed == false) {
+      Logger.error("$oldChild was not found");
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
   }
@@ -101,6 +103,7 @@ class StructureFolder extends StructureItem {
   /// Can throw [ErrorCodes.INVALID_PARAMS] and sorts the children.
   void changeChild(int position, StructureItem newChild) {
     if (position >= _children.length) {
+      Logger.error("$position was too high");
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
     _children[position] = StructureItem.deepCopy(newChild, newDirectParent: this, changeParentOfChildren: true);
@@ -128,6 +131,7 @@ class StructureFolder extends StructureItem {
         return newChild;
       }
     }
+    Logger.error("$oldChild was not found");
     throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
   }
 
@@ -135,6 +139,7 @@ class StructureFolder extends StructureItem {
   /// Can throw [ErrorCodes.INVALID_PARAMS].
   StructureItem getChild(int position) {
     if (position >= _children.length) {
+      Logger.error("$position was too high");
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
     return _children.elementAt(position);

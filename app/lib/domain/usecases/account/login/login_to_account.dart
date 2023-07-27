@@ -164,7 +164,7 @@ class LoginToAccount extends UseCase<bool, LoginToAccountParams> {
         account.passwordHash = passwordHash;
       }
       return account;
-    } else if (params is LoginToAccountParamsLocal) {
+    } else if (params is LoginToAccountParamsLocal || params is LoginToAccountParamsBiometric) {
       return accountRepository.getAccountAndThrowIfNull();
     }
     throw UnimplementedError();

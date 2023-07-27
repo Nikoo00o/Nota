@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:app/core/config/app_config.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/core/utils/security_utils_extension.dart';
@@ -90,6 +92,9 @@ class BiometricsRepositoryImpl extends BiometricsRepository {
 
   @override
   Future<bool> isBiometricsSupported() async {
+    if(Platform.isMacOS || Platform.isLinux){
+      return false; // todo: currently "local_auth" does not support mac os, or linux for biometrics
+    }
     final bool supported = await auth.canCheckBiometrics;
     final List<BiometricType> available = await auth.getAvailableBiometrics();
     return supported && available.isNotEmpty;
