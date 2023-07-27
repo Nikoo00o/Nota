@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/utils/input_validator.dart';
 import 'package:app/core/utils/security_utils_extension.dart';
@@ -120,7 +121,8 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
 
     inputFocus.addListener(() {
       if (inputFocus.hasFocus) {
-        add(const NoteEditUpdatedState(didSearchChange: false)); // important: rebuild state only if input received the focus
+        add(const NoteEditUpdatedState(didSearchChange: false)); // important: rebuild state only if input received
+        // the focus
       }
     });
     searchFocus.addListener(() {
@@ -132,8 +134,8 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
 
     // init first item and init stream
     add(NoteEditStructureChanged(newCurrentItem: await getCurrentStructureItem.call(const NoParams())));
-    subscription =
-        await getStructureUpdatesStream.call(GetStructureUpdatesStreamParams(callbackFunction: (StructureUpdateBatch batch) {
+    subscription = await getStructureUpdatesStream
+        .call(GetStructureUpdatesStreamParams(callbackFunction: (StructureUpdateBatch batch) {
       add(NoteEditStructureChanged(newCurrentItem: batch.currentItem));
     }));
   }
@@ -162,7 +164,8 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
       favourite = await isFavourite.call(IsFavouriteParams.fromItem(currentItem));
       emit(_buildState());
     } else {
-      navigationService.navigateTo(Routes.note_selection); // will be called automatically from _handleNavigatedBack below
+      navigationService
+          .navigateTo(Routes.note_selection); // will be called automatically from _handleNavigatedBack below
     }
     dialogService.hideLoadingDialog();
   }
@@ -281,7 +284,11 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
 
   Future<void> _handleAppPaused(NoteEditAppPaused event, Emitter<NoteEditState> emit) async {
     if (noteHash != null && await hasContentChanged(updateOldHash: false)) {
-      await saveNoteBuffer(SaveNoteBufferParams(content: inputController.text));
+      if (await appSettingsRepository.getAutoSave()) {
+        await _saveInputIfChanged();
+      } else {
+        await saveNoteBuffer(SaveNoteBufferParams(content: inputController.text));
+      }
     }
   }
 

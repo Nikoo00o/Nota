@@ -181,5 +181,3 @@ flutter build ipa --release           # ios
     the server tests
 - the default log level for the tests can be changed inside of the file `nota/app/test/helper/app_test_helper.dart` in 
 the method `createCommonTestObjects`
-
-<!--- // todo: screenshots of the app should follow here -->
