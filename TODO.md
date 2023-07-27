@@ -5,6 +5,7 @@
 - maybe add a share feature to share notes (and also receive them with an intent) with share_plus. and that option 
   should also be included in the top right menu 
 - add multi select with long press on notes in the selection (for delete, move) 
+- also make blocs cleaner and leaner and maybe make some shared base classes
 
 ## New Features 
 

@@ -2,11 +2,11 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:app/core/utils/security_utils_extension.dart';
 import 'package:app/domain/entities/client_account.dart';
+import 'package:app/domain/entities/note_content.dart';
 import 'package:app/domain/repositories/note_transfer_repository.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/save_account.dart';
 import 'package:shared/core/constants/error_codes.dart';
-import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/entities/note_info.dart';
@@ -82,7 +82,7 @@ class StoreNoteEncrypted extends UseCase<DateTime, StoreNoteEncryptedParams> {
       throw const FileException(message: ErrorCodes.FILE_NOT_FOUND);
     }
 
-    if (params.decryptedContent!.isEmpty) {
+    if (params.decryptedContent.isEmpty) {
       Logger.debug("Create called with an empty content");
     }
 
@@ -92,12 +92,12 @@ class StoreNoteEncrypted extends UseCase<DateTime, StoreNoteEncryptedParams> {
       id: params.noteId,
       encFileName: encryptedFileName!,
       lastEdited: now,
-      noteType: params.noteType,
+      noteType: params.decryptedContent.noteType,
     ));
 
     await noteTransferRepository.storeEncryptedNote(
       noteId: params.noteId,
-      encryptedBytes: await _encryptAndCompressContent(params.decryptedContent!, account),
+      encryptedBytes: await _encryptAndCompressContent(params.decryptedContent, account),
     );
   }
 
@@ -132,9 +132,9 @@ class StoreNoteEncrypted extends UseCase<DateTime, StoreNoteEncryptedParams> {
     return SecurityUtilsExtension.encryptStringAsync2(fileName, account.decryptedDataKey!);
   }
 
-  Future<Uint8List> _encryptAndCompressContent(List<int> content, ClientAccount account) async {
+  Future<Uint8List> _encryptAndCompressContent(NoteContent content, ClientAccount account) async {
     // todo: maybe clear content list here, or also add a config option for the compression level
-    return SecurityUtilsExtension.encryptBytesAsync(gzip.encode(content) as Uint8List, account.decryptedDataKey!);
+    return SecurityUtilsExtension.encryptBytesAsync(gzip.encode(content.bytes) as Uint8List, account.decryptedDataKey!);
   }
 }
 
@@ -148,28 +148,28 @@ abstract class StoreNoteEncryptedParams {
 
   /// This can be empty if the file has no content yet and must be set if the note is newly created!
   /// If this is [null] it means that the file content did not change.
-  final List<int>? decryptedContent;
+  final NoteContent? decryptedContent;
 
   StoreNoteEncryptedParams({required this.noteId, required this.decryptedName, required this.decryptedContent});
 }
 
 class CreateNoteEncryptedParams extends StoreNoteEncryptedParams {
-  /// What kind of note is created
-  final NoteType noteType;
-
   /// This constructor is used when the note was newly created.
   /// The file name may not be empty!
   CreateNoteEncryptedParams({
     required int noteId,
     required String decryptedName,
-    required Uint8List decryptedContent,
-    required this.noteType,
+    required NoteContent decryptedContent,
   }) : super(noteId: noteId, decryptedName: decryptedName, decryptedContent: decryptedContent) {
     if (decryptedName.isEmpty) {
       Logger.error("CreateNoteEncryptedParams: file name may not be empty");
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
   }
+
+  // in this case, the content will never be null
+  @override
+  NoteContent get decryptedContent => super.decryptedContent!;
 }
 
 class ChangeNoteEncryptedParams extends StoreNoteEncryptedParams {
