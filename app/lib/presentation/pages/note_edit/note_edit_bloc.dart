@@ -5,6 +5,7 @@ import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/utils/input_validator.dart';
 import 'package:app/core/utils/security_utils_extension.dart';
+import 'package:app/domain/entities/note_content.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/entities/structure_update_batch.dart';
@@ -147,8 +148,10 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
     if (currentItem is StructureNote) {
       if (noteHash == null) {
         Logger.verbose("loading initial note content");
-        final List<int> data = await loadNoteContent(LoadNoteContentParams(noteId: (currentItem as StructureNote).id));
-        noteHash = await SecurityUtilsExtension.hashBytesAsync(data);
+        final StructureNote note = currentItem as StructureNote;
+        final NoteContent data = await loadNoteContent(LoadNoteContentParams(noteId: note.id, noteType: note.noteType));
+
+        noteHash = await SecurityUtilsExtension.hashBytesAsync(data.text);
         final String? bufferedData = await loadNoteBuffer(const NoParams());
         if (bufferedData != null) {
           inputController.text = bufferedData; // restore and reset buffered data after pausing the app and coming back
@@ -158,7 +161,7 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
             inputFocus.requestFocus();
           }
         } else {
-          inputController.text = utf8.decode(data);
+          inputController.text = utf8.decode(data.text);
         }
       }
       favourite = await isFavourite.call(IsFavouriteParams.fromItem(currentItem));

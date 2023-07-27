@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:app/domain/entities/note_content.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
@@ -106,8 +107,7 @@ class CreateStructureItem extends UseCase<void, CreateStructureItemParams> {
     final DateTime timeStamp = await storeNoteEncrypted.call(CreateNoteEncryptedParams(
       noteId: noteId,
       decryptedName: currentFolder.getPathForChildName(newName),
-      decryptedContent: Uint8List(0),
-      noteType: type,
+      decryptedContent: NoteContent.saveFile(decryptedContent: <int>[], noteType: type),
     ));
 
     // then update note in structure
@@ -117,6 +117,7 @@ class CreateStructureItem extends UseCase<void, CreateStructureItemParams> {
       canBeModified: true,
       id: noteId,
       lastModified: timeStamp,
+      noteType: type,
     ));
   }
 }
@@ -140,4 +141,6 @@ class CreateStructureItemParams {
   CreateStructureItemParams.folder({
     required String name,
   }) : this(name: name, noteType: NoteType.FOLDER);
+
+//todo: for now there is only the raw text note option
 }

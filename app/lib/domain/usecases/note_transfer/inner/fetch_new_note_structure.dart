@@ -74,6 +74,7 @@ class FetchNewNoteStructure extends UseCase<void, NoParams> {
         canBeModified: true,
         id: note.id,
         lastModified: note.lastEdited,
+        noteType: note.noteType,
       ));
       Logger.verbose("added note $decryptedName in ${targetFolder.path}");
     } else {

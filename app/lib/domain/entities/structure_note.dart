@@ -23,6 +23,7 @@ class StructureNote extends StructureItem {
     required super.name,
     required StructureFolder? directParent,
     required super.canBeModified,
+    required super.noteType,
     required this.id,
     required this.lastModified,
   }) : super(directParent: directParent, additionalProperties: <String, Object?>{
@@ -45,6 +46,7 @@ class StructureNote extends StructureItem {
       canBeModified: newCanBeModified ?? canBeModified,
       id: newId ?? id,
       lastModified: newLastModified ?? lastModified,
+      noteType: noteType,
     );
   }
 

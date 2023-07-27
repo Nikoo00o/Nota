@@ -134,7 +134,7 @@ class StoreNoteEncrypted extends UseCase<DateTime, StoreNoteEncryptedParams> {
 
   Future<Uint8List> _encryptAndCompressContent(NoteContent content, ClientAccount account) async {
     // todo: maybe clear content list here, or also add a config option for the compression level
-    return SecurityUtilsExtension.encryptBytesAsync(gzip.encode(content.bytes) as Uint8List, account.decryptedDataKey!);
+    return SecurityUtilsExtension.encryptBytesAsync(gzip.encode(content.text) as Uint8List, account.decryptedDataKey!);
   }
 }
 

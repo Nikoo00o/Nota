@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:app/domain/entities/note_content.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
 import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
@@ -22,8 +23,9 @@ class LoadAllStructureContent extends UseCase<Map<int, String>, NoParams> {
     if (noteStructureRepository.root != null) {
       final List<StructureNote> notes = noteStructureRepository.root!.getAllNotes();
       for (final StructureNote note in notes) {
-        final List<int> decryptedBytes = await loadNoteContent(LoadNoteContentParams(noteId: note.id));
-        result[note.id] = utf8.decode(decryptedBytes);
+        final NoteContent content =
+            await loadNoteContent(LoadNoteContentParams(noteId: note.id, noteType: note.noteType));
+        result[note.id] = utf8.decode(content.text);
       }
     }
     Logger.verbose("Loaded and decrypted the content for ${result.length} notes");
