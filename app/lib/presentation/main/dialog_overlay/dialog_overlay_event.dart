@@ -215,7 +215,8 @@ final class ShowInputDialog extends _CancelDialog {
   /// can be used to limit the keyboard
   final TextInputType? keyboardType;
 
-  /// if the input field should be focused when opening the dialog
+  /// if the input field should be focused when opening the dialog. This also makes it so that the input dialog will
+  /// be confirmed on pressing the confirm button on the keyboard!.
   final bool autoFocus;
 
   const ShowInputDialog({

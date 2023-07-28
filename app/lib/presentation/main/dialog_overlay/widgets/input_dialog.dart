@@ -19,19 +19,14 @@ class InputDialog extends StatefulWidget {
 class _InputDialogState extends State<InputDialog> {
   final TextEditingController controller = TextEditingController();
   bool _confirmButtonEnabled = false;
-  final FocusNode focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
-    if (widget.event.autoFocus) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => focusNode.requestFocus());
-    }
   }
 
   @override
   void dispose() {
-    focusNode.dispose();
     super.dispose();
   }
 
@@ -76,10 +71,11 @@ class _InputDialogState extends State<InputDialog> {
   Widget _buildFormField(BuildContext context) {
     return CustomTextFormField(
       controller: controller,
-      focusNode: focusNode,
+      autoFocus: event.autoFocus,
       validator: event.validatorCallback,
       textKey: event.inputLabelKey ?? "dialog.input.label",
       keyboardType: event.keyboardType,
+      onConfirm: event.autoFocus ? _confirm : null,
       onChanged: (String? input) {
         setState(() {
           if (input?.isEmpty ?? true) {
@@ -114,9 +110,11 @@ class _InputDialogState extends State<InputDialog> {
       style: event.confirmButtonStyle,
       defaultColor: _confirmButtonEnabled ? colors.tertiary : Theme.of(context).disabledColor,
       buttonEnabled: _confirmButtonEnabled,
-      onClick: () => bloc.add(HideDialog(dataForDialog: controller.text, cancelDialog: false)),
+      onClick: () => _confirm(),
     );
   }
+
+  void _confirm() => bloc.add(HideDialog(dataForDialog: controller.text, cancelDialog: false));
 
   Widget _buildButton({
     required String textKey,

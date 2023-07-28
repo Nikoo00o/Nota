@@ -39,6 +39,7 @@ class BiometricsRepositoryImpl extends BiometricsRepository {
         // direct access to TranslationService is needed here, because app settings repository needs biometrics
         // repository and biometrics repository needs translation service and translation service needs app settings
         // repository
+        // todo: add localisation params
         final bool success = await auth.authenticate(
           localizedReason: getIt<TranslationService>().translate("page.login.biometrics"),
           options: const AuthenticationOptions(stickyAuth: true, biometricOnly: true),
