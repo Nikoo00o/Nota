@@ -215,6 +215,9 @@ final class ShowInputDialog extends _CancelDialog {
   /// can be used to limit the keyboard
   final TextInputType? keyboardType;
 
+  /// if the input field should be focused when opening the dialog
+  final bool autoFocus;
+
   const ShowInputDialog({
     super.titleKey,
     super.titleKeyParams,
@@ -234,6 +237,7 @@ final class ShowInputDialog extends _CancelDialog {
     required this.onConfirm,
     this.validatorCallback,
     this.keyboardType,
+    required this.autoFocus,
   }) : super(descriptionKey: descriptionKey ?? "");
 }
 

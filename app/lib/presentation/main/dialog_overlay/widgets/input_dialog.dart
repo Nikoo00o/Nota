@@ -19,6 +19,21 @@ class InputDialog extends StatefulWidget {
 class _InputDialogState extends State<InputDialog> {
   final TextEditingController controller = TextEditingController();
   bool _confirmButtonEnabled = false;
+  final FocusNode focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.event.autoFocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => focusNode.requestFocus());
+    }
+  }
+
+  @override
+  void dispose() {
+    focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +76,7 @@ class _InputDialogState extends State<InputDialog> {
   Widget _buildFormField(BuildContext context) {
     return CustomTextFormField(
       controller: controller,
+      focusNode: focusNode,
       validator: event.validatorCallback,
       textKey: event.inputLabelKey ?? "dialog.input.label",
       keyboardType: event.keyboardType,

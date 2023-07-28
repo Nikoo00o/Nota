@@ -26,6 +26,9 @@ class SettingsInputOption extends SettingsOption {
   /// can be used to limit the keyboard
   final TextInputType? keyboardType;
 
+  /// if the input field should be focused when opening the dialog. Per default true
+  final bool autoFocus;
+
   const SettingsInputOption({
     required super.titleKey,
     super.titleKeyParams,
@@ -43,6 +46,7 @@ class SettingsInputOption extends SettingsOption {
     this.dialogDescriptionKeyParams,
     this.dialogInputLabelKey,
     this.keyboardType,
+    this.autoFocus = true,
   });
 
   @override
@@ -59,6 +63,7 @@ class SettingsInputOption extends SettingsOption {
       validatorCallback: validatorCallback,
       keyboardType: keyboardType,
       inputLabelKey: dialogInputLabelKey,
+      autoFocus: autoFocus,
     ));
   }
 }

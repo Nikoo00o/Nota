@@ -76,9 +76,31 @@ final class DialogTestPage extends NoBlocPage {
                 onCancel: () {
                   Logger.verbose("CANCELLED");
                 },
+                autoFocus: false,
               ));
             },
             child: const Text("test input dialog "),
+          ),
+          FilledButton(
+            onPressed: () async {
+              sl<DialogService>().show(ShowInputDialog(
+                descriptionKey: "auto focus 4 chars",
+                onConfirm: (String data) {
+                  Logger.verbose("CONFIRMED $data");
+                },
+                validatorCallback: (String? input) {
+                  if (input != null && input.length < 4) {
+                    return "more chars";
+                  }
+                  return null;
+                },
+                onCancel: () {
+                  Logger.verbose("CANCELLED");
+                },
+                autoFocus: true,
+              ));
+            },
+            child: const Text("test input dialog with auto focus"),
           ),
           FilledButton(
             onPressed: () async {

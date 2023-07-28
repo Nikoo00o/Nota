@@ -198,6 +198,7 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
       descriptionKey: "note.selection.create.folder.description",
       validatorCallback: (String? input) =>
           InputValidator.validateNewItem(input, isFolder: true, parent: currentItem?.getParent()),
+      autoFocus: true,
     ));
     final String? name = await completer.future;
     final String? oldName = currentItem?.name;
@@ -241,6 +242,7 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
           event.isFolder ? "note.selection.create.folder.description" : "note.selection.create.note.description",
       validatorCallback: (String? input) =>
           InputValidator.validateNewItem(input, isFolder: event.isFolder, parent: currentItem as StructureFolder?),
+      autoFocus: true,
     ));
     final String? name = await completer.future;
     if (name != null) {

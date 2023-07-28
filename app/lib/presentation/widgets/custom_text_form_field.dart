@@ -25,6 +25,9 @@ class CustomTextFormField extends WidgetBase {
   /// can be used to limit the keyboard
   final TextInputType? keyboardType;
 
+  /// used to control focus of the text field
+  final FocusNode? focusNode;
+
   const CustomTextFormField({
     super.key,
     this.controller,
@@ -34,11 +37,13 @@ class CustomTextFormField extends WidgetBase {
     this.textKeyParams,
     this.onChanged,
     this.keyboardType,
+    this.focusNode,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      focusNode: focusNode,
       keyboardType: keyboardType,
       controller: controller,
       validator: validator,

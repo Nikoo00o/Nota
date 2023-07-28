@@ -230,6 +230,7 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
       descriptionKey: "note.selection.create.folder.description",
       validatorCallback: (String? input) =>
           InputValidator.validateNewItem(input, isFolder: true, parent: currentItem.getParent()),
+      autoFocus: true,
     ));
     final String? name = await completer.future;
     if (name != null) {
