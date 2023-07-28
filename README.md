@@ -86,6 +86,11 @@
 
 - initial release and beginning of changelog 
 
+## Known Issues
+
+- rich text copied to the clipboard from word, or samsung notes, etc cannot be pasted into a text field (todo: maybe 
+  try to use a different clipboard manager to fix this problem in the future if it isn't fixed in flutter sdk: https://github.com/flutter/flutter/issues/74320)
+
 ## Technical Details on building the projects 
 
 - just import the project in android studio and have the flutter and dart sdks installed and the android studio flutter 
