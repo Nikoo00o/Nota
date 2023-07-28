@@ -7,6 +7,7 @@ import 'package:app/presentation/main/dialog_overlay/widgets/input_dialog.dart';
 import 'package:app/presentation/main/dialog_overlay/widgets/loading_dialog_content.dart';
 import 'package:app/presentation/main/dialog_overlay/widgets/selection_dialog.dart';
 import 'package:app/presentation/widgets/base_pages/page_event.dart';
+import 'package:app/services/dialog_service.dart';
 import 'package:app/services/translation_service.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +28,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
   final GlobalKey dialogOverlayKey;
 
   final TranslationService translationService;
+  final DialogService dialogService;
 
   /// 0 means that no loading dialog is visible
   int loadingDialogCounter = 0;
@@ -38,11 +40,19 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
   /// This only counts for the confirm, input and selection dialogs.
   VoidCallback? _cancelCallback;
 
+  /// gets the events from the [DialogService]
+  late final StreamSubscription<DialogOverlayEvent>? streamSubscription;
+
   DialogOverlayBloc({
     required this.dialogOverlayKey,
     required this.translationService,
+    required this.dialogService,
   }) : super(DialogOverlayState(dialogOverlayKey: dialogOverlayKey)) {
     registerEventHandlers();
+    streamSubscription = dialogService.listen((DialogOverlayEvent event) async {
+      // add event to emit a new state and rebuild depending on the change
+      add(event);
+    });
   }
 
   void registerEventHandlers() {
@@ -57,6 +67,13 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
     on<ShowInputDialog>(_handleShowInputDialog);
     on<ShowSelectDialog>(_handleShowSelectDialog);
     on<ShowAboutDialog>(_handleShowAboutDialog);
+  }
+
+  @mustCallSuper
+  @override
+  Future<void> close() async {
+    await streamSubscription?.cancel();
+    return super.close();
   }
 
   Future<void> _handleHideDialog(HideDialog event, Emitter<DialogOverlayState> emit) async {
@@ -127,7 +144,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
   }
 
   Future<void> _handleShowErrorDialog(ShowErrorDialog event, Emitter<DialogOverlayState> emit) async {
-    if(context==null){
+    if (context == null) {
       return;
     }
     await _showDialog(
@@ -226,9 +243,7 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
         RichText(
           text: TextSpan(
             children: <TextSpan>[
-              TextSpan(
-                  style: style,
-                  text: translate("nota.about")),
+              TextSpan(style: style, text: translate("nota.about")),
               TextSpan(
                 style: style?.copyWith(color: colors.primary),
                 text: "https://github.com/Nikoo00o/Nota",

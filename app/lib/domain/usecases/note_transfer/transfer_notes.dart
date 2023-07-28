@@ -5,11 +5,13 @@ import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/repositories/note_transfer_repository.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/save_account.dart';
+import 'package:app/domain/usecases/favourites/update_favourite.dart';
 import 'package:app/domain/usecases/note_transfer/get_last_note_transfer_time.dart';
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:shared/core/enums/note_transfer_status.dart';
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/entities/note_info.dart';
 import 'package:shared/domain/entities/note_update.dart';
@@ -35,6 +37,7 @@ class TransferNotes extends UseCase<bool, NoParams> {
   final NoteTransferRepository noteTransferRepository;
   final DialogService dialogService;
   final FetchNewNoteStructure fetchNewNoteStructure;
+  final UpdateFavourite updateFavourite;
 
   const TransferNotes({
     required this.getLoggedInAccount,
@@ -42,6 +45,7 @@ class TransferNotes extends UseCase<bool, NoParams> {
     required this.noteTransferRepository,
     required this.dialogService,
     required this.fetchNewNoteStructure,
+    required this.updateFavourite,
   });
 
   @override
@@ -96,25 +100,42 @@ class TransferNotes extends UseCase<bool, NoParams> {
         newTimeStamp = update.newLastEdited;
       }
 
-      await _applyChange(newId, newFileName, newTimeStamp, update.clientId, account);
+      await _applyChange(newId, newFileName, newTimeStamp, update.clientId, account, update.noteType);
     }
   }
 
   Future<void> _applyChange(
-      int? newId, String? newFileName, DateTime? newTimeStamp, int oldId, ClientAccount account) async {
+    int? newId,
+    String? newFileName,
+    DateTime? newTimeStamp,
+    int oldId,
+    ClientAccount account,
+    NoteType noteType,
+  ) async {
     if (newId != null || newFileName != null || newTimeStamp != null) {
-      Logger.verbose("Applying change with: $newId, $newFileName, $newTimeStamp to $oldId");
-      final bool replaced =
-          account.changeNote(noteId: oldId, newNodeId: newId, newEncFileName: newFileName, newLastEdited: newTimeStamp);
+      Logger.verbose("Applying change with: $newId, $newFileName, $newTimeStamp to $oldId"); // update element
+      final bool replaced = account.changeNote(
+        noteId: oldId,
+        newNodeId: newId,
+        newEncFileName: newFileName,
+        newLastEdited: newTimeStamp,
+      );
       if (replaced == false && newTimeStamp != null && newFileName != null) {
-        Logger.verbose("Added new note");
-        account.noteInfoList.add(NoteInfo(id: newId ?? oldId, encFileName: newFileName, lastEdited: newTimeStamp));
+        Logger.verbose("Added new note"); // not found, so add new one
+        account.noteInfoList.add(NoteInfo(
+          id: newId ?? oldId,
+          encFileName: newFileName,
+          lastEdited: newTimeStamp,
+          noteType: noteType,
+        ));
       } else if (newId == null) {
         Logger.warn("No note changed and also none added!");
       }
 
       if (newId != null) {
         await noteTransferRepository.renameNote(oldNoteId: oldId, newNoteId: newId);
+        await updateFavourite.call(UpdateFavouriteParams(fromId: oldId, toId: newId)); // update the favourite status
+        // of a note if its id changed! (removing favourites is done automatically when receiving the new favourites)
       }
     }
   }
@@ -152,14 +173,16 @@ class TransferNotes extends UseCase<bool, NoParams> {
     return false;
   }
 
-  bool _containsAServerChange(List<NoteUpdate> updates) =>
-      updates.where((NoteUpdate update) => update.noteTransferStatus == NoteTransferStatus.CLIENT_NEEDS_UPDATE).isNotEmpty;
+  bool _containsAServerChange(List<NoteUpdate> updates) => updates
+      .where((NoteUpdate update) => update.noteTransferStatus == NoteTransferStatus.CLIENT_NEEDS_UPDATE)
+      .isNotEmpty;
 
   /// This returns the old client side names of the notes (if a file was renamed on server side)!
   Future<List<String>> _getServerChangeFileNames(List<NoteUpdate> updates, ClientAccount account) async {
     final List<String> serverNames = List<String>.empty(growable: true);
-    final List<NoteUpdate> serverChanges =
-        updates.where((NoteUpdate update) => update.noteTransferStatus == NoteTransferStatus.CLIENT_NEEDS_UPDATE).toList();
+    final List<NoteUpdate> serverChanges = updates
+        .where((NoteUpdate update) => update.noteTransferStatus == NoteTransferStatus.CLIENT_NEEDS_UPDATE)
+        .toList();
 
     final List<NoteInfo> affectedClientNotes = account.noteInfoList.where((NoteInfo note) {
       return serverChanges.where((NoteUpdate update) => update.clientId == note.id).isNotEmpty;

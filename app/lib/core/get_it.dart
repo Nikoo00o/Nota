@@ -5,10 +5,12 @@ import 'package:app/data/datasources/remote_account_data_source.dart';
 import 'package:app/data/datasources/remote_note_data_source.dart';
 import 'package:app/data/repositories/account_repository_impl.dart';
 import 'package:app/data/repositories/app_settings_repository_impl.dart';
+import 'package:app/data/repositories/biometrics_repository_impl.dart';
 import 'package:app/data/repositories/note_structure_repository_impl.dart';
 import 'package:app/data/repositories/note_transfer_repository_impl.dart';
 import 'package:app/domain/repositories/account_repository.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';
+import 'package:app/domain/repositories/biometrics_repository.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
 import 'package:app/domain/repositories/note_transfer_repository.dart';
 import 'package:app/domain/usecases/account/change/activate_lock_screen.dart';
@@ -19,10 +21,15 @@ import 'package:app/domain/usecases/account/get_auto_login.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/get_user_name.dart';
 import 'package:app/domain/usecases/account/inner/fetch_current_session_token.dart';
+import 'package:app/domain/usecases/account/login/can_login_with_biometrics.dart';
 import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/account/login/get_required_login_status.dart';
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
 import 'package:app/domain/usecases/account/save_account.dart';
+import 'package:app/domain/usecases/favourites/change_favourite.dart';
+import 'package:app/domain/usecases/favourites/get_favourites.dart';
+import 'package:app/domain/usecases/favourites/is_favourite.dart';
+import 'package:app/domain/usecases/favourites/update_favourite.dart';
 import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/create_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
@@ -100,7 +107,13 @@ Future<void> initializeGetIt() async {
         localDataSource: sl(),
         appConfig: sl(),
       ));
-  sl.registerLazySingleton<AppSettingsRepository>(() => AppSettingsRepositoryImpl(localDataSource: sl(), appConfig: sl()));
+  sl.registerLazySingleton<AppSettingsRepository>(
+      () => AppSettingsRepositoryImpl(localDataSource: sl(), appConfig: sl(), biometricsRepository: sl()));
+  sl.registerLazySingleton<BiometricsRepository>(() => BiometricsRepositoryImpl(
+        localDataSource: sl(),
+        appConfig: sl(),
+        dialogService: sl(),
+      ));
   sl.registerLazySingleton<NoteStructureRepository>(() => NoteStructureRepositoryImpl(localDataSource: sl()));
 
   // domain layer (use cases)
@@ -108,14 +121,17 @@ Future<void> initializeGetIt() async {
       () => FetchCurrentSessionToken(accountRepository: sl(), appConfig: sl()));
   sl.registerLazySingleton<CreateAccount>(() => CreateAccount(accountRepository: sl(), appConfig: sl()));
   sl.registerLazySingleton<GetRequiredLoginStatus>(() => GetRequiredLoginStatus(accountRepository: sl()));
+  sl.registerLazySingleton<CanLoginWithBiometrics>(() => CanLoginWithBiometrics(biometricsRepository: sl()));
   sl.registerLazySingleton<LoginToAccount>(() => LoginToAccount(
         accountRepository: sl(),
         appConfig: sl(),
         getRequiredLoginStatus: sl(),
         transferNotes: sl(),
+        biometricsRepository: sl(),
       ));
   sl.registerLazySingleton<LogoutOfAccount>(() => LogoutOfAccount(
         accountRepository: sl(),
+        appSettingsRepository: sl(),
         navigationService: sl(),
         appConfig: sl(),
         dialogService: sl(),
@@ -125,15 +141,18 @@ Future<void> initializeGetIt() async {
         accountRepository: sl(),
         appConfig: sl(),
         getLoggedInAccount: sl(),
+        biometricsRepository: sl(),
       ));
   sl.registerLazySingleton<GetAutoLogin>(() => GetAutoLogin(accountRepository: sl()));
   sl.registerLazySingleton<ChangeAutoLogin>(() => ChangeAutoLogin(accountRepository: sl()));
   sl.registerLazySingleton<GetLoggedInAccount>(() => GetLoggedInAccount(accountRepository: sl()));
   sl.registerLazySingleton<GetUsername>(() => GetUsername(accountRepository: sl()));
   sl.registerLazySingleton<SaveAccount>(() => SaveAccount(accountRepository: sl()));
-  sl.registerLazySingleton<ActivateLockscreen>(() => ActivateLockscreen(accountRepository: sl(), navigationService: sl()));
+  sl.registerLazySingleton<ActivateLockscreen>(
+      () => ActivateLockscreen(accountRepository: sl(), navigationService: sl()));
 
-  sl.registerLazySingleton<LoadNoteContent>(() => LoadNoteContent(getLoggedInAccount: sl(), noteTransferRepository: sl()));
+  sl.registerLazySingleton<LoadNoteContent>(
+      () => LoadNoteContent(getLoggedInAccount: sl(), noteTransferRepository: sl()));
   sl.registerLazySingleton<StoreNoteEncrypted>(() => StoreNoteEncrypted(
         getLoggedInAccount: sl(),
         noteTransferRepository: sl(),
@@ -145,6 +164,7 @@ Future<void> initializeGetIt() async {
         saveAccount: sl(),
         dialogService: sl(),
         fetchNewNoteStructure: sl(),
+        updateFavourite: sl(),
       ));
 
   sl.registerLazySingleton<FetchNewNoteStructure>(() => FetchNewNoteStructure(
@@ -220,27 +240,40 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<LoadAllStructureContent>(() => LoadAllStructureContent(
         noteStructureRepository: sl(),
         loadNoteContent: sl(),
+        appConfig: sl(),
       ));
   sl.registerLazySingleton<GetLastNoteTransferTime>(() => GetLastNoteTransferTime(
         localDataSource: sl(),
       ));
+  sl.registerLazySingleton<ChangeFavourite>(() => ChangeFavourite(
+        appSettingsRepository: sl(),
+      ));
+  sl.registerLazySingleton<GetFavourites>(() => GetFavourites(
+        appSettingsRepository: sl(),
+        noteStructureRepository: sl(),
+        fetchNewNoteStructure: sl(),
+      ));
+  sl.registerLazySingleton<IsFavourite>(() => IsFavourite(
+        appSettingsRepository: sl(),
+      ));
+  sl.registerLazySingleton<UpdateFavourite>(() => UpdateFavourite(
+        appSettingsRepository: sl(),
+        isFavourite: sl(),
+      ));
 
   // services
   sl.registerLazySingleton<SessionService>(() => SessionService());
-  sl.registerLazySingleton<DialogService>(() => DialogServiceImpl(dialogOverlayBloc: sl()));
+  sl.registerLazySingleton<DialogService>(() => DialogServiceImpl());
   sl.registerLazySingleton<NavigationService>(() => NavigationService());
   sl.registerLazySingleton<TranslationService>(() => TranslationService(appSettingsRepository: sl()));
 
   // presentation layer (blocs)
-
-  // important: the next two blocs are singletons and no factory functions, because they are used within the app and are
-  // only created once!
-  sl.registerLazySingleton<AppBloc>(() => AppBloc(translationService: sl()));
-  sl.registerLazySingleton<DialogOverlayBloc>(() => DialogOverlayBloc(
+  sl.registerFactory<AppBloc>(() => AppBloc(translationService: sl(), appSettingsRepository: sl()));
+  sl.registerFactory<DialogOverlayBloc>(() => DialogOverlayBloc(
         dialogOverlayKey: GlobalKey(),
         translationService: sl(),
+        dialogService: sl(),
       ));
-
   // the blocs below are factory functions, because they should be newly created each time the user navigates to the page!
   sl.registerFactory<LoginBloc>(() => LoginBloc(
         navigationService: sl(),
@@ -250,9 +283,11 @@ Future<void> initializeGetIt() async {
         createAccount: sl(),
         loginToAccount: sl(),
         logoutOfAccount: sl(),
+        canLoginWithBiometrics: sl(),
       ));
   sl.registerFactory<NoteSelectionBloc>(() => NoteSelectionBloc(
         getCurrentStructureItem: sl(),
+        appConfig: sl(),
         getStructureUpdatesStream: sl(),
         navigationService: sl(),
         createStructureItem: sl(),
@@ -265,6 +300,8 @@ Future<void> initializeGetIt() async {
         finishMoveStructureItem: sl(),
         navigateToItem: sl(),
         dialogService: sl(),
+        isFavourite: sl(),
+        changeFavourite: sl(),
       ));
   sl.registerFactory<NoteEditBloc>(() => NoteEditBloc(
         getCurrentStructureItem: sl(),
@@ -279,15 +316,17 @@ Future<void> initializeGetIt() async {
         loadNoteBuffer: sl(),
         saveNoteBuffer: sl(),
         appSettingsRepository: sl(),
+        isFavourite: sl(),
+        changeFavourite: sl(),
       ));
   sl.registerFactory<SettingsBloc>(() => SettingsBloc(
         appSettingsRepository: sl(),
-        appBloc: sl(),
         changeAutoLogin: sl(),
         getAutoLogin: sl(),
         navigationService: sl(),
         changeAccountPassword: sl(),
         dialogService: sl(),
+        biometricsRepository: sl(),
       ));
   sl.registerFactory<MenuBloc>(() => MenuBloc(
         getUsername: sl(),
@@ -299,6 +338,7 @@ Future<void> initializeGetIt() async {
         activateLockscreen: sl(),
         dialogService: sl(),
         navigateToItem: sl(),
+        getFavourites: sl(),
       ));
   sl.registerFactory<LogsBloc>(() => LogsBloc(
         appSettingsRepository: sl(),

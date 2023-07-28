@@ -8,7 +8,7 @@ import 'package:shared/domain/entities/shared_account.dart';
 class ClientAccount extends SharedAccount {
   /// The cached data key of the user used to encrypt the note data.
   ///
-  /// This might be null at first.
+  /// This might be null at first and is null always after logout, or after lock screen if auto login is disabled.
   /// It's only set later when decrypting the [encryptedDataKey], or it is loaded from the storage depending on
   /// [storeDecryptedDataKey]!
   Uint8List? decryptedDataKey;

@@ -7,9 +7,16 @@ class AccountLoginRequest extends RequestDTO {
   /// Base64 encoded
   final String passwordHash;
 
+  /// Unique identifier for each build app / server pair
+  final String createAccountToken;
+
+
+  static const String JSON_CREATE_ACCOUNT_TOKEN = "JSON_CREATE_ACCOUNT_TOKEN";
+
   const AccountLoginRequest({
     required this.username,
     required this.passwordHash,
+    required this.createAccountToken,
   });
 
   @override
@@ -17,6 +24,7 @@ class AccountLoginRequest extends RequestDTO {
     return <String, dynamic>{
       SharedAccountModelMixin.JSON_USER_NAME: username,
       SharedAccountModelMixin.JSON_PASSWORD_HASH: passwordHash,
+      JSON_CREATE_ACCOUNT_TOKEN: createAccountToken,
     };
   }
 
@@ -24,6 +32,7 @@ class AccountLoginRequest extends RequestDTO {
     return AccountLoginRequest(
       username: map[SharedAccountModelMixin.JSON_USER_NAME] as String,
       passwordHash: map[SharedAccountModelMixin.JSON_PASSWORD_HASH] as String,
+      createAccountToken: map[JSON_CREATE_ACCOUNT_TOKEN] as String,
     );
   }
 }

@@ -5,11 +5,14 @@ import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
 import 'package:app/presentation/widgets/custom_outlined_button.dart';
 import 'package:flutter/material.dart';
 
-class LoginButtons extends BlocPageChild<LoginBloc, LoginState> {
+final class LoginButtons extends BlocPageChild<LoginBloc, LoginState> {
   const LoginButtons();
 
   @override
   Widget buildWithState(BuildContext context, LoginState state) {
+    if (state is LoginErrorState) {
+      return const SizedBox();
+    }
     final String firstButtonKey = state is LoginCreateState ? "page.login.create" : "page.login.login";
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,

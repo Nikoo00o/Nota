@@ -11,6 +11,7 @@ import 'package:app/domain/usecases/note_structure/navigation/get_current_struct
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/utils/security_utils.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
@@ -42,7 +43,7 @@ void main() {
     test("creating a new note inside of a subfolder from root", () async {
       sl<NoteStructureRepository>().currentItem = sl<NoteStructureRepository>().root!.getChild(0); // dir1
 
-      await sl<CreateStructureItem>().call(const CreateStructureItemParams(name: "fifth", isFolder: false));
+      await sl<CreateStructureItem>().call(const CreateStructureItemParams(name: "fifth", noteType: NoteType.RAW_TEXT));
       final StructureItem current = await sl<GetCurrentStructureItem>().call(const NoParams());
 
       expect(current.path, "dir1/fifth", reason: "path of the new note should match");
@@ -54,30 +55,30 @@ void main() {
       expect(current.directParent?.path, dir1.path, reason: "and the parent reference should also match");
 
       final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
-      expect(current.path,
-          SecurityUtils.decryptString(account.noteInfoList.last.encFileName, base64UrlEncode(account.decryptedDataKey!)),
-          reason: "enc file name should match");
+      expect(
+        current.path,
+        SecurityUtils.decryptString(account.noteInfoList.last.encFileName, base64UrlEncode(account.decryptedDataKey!)),
+        reason: "enc file name should match",
+      );
 
-      final List<int> bytes = await sl<LoadNoteContent>().call(LoadNoteContentParams(noteId: current.id));
+      final List<int> bytes = await loadNoteBytes(noteId: current.id, noteType: current.noteType);
       expect(bytes, utf8.encode(""), reason: "bytes should be empty");
 
       expect(sl<NoteStructureRepository>().recent!.getChild(0).path, "dir1/fifth", reason: "recent should be updated");
     });
 
     test("creating a new note inside of recent", () async {
+      await Future<void>.delayed(const Duration(milliseconds: 10));
       sl<NoteStructureRepository>().currentItem = sl<NoteStructureRepository>().recent!;
-
-      await sl<CreateStructureItem>().call(const CreateStructureItemParams(name: "fifth", isFolder: false));
+      await sl<CreateStructureItem>().call(const CreateStructureItemParams(name: "fifth", noteType: NoteType.RAW_TEXT));
       final StructureItem current = await sl<GetCurrentStructureItem>().call(const NoParams());
-
       expect(current.path, "fifth", reason: "path of the new note should match");
 
       final StructureFolder recent = sl<NoteStructureRepository>().recent!;
       expect(recent.amountOfChildren, 6, reason: "recent should now have 6 children");
 
       expect((recent.getChild(0) as StructureNote).id, (current as StructureNote).id,
-          reason: "the new note should be the "
-              "newest");
+          reason: "the new note should be the newest");
       expect(current.topMostParent.isRecent, true, reason: "current should also exist in recent");
 
       final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
@@ -85,7 +86,7 @@ void main() {
           SecurityUtils.decryptString(account.noteInfoList.last.encFileName, base64UrlEncode(account.decryptedDataKey!)),
           reason: "enc file name should match");
 
-      final List<int> bytes = await sl<LoadNoteContent>().call(LoadNoteContentParams(noteId: current.id));
+      final List<int> bytes = await loadNoteBytes(noteId: current.id, noteType: current.noteType);
       expect(bytes, utf8.encode(""), reason: "bytes should be empty");
 
       expect(sl<NoteStructureRepository>().root!.getChild(2).path, "fifth", reason: "root should be updated");

@@ -89,11 +89,11 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.nota.app" "\0"
+            VALUE "CompanyName", "com.Nikoo00o.nota.app" "\0"
             VALUE "FileDescription", "Nota" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "Nota" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2022 com.nota.app. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2022 com.Nikoo00o.nota.app. All rights reserved." "\0"
             VALUE "OriginalFilename", "Nota.exe" "\0"
             VALUE "ProductName", "Nota" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

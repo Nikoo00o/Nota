@@ -4,6 +4,7 @@ import 'package:app/domain/entities/translation_string.dart';
 import 'package:intl/intl.dart';
 import 'package:shared/core/config/shared_config.dart';
 import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/entities/entity.dart';
@@ -45,15 +46,23 @@ abstract class StructureItem extends Entity {
   /// This is always true if the item has a parent except for the top level folders, or for the move item view!
   final bool canBeModified;
 
+  /// The type of the note (could be something special, but also could be just a raw text file, or a folder).
+  ///
+  /// This should always stay the same and is never modified (so it is also not included inside of the [copyWith]
+  /// methods.
+  final NoteType noteType;
+
   StructureItem({
     required this.name,
     required this.directParent,
     required this.canBeModified,
+    required this.noteType,
     required Map<String, Object?> additionalProperties,
   }) : super(<String, Object?>{
           "name": name,
           "parentPath": directParent?.path,
           "topMostParent": directParent?.topMostParent.name,
+          "noteType": noteType,
           ...additionalProperties,
         });
 
@@ -111,8 +120,10 @@ abstract class StructureItem extends Entity {
 
   String get lastModifiedFormatted => DateFormat("yyyy-MM-dd – HH:mm").format(lastModified);
 
-  /// Returns if this item, or any sub folder contains the [pattern] inside of its [name]
-  bool containsName(String pattern);
+  /// Returns if this item, or any sub folder contains the [pattern] inside of its [name].
+  ///
+  /// If [caseSensitive] is false, then it will match everything as lowercase!
+  bool containsName(String pattern, {required bool caseSensitive});
 
   /// Returns a deep copy of the [item] (recursively copy all sub folders and items).
   ///

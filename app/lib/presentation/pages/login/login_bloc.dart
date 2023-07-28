@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/enums/required_login_status.dart';
+import 'package:app/core/get_it.dart';
 import 'package:app/core/utils/input_validator.dart';
+import 'package:app/data/datasources/local_data_source.dart';
 import 'package:app/domain/usecases/account/change/logout_of_account.dart';
 import 'package:app/domain/usecases/account/get_user_name.dart';
+import 'package:app/domain/usecases/account/login/can_login_with_biometrics.dart';
 import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/account/login/get_required_login_status.dart';
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
@@ -18,7 +21,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
-class LoginBloc extends PageBloc<LoginEvent, LoginState> {
+final class LoginBloc extends PageBloc<LoginEvent, LoginState> {
   final GetRequiredLoginStatus getRequiredLoginStatus;
   final GetUsername getUsername;
   final CreateAccount createAccount;
@@ -26,6 +29,7 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
   final LogoutOfAccount logoutOfAccount;
   final DialogService dialogService;
   final NavigationService navigationService;
+  final CanLoginWithBiometrics canLoginWithBiometrics;
 
   late RequiredLoginStatus _loginStatus;
   bool _createNewAccount = false;
@@ -48,6 +52,7 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
     required this.logoutOfAccount,
     required this.dialogService,
     required this.navigationService,
+    required this.canLoginWithBiometrics,
   }) : super(initialState: const LoginState());
 
   @override
@@ -61,18 +66,29 @@ class LoginBloc extends PageBloc<LoginEvent, LoginState> {
   }
 
   Future<void> _handleInitialise(LoginEventInitialise event, Emitter<LoginState> emit) async {
-    _loginStatus = await getRequiredLoginStatus(const NoParams());
-    if (_loginStatus == RequiredLoginStatus.NONE) {
-      _navigateToNextPage();
-      return;
+    try {
+      _loginStatus = await getRequiredLoginStatus(const NoParams());
+      if (_loginStatus == RequiredLoginStatus.NONE) {
+        _navigateToNextPage();
+        return;
+      }
+      _clearTextInputFields();
+      _setupAutoScroll();
+      String? username;
+      if (_loginStatus == RequiredLoginStatus.LOCAL) {
+        username = await getUsername.call(const NoParams());
+      }
+      emit(_buildState(username: username));
+
+      if (await canLoginWithBiometrics(const NoParams())) {
+        if (await loginToAccount(const LoginToAccountParamsBiometric())) {
+          _navigateToNextPage();
+        }
+      }
+    } catch (_) {
+      emit(LoginErrorState(dataFolderPath: await getIt<LocalDataSource>().getBasePath()));
+      rethrow;
     }
-    _clearTextInputFields();
-    _setupAutoScroll();
-    String? username;
-    if (_loginStatus == RequiredLoginStatus.LOCAL) {
-      username = await getUsername.call(const NoParams());
-    }
-    emit(_buildState(username: username));
   }
 
   Future<void> _handleRemoteLogin(LoginEventRemoteLogin event, Emitter<LoginState> emit) async {

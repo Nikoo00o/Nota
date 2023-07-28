@@ -2,23 +2,24 @@ name: shared
 description: Shared Component with Code for both Server and App
 publish_to: 'none'
 
-version: 1.0.2
+version: 1.1.0
 
 environment:
-  sdk: '>=2.19.2 <3.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   collection: ^1.17.0 # deep collection equality
   equatable: ^2.0.5 # comparing objects
   http_parser: ^4.0.2 # parsing content type and media type
-  http: ^0.13.5 # http client
+  http: ^1.1.0 # http client
   hive: ^2.2.3 # nosql database
   convert: ^3.1.1 # hex conversion
   cryptography: ^2.5.0 # basic cryptographic functions (like aes encryption)
   synchronized: ^3.0.1 # locks for concurrent access
+  path: ^1.8.2 # file paths
 
 dev_dependencies:
-  flutter_lints: ^2.0.1  # linter rules
-  test: ^1.23.1 # dart test package
+  flutter_lints: ^2.0.2  # linter rules
+  test: ^1.24.1 # dart test package
   hive_generator: ^2.0.0
-  build_runner: ^2.3.3
+  build_runner: ^2.4.6

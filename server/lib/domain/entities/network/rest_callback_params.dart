@@ -2,6 +2,7 @@ import 'package:server/domain/entities/server_account.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/enums/http_method.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
+import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/entities/entity.dart';
 
 /// The Parameter that a rest callback method will be called with.
@@ -99,6 +100,7 @@ class RestCallbackParams extends Entity {
         authenticatedAccount: authenticatedAccount,
       );
     }
+    Logger.error("rest callback params created with a wrong data type: $data");
     throw const ServerException(message: ErrorCodes.INVALID_DATA_TYPE);
   }
 

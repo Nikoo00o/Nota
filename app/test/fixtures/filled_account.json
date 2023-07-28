@@ -10,7 +10,8 @@
     {
       "JSON_ID": 1,
       "JSON_ENC_FILE_NAME": "test",
-      "JSON_LAST_EDITED": "2023-03-13T21:53:31.000"
+      "JSON_LAST_EDITED": "2023-03-13T21:53:31.000",
+      "JSON_NOTE_TYPE" : 0
     }
   ],
   "JSON_DECRYPTED_DATA_KEY": [

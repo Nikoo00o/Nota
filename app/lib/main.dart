@@ -60,6 +60,7 @@ void _initErrorCallbacks() {
     FlutterError.presentError(details);
     _handleError(details.exception, details.stack ?? StackTrace.current);
   };
+  // also handles the zone errors
   PlatformDispatcher.instance.onError = (Object error, StackTrace trace) {
     try {
       _handleError(error, trace);
@@ -72,6 +73,7 @@ void _initErrorCallbacks() {
 
 void _handleError(Object error, StackTrace trace) {
   if (error is BaseException) {
+    Logger.error("Exception", error, trace);
     sl<DialogService>().show(ShowErrorDialog(
       descriptionKey: error.message ?? "error.unknown",
       descriptionKeyParams: error.messageParams,
@@ -79,8 +81,9 @@ void _handleError(Object error, StackTrace trace) {
     if (sl<NavigationService>().currentRoute != Routes.login) {
       if (error.message == ErrorCodes.ACCOUNT_WRONG_PASSWORD ||
           error.message == ErrorCodes.httpStatusWith(HttpStatus.unauthorized)) {
+        Logger.debug("logging out, because of ErrorCodes.ACCOUNT_WRONG_PASSWORD, or HttpStatus.unauthorized");
         sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: true)); // important: navigate to the
-        // login page if the wrong password error  is thrown anywhere, because it means that the password might have been
+        // login page if the wrong password error is thrown anywhere, because it means that the password might have been
         // changed on a different device! the future can not be awaited here, but the dialog is shown to the user anyways.
       }
     }

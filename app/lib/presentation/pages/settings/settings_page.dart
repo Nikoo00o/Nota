@@ -13,7 +13,7 @@ import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:flutter/material.dart';
 
-class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
+final class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
   const SettingsPage() : super();
 
   @override
@@ -87,6 +87,13 @@ class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
             icon: Icons.save,
             isActive: state.autoSave,
             onChange: (bool value) => currentBloc(context).add(SettingsAutoSaveChanged(autoSave: value)),
+          ),
+          SettingsToggleOption(
+            titleKey: "page.settings.biometrics",
+            descriptionKey: "page.settings.biometrics.description",
+            icon: Icons.fingerprint,
+            isActive: state.biometrics,
+            onChange: (bool value) => currentBloc(context).add(SettingsBiometricsChanged(enabled: value)),
           ),
         ],
       );

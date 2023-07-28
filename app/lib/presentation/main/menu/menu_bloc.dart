@@ -1,11 +1,13 @@
 import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/routes.dart';
+import 'package:app/domain/entities/favourites.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/domain/usecases/account/change/activate_lock_screen.dart';
 import 'package:app/domain/usecases/account/change/change_auto_login.dart';
 import 'package:app/domain/usecases/account/change/logout_of_account.dart';
 import 'package:app/domain/usecases/account/get_user_name.dart';
+import 'package:app/domain/usecases/favourites/get_favourites.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_folders.dart';
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
@@ -18,7 +20,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
-class MenuBloc extends PageBloc<MenuEvent, MenuState> {
+final class MenuBloc extends PageBloc<MenuEvent, MenuState> {
   final GetUsername getUsername;
 
   // todo: currently the menu is recreated each time it is opened, so it does not need streamed changes. in the future it
@@ -30,6 +32,7 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
   final ChangeAutoLogin changeAutoLogin;
   final ActivateLockscreen activateLockscreen;
   final LogoutOfAccount logoutOfAccount;
+  final GetFavourites getFavourites;
   final AppConfig appConfig;
   late String? username;
 
@@ -49,6 +52,8 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
   /// key for closing the menu here
   final GlobalKey drawerKey = GlobalKey();
 
+  late Favourites userMenuEntries;
+
   MenuBloc({
     required this.getUsername,
     required this.getStructureFolders,
@@ -59,6 +64,7 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
     required this.changeAutoLogin,
     required this.activateLockscreen,
     required this.logoutOfAccount,
+    required this.getFavourites,
   }) : super(initialState: const MenuState());
 
   @override
@@ -73,6 +79,7 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
     currentPageTranslationKey = event.currentPageTranslationKey;
     currentPageTranslationKeyParams = event.currentPageTranslationKeyParams;
     noteFolders = await getStructureFolders.call(const GetStructureFoldersParams(includeMoveFolder: false));
+    userMenuEntries = await getFavourites.call(const NoParams());
     emit(_buildState());
   }
 
@@ -132,6 +139,20 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
 
   Future<void> _topLevelNoteFolderClicked(MenuItemClicked event, Emitter<MenuState> emit) async {
     await navigateToItem.call(NavigateToItemParamsTopLevelName(folderName: currentPageTranslationKey));
+    _navigateToNoteSelection();
+  }
+
+  Future<void> _userMenuEntryClicked(MenuItemClicked event, Emitter<MenuState> emit) async {
+    final Object? data = event.additionalData;
+    if (data is NoteFavourite) {
+      await navigateToItem.call(NavigateToItemParamsExact.note(data.id));
+    } else if (data is FolderFavourite) {
+      await navigateToItem.call(NavigateToItemParamsExact.folder(data.path));
+    }
+    _navigateToNoteSelection();
+  }
+
+  void _navigateToNoteSelection(){
     if (navigationService.currentRoute != Routes.note_selection) {
       // for performance, if already on the note selection page, the event stream will handle the updating
       navigationService.navigateTo(Routes.note_selection);
@@ -140,8 +161,6 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
     }
   }
 
-  Future<void> _userMenuEntryClicked(MenuItemClicked event, Emitter<MenuState> emit) async {}
-
   MenuState _buildState() {
     return MenuStateInitialised(
       username: username,
@@ -149,6 +168,7 @@ class MenuBloc extends PageBloc<MenuEvent, MenuState> {
       currentPageTranslationKeyParams: currentPageTranslationKeyParams,
       showDeveloperOptions: appConfig.showDeveloperOptions,
       topLevelFolders: noteFolders.keys.toList(),
+      userMenuEntries: userMenuEntries,
     );
   }
 }

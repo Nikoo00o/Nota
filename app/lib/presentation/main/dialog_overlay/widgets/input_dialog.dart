@@ -21,6 +21,16 @@ class _InputDialogState extends State<InputDialog> {
   bool _confirmButtonEnabled = false;
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Center(
       child: SingleChildScrollView(
@@ -61,9 +71,11 @@ class _InputDialogState extends State<InputDialog> {
   Widget _buildFormField(BuildContext context) {
     return CustomTextFormField(
       controller: controller,
+      autoFocus: event.autoFocus,
       validator: event.validatorCallback,
       textKey: event.inputLabelKey ?? "dialog.input.label",
       keyboardType: event.keyboardType,
+      onConfirm: event.autoFocus ? _confirm : null,
       onChanged: (String? input) {
         setState(() {
           if (input?.isEmpty ?? true) {
@@ -98,9 +110,11 @@ class _InputDialogState extends State<InputDialog> {
       style: event.confirmButtonStyle,
       defaultColor: _confirmButtonEnabled ? colors.tertiary : Theme.of(context).disabledColor,
       buttonEnabled: _confirmButtonEnabled,
-      onClick: () => bloc.add(HideDialog(dataForDialog: controller.text, cancelDialog: false)),
+      onClick: () => _confirm(),
     );
   }
+
+  void _confirm() => bloc.add(HideDialog(dataForDialog: controller.text, cancelDialog: false));
 
   Widget _buildButton({
     required String textKey,

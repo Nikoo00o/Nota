@@ -1,14 +1,14 @@
 import 'package:app/presentation/widgets/base_pages/page_state.dart';
 
-class LoginState extends PageState {
+base class LoginState extends PageState {
   const LoginState([super.properties = const <String, Object?>{}]);
 }
 
-class LoginRemoteState extends LoginState {
+final class LoginRemoteState extends LoginState {
   const LoginRemoteState();
 }
 
-class LoginLocalState extends LoginState {
+final class LoginLocalState extends LoginState {
   final String username;
 
   LoginLocalState({required this.username})
@@ -17,6 +17,11 @@ class LoginLocalState extends LoginState {
         });
 }
 
-class LoginCreateState extends LoginState {
+final class LoginCreateState extends LoginState {
   const LoginCreateState();
+}
+
+final class LoginErrorState extends LoginState {
+  final String dataFolderPath;
+  const LoginErrorState({required this.dataFolderPath});
 }

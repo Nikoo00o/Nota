@@ -3,6 +3,7 @@ import 'package:app/domain/repositories/account_repository.dart';
 import 'package:app/domain/usecases/account/save_account.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
+import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
 /// This returns the current logged in account (as a reference), or throws an exception if there is no cached account, or
@@ -30,6 +31,7 @@ class GetLoggedInAccount extends UseCase<ClientAccount, NoParams> {
   Future<ClientAccount> execute(NoParams params) async {
     final ClientAccount account = await accountRepository.getAccountAndThrowIfNull();
     if (account.isLoggedIn == false) {
+      Logger.error("account was not logged in");
       throw const ClientException(message: ErrorCodes.ACCOUNT_WRONG_PASSWORD); // data key is not available
     }
     return account;

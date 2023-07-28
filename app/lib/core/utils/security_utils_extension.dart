@@ -112,6 +112,9 @@ class SecurityUtilsExtension {
   ///
   /// The returned hash will be base 64 encoded!
   static Future<String> hashStringSecure(String input, String base64EncodedSalt) async {
+    if(input.isEmpty){
+      return "";
+    }
     final List<int> bytes = await hashBytesSecure(utf8.encode(input), base64Decode(base64EncodedSalt));
     return base64UrlEncode(bytes);
   }

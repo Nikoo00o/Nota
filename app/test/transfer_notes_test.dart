@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/client_account.dart';
+import 'package:app/domain/entities/note_content.dart';
 import 'package:app/domain/repositories/note_transfer_repository.dart';
 import 'package:app/domain/usecases/account/change/logout_of_account.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
@@ -11,6 +12,7 @@ import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
 import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/security_utils.dart';
 import 'package:shared/domain/usecases/usecase.dart';
@@ -63,7 +65,7 @@ void main() {
       );
       expect(account.noteInfoList.first.lastEdited, firstTime, reason: "should have the old time stamp");
 
-      final List<int> bytes2 = await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
+      final List<int> bytes2 = await loadNoteBytes(noteId: 1, noteType: NoteType.RAW_TEXT);
       expect(utf8.decode(bytes2), "test", reason: "should have the old note bytes downloaded again");
     });
 
@@ -94,8 +96,9 @@ void main() {
       expect(account.noteInfoList.first.lastEdited, newTime, reason: "should have the new time stamp");
 
       expect(() async {
-        await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
-      }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)), reason: "no file");
+        await loadNoteBytes(noteId: 1, noteType: NoteType.RAW_TEXT);
+      }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)),
+          reason: "no file");
     });
 
     test("Should do nothing without notes", () async {
@@ -117,7 +120,10 @@ void main() {
 
       // newer version on client
       final DateTime nextTime = await sl<StoreNoteEncrypted>().call(ChangeNoteEncryptedParams(
-          noteId: 1, decryptedName: "invalid", decryptedContent: Uint8List.fromList(utf8.encode("file"))));
+        noteId: 1,
+        decryptedName: "invalid",
+        decryptedContent: NoteContent.saveFile(decryptedContent: utf8.encode("file"), noteType: NoteType.RAW_TEXT),
+      ));
 
       await sl<TransferNotes>().call(const NoParams()); //next transfer to upload note again
 
@@ -129,7 +135,7 @@ void main() {
       );
       expect(account.noteInfoList.first.lastEdited, nextTime, reason: "should have the mew time stamp");
 
-      final List<int> bytes2 = await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
+      final List<int> bytes2 = await loadNoteBytes(noteId: 1, noteType: NoteType.RAW_TEXT);
       expect(utf8.decode(bytes2), "file", reason: "should have the new note bytes");
     });
 
@@ -150,7 +156,7 @@ void main() {
       );
       expect(account.noteInfoList.first.lastEdited, firstTime, reason: "should have the old time stamp");
 
-      final List<int> bytes2 = await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
+      final List<int> bytes2 = await loadNoteBytes(noteId: 1, noteType: NoteType.RAW_TEXT);
       expect(utf8.decode(bytes2), "test", reason: "should have the old note bytes downloaded again");
     });
   });
@@ -177,7 +183,7 @@ void main() {
     );
     expect(account.noteInfoList.first.lastEdited, firstTime, reason: "should have the old time stamp");
 
-    final List<int> bytes2 = await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
+    final List<int> bytes2 = await loadNoteBytes(noteId: 1, noteType: NoteType.RAW_TEXT);
     expect(utf8.decode(bytes2), "test", reason: "should have the old note bytes downloaded again");
   });
 
@@ -195,8 +201,9 @@ void main() {
     expect(account.noteInfoList.first.lastEdited, secondTime, reason: "should have the new time stamp");
 
     expect(() async {
-      await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
-    }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)), reason: "no file");
+      await loadNoteBytes(noteId: 1, noteType: NoteType.RAW_TEXT);
+    }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)),
+        reason: "no file");
   });
 
   test("Delete note on server side and delete local note as well", () async {
@@ -213,13 +220,15 @@ void main() {
     expect(account.noteInfoList.first.lastEdited, secondTime, reason: "should have the new time stamp");
 
     expect(() async {
-      await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
-    }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)), reason: "no file");
+      await loadNoteBytes(noteId: 1, noteType: NoteType.RAW_TEXT);
+    }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)),
+        reason: "no file");
   });
 
   test("Directly sending the server a deleted note", () async {
     final ClientAccount account = await _loginAndCreateNote();
-    final DateTime secondTime = await sl<StoreNoteEncrypted>().call(DeleteNoteEncryptedParams(noteId: -1)); //delete note
+    final DateTime secondTime =
+        await sl<StoreNoteEncrypted>().call(DeleteNoteEncryptedParams(noteId: -1)); //delete note
 
     dialogServiceMock.confirmedOverride = true; // should confirm the note transfer
     await sl<TransferNotes>().call(const NoParams()); // first transfer to upload note
@@ -229,8 +238,9 @@ void main() {
     expect(account.noteInfoList.first.lastEdited, secondTime, reason: "should have the new time stamp");
 
     expect(() async {
-      await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
-    }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)), reason: "no file");
+      await loadNoteBytes(noteId: 1, noteType: NoteType.RAW_TEXT);
+    }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)),
+        reason: "no file");
   });
 
   test("Getting a deleted note from the server with cached data", () async {
@@ -251,12 +261,13 @@ void main() {
     account.username = "dontCacheData"; // pretend that this is someone else, so that the logout does not cache!
     await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
     await loginToTestAccount(reuseOldNotes: true);
-    account = await sl<GetLoggedInAccount>().call(const NoParams()); //refresh account because of logout and get the old cached
+    account = await sl<GetLoggedInAccount>()
+        .call(const NoParams()); //refresh account because of logout and get the old cached
     // data
 
     expect(account.noteInfoList.length, 1, reason: "first account should have 1 note");
     expect(account.noteInfoList.first.encFileName, oldName, reason: "first name should be the old name");
-    await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1)); // and the file should also exist
+    await loadNoteBytes(noteId: 1, noteType: NoteType.RAW_TEXT); // and the file should also exist
 
     await sl<TransferNotes>().call(const NoParams()); // now from this transfer the note should get deleted
 
@@ -265,8 +276,9 @@ void main() {
     expect(account.noteInfoList.first.lastEdited, deleteTime, reason: "should have the new time stamp");
 
     expect(() async {
-      await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
-    }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)), reason: "no file");
+      await loadNoteBytes(noteId: 1, noteType: NoteType.RAW_TEXT);
+    }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)),
+        reason: "no file");
   });
 
   test("Directly getting a deleted note from the server", () async {
@@ -299,8 +311,9 @@ void main() {
     expect(account.noteInfoList.first.lastEdited, deletedTime, reason: "should have the new time stamp");
 
     expect(() async {
-      await sl<LoadNoteContent>().call(const LoadNoteContentParams(noteId: 1));
-    }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)), reason: "no file");
+      await loadNoteBytes(noteId: 1, noteType: NoteType.RAW_TEXT);
+    }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_FOUND)),
+        reason: "no file");
   });
 }
 
@@ -308,7 +321,10 @@ Future<ClientAccount> _loginAndCreateNote() async {
   await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
   await loginToTestAccount();
   await sl<StoreNoteEncrypted>().call(CreateNoteEncryptedParams(
-      noteId: -1, decryptedName: "name", decryptedContent: Uint8List.fromList(utf8.encode("test"))));
+    noteId: -1,
+    decryptedName: "name",
+    decryptedContent: NoteContent.saveFile(decryptedContent: utf8.encode("test"), noteType: NoteType.RAW_TEXT),
+  ));
   final ClientAccount account = await sl<GetLoggedInAccount>().call(const NoParams());
   return account;
 }

@@ -32,8 +32,10 @@
 </p>
 
 - Additionally on the top right you can open a menu to rename, delete, or move notes and folders except the top level folder 
-- You can also open the top left menu to navigate to another view of the notes which shows all notes without folders 
-  sorted by the latest edit 
+- You can also open the top left menu to navigate to other views of the notes via the quick access menu
+  - the "Root Folder" view shows all of your notes with the folder structure 
+  - the "Recent Notes" view which shows all notes without folders sorted by the latest edit
+  - other than that you can also mark your own notes, or folders as favourites, so they can also be accessed here
 - And of course the app also has some settings like for example activating the dark mode, but also an auto save and an 
   auto login feature 
 
@@ -72,6 +74,17 @@
   stores the content, but can't read it. The content is of course also saved the same way locally.
 - If you disable the auto login feature, then the key to decrypt the note content will only be kept in memory and it will 
   only be saved encrypted locally if you enable the auto login feature
+
+## Changelog 
+
+### Version 1.1.0 
+
+- improved some internal data handling and updated sdk and package versions and changed the apps bundle id 
+- added biometrics login and the possibility to mark notes, or folders as favourites
+
+### Version 1.0.2
+
+- initial release and beginning of changelog 
 
 ## Technical Details on building the projects 
 
@@ -112,7 +125,7 @@ flutter build ipa --release           # ios
 ### Configure the projects
 
 - you have to run the run configuration "Create New Keys" at least once, because it will create the "sensitive_data.dart" 
-  files with new random salts and keys
+  files inside of the config folders of each project with new random salts and keys
   - then you have to set the server hostname in `/shared/lib/core/config/sensitive_data.dart`
 - you also have to add a RSA private key named `key.pem` and the matching certificate named `certificate.pem`in the 
   folder `nota/server/notaRes` for debug mode, or inside of a folder named `data` next to the server exe in release mode
@@ -125,8 +138,7 @@ flutter build ipa --release           # ios
 
 - first install openssl 
 - then open a terminal and navigate to the folder `server/notaRes`
-- now enter the command `openssl req -x509 -sha256 -nodes -days 36500 -newkey rsa:4096 -keyout key.pem -out 
-  certificate.pem`
+- now enter the command `openssl req -x509 -sha256 -nodes -days 36500 -newkey rsa:4096 -keyout key.pem -out certificate.pem`
 - always enter `.` except for the common name, where you can enter anything you want
 
 ### Project Structure
@@ -169,5 +181,3 @@ flutter build ipa --release           # ios
     the server tests
 - the default log level for the tests can be changed inside of the file `nota/app/test/helper/app_test_helper.dart` in 
 the method `createCommonTestObjects`
-
-<!--- // todo: screenshots of the app should follow here -->

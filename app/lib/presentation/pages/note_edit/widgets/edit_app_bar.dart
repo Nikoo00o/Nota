@@ -6,7 +6,7 @@ import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
 import 'package:app/presentation/widgets/custom_icon_button.dart';
 import 'package:flutter/material.dart';
 
-class EditAppBar extends BlocPageChild<NoteEditBloc, NoteEditState> {
+final class EditAppBar extends BlocPageChild<NoteEditBloc, NoteEditState> {
   const EditAppBar();
 
   @override

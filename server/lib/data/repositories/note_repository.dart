@@ -281,6 +281,7 @@ class NoteRepository {
       id: noteUpdate.serverId,
       encFileName: noteUpdate.newEncFileName ?? "",
       lastEdited: noteUpdate.newLastEdited,
+      noteType: noteUpdate.noteType,
     ));
   }
 
@@ -353,6 +354,7 @@ class NoteRepository {
     int serverId = note.id;
     if (noteTransferStatus == NoteTransferStatus.SERVER_NEEDS_NEW) {
       if (note.id >= 0) {
+        Logger.error("transfer status was server needs new, but client id was bigger than 0 ${note.id}");
         throw const ServerException(message: ErrorCodes.SERVER_INVALID_REQUEST_VALUES);
       }
       serverId = await noteDataSource.getNewNoteCounter();
@@ -402,6 +404,7 @@ class NoteRepository {
       newEncFileName: newNote.encFileName != oldEncFileName ? newNote.encFileName : null,
       newLastEdited: newNote.lastEdited,
       noteTransferStatus: noteTransferStatus,
+      noteType: newNote.noteType,
     );
   }
 

@@ -20,10 +20,20 @@ class CustomTextFormField extends WidgetBase {
   /// Used for passwords
   final bool obscureText;
 
+  /// called with the current text when the user enters something with the keyboard
   final ValueChanged<String>? onChanged;
+
+  /// called when the user presses the confirm button on the keyboard
+  final VoidCallback? onConfirm;
 
   /// can be used to limit the keyboard
   final TextInputType? keyboardType;
+
+  /// used to control focus of the text field
+  final FocusNode? focusNode;
+
+  /// if this text field should be focused automatically
+  final bool autoFocus;
 
   const CustomTextFormField({
     super.key,
@@ -33,17 +43,23 @@ class CustomTextFormField extends WidgetBase {
     required this.textKey,
     this.textKeyParams,
     this.onChanged,
+    this.onConfirm,
     this.keyboardType,
+    this.focusNode,
+    this.autoFocus = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      focusNode: focusNode,
+      autofocus: autoFocus,
       keyboardType: keyboardType,
       controller: controller,
       validator: validator,
       obscureText: obscureText,
       onChanged: onChanged,
+      onEditingComplete: onConfirm,
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.fromLTRB(8, 12, 8, 8),
         labelText: translate(context, textKey, keyParams: textKeyParams),

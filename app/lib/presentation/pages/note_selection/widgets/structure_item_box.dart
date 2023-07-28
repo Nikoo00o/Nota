@@ -1,3 +1,5 @@
+import 'package:app/core/config/app_config.dart';
+import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
@@ -8,7 +10,7 @@ import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
 import 'package:app/presentation/widgets/custom_card.dart';
 import 'package:flutter/material.dart';
 
-class StructureItemBox extends BlocPageChild<NoteSelectionBloc, NoteSelectionState> {
+final class StructureItemBox extends BlocPageChild<NoteSelectionBloc, NoteSelectionState> {
   final StructureItem item;
   final int index;
   static const double iconSize = 30;
@@ -50,7 +52,9 @@ class StructureItemBox extends BlocPageChild<NoteSelectionBloc, NoteSelectionSta
     Map<int, String>? noteContentMap,
     DateTime lastNoteTransferTime,
   ) {
-    if (searchString == null || item.containsName(searchString) || _containsNoteContent(searchString, noteContentMap)) {
+    if (searchString == null ||
+        item.containsName(searchString, caseSensitive: getIt<AppConfig>().searchCaseSensitive) ||
+        _containsNoteContent(searchString, noteContentMap)) {
       return CustomCard(
         color: item is StructureFolder ? colorSecondaryContainer(context) : colorPrimaryContainer(context),
         onTap: () => currentBloc(context).add(NoteSelectionItemClicked(index: index)),

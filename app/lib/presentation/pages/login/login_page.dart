@@ -8,7 +8,7 @@ import 'package:app/presentation/pages/login/widgets/login_inputs.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:flutter/material.dart';
 
-class LoginPage extends BlocPage<LoginBloc, LoginState> {
+final class LoginPage extends BlocPage<LoginBloc, LoginState> {
   const LoginPage() : super();
 
   @override
@@ -26,9 +26,9 @@ class LoginPage extends BlocPage<LoginBloc, LoginState> {
         child: SingleChildScrollView(
           controller: currentBloc(context).scrollController,
           padding: const EdgeInsets.fromLTRB(40, 5, 40, 5),
-          child: Column(
+          child: const Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const <Widget>[
+            children:  <Widget>[
               LoginDescription(),
               SizedBox(height: 25),
               LoginInputs(),

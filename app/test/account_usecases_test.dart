@@ -16,17 +16,19 @@ import 'package:app/domain/usecases/account/login/login_to_account.dart';
 import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/data/models/note_info_model.dart';
 import 'package:shared/domain/entities/note_info.dart';
 import 'package:shared/domain/entities/session_token.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
-import '../../server/test/helper/server_test_helper.dart' as server; // relative import of the server test helpers, so that
+import '../../server/test/helper/server_test_helper.dart'
+    as server; // relative import of the server test helpers, so that
 // the real server responses can be used for testing instead of mocks! The server tests should be run before!
 import 'helper/app_test_helper.dart';
 
-const int _serverPort = 9196; // also needs to be a different port for each test file. The app tests dont have to care
+const int _serverPort = 9197; // also needs to be a different port for each test file. The app tests dont have to care
 // about the server errors!
 
 void main() {
@@ -78,7 +80,8 @@ void _testCreateAccount() {
     expect(cachedAccount.username, "test2", reason: "username should match");
     expect(cachedAccount, storedAccount, reason: "accounts should match");
     expect(server.accountRepository.getAccountByUsername("test1"), isNot(null), reason: "server should have account 1");
-    expect(server.accountRepository.getAccountByUsername("test2"), isNot(null), reason: "and server should have account 2");
+    expect(server.accountRepository.getAccountByUsername("test2"), isNot(null),
+        reason: "and server should have account 2");
   });
 }
 
@@ -167,7 +170,8 @@ Future<ClientAccount> _remoteLogin(String username, String password) async {
   RequiredLoginStatus loginStatus = await sl<GetRequiredLoginStatus>().call(const NoParams());
   expect(loginStatus, RequiredLoginStatus.REMOTE, reason: "before it should require a remote login");
 
-  await sl<LoginToAccount>().call(LoginToAccountParamsRemote(username: username, password: password, reuseOldNotes: false));
+  await sl<LoginToAccount>()
+      .call(LoginToAccountParamsRemote(username: username, password: password, reuseOldNotes: false));
   final ClientAccount cachedAccount = await sl<AccountRepository>().getAccountAndThrowIfNull();
   loginStatus = await sl<GetRequiredLoginStatus>().call(const NoParams());
 
@@ -221,7 +225,9 @@ void _testLogoutOfAccount() {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
     await loginToTestAccount();
 
-    final List<NoteInfo> notes = <NoteInfo>[NoteInfoModel(id: -1, encFileName: "test", lastEdited: DateTime.now())];
+    final List<NoteInfo> notes = <NoteInfo>[
+      NoteInfoModel(id: -1, encFileName: "test", lastEdited: DateTime.now(), noteType: NoteType.RAW_TEXT)
+    ];
     final ClientAccount cachedAccount = await sl<AccountRepository>().getAccountAndThrowIfNull();
     cachedAccount.noteInfoList = notes;
 
@@ -243,7 +249,9 @@ void _testLogoutOfAccount() {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
     await loginToTestAccount();
 
-    final List<NoteInfo> notes = <NoteInfo>[NoteInfoModel(id: -1, encFileName: "test", lastEdited: DateTime.now())];
+    final List<NoteInfo> notes = <NoteInfo>[
+      NoteInfoModel(id: -1, encFileName: "test", lastEdited: DateTime.now(), noteType: NoteType.RAW_TEXT)
+    ];
     final ClientAccount account = await sl<AccountRepository>().getAccountAndThrowIfNull();
     account.noteInfoList = notes;
 
@@ -262,7 +270,9 @@ void _testLogoutOfAccount() {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
     await loginToTestAccount();
 
-    final List<NoteInfo> notes = <NoteInfo>[NoteInfoModel(id: -1, encFileName: "test", lastEdited: DateTime.now())];
+    final List<NoteInfo> notes = <NoteInfo>[
+      NoteInfoModel(id: -1, encFileName: "test", lastEdited: DateTime.now(), noteType: NoteType.RAW_TEXT)
+    ];
     final ClientAccount account = await sl<AccountRepository>().getAccountAndThrowIfNull();
     account.noteInfoList = notes;
     await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
@@ -278,12 +288,15 @@ void _testLogoutOfAccount() {
     expect(jsonEncode(account.noteInfoList), jsonEncode(notes), reason: "test1 should have the notes");
   });
 
-  test("Login to a different account after logout should restore the note info list without a create in between", () async {
+  test("Login to a different account after logout should restore the note info list without a create in between",
+      () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test2", password: "password2"));
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
     await loginToTestAccount();
 
-    final List<NoteInfo> notes = <NoteInfo>[NoteInfoModel(id: -1, encFileName: "test", lastEdited: DateTime.now())];
+    final List<NoteInfo> notes = <NoteInfo>[
+      NoteInfoModel(id: -1, encFileName: "test", lastEdited: DateTime.now(), noteType: NoteType.RAW_TEXT)
+    ];
     final ClientAccount account = await sl<AccountRepository>().getAccountAndThrowIfNull();
     account.noteInfoList = notes;
     await sl<LogoutOfAccount>().call(const LogoutOfAccountParams(navigateToLoginPage: false));
@@ -329,7 +342,8 @@ void _testFetchCurrentSessionToken() {
 
   test("Trying to get session token with an invalid account stored", () async {
     await sl<CreateAccount>().call(const CreateAccountParams(username: "test1", password: "password1"));
-    await sl<AccountRepository>().saveAccount(ClientAccount.defaultValues(username: "invalid", passwordHash: "invalid"));
+    await sl<AccountRepository>()
+        .saveAccount(ClientAccount.defaultValues(username: "invalid", passwordHash: "invalid"));
     expect(() async {
       await fetchCurrentSessionToken();
     }, throwsA(predicate((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_UNKNOWN_ACCOUNT)));

@@ -128,11 +128,11 @@ class NoteDataSource {
     if (transferToken != null) {
       return "${_transferTempBasePath(transferToken)}$noteId$fileEnding";
     } else {
-      return "$_baseDir$noteId$fileEnding";
+      return "$_baseDir${Platform.pathSeparator}$noteId$fileEnding";
     }
   }
 
-  String _transferTempBasePath(String transferToken) => "$_baseDir${transferToken}_";
+  String _transferTempBasePath(String transferToken) => "$_baseDir${Platform.pathSeparator}${transferToken}_";
 
-  String get _baseDir => "${serverConfig.noteFolder}${Platform.pathSeparator}";
+  String get _baseDir => serverConfig.noteFolder;
 }

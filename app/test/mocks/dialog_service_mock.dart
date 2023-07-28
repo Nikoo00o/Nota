@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/services/dialog_service.dart';
 
@@ -89,8 +91,5 @@ class DialogServiceMock extends DialogService {
   void hideLoadingDialog() {}
 
   @override
-  bool get isDialogVisible => false;
-
-  @override
-  bool get isLoading => false;
+  StreamSubscription<DialogOverlayEvent>? listen(void Function(DialogOverlayEvent) callback) => null;
 }

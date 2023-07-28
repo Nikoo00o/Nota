@@ -6,17 +6,21 @@ import 'package:app/core/get_it.dart';
 import 'package:app/core/utils/security_utils_extension.dart';
 import 'package:app/data/datasources/local_data_source.dart';
 import 'package:app/domain/entities/client_account.dart';
+import 'package:app/domain/entities/note_content.dart';
 import 'package:app/domain/repositories/account_repository.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/account/login/login_to_account.dart';
 import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
+import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
 import 'package:app/services/dialog_service.dart';
 import 'package:shared/core/enums/log_level.dart';
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/data/datasources/rest_client.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
-import '../../../server/test/helper/server_test_helper.dart' as server; // relative import of the server test helpers, so
+import '../../../server/test/helper/server_test_helper.dart'
+    as server; // relative import of the server test helpers, so
 // that the real server responses can be used for testing instead of mocks! The server tests should be run before!
 import '../mocks/app_config_mock.dart';
 import '../mocks/argon_wrapper_mock.dart';
@@ -30,7 +34,8 @@ late DialogServiceMock dialogServiceMock;
 ///
 /// You can also set a new default [logLevel] in this method params for all tests.
 Future<void> createCommonTestObjects({required int serverPort, LogLevel logLevel = LogLevel.VERBOSE}) async {
-  await server.createCommonTestObjects(serverPort: serverPort, logLevel: logLevel); // init the server test helper objects
+  await server.createCommonTestObjects(
+      serverPort: serverPort, logLevel: logLevel); // init the server test helper objects
   // this will also init the dart console logger
 
   await initializeGetIt(); // init the app singletons
@@ -70,6 +75,12 @@ Future<ClientAccount> loginToTestAccount({bool reuseOldNotes = false}) async {
   return account;
 }
 
+Future<List<int>> loadNoteBytes({required int noteId, required NoteType noteType}) async {
+  final NoteContent content =
+      await sl<LoadNoteContent>().call(LoadNoteContentParams(noteId: noteId, noteType: noteType));
+  return content.text;
+}
+
 /// For recent the notes are ordered as followed:
 ///
 /// fourth
@@ -102,7 +113,7 @@ Future<ClientAccount> loginToTestAccount({bool reuseOldNotes = false}) async {
 /// first.
 Future<void> createSomeTestNotes() async {
   int counter = -1;
-  final Uint8List content = Uint8List.fromList(utf8.encode("123"));
+  final NoteContent content = NoteContent.saveFile(decryptedContent: utf8.encode("123"), noteType: NoteType.RAW_TEXT);
   await sl<StoreNoteEncrypted>()
       .call(CreateNoteEncryptedParams(noteId: counter--, decryptedName: "first", decryptedContent: content));
   await Future<void>.delayed(const Duration(milliseconds: 10));

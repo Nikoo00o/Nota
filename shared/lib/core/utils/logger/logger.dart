@@ -80,7 +80,15 @@ class Logger {
   static bool canLog(LogLevel targetLevel) => targetLevel.index <= _instance!.logLevel.index;
 
   /// returns the current log level of the logger
-  static LogLevel get currentLogLevel => _instance!.logLevel;
+  static LogLevel get currentLogLevel {
+    assert(_instance != null, "logger not initialised");
+    return _instance!.logLevel;
+  }
+
+  static set currentLogLevel(LogLevel newLogLevel) {
+    assert(_instance != null, "logger not initialised");
+    _instance!.logLevel = newLogLevel;
+  }
 
   /// The main log method that is called by the static log methods. will log to console, storage, etc...
   Future<void> log(String? message, LogLevel level, Object? error, StackTrace? stackTrace) async {
@@ -99,7 +107,8 @@ class Logger {
 
     //var s = stdout.terminalColumns;
 
-    await _lock.synchronized(() => logToStorage(logMessage)); // the static log methods will not await this, so it has to
+    await _lock
+        .synchronized(() => logToStorage(logMessage)); // the static log methods will not await this, so it has to
     // be synchronized!
   }
 

@@ -5,11 +5,14 @@ import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
 import 'package:app/presentation/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
 
-class LoginInputs extends BlocPageChild<LoginBloc, LoginState> {
+final class LoginInputs extends BlocPageChild<LoginBloc, LoginState> {
   const LoginInputs();
 
   @override
   Widget buildWithState(BuildContext context, LoginState state) {
+    if (state is LoginErrorState) {
+      return const SizedBox();
+    }
     const double space = 15; //height between fields
     return Form(
       autovalidateMode: AutovalidateMode.always,

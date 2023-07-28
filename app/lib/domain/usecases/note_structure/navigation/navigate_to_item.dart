@@ -41,7 +41,8 @@ class NavigateToItem extends UseCase<void, NavigateToItemParams> {
     final StructureItem newItem = getNewItem(params);
 
     noteStructureRepository.currentItem = newItem;
-    Logger.debug("Navigated to the new current item path ${newItem.path} with the parent ${newItem.topMostParent.name}");
+    Logger.debug(
+        "Navigated to the new current item path ${newItem.path} with the parent ${newItem.topMostParent.name}");
 
     // at the end send a new update event to the ui!
     await addNewStructureUpdateBatch.call(const NoParams());
@@ -58,8 +59,8 @@ class NavigateToItem extends UseCase<void, NavigateToItemParams> {
         throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
       }
     } else if (params is NavigateToItemParamsTopLevelName) {
-      final Iterable<StructureFolder?> iterator =
-          noteStructureRepository.topLevelFolders.where((StructureFolder? element) => element?.name == params.folderName);
+      final Iterable<StructureFolder?> iterator = noteStructureRepository.topLevelFolders
+          .where((StructureFolder? element) => element?.name == params.folderName);
       if (iterator.isNotEmpty && iterator.first != null) {
         return iterator.first!;
       } else {
@@ -73,6 +74,8 @@ class NavigateToItem extends UseCase<void, NavigateToItemParams> {
         throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
       }
       return newItem;
+    } else if(params is NavigateToItemParamsExact){
+      return getExactItem(params);
     }
 
     throw UnimplementedError();
@@ -111,14 +114,28 @@ class NavigateToItem extends UseCase<void, NavigateToItemParams> {
 
     throw UnimplementedError();
   }
+
+  StructureItem getExactItem(NavigateToItemParamsExact params){
+    StructureItem? newItem;
+    if(params.path != null){
+      newItem = noteStructureRepository.root!.getFolderByPath(params.path!, deepCopy: false);
+    } else if(params.id!=null){
+      newItem = noteStructureRepository.root!.getNoteById(params.id!);
+    }
+    if (newItem == null) {
+      Logger.error("The exact item with the path: ${params.path} and the id ${params.id} was not found!");
+      throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
+    }
+    return newItem;
+  }
 }
 
-abstract class NavigateToItemParams {
+sealed class NavigateToItemParams {
   const NavigateToItemParams();
 }
 
 /// base class for all child navigation params
-abstract class _NavigateToItemParamsChild extends NavigateToItemParams {
+sealed class _NavigateToItemParamsChild extends NavigateToItemParams {
   const _NavigateToItemParamsChild();
 }
 
@@ -126,7 +143,7 @@ abstract class _NavigateToItemParamsChild extends NavigateToItemParams {
 ///
 /// Throws [ErrorCodes.INVALID_PARAMS] if the [childIndex] was equal, or higher than the amount of children. Or if the
 /// [NoteStructureRepository.currentItem] is not a folder.
-class NavigateToItemParamsChild extends _NavigateToItemParamsChild {
+final class NavigateToItemParamsChild extends _NavigateToItemParamsChild {
   final int childIndex;
 
   const NavigateToItemParamsChild({required this.childIndex});
@@ -138,7 +155,7 @@ class NavigateToItemParamsChild extends _NavigateToItemParamsChild {
 ///
 /// Throws [ErrorCodes.INVALID_PARAMS] if the child was not found. Or if the
 /// [NoteStructureRepository.currentItem] is not a folder.
-class NavigateToItemParamsChildNoteById extends _NavigateToItemParamsChild {
+final class NavigateToItemParamsChildNoteById extends _NavigateToItemParamsChild {
   final int noteId;
 
   const NavigateToItemParamsChildNoteById({required this.noteId});
@@ -148,7 +165,7 @@ class NavigateToItemParamsChildNoteById extends _NavigateToItemParamsChild {
 ///
 /// Throws [ErrorCodes.INVALID_PARAMS] if the child was not found. Or if the
 /// [NoteStructureRepository.currentItem] is not a folder.
-class NavigateToItemParamsChildFolderByName extends _NavigateToItemParamsChild {
+final class NavigateToItemParamsChildFolderByName extends _NavigateToItemParamsChild {
   final String folderName;
 
   const NavigateToItemParamsChildFolderByName({required this.folderName});
@@ -159,14 +176,14 @@ class NavigateToItemParamsChildFolderByName extends _NavigateToItemParamsChild {
 /// Items in recent will directly navigate to recent itself.
 ///
 /// If the parent is null, then this throws [ErrorCodes.INVALID_PARAMS].
-class NavigateToItemParamsParent extends NavigateToItemParams {
+final class NavigateToItemParamsParent extends NavigateToItemParams {
   const NavigateToItemParamsParent();
 }
 
 /// Navigates to the specific top level item at the specified index.
 ///
 /// Throws [ErrorCodes.INVALID_PARAMS] if the [topLevelIndex] was equal, or higher than the amount of top level items.
-class NavigateToItemParamsTopLevel extends NavigateToItemParams {
+final class NavigateToItemParamsTopLevel extends NavigateToItemParams {
   final int topLevelIndex;
 
   const NavigateToItemParamsTopLevel({required this.topLevelIndex});
@@ -174,9 +191,25 @@ class NavigateToItemParamsTopLevel extends NavigateToItemParams {
 
 /// Navigates to the specific top level folder with the specific name.
 ///
-/// Throws [ErrorCodes.INVALID_PARAMS] the [folderName] was not found!
-class NavigateToItemParamsTopLevelName extends NavigateToItemParams {
+/// Throws [ErrorCodes.INVALID_PARAMS] if the [folderName] was not found!
+final class NavigateToItemParamsTopLevelName extends NavigateToItemParams {
   final String folderName;
 
   const NavigateToItemParamsTopLevelName({required this.folderName});
+}
+
+/// Navigates to the exact item (either folder, or note) by using [NoteStructureRepository.root] to find the item by
+/// its path, or id!
+///
+/// Throws [ErrorCodes.INVALID_PARAMS] if the [path], or [id] was not found! Either one of those is null
+final class NavigateToItemParamsExact extends NavigateToItemParams {
+  /// used to identify a folder
+  final String? path;
+
+  /// used to identify a note
+  final int? id;
+
+  const NavigateToItemParamsExact.note(int this.id) : path = null;
+
+  const NavigateToItemParamsExact.folder(String this.path) : id = null;
 }

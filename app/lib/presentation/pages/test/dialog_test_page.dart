@@ -10,7 +10,7 @@ import 'package:app/services/navigation_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
-class DialogTestPage extends NoBlocPage {
+final class DialogTestPage extends NoBlocPage {
   const DialogTestPage() : super(pagePadding: const EdgeInsets.fromLTRB(0, 0, 0, 0));
 
   @override
@@ -22,21 +22,21 @@ class DialogTestPage extends NoBlocPage {
         children: <Widget>[
           FilledButton(
             onPressed: () {
-              sl<DialogOverlayBloc>().add(const ShowInfoSnackBar(textKey: "some long long info text yay"));
+              sl<DialogService>().show(const ShowInfoSnackBar(textKey: "some long long info text yay"));
             },
             child: const Text("test snack"),
           ),
           FilledButton(
             onPressed: () {
-              sl<DialogOverlayBloc>().add(const ShowInfoDialog(descriptionKey: "some long description, yay"));
+              sl<DialogService>().show(const ShowInfoDialog(descriptionKey: "some long description, yay"));
             },
             child: const Text("test info dialog"),
           ),
           FilledButton(
             onPressed: () async {
-              sl<DialogOverlayBloc>().add(const ShowLoadingDialog());
+              sl<DialogService>().show(const ShowLoadingDialog());
               await Future<void>.delayed(const Duration(seconds: 4));
-              sl<DialogOverlayBloc>().add(const HideLoadingDialog());
+              sl<DialogService>().show(const HideLoadingDialog());
             },
             child: const Text("test loading dialog"),
           ),
@@ -76,9 +76,31 @@ class DialogTestPage extends NoBlocPage {
                 onCancel: () {
                   Logger.verbose("CANCELLED");
                 },
+                autoFocus: false,
               ));
             },
             child: const Text("test input dialog "),
+          ),
+          FilledButton(
+            onPressed: () async {
+              sl<DialogService>().show(ShowInputDialog(
+                descriptionKey: "auto focus 4 chars",
+                onConfirm: (String data) {
+                  Logger.verbose("CONFIRMED $data");
+                },
+                validatorCallback: (String? input) {
+                  if (input != null && input.length < 4) {
+                    return "more chars";
+                  }
+                  return null;
+                },
+                onCancel: () {
+                  Logger.verbose("CANCELLED");
+                },
+                autoFocus: true,
+              ));
+            },
+            child: const Text("test input dialog with auto focus"),
           ),
           FilledButton(
             onPressed: () async {

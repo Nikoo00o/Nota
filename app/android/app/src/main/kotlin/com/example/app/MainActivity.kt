@@ -1,6 +1,7 @@
-package com.nota.app
+package com.Nikoo00o.nota.app
 
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity;
 
-class MainActivity: FlutterActivity() {
+class MainActivity: FlutterFragmentActivity () {
+    // FlutterFragmentActivity is needed for local_auth package for biometrics
 }

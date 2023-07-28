@@ -1,3 +1,4 @@
+import 'package:app/core/config/sensitive_data.dart';
 import 'package:app/core/constants/locales.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -17,6 +18,9 @@ class AppConfig extends SharedConfig {
 
   String get appTitle => "Nota";
 
+  /// Used when creating the user key from the password (which will only be stored inside the app)
+  String get userKeySalt => SensitiveData.userKeySalt;
+
   /// If the app was in the background for this amount of time, then a new local login with the password will be needed if
   /// the accounts auto login setting is set to false!
   Duration get defaultLockscreenTimeout => const Duration(seconds: 30);
@@ -27,4 +31,7 @@ class AppConfig extends SharedConfig {
   LogLevel get defaultLogLevel => LogLevel.VERBOSE;
 
   int get amountOfLogsToKeep => 350;
+
+  /// if the note search should be case sensitive, or compare everything as lowercase
+  bool get searchCaseSensitive => false;
 }

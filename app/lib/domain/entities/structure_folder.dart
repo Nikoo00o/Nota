@@ -2,9 +2,13 @@ import 'package:app/core/enums/note_sorting.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
+/// A folder is uniquely identified by its full [path]!
+///
+/// Here the [noteType] is always [NoteType.FOLDER]
 class StructureFolder extends StructureItem {
   /// The folders and files within this folder.
   ///
@@ -30,10 +34,12 @@ class StructureFolder extends StructureItem {
     required bool changeParentOfChildren,
     bool changeCanBeModifiedOfChildrenRecursively = false,
   }) {
+    // note type is always FOLDER!
     final StructureFolder folder = StructureFolder._internal(
       name: name,
       directParent: directParent,
       canBeModified: canBeModified,
+      noteType: NoteType.FOLDER,
       children: List<StructureItem>.empty(growable: true),
       sorting: sorting,
     );
@@ -54,6 +60,7 @@ class StructureFolder extends StructureItem {
     required super.name,
     required super.directParent,
     required super.canBeModified,
+    required super.noteType,
     required List<StructureItem> children,
     required this.sorting,
   })  : _children = children,
@@ -82,6 +89,7 @@ class StructureFolder extends StructureItem {
   /// Can throw [ErrorCodes.INVALID_PARAMS].
   void removeChild(int position) {
     if (position >= _children.length) {
+      Logger.error("$position was too high");
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
     _children.removeAt(position);
@@ -92,6 +100,7 @@ class StructureFolder extends StructureItem {
   void removeChildRef(StructureItem oldChild) {
     final bool removed = _children.remove(oldChild);
     if (removed == false) {
+      Logger.error("$oldChild was not found");
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
   }
@@ -100,6 +109,7 @@ class StructureFolder extends StructureItem {
   /// Can throw [ErrorCodes.INVALID_PARAMS] and sorts the children.
   void changeChild(int position, StructureItem newChild) {
     if (position >= _children.length) {
+      Logger.error("$position was too high");
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
     _children[position] = StructureItem.deepCopy(newChild, newDirectParent: this, changeParentOfChildren: true);
@@ -127,6 +137,7 @@ class StructureFolder extends StructureItem {
         return newChild;
       }
     }
+    Logger.error("$oldChild was not found");
     throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
   }
 
@@ -134,6 +145,7 @@ class StructureFolder extends StructureItem {
   /// Can throw [ErrorCodes.INVALID_PARAMS].
   StructureItem getChild(int position) {
     if (position >= _children.length) {
+      Logger.error("$position was too high");
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
     return _children.elementAt(position);
@@ -245,7 +257,8 @@ class StructureFolder extends StructureItem {
       first.name.toLowerCase().compareTo(second.name.toLowerCase());
 
   /// Compares 2 structure items by the newest modified time stamp first in descending order
-  static int _sortByDate(StructureItem first, StructureItem second) => second.lastModified.compareTo(first.lastModified);
+  static int _sortByDate(StructureItem first, StructureItem second) =>
+      second.lastModified.compareTo(first.lastModified);
 
   @override
   DateTime get lastModified {
@@ -298,12 +311,18 @@ class StructureFolder extends StructureItem {
   }
 
   @override
-  bool containsName(String pattern) {
-    if (name.contains(pattern)) {
-      return true;
+  bool containsName(String pattern, {required bool caseSensitive}) {
+    if (caseSensitive) {
+      if (name.contains(pattern)) {
+        return true;
+      }
+    } else {
+      if (name.toLowerCase().contains(pattern.toLowerCase())) {
+        return true;
+      }
     }
     for (final StructureItem child in _children) {
-      if (child.containsName(pattern)) {
+      if (child.containsName(pattern, caseSensitive: caseSensitive)) {
         return true;
       }
     }

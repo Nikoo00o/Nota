@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:app/domain/entities/note_content.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
@@ -8,6 +9,7 @@ import 'package:app/domain/usecases/note_structure/inner/get_original_structure_
 import 'package:app/domain/usecases/note_structure/inner/update_note_structure.dart';
 import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
 import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
@@ -50,7 +52,7 @@ class CreateStructureItem extends UseCase<void, CreateStructureItemParams> {
     final StructureItem currentFolder = await getOriginalStructureItem.call(const NoParams());
     late final StructureItem newItem;
 
-    if (noteStructureRepository.currentItem!.topMostParent.isRecent && params.isFolder) {
+    if (noteStructureRepository.currentItem!.topMostParent.isRecent && params.noteType == NoteType.FOLDER) {
       Logger.error("The current item is inside of recent and the target is to create a folder");
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
@@ -62,10 +64,10 @@ class CreateStructureItem extends UseCase<void, CreateStructureItemParams> {
 
     StructureItem.throwErrorForName(params.name);
 
-    if (params.isFolder) {
+    if (params.noteType == NoteType.FOLDER) {
       newItem = await _createFolder(currentFolder, params.name);
     } else {
-      newItem = await _createNote(currentFolder, params.name);
+      newItem = await _createNote(currentFolder, params.name, params.noteType);
     }
 
     Logger.info("Created the new item:\n$newItem");
@@ -97,7 +99,7 @@ class CreateStructureItem extends UseCase<void, CreateStructureItemParams> {
     ));
   }
 
-  Future<StructureItem> _createNote(StructureFolder currentFolder, String newName) async {
+  Future<StructureItem> _createNote(StructureFolder currentFolder, String newName, NoteType type) async {
     // first get new note client id
     final int noteId = await noteStructureRepository.getNewClientNoteCounter();
 
@@ -105,7 +107,7 @@ class CreateStructureItem extends UseCase<void, CreateStructureItemParams> {
     final DateTime timeStamp = await storeNoteEncrypted.call(CreateNoteEncryptedParams(
       noteId: noteId,
       decryptedName: currentFolder.getPathForChildName(newName),
-      decryptedContent: Uint8List(0),
+      decryptedContent: NoteContent.saveFile(decryptedContent: <int>[], noteType: type),
     ));
 
     // then update note in structure
@@ -115,6 +117,7 @@ class CreateStructureItem extends UseCase<void, CreateStructureItemParams> {
       canBeModified: true,
       id: noteId,
       lastModified: timeStamp,
+      noteType: type,
     ));
   }
 }
@@ -122,19 +125,22 @@ class CreateStructureItem extends UseCase<void, CreateStructureItemParams> {
 class CreateStructureItemParams {
   final String name;
 
-  /// If this is false, then the newly created item will be a note.
-  final bool isFolder;
+  /// What kind of note this is. this can also be a folder
+  final NoteType noteType;
 
   const CreateStructureItemParams({
     required this.name,
-    required this.isFolder,
+    required this.noteType,
   });
 
+  /// creates a raw text note
   const CreateStructureItemParams.note({
     required String name,
-  }) : this(name: name, isFolder: false);
+  }) : this(name: name, noteType: NoteType.RAW_TEXT);
 
   CreateStructureItemParams.folder({
     required String name,
-  }) : this(name: name, isFolder: true);
+  }) : this(name: name, noteType: NoteType.FOLDER);
+
+//todo: for now there is only the raw text note option
 }

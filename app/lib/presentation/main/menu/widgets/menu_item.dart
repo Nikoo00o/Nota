@@ -1,20 +1,34 @@
+import 'package:app/domain/entities/favourites.dart';
 import 'package:app/presentation/main/menu/menu_bloc.dart';
 import 'package:app/presentation/main/menu/menu_event.dart';
 import 'package:app/presentation/main/menu/menu_state.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
 import 'package:flutter/material.dart';
+import 'package:shared/core/utils/logger/logger.dart';
 
-class MenuItem extends BlocPageChild<MenuBloc, MenuState> {
+final class MenuItem extends BlocPageChild<MenuBloc, MenuState> {
   /// This is also used to identify the current page of the menu and it is also used to return the fitting icon internally!
   final String pageTitleKey;
   final List<String>? pageTitleKeyParams;
   final double iconSize;
 
+  /// this is used for the custom user menu entries to store the [Favourite] object used for identification!
+  final Object? additionalData;
+
   const MenuItem({
     required this.pageTitleKey,
     this.pageTitleKeyParams,
     this.iconSize = 30,
+    this.additionalData,
   });
+
+  factory MenuItem.fromFavourite(Favourite favourite) {
+    return MenuItem(
+      pageTitleKey: "empty.param.1",
+      pageTitleKeyParams: <String>[favourite.name],
+      additionalData: favourite,
+    );
+  }
 
   @override
   Widget buildWithState(BuildContext context, MenuState state) {
@@ -39,12 +53,14 @@ class MenuItem extends BlocPageChild<MenuBloc, MenuState> {
           currentBloc(context).add(MenuItemClicked(
             targetPageTranslationKey: pageTitleKey,
             targetPageTranslationKeyParams: pageTitleKeyParams,
+            additionalData: additionalData,
           ));
         },
       ),
     );
   }
 
+  // todo: important: this does not show the custom user entries highlighted
   bool _isCurrentPage(MenuState state) {
     return state is MenuStateInitialised &&
         state.currentPageTranslationKey == pageTitleKey &&
@@ -89,9 +105,12 @@ class MenuItem extends BlocPageChild<MenuBloc, MenuState> {
 
   /// user generated menu entries that do not have a translation key
   IconData? _getCustomUserIcon() {
-    switch (pageTitleKeyParams) {
-      default:
-        return null;
+    if (additionalData is NoteFavourite) {
+      return Icons.sticky_note_2_outlined;
+    } else if (additionalData is FolderFavourite) {
+      return Icons.folder;
     }
+
+    return null;
   }
 }

@@ -1,6 +1,8 @@
 import 'package:app/presentation/main/app/widgets/custom_app_localizations.dart';
 import 'package:flutter/material.dart';
 
+/// Immutable widget base class with some useful helper functions
+@immutable
 abstract class WidgetBase extends StatelessWidget {
   const WidgetBase({super.key});
 

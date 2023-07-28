@@ -1,10 +1,12 @@
+import 'dart:io';
+
 import 'package:app/presentation/pages/login/login_bloc.dart';
 import 'package:app/presentation/pages/login/login_state.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
 import 'package:app/presentation/widgets/nota_icon.dart';
 import 'package:flutter/material.dart';
 
-class LoginDescription extends BlocPageChild<LoginBloc, LoginState> {
+final class LoginDescription extends BlocPageChild<LoginBloc, LoginState> {
   const LoginDescription();
 
   @override
@@ -17,7 +19,7 @@ class LoginDescription extends BlocPageChild<LoginBloc, LoginState> {
         const NotaIcon(),
         const SizedBox(height: 25),
         Text(
-          translate(context, _getPageDescription(state)),
+          translate(context, _getPageDescription(state), keyParams: _getPageDescriptionKeys(state)),
           style: textBodyLarge(context),
           textAlign: TextAlign.center,
           // textAlign: TextAlign.center,
@@ -64,6 +66,16 @@ class LoginDescription extends BlocPageChild<LoginBloc, LoginState> {
     if (state is LoginRemoteState) {
       return "page.login.description.remote.login";
     }
+    if (state is LoginErrorState) {
+      return "page.login.description.restart";
+    }
     return "empty";
+  }
+
+  List<String>? _getPageDescriptionKeys(LoginState state) {
+    if (state is LoginErrorState && (Platform.isMacOS || Platform.isWindows || Platform.isLinux)) {
+      return <String>["\n${state.dataFolderPath}"];
+    }
+    return null;
   }
 }

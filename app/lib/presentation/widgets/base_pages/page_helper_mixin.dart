@@ -6,7 +6,7 @@ import 'package:app/services/navigation_service.dart';
 import 'package:flutter/material.dart';
 
 /// Provides some helper functions to both [PageBase] and [BlocPageChild] for navigating, etc.
-class PageHelperMixin {
+mixin PageHelperMixin {
   /// Navigates to the given [route] by using the [NavigationService].
   ///
   /// This is for navigating with routes!

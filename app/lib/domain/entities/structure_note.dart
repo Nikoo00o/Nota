@@ -6,7 +6,11 @@ import 'package:shared/domain/entities/note_info.dart';
 ///
 /// The decrypted name of a note is the [path] and note the [name]!
 ///
-/// The [id] and [lastModified] are the same as in [NoteInfo]
+/// The [id] and [lastModified] are the same as in [NoteInfo].
+///
+/// Here a note is deleted when it is [null] (removed from the structure)!
+///
+/// A note is uniquely identified by its [id], but the [name] might be shared across multiple notes!
 class StructureNote extends StructureItem {
   /// The noteId
   final int id;
@@ -19,6 +23,7 @@ class StructureNote extends StructureItem {
     required super.name,
     required StructureFolder? directParent,
     required super.canBeModified,
+    required super.noteType,
     required this.id,
     required this.lastModified,
   }) : super(directParent: directParent, additionalProperties: <String, Object?>{
@@ -41,9 +46,16 @@ class StructureNote extends StructureItem {
       canBeModified: newCanBeModified ?? canBeModified,
       id: newId ?? id,
       lastModified: newLastModified ?? lastModified,
+      noteType: noteType,
     );
   }
 
   @override
-  bool containsName(String pattern) => name.contains(pattern);
+  bool containsName(String pattern, {required bool caseSensitive}) {
+    if (caseSensitive) {
+      return name.contains(pattern);
+    } else {
+      return name.toLowerCase().contains(pattern.toLowerCase());
+    }
+  }
 }

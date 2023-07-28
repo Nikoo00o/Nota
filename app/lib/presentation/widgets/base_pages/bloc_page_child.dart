@@ -17,7 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// around the [buildWithState].
 ///
 /// The Template types are first [Bloc], then [State].
-abstract class BlocPageChild<Bloc extends PageBloc<PageEvent, State>, State extends PageState> extends WidgetBase
+abstract base class BlocPageChild<Bloc extends PageBloc<PageEvent, State>, State extends PageState> extends WidgetBase
     with PageHelperMixin {
   const BlocPageChild({super.key});
 

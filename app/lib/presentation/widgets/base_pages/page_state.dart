@@ -10,6 +10,6 @@ import 'package:shared/core/utils/immutable_equatable.dart';
 /// You can also add a copyWith method if you need to store copies of the state, but otherwise don't cache states which
 /// should be directly emitted!
 @immutable
-abstract class PageState extends ImmutableEquatable {
+abstract base class PageState extends ImmutableEquatable {
   const PageState(super.properties);
 }

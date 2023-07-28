@@ -56,6 +56,7 @@ class UpdateNoteStructure extends UseCase<void, UpdateNoteStructureParams> {
   @override
   Future<void> execute(UpdateNoteStructureParams params) async {
     if (noteStructureRepository.root == null) {
+      Logger.error("root was null when calling update note structure");
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
 

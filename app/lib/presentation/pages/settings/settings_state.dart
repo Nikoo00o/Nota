@@ -1,16 +1,17 @@
 import 'package:app/presentation/widgets/base_pages/page_state.dart';
 
-class SettingsState extends PageState {
+base class SettingsState extends PageState {
   const SettingsState([super.properties = const <String, Object?>{}]);
 }
 
-class SettingsStateInitialised extends SettingsState {
+final class SettingsStateInitialised extends SettingsState {
   final bool isDarkTheme;
   final int localeIndex;
   final List<String> localeOptions;
   final bool autoLogin;
   final String lockscreenTimeoutInSeconds;
   final bool autoSave;
+  final bool biometrics;
 
   SettingsStateInitialised({
     required this.isDarkTheme,
@@ -19,6 +20,7 @@ class SettingsStateInitialised extends SettingsState {
     required this.autoLogin,
     required this.lockscreenTimeoutInSeconds,
     required this.autoSave,
+    required this.biometrics,
   }) : super(<String, Object?>{
           "isDarkTheme": isDarkTheme,
           "localeIndex": localeIndex,
@@ -26,5 +28,6 @@ class SettingsStateInitialised extends SettingsState {
           "autoLogin": autoLogin,
           "lockscreenTimeoutInSeconds": lockscreenTimeoutInSeconds,
           "autoSave": autoSave,
+          "biometrics": biometrics,
         });
 }

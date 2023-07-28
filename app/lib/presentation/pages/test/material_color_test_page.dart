@@ -6,7 +6,7 @@ import 'package:app/presentation/widgets/base_pages/no_bloc_page.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:flutter/material.dart';
 
-class MaterialColorTestPage extends NoBlocPage {
+final class MaterialColorTestPage extends NoBlocPage {
   const MaterialColorTestPage() : super(pagePadding: const EdgeInsets.fromLTRB(0, 0, 0, 0));
 
   @override

@@ -9,13 +9,14 @@ import 'package:app/presentation/pages/note_selection/note_selection_event.dart'
 import 'package:app/presentation/pages/note_selection/note_selection_state.dart';
 import 'package:app/presentation/pages/note_selection/widgets/current_folder_info.dart';
 import 'package:app/presentation/pages/note_selection/widgets/selection_bottom_bar.dart';
+import 'package:app/presentation/pages/note_selection/widgets/selection_favourite_toggle.dart';
 import 'package:app/presentation/pages/note_selection/widgets/selection_popup_menu.dart';
 import 'package:app/presentation/pages/note_selection/widgets/selection_search_bar.dart';
 import 'package:app/presentation/pages/note_selection/widgets/structure_item_box.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:flutter/material.dart';
 
-class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> {
+final class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> {
   const NoteSelectionPage() : super(pagePadding: const EdgeInsets.fromLTRB(5, 0, 5, 0));
 
   @override
@@ -72,7 +73,9 @@ class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> 
         style: textTitleLarge(context).copyWith(fontWeight: FontWeight.bold),
       ),
       centerTitle: false,
+      titleSpacing: 8,
       actions: const <Widget>[
+        SelectionFavouriteToggle(),
         SelectionPopupMenu(),
       ],
     );

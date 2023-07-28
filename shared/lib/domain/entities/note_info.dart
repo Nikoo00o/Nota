@@ -1,3 +1,4 @@
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/domain/entities/entity.dart';
 
 // ignore_for_file: hash_and_equals
@@ -18,11 +19,15 @@ class NoteInfo extends Entity {
   /// The TimeStamp for when the note was edited the last time
   final DateTime lastEdited;
 
-  NoteInfo({required this.id, required this.encFileName, required this.lastEdited})
+  /// what kind of note this is
+  final NoteType noteType;
+
+  NoteInfo({required this.id, required this.encFileName, required this.lastEdited, required this.noteType})
       : super(<String, Object?>{
           "id": id,
           "encFileName": encFileName,
           "lastEdited": lastEdited,
+          "noteType": noteType,
         });
 
   /// Creates a copy of this entity and changes the members to the parameters if they are not null.
@@ -32,11 +37,12 @@ class NoteInfo extends Entity {
   /// value (with either null, or a concrete value)
   ///
   /// Needs to be overridden in the model as well!
-  NoteInfo copyWith({int? newId, String? newEncFileName, DateTime? newLastEdited}) {
+  NoteInfo copyWith({int? newId, String? newEncFileName, DateTime? newLastEdited, NoteType? newNoteType}) {
     return NoteInfo(
       id: newId ?? id,
       encFileName: newEncFileName ?? encFileName,
       lastEdited: newLastEdited ?? lastEdited,
+      noteType: newNoteType ?? noteType,
     );
   }
 

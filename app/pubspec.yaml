@@ -2,11 +2,11 @@ name: app
 description: The App Part of Nota
 publish_to: 'none'
 
-version: 1.0.2
+version: 1.1.0
 
 environment:
-  sdk: '>=2.19.2 <3.0.0'
-  flutter: ^3.7.8
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: ^3.10.6
 
 dependencies:
   flutter:
@@ -17,31 +17,32 @@ dependencies:
   cupertino_icons: ^1.0.2 # default icons
   meta: ^1.8.0 # annotations like immutable
   get_it: ^7.2.0 # service locator
-  flutter_bloc: ^8.1.2 # BLoC state management
-  tuple: 2.0.1 # tuples
-  path_provider: ^2.0.14 # application directory path
+  flutter_bloc: ^8.1.3 # BLoC state management
+  tuple: 2.0.2 # tuples
+  path_provider: ^2.0.15 # application directory path
   hive: ^2.2.3 # nosql database
   hive_flutter: ^1.1.0 # flutter extension for hive
+  local_auth: ^2.1.6 # biometric
   flutter_secure_storage: ^8.0.0 # secure storage for keys in keychain, or keystore. NEEDS LINUX SPECIFIC SETUP!
   cryptography: 2.5.0 # basic cryptographic functions (like aes encryption)
   cryptography_flutter: 2.3.0 # better flutter performance for base package
-  dargon2_flutter: 3.2.0 # argon2 implementation. MIGHT NEED IOS specific setup! for ios version 2.1.0 is needed for now!!!
-  flutter_svg: ^2.0.4 # svg images
-  flutter_native_splash: ^2.2.19 # splash screen. NEEDS IOS SPECIFIC SETUP!
-  flutter_launcher_icons: ^0.12.0 # app launcher icon
-  flutter_keyboard_visibility: 5.4.0 # keyboard visibility callback
-  url_launcher: 6.1.10 # open urls
-  intl: ^0.17.0 # internationalization
+  dargon2_flutter: 3.3.0 # argon2 implementation. MIGHT NEED IOS specific setup! ios version 2.1.0 is needed for now
+  flutter_svg: ^2.0.7 # svg images
+  flutter_native_splash: ^2.3.1 # splash screen. NEEDS IOS SPECIFIC SETUP!
+  flutter_launcher_icons: ^0.13.1 # app launcher icon
+  flutter_keyboard_visibility: 5.4.1 # keyboard visibility callback
+  url_launcher: 6.1.12 # open urls
+  intl: ^0.18.0 # internationalization
   localization: 2.1.0 # localization
   flutter_localizations:
     sdk: flutter
 
 dev_dependencies:
-  test: ^1.22.0 # dart test package
+  test: ^1.24.1 # dart test package
   flutter_test: # flutter test package
     sdk: flutter
 
-  flutter_lints: ^2.0.1 # linter rules
+  flutter_lints: ^2.0.2 # linter rules
 
   server: # server project is needed only for testing
     path: ../server

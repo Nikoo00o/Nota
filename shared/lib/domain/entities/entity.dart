@@ -16,7 +16,7 @@ abstract class Entity extends ImmutableEquatable {
 
   /// This can be returned inside of the [operator ==] if you want to compare the entities without their runtimetype.
   ///
-  /// This is useful so that comparing models and entities still returns tru!
+  /// This is useful so that comparing models and entities still returns true!
   bool compareWithoutRuntimeType(Object other) =>
       identical(this, other) || other is Entity && ListUtils.equals(props, other.props);
 }

@@ -5,6 +5,7 @@ import 'package:shared/core/constants/endpoints.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/constants/rest_json_parameter.dart';
 import 'package:shared/core/enums/note_transfer_status.dart';
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/data/dtos/account/account_change_password_request.dart';
@@ -32,7 +33,8 @@ void main() {
   });
 
   tearDown(() async {
-    await cleanupTestFilesAndServer(deleteTestFolderAfterwards: true); // cleanup server and hive test data after every test
+    await cleanupTestFilesAndServer(
+        deleteTestFolderAfterwards: true); // cleanup server and hive test data after every test
     // (this callback will be run after each test)
   });
 
@@ -84,11 +86,13 @@ Future<void> _noteTests() async {
 
 Future<void> _firstTransfer() async {
   _account1.noteInfoList = <NoteInfoModel>[
-    NoteInfoModel(id: -1, encFileName: "c1_1", lastEdited: _now.subtract(const Duration(days: 5))),
+    NoteInfoModel(
+        id: -1, encFileName: "c1_1", lastEdited: _now.subtract(const Duration(days: 5)), noteType: NoteType.RAW_TEXT),
   ];
 
   _account2.noteInfoList = <NoteInfoModel>[
-    NoteInfoModel(id: -1, encFileName: "c2_1", lastEdited: _now.subtract(const Duration(days: 5))),
+    NoteInfoModel(
+        id: -1, encFileName: "c2_1", lastEdited: _now.subtract(const Duration(days: 5)), noteType: NoteType.RAW_TEXT),
   ];
 
   Logger.info("starting first transfers to add some notes to the server");
@@ -126,7 +130,8 @@ Future<void> _firstTransfer() async {
   await _finishTransfer(_account2, transfer2.transferToken, shouldCancel: false);
 
   expect(() async {
-    await _finishTransfer(_account1, invalidTransfer.transferToken, shouldCancel: false); // already cancelled by transfer1
+    await _finishTransfer(_account1, invalidTransfer.transferToken,
+        shouldCancel: false); // already cancelled by transfer1
   }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN));
   await Future<void>.delayed(const Duration(milliseconds: 25));
 
@@ -134,7 +139,8 @@ Future<void> _firstTransfer() async {
   await _finishTransfer(_account3, emptyTransfer.transferToken, shouldCancel: false);
 
   expect(() async {
-    await _finishTransfer(_account3, emptyTransfer.transferToken, shouldCancel: false); //cancelled from last finish call
+    await _finishTransfer(_account3, emptyTransfer.transferToken,
+        shouldCancel: false); //cancelled from last finish call
   }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN));
   await Future<void>.delayed(const Duration(milliseconds: 25));
 
@@ -142,17 +148,21 @@ Future<void> _firstTransfer() async {
   _account1.noteInfoList[0] = NoteInfoModel(
       id: transfer1.noteUpdates.first.serverId,
       encFileName: "c1_1_changed",
-      lastEdited: _account1.noteInfoList.first.lastEdited.subtract(const Duration(days: 1)));
+      lastEdited: _account1.noteInfoList.first.lastEdited.subtract(const Duration(days: 1)),
+      noteType: NoteType.RAW_TEXT);
   _account2.noteInfoList[0] = NoteInfoModel(
       id: transfer2.noteUpdates.first.serverId,
       encFileName: "c2_1_changed",
-      lastEdited: _account2.noteInfoList.first.lastEdited.add(const Duration(days: 1)));
+      lastEdited: _account2.noteInfoList.first.lastEdited.add(const Duration(days: 1)),
+      noteType: NoteType.RAW_TEXT);
 }
 
 Future<void> _secondTransfer() async {
-  _account1.noteInfoList.add(NoteInfoModel(id: -2, encFileName: "c1_2", lastEdited: _now.subtract(const Duration(days: 5))));
+  _account1.noteInfoList.add(NoteInfoModel(
+      id: -2, encFileName: "c1_2", lastEdited: _now.subtract(const Duration(days: 5)), noteType: NoteType.RAW_TEXT));
 
-  _account2.noteInfoList.add(NoteInfoModel(id: -3, encFileName: "c2_2", lastEdited: _now.subtract(const Duration(days: 5))));
+  _account2.noteInfoList.add(NoteInfoModel(
+      id: -3, encFileName: "c2_2", lastEdited: _now.subtract(const Duration(days: 5)), noteType: NoteType.RAW_TEXT));
 
   Logger.info("starting second transfers to change some notes");
 
@@ -182,7 +192,8 @@ Future<void> _secondTransfer() async {
   Logger.info("uploading notes");
   await _upload(_account1, transfer1.transferToken, transfer1.noteUpdates[1].serverId, utf8.encode("c1_2_text"));
 
-  await _upload(_account2, transfer2.transferToken, transfer2.noteUpdates.first.serverId, utf8.encode("c2_1_changed_text"));
+  await _upload(
+      _account2, transfer2.transferToken, transfer2.noteUpdates.first.serverId, utf8.encode("c2_1_changed_text"));
   await _upload(_account2, transfer2.transferToken, transfer2.noteUpdates[1].serverId, utf8.encode("c2_2_text"));
 
   Logger.info("finishing transfers");
@@ -234,10 +245,10 @@ Future<void> _fourthTransfer() async {
 void _addNotes(ServerAccountModel account, List<NoteUpdateModel> noteUpdates) {
   for (final NoteUpdateModel noteUpdate in noteUpdates) {
     account.noteInfoList.add(NoteInfoModel(
-      id: noteUpdate.serverId,
-      encFileName: noteUpdate.newEncFileName ?? "",
-      lastEdited: noteUpdate.newLastEdited,
-    ));
+        id: noteUpdate.serverId,
+        encFileName: noteUpdate.newEncFileName ?? "",
+        lastEdited: noteUpdate.newLastEdited,
+        noteType: NoteType.RAW_TEXT));
   }
 }
 
@@ -247,7 +258,8 @@ void _expectClientNeedsNew(NoteUpdateModel noteUpdate) {
 
 DateTime _now = DateTime.now();
 
-Future<AccountChangePasswordResponse> _changePasswordOfTestAccount(ServerAccountModel accountWithChangedPassword) async {
+Future<AccountChangePasswordResponse> _changePasswordOfTestAccount(
+    ServerAccountModel accountWithChangedPassword) async {
   fetchCurrentSessionTokenMock.sessionTokenOverride = accountWithChangedPassword.sessionToken!;
   final Map<String, dynamic> json = await restClient.sendJsonRequest(
     endpoint: Endpoints.ACCOUNT_CHANGE_PASSWORD,
@@ -265,6 +277,7 @@ Future<AccountLoginResponse> _loginToAccount(ServerAccountModel account) async {
     bodyData: AccountLoginRequest(
       username: account.username,
       passwordHash: account.passwordHash,
+      createAccountToken: serverConfigMock.createAccountToken,
     ).toJson(),
   );
   return AccountLoginResponse.fromJson(json);

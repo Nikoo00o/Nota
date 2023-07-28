@@ -12,7 +12,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 ///
 /// You can also override [enableLoadingDialog] in your subclass if every event handler should automatically display a
 /// loading dialog during its work!
-abstract class PageBloc<Event extends PageEvent, State extends PageState> extends Bloc<Event, State> {
+abstract base class PageBloc<Event extends PageEvent, State extends PageState> extends Bloc<Event, State> {
   /// Initial state reference
   final State initialState;
 

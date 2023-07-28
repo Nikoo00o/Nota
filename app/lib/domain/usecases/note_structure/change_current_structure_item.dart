@@ -1,3 +1,4 @@
+import 'package:app/domain/entities/note_content.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
@@ -101,9 +102,15 @@ class ChangeCurrentStructureItem extends UseCase<void, ChangeCurrentStructureIte
       newPath = note.path;
     }
 
+    NoteContent? content;
+
+    if (newContent != null) {
+      content = NoteContent.saveFile(decryptedContent: newContent, noteType: note.noteType);
+    }
+
     // first update stored note
     final DateTime newTime = await storeNoteEncrypted
-        .call(ChangeNoteEncryptedParams(noteId: note.id, decryptedName: newPath, decryptedContent: newContent));
+        .call(ChangeNoteEncryptedParams(noteId: note.id, decryptedName: newPath, decryptedContent: content));
 
     // then update note structure
     final StructureNote newNote = note.copyWith(newName: newName, newLastModified: newTime);

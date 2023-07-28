@@ -8,7 +8,7 @@ import 'package:app/presentation/widgets/custom_outlined_button.dart';
 import 'package:app/presentation/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
 
-class ChangePasswordPage extends ReuseBlocPage<SettingsBloc, SettingsState> {
+final class ChangePasswordPage extends ReuseBlocPage<SettingsBloc, SettingsState> {
   const ChangePasswordPage({required super.bloc});
 
   @override

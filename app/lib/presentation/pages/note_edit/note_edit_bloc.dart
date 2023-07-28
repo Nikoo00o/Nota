@@ -1,13 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/utils/input_validator.dart';
 import 'package:app/core/utils/security_utils_extension.dart';
+import 'package:app/domain/entities/note_content.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/entities/structure_update_batch.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';
+import 'package:app/domain/usecases/favourites/change_favourite.dart';
+import 'package:app/domain/usecases/favourites/is_favourite.dart';
 import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
@@ -30,7 +34,7 @@ import 'package:shared/core/utils/list_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
-class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
+final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
   /// This will be updated as deep copies (so it can be used as a reference inside of the state)
   late StructureItem currentItem;
 
@@ -43,6 +47,8 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
   final LoadNoteBuffer loadNoteBuffer;
   final AppSettingsRepository appSettingsRepository;
   final GetCurrentStructureItem getCurrentStructureItem;
+  final IsFavourite isFavourite;
+  final ChangeFavourite changeFavourite;
 
   final GetStructureUpdatesStream getStructureUpdatesStream;
 
@@ -63,6 +69,8 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
   /// calculated from the loaded note to test if the user changed something
   List<int>? noteHash;
 
+  bool favourite = false;
+
   NoteEditBloc({
     required this.navigationService,
     required this.startMoveStructureItem,
@@ -76,6 +84,8 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
     required this.getStructureUpdatesStream,
     required this.loadNoteContent,
     required this.changeCurrentStructureItem,
+    required this.isFavourite,
+    required this.changeFavourite,
   }) : super(initialState: const NoteEditState());
 
   @override
@@ -88,6 +98,7 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
     on<NoteEditInputSaved>(_handleInputSaved);
     on<NoteEditSearchStepped>(_handleSearchStep);
     on<NoteEditAppPaused>(_handleAppPaused);
+    on<NoteEditChangeFavourite>(_handleChangeFavourite);
   }
 
   @override
@@ -111,7 +122,8 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
 
     inputFocus.addListener(() {
       if (inputFocus.hasFocus) {
-        add(const NoteEditUpdatedState(didSearchChange: false)); // important: rebuild state only if input received the focus
+        add(const NoteEditUpdatedState(didSearchChange: false)); // important: rebuild state only if input received
+        // the focus
       }
     });
     searchFocus.addListener(() {
@@ -123,8 +135,8 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
 
     // init first item and init stream
     add(NoteEditStructureChanged(newCurrentItem: await getCurrentStructureItem.call(const NoParams())));
-    subscription =
-        await getStructureUpdatesStream.call(GetStructureUpdatesStreamParams(callbackFunction: (StructureUpdateBatch batch) {
+    subscription = await getStructureUpdatesStream
+        .call(GetStructureUpdatesStreamParams(callbackFunction: (StructureUpdateBatch batch) {
       add(NoteEditStructureChanged(newCurrentItem: batch.currentItem));
     }));
   }
@@ -136,8 +148,10 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
     if (currentItem is StructureNote) {
       if (noteHash == null) {
         Logger.verbose("loading initial note content");
-        final List<int> data = await loadNoteContent(LoadNoteContentParams(noteId: (currentItem as StructureNote).id));
-        noteHash = await SecurityUtilsExtension.hashBytesAsync(data);
+        final StructureNote note = currentItem as StructureNote;
+        final NoteContent data = await loadNoteContent(LoadNoteContentParams(noteId: note.id, noteType: note.noteType));
+
+        noteHash = await SecurityUtilsExtension.hashBytesAsync(data.text);
         final String? bufferedData = await loadNoteBuffer(const NoParams());
         if (bufferedData != null) {
           inputController.text = bufferedData; // restore and reset buffered data after pausing the app and coming back
@@ -147,12 +161,14 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
             inputFocus.requestFocus();
           }
         } else {
-          inputController.text = utf8.decode(data);
+          inputController.text = utf8.decode(data.text);
         }
       }
+      favourite = await isFavourite.call(IsFavouriteParams.fromItem(currentItem));
       emit(_buildState());
     } else {
-      navigationService.navigateTo(Routes.note_selection); // will be called automatically from _handleNavigatedBack below
+      navigationService
+          .navigateTo(Routes.note_selection); // will be called automatically from _handleNavigatedBack below
     }
     dialogService.hideLoadingDialog();
   }
@@ -214,6 +230,7 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
       descriptionKey: "note.selection.create.folder.description",
       validatorCallback: (String? input) =>
           InputValidator.validateNewItem(input, isFolder: true, parent: currentItem.getParent()),
+      autoFocus: true,
     ));
     final String? name = await completer.future;
     if (name != null) {
@@ -271,7 +288,11 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
 
   Future<void> _handleAppPaused(NoteEditAppPaused event, Emitter<NoteEditState> emit) async {
     if (noteHash != null && await hasContentChanged(updateOldHash: false)) {
-      await saveNoteBuffer(SaveNoteBufferParams(content: inputController.text));
+      if (await appSettingsRepository.getAutoSave()) {
+        await _saveInputIfChanged();
+      } else {
+        await saveNoteBuffer(SaveNoteBufferParams(content: inputController.text));
+      }
     }
   }
 
@@ -289,6 +310,12 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
     await saveNoteBuffer(const SaveNoteBufferParams(content: null));
   }
 
+  Future<void> _handleChangeFavourite(NoteEditChangeFavourite event, Emitter<NoteEditState> emit) async {
+    favourite = event.isFavourite;
+    await changeFavourite.call(ChangeFavouriteParams(isFavourite: favourite, item: currentItem));
+    emit(_buildState());
+  }
+
   /// only if [currentItem] is [StructureNote]
   NoteEditState _buildState() {
     if (currentItem is StructureNote) {
@@ -298,6 +325,7 @@ class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
         currentSearchPosition: inputController.currentSearchPosition.toString(),
         searchPositionSize: inputController.searchPositionAmount.toString(),
         searchLength: inputController.searchSize,
+        isFavourite: favourite,
       );
     } else {
       return const NoteEditState();

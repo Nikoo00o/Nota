@@ -173,6 +173,7 @@ Future<AccountLoginResponse> loginToTestAccount(int testNumber) async {
     bodyData: AccountLoginRequest(
       username: getTestAccount(testNumber).username,
       passwordHash: getTestAccount(testNumber).passwordHash,
+      createAccountToken: serverConfigMock.createAccountToken,
     ).toJson(),
   );
   return AccountLoginResponse.fromJson(json);

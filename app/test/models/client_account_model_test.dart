@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:app/data/models/client_account_model.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/data/models/note_info_model.dart';
 import 'package:shared/data/models/session_token_model.dart';
 import 'package:shared/domain/entities/note_info.dart';
@@ -79,16 +80,18 @@ void main() {
       final Map<String, dynamic> json =
           jsonDecode(fixture("filled_account.json", removeFormatting: true)) as Map<String, dynamic>;
       final ClientAccountModel model = ClientAccountModel.fromJson(json);
-      final NoteInfoModel noteInfo = NoteInfoModel(id: 2, encFileName: "2", lastEdited: DateTime.now());
+      final NoteInfoModel noteInfo =
+          NoteInfoModel(id: 2, encFileName: "2", lastEdited: DateTime.now(), noteType: NoteType.RAW_TEXT);
       model.noteInfoList.add(noteInfo);
       expect(model.noteInfoList.last, noteInfo);
     });
 
     test("add a note info entity after fromJson", () async {
       final Map<String, dynamic> json =
-      jsonDecode(fixture("filled_account.json", removeFormatting: true)) as Map<String, dynamic>;
+          jsonDecode(fixture("filled_account.json", removeFormatting: true)) as Map<String, dynamic>;
       final ClientAccountModel model = ClientAccountModel.fromJson(json);
-      final NoteInfo noteInfo = NoteInfo(id: 2, encFileName: "2", lastEdited: DateTime.now());
+      final NoteInfo noteInfo =
+          NoteInfo(id: 2, encFileName: "2", lastEdited: DateTime.now(), noteType: NoteType.RAW_TEXT);
       model.noteInfoList.add(noteInfo);
       expect(model.noteInfoList.last, noteInfo);
     });
@@ -116,7 +119,7 @@ ClientAccountModel _getFilledModel({required bool storeDecryptedKey}) {
     passwordHash: "test",
     sessionToken: SessionTokenModel(validTo: date, token: "test"),
     encryptedDataKey: "test",
-    noteInfoList: <NoteInfo>[NoteInfoModel(id: 1, lastEdited: date, encFileName: "test")],
+    noteInfoList: <NoteInfo>[NoteInfoModel(id: 1, lastEdited: date, encFileName: "test", noteType: NoteType.RAW_TEXT)],
     decryptedDataKey: Uint8List.fromList(<int>[1, 2, 3, 4]),
     storeDecryptedDataKey: storeDecryptedKey,
     needsServerSideLogin: true,
@@ -129,7 +132,7 @@ ClientAccountModel _getFilledWithEntityInside() {
     passwordHash: "test",
     sessionToken: SessionToken(validTo: date, token: "test"),
     encryptedDataKey: "test",
-    noteInfoList: <NoteInfo>[NoteInfo(id: 1, lastEdited: date, encFileName: "test")],
+    noteInfoList: <NoteInfo>[NoteInfo(id: 1, lastEdited: date, encFileName: "test", noteType: NoteType.RAW_TEXT)],
     decryptedDataKey: Uint8List.fromList(<int>[1, 2, 3, 4]),
     storeDecryptedDataKey: true,
     needsServerSideLogin: true,

@@ -1,6 +1,7 @@
 import 'package:app/core/constants/locales.dart';
 import 'package:app/core/utils/input_validator.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';
+import 'package:app/domain/repositories/biometrics_repository.dart';
 import 'package:app/domain/usecases/account/change/change_account_password.dart';
 import 'package:app/domain/usecases/account/change/change_auto_login.dart';
 import 'package:app/domain/usecases/account/get_auto_login.dart';
@@ -17,14 +18,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
-class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
+final class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
   final AppSettingsRepository appSettingsRepository;
   final NavigationService navigationService;
   final DialogService dialogService;
   final ChangeAccountPassword changeAccountPassword;
-  final AppBloc appBloc;
   final GetAutoLogin getAutoLogin;
   final ChangeAutoLogin changeAutoLogin;
+  final BiometricsRepository biometricsRepository;
 
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController passwordConfirmController = TextEditingController();
@@ -36,9 +37,9 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
     required this.navigationService,
     required this.dialogService,
     required this.changeAccountPassword,
-    required this.appBloc,
     required this.getAutoLogin,
     required this.changeAutoLogin,
+    required this.biometricsRepository,
   }) : super(initialState: const SettingsState());
 
   @override
@@ -51,6 +52,7 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
     on<SettingsNavigatedToChangePasswordPage>(_handleNavigatedToChangePasswordPage);
     on<SettingsPasswordChanged>(_handlePasswordChanged);
     on<SettingsAutoSaveChanged>(_handleAutoSaveChanged);
+    on<SettingsBiometricsChanged>(_handleBiometricsChanged);
   }
 
   Future<void> _handleInitialise(SettingsEventInitialise event, Emitter<SettingsState> emit) async {
@@ -59,7 +61,6 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
 
   Future<void> _handleDarkThemeChange(SettingsDarkThemeChanged event, Emitter<SettingsState> emit) async {
     await appSettingsRepository.setDarkTheme(useDarkTheme: event.isDarkTheme);
-    appBloc.add(AppUpdateTheme(useDarkTheme: event.isDarkTheme)); // update the app and force a rebuild
     emit(await _buildState());
   }
 
@@ -69,7 +70,6 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
       newLocale = Locales.supportedLocales[event.index];
     }
     await appSettingsRepository.setLocale(newLocale);
-    appBloc.add(AppUpdateLocale(await appSettingsRepository.getCurrentLocale())); // update the app and force a rebuild
     emit(await _buildState());
   }
 
@@ -78,7 +78,8 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
     emit(await _buildState());
   }
 
-  Future<void> _handleLockscreenTimeoutChanged(SettingsLockscreenTimeoutChanged event, Emitter<SettingsState> emit) async {
+  Future<void> _handleLockscreenTimeoutChanged(
+      SettingsLockscreenTimeoutChanged event, Emitter<SettingsState> emit) async {
     await appSettingsRepository.setLockscreenTimeout(duration: Duration(seconds: int.parse(event.timeoutInSeconds)));
     emit(await _buildState());
   }
@@ -111,6 +112,11 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
     emit(await _buildState());
   }
 
+  Future<void> _handleBiometricsChanged(SettingsBiometricsChanged event, Emitter<SettingsState> emit) async {
+    await biometricsRepository.enableBiometrics(enabled: event.enabled);
+    emit(await _buildState());
+  }
+
   Future<SettingsState> _buildState() async {
     final Duration timeout = await appSettingsRepository.getLockscreenTimeout();
     return SettingsStateInitialised(
@@ -120,6 +126,7 @@ class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
       autoLogin: await getAutoLogin.call(const NoParams()),
       lockscreenTimeoutInSeconds: timeout.inSeconds.toString(),
       autoSave: await appSettingsRepository.getAutoSave(),
+      biometrics: await biometricsRepository.isBiometricsEnabled(),
     );
   }
 

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/enums/event_action.dart';
 import 'package:app/core/enums/search_status.dart';
@@ -7,6 +8,8 @@ import 'package:app/core/utils/input_validator.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_update_batch.dart';
+import 'package:app/domain/usecases/favourites/change_favourite.dart';
+import 'package:app/domain/usecases/favourites/is_favourite.dart';
 import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/create_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
@@ -26,12 +29,14 @@ import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 import 'package:tuple/tuple.dart';
 
-class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState> {
+final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState> {
   final NavigationService navigationService;
+  final AppConfig appConfig;
   final DialogService dialogService;
 
   final NavigateToItem navigateToItem;
@@ -49,6 +54,8 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
 
   final GetCurrentStructureItem getCurrentStructureItem;
   final GetStructureUpdatesStream getStructureUpdatesStream;
+  final IsFavourite isFavourite;
+  final ChangeFavourite changeFavourite;
 
   final ScrollController scrollController = ScrollController();
   final FocusNode searchFocus = FocusNode();
@@ -68,8 +75,14 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
 
   late DateTime lastNoteTransferTime;
 
+  bool favourite = false;
+
+  // todo: maybe in the future make this bloc leaner (and put some of the selection and edit stuff together like the
+  //  favourite handling, etc)
+
   NoteSelectionBloc({
     required this.navigationService,
+    required this.appConfig,
     required this.dialogService,
     required this.navigateToItem,
     required this.createStructureItem,
@@ -82,6 +95,8 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     required this.loadAllStructureContent,
     required this.getCurrentStructureItem,
     required this.getStructureUpdatesStream,
+    required this.isFavourite,
+    required this.changeFavourite,
   }) : super(initialState: const NoteSelectionState());
 
   @override
@@ -96,6 +111,7 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     on<NoteSelectionServerSynced>(_handleServerSync);
     on<NoteSelectionChangedMove>(_handleChangeMove);
     on<NoteSelectionChangeSearch>(_handleChangeSearch);
+    on<NoteSelectionChangeFavourite>(_handleChangeFavourite);
   }
 
   @override
@@ -115,8 +131,8 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     dialogService.showLoadingDialog();
     lastNoteTransferTime = await getLastNoteTransferTime(const NoParams());
     add(NoteSelectionStructureChanged(newCurrentItem: await getCurrentStructureItem.call(const NoParams())));
-    subscription =
-        await getStructureUpdatesStream.call(GetStructureUpdatesStreamParams(callbackFunction: (StructureUpdateBatch batch) {
+    subscription = await getStructureUpdatesStream
+        .call(GetStructureUpdatesStreamParams(callbackFunction: (StructureUpdateBatch batch) {
       add(NoteSelectionStructureChanged(newCurrentItem: batch.currentItem));
     }));
     dialogService.hideLoadingDialog();
@@ -127,6 +143,7 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     currentItem = event.newCurrentItem;
     Logger.verbose("handling structure change with new item ${currentItem!.path}");
     if (currentItem is StructureFolder) {
+      favourite = await isFavourite.call(IsFavouriteParams.fromItem(currentItem!));
       emit(_buildState());
       if (lastItem != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -153,7 +170,8 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     }
   }
 
-  Future<void> _handleDropDownMenuSelected(NoteSelectionDropDownMenuSelected event, Emitter<NoteSelectionState> emit) async {
+  Future<void> _handleDropDownMenuSelected(
+      NoteSelectionDropDownMenuSelected event, Emitter<NoteSelectionState> emit) async {
     switch (event.index) {
       case 0:
         await _renameCurrentFolder();
@@ -180,6 +198,7 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
       descriptionKey: "note.selection.create.folder.description",
       validatorCallback: (String? input) =>
           InputValidator.validateNewItem(input, isFolder: true, parent: currentItem?.getParent()),
+      autoFocus: true,
     ));
     final String? name = await completer.future;
     final String? oldName = currentItem?.name;
@@ -219,13 +238,19 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
       onCancel: () => completer.complete(null),
       titleKey: event.isFolder ? "note.selection.create.folder" : "note.selection.create.note",
       inputLabelKey: "name",
-      descriptionKey: event.isFolder ? "note.selection.create.folder.description" : "note.selection.create.note.description",
+      descriptionKey:
+          event.isFolder ? "note.selection.create.folder.description" : "note.selection.create.note.description",
       validatorCallback: (String? input) =>
           InputValidator.validateNewItem(input, isFolder: event.isFolder, parent: currentItem as StructureFolder?),
+      autoFocus: true,
     ));
     final String? name = await completer.future;
     if (name != null) {
-      await createStructureItem.call(CreateStructureItemParams(name: name, isFolder: event.isFolder));
+      // todo: currently only creating either a folder, or a raw text note
+      await createStructureItem.call(CreateStructureItemParams(
+        name: name,
+        noteType: event.isFolder ? NoteType.FOLDER : NoteType.RAW_TEXT,
+      ));
       if (event.isFolder) {
         dialogService.showInfoSnackBar(ShowInfoSnackBar(
           textKey: "note.selection.folder.created",
@@ -261,8 +286,8 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
         dialogService.showInfoSnackBar(
             ShowInfoSnackBar(textKey: "note.selection.moved.folder.top", textKeyParams: <String>[result.item1]));
       } else {
-        dialogService.showInfoSnackBar(
-            ShowInfoSnackBar(textKey: "note.selection.moved.folder", textKeyParams: <String>[result.item1, result.item2]));
+        dialogService.showInfoSnackBar(ShowInfoSnackBar(
+            textKey: "note.selection.moved.folder", textKeyParams: <String>[result.item1, result.item2]));
       }
     }
   }
@@ -302,19 +327,34 @@ class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState>
     emit(_buildState());
   }
 
+  Future<void> _handleChangeFavourite(NoteSelectionChangeFavourite event, Emitter<NoteSelectionState> emit) async {
+    favourite = event.isFavourite;
+    await changeFavourite.call(ChangeFavouriteParams(isFavourite: favourite, item: currentItem!));
+    emit(_buildState());
+  }
+
   /// only if [currentItem] is [StructureFolder]
   NoteSelectionState _buildState() {
     if (currentItem is StructureFolder) {
-      final bool containsSearch = searchStatus != SearchStatus.DISABLED && searchController.text.isNotEmpty;
+
       return NoteSelectionStateInitialised(
         currentFolder: currentItem as StructureFolder,
         searchStatus: searchStatus,
-        searchInput: containsSearch ? searchController.text : null,
+        searchInput: _searchInput,
         noteContentMap: noteContentMap,
         lastNoteTransferTime: lastNoteTransferTime,
+        isFavourite: favourite,
       );
     } else {
       return const NoteSelectionState();
     }
+  }
+
+  /// as lower case if [AppConfig.searchCaseSensitive] is false
+  String? get _searchInput {
+    if (searchStatus != SearchStatus.DISABLED && searchController.text.isNotEmpty) {
+      return appConfig.searchCaseSensitive ? searchController.text : searchController.text.toLowerCase();
+    }
+    return null;
   }
 }

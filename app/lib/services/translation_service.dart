@@ -64,6 +64,7 @@ class TranslationService {
   /// Otherwise this throws a [ClientException] with [ErrorCodes.FILE_NOT_FOUND].
   Locale get currentLocale {
     if (_locale == null) {
+      Logger.error("locale was null");
       throw const ClientException(message: ErrorCodes.FILE_NOT_FOUND);
     }
     return _locale!;
