@@ -311,12 +311,18 @@ class StructureFolder extends StructureItem {
   }
 
   @override
-  bool containsName(String pattern) {
-    if (name.contains(pattern)) {
-      return true;
+  bool containsName(String pattern, {required bool caseSensitive}) {
+    if (caseSensitive) {
+      if (name.contains(pattern)) {
+        return true;
+      }
+    } else {
+      if (name.toLowerCase().contains(pattern.toLowerCase())) {
+        return true;
+      }
     }
     for (final StructureItem child in _children) {
-      if (child.containsName(pattern)) {
+      if (child.containsName(pattern, caseSensitive: caseSensitive)) {
         return true;
       }
     }

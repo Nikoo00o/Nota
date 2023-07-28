@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/enums/event_action.dart';
 import 'package:app/core/enums/search_status.dart';
@@ -35,6 +36,7 @@ import 'package:tuple/tuple.dart';
 
 final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState> {
   final NavigationService navigationService;
+  final AppConfig appConfig;
   final DialogService dialogService;
 
   final NavigateToItem navigateToItem;
@@ -80,6 +82,7 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
 
   NoteSelectionBloc({
     required this.navigationService,
+    required this.appConfig,
     required this.dialogService,
     required this.navigateToItem,
     required this.createStructureItem,
@@ -331,11 +334,11 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
   /// only if [currentItem] is [StructureFolder]
   NoteSelectionState _buildState() {
     if (currentItem is StructureFolder) {
-      final bool containsSearch = searchStatus != SearchStatus.DISABLED && searchController.text.isNotEmpty;
+
       return NoteSelectionStateInitialised(
         currentFolder: currentItem as StructureFolder,
         searchStatus: searchStatus,
-        searchInput: containsSearch ? searchController.text : null,
+        searchInput: _searchInput,
         noteContentMap: noteContentMap,
         lastNoteTransferTime: lastNoteTransferTime,
         isFavourite: favourite,
@@ -343,5 +346,13 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
     } else {
       return const NoteSelectionState();
     }
+  }
+
+  /// as lower case if [AppConfig.searchCaseSensitive] is false
+  String? get _searchInput {
+    if (searchStatus != SearchStatus.DISABLED && searchController.text.isNotEmpty) {
+      return appConfig.searchCaseSensitive ? searchController.text : searchController.text.toLowerCase();
+    }
+    return null;
   }
 }

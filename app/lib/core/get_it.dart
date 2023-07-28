@@ -240,6 +240,7 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<LoadAllStructureContent>(() => LoadAllStructureContent(
         noteStructureRepository: sl(),
         loadNoteContent: sl(),
+        appConfig: sl(),
       ));
   sl.registerLazySingleton<GetLastNoteTransferTime>(() => GetLastNoteTransferTime(
         localDataSource: sl(),
@@ -286,6 +287,7 @@ Future<void> initializeGetIt() async {
       ));
   sl.registerFactory<NoteSelectionBloc>(() => NoteSelectionBloc(
         getCurrentStructureItem: sl(),
+        appConfig: sl(),
         getStructureUpdatesStream: sl(),
         navigationService: sl(),
         createStructureItem: sl(),

@@ -120,8 +120,10 @@ abstract class StructureItem extends Entity {
 
   String get lastModifiedFormatted => DateFormat("yyyy-MM-dd – HH:mm").format(lastModified);
 
-  /// Returns if this item, or any sub folder contains the [pattern] inside of its [name]
-  bool containsName(String pattern);
+  /// Returns if this item, or any sub folder contains the [pattern] inside of its [name].
+  ///
+  /// If [caseSensitive] is false, then it will match everything as lowercase!
+  bool containsName(String pattern, {required bool caseSensitive});
 
   /// Returns a deep copy of the [item] (recursively copy all sub folders and items).
   ///

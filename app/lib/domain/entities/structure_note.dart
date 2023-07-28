@@ -51,5 +51,11 @@ class StructureNote extends StructureItem {
   }
 
   @override
-  bool containsName(String pattern) => name.contains(pattern);
+  bool containsName(String pattern, {required bool caseSensitive}) {
+    if (caseSensitive) {
+      return name.contains(pattern);
+    } else {
+      return name.toLowerCase().contains(pattern.toLowerCase());
+    }
+  }
 }

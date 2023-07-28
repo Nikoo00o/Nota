@@ -1,3 +1,5 @@
+import 'package:app/core/config/app_config.dart';
+import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
@@ -50,7 +52,9 @@ final class StructureItemBox extends BlocPageChild<NoteSelectionBloc, NoteSelect
     Map<int, String>? noteContentMap,
     DateTime lastNoteTransferTime,
   ) {
-    if (searchString == null || item.containsName(searchString) || _containsNoteContent(searchString, noteContentMap)) {
+    if (searchString == null ||
+        item.containsName(searchString, caseSensitive: getIt<AppConfig>().searchCaseSensitive) ||
+        _containsNoteContent(searchString, noteContentMap)) {
       return CustomCard(
         color: item is StructureFolder ? colorSecondaryContainer(context) : colorPrimaryContainer(context),
         onTap: () => currentBloc(context).add(NoteSelectionItemClicked(index: index)),

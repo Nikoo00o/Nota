@@ -31,4 +31,7 @@ class AppConfig extends SharedConfig {
   LogLevel get defaultLogLevel => LogLevel.VERBOSE;
 
   int get amountOfLogsToKeep => 350;
+
+  /// if the note search should be case sensitive, or compare everything as lowercase
+  bool get searchCaseSensitive => false;
 }
