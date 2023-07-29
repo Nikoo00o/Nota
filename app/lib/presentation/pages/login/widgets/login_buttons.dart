@@ -47,12 +47,16 @@ final class LoginButtons extends BlocPageChild<LoginBloc, LoginState> {
 
   void _firstButtonPressed(BuildContext context, LoginState state) {
     unFocus(context);
+    loginCorrectly(currentBloc(context), state);
+  }
+
+  static void loginCorrectly(LoginBloc bloc, LoginState state) {
     if (state is LoginCreateState) {
-      currentBloc(context).add(const LoginEventCreate());
+      bloc.add(const LoginEventCreate());
     } else if (state is LoginRemoteState) {
-      currentBloc(context).add(const LoginEventRemoteLogin());
+      bloc.add(const LoginEventRemoteLogin());
     } else if (state is LoginLocalState) {
-      currentBloc(context).add(const LoginEventLocalLogin());
+      bloc.add(const LoginEventLocalLogin());
     }
   }
 

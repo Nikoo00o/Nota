@@ -1,6 +1,7 @@
 import 'package:app/core/utils/input_validator.dart';
 import 'package:app/presentation/pages/login/login_bloc.dart';
 import 'package:app/presentation/pages/login/login_state.dart';
+import 'package:app/presentation/pages/login/widgets/login_buttons.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
 import 'package:app/presentation/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +31,7 @@ final class LoginInputs extends BlocPageChild<LoginBloc, LoginState> {
             validator: state is LoginCreateState ? (String? input) => _passwordValidator(context, input) : null,
             textKey: "page.login.password",
             obscureText: true,
+            onConfirm: state is LoginCreateState ? null : () => _autoLogin(context, state),
           ),
           if (state is LoginCreateState) const SizedBox(height: space),
           if (state is LoginCreateState)
@@ -42,6 +44,11 @@ final class LoginInputs extends BlocPageChild<LoginBloc, LoginState> {
         ],
       ),
     );
+  }
+
+  void _autoLogin(BuildContext context, LoginState state) {
+    unFocus(context);
+    LoginButtons.loginCorrectly(currentBloc(context), state);
   }
 
   /// Returns error message, or null

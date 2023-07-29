@@ -39,7 +39,7 @@ final class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
           border: InputBorder.none,
           hintText: translate(context, "note.edit.input.text"),
           isDense: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
         ),
         textInputAction: TextInputAction.newline,
         keyboardType: TextInputType.multiline,
