@@ -1,3 +1,4 @@
+import 'package:app/core/enums/custom_icon_button_type.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/translation_string.dart';
@@ -9,6 +10,7 @@ import 'package:app/presentation/pages/note_edit/widgets/edit_bottom_bar.dart';
 import 'package:app/presentation/pages/note_edit/widgets/edit_favourite_toggle.dart';
 import 'package:app/presentation/pages/note_edit/widgets/edit_popup_menu.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
+import 'package:app/presentation/widgets/custom_icon_button.dart';
 import 'package:app/presentation/widgets/life_cycle_callback.dart';
 import 'package:flutter/material.dart';
 
@@ -39,7 +41,7 @@ final class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
           border: InputBorder.none,
           hintText: translate(context, "note.edit.input.text"),
           isDense: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         ),
         textInputAction: TextInputAction.newline,
         keyboardType: TextInputType.multiline,
@@ -74,9 +76,9 @@ final class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
               title: _buildAppBarTitle(context),
               titleSpacing: 8,
               centerTitle: false,
-              actions: const <Widget>[
-                EditFavouriteToggle(),
-                EditPopupMenu(),
+              actions: <Widget>[
+                _buildFirstAction(),
+                const EditPopupMenu(),
               ],
             );
           } else {
@@ -85,6 +87,23 @@ final class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
         },
       ),
     );
+  }
+
+  Widget _buildFirstAction() {
+    return createBlocBuilder(builder: (BuildContext context, NoteEditState state) {
+      final NoteEditStateInitialised initState = state as NoteEditStateInitialised; // always true
+      if (initState.isEditing) {
+        return CustomIconButton(
+          icon: Icons.save,
+          tooltipKey: "save",
+          size: 20,
+          buttonType: CustomIconButtonType.FILLED,
+          onPressed: () => currentBloc(context).add(const NoteEditInputSaved()),
+        );
+      } else {
+        return const EditFavouriteToggle();
+      }
+    });
   }
 
   Widget _buildAppBarTitle(BuildContext context) {

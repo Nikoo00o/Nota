@@ -35,14 +35,6 @@ final class EditAppBar extends BlocPageChild<NoteEditBloc, NoteEditState> {
           ),
         ),
         _buildTitle(context),
-        const SizedBox(width: 16),
-        CustomIconButton(
-          icon: Icons.save,
-          tooltipKey: "save",
-          size: 20,
-          buttonType: CustomIconButtonType.FILLED,
-          onPressed: () => currentBloc(context).add(const NoteEditInputSaved()),
-        ),
       ],
     );
   }

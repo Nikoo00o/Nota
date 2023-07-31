@@ -63,6 +63,8 @@ final class StructureItemBox extends BlocPageChild<NoteSelectionBloc, NoteSelect
         title: item.name,
         description: _getDescription(context),
         alignDescriptionRight: true,
+        parentPath:
+            item.topMostParent.isRecent && item.directParent?.isRecent == false ? item.directParent?.path : null,
       );
     }
     return const SizedBox();

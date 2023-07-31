@@ -15,6 +15,9 @@ class CustomCard extends WidgetBase {
   /// tooltip on long press if not null
   final String? toolTip;
 
+  /// Optional shows the parent path of the note in a new line
+  final String? parentPath;
+
   /// The description (already translated value!)
   final String description;
 
@@ -32,6 +35,7 @@ class CustomCard extends WidgetBase {
     required this.icon,
     required this.title,
     this.toolTip,
+    this.parentPath,
     required this.description,
     required this.alignDescriptionRight,
     this.trailingIcon,
@@ -95,7 +99,7 @@ class CustomCard extends WidgetBase {
                 ),
             ],
           ),
-          const SizedBox(height: 3),
+          ..._buildInnerParentPath(context),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: alignDescriptionRight ? MainAxisAlignment.end : MainAxisAlignment.start,
@@ -112,5 +116,26 @@ class CustomCard extends WidgetBase {
         ],
       ),
     );
+  }
+
+  List<Widget> _buildInnerParentPath(BuildContext context) {
+    if (parentPath?.isEmpty ?? true) {
+      return <Widget>[const SizedBox(height: 3)];
+    }
+    return <Widget>[
+      const SizedBox(height: 4),
+      Row(
+        children: <Widget>[
+          Expanded(
+            child: Text(
+              parentPath!,
+              textAlign: alignDescriptionRight ? TextAlign.right : TextAlign.left,
+              style: theme(context).textTheme.labelSmall?.copyWith(color: colorOnSurfaceVariant(context)),
+            ),
+          )
+        ],
+      ),
+      const SizedBox(height: 4),
+    ];
   }
 }
