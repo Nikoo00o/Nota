@@ -232,19 +232,19 @@ abstract class LocalDataSource {
 
   /// Creates all parent folders and writes the [bytes] to the specified [getBasePath] / [localFilePath]
   ///
-  /// The application documents directory will for example be: /data/user/0/com.nota.nota_app/app_flutter/nota/
+  /// The application documents directory will for example be: /data/user/0/com.Nikoo00o.nota.app/app_flutter/nota/
   Future<void> writeFile({required String localFilePath, required List<int> bytes});
 
   /// Returns the bytes of the file at [getBasePath] / [localFilePath].
   ///
   /// Returns null if the [getBasePath] / [localFilePath] was not found
   ///
-  /// The application documents directory will for example be: /data/user/0/com.nota.nota_app/app_flutter/nota/
+  /// The application documents directory will for example be: /data/user/0/com.Nikoo00o.nota.app/app_flutter/nota/
   Future<Uint8List?> readFile({required String localFilePath});
 
   /// Returns if the file at [getBasePath] / [localFilePath] existed and if it was deleted, or not.
   ///
-  /// The application documents directory will for example be: /data/user/0/com.nota.nota_app/app_flutter/nota/
+  /// The application documents directory will for example be: /data/user/0/com.Nikoo00o.nota.app/app_flutter/nota/
   Future<bool> deleteFile({required String localFilePath});
 
   /// Renames the file from [oldLocalFilePath] to [newLocalFilePath] and returns if the old file existed, or not.

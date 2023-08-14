@@ -43,7 +43,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.nota.nota_app"
+        applicationId "com.Nikoo00o.nota.app"
         minSdkVersion 23 // local_auth needs at least android 6.0
         targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()
