@@ -88,7 +88,8 @@ abstract class StructureItem extends Entity {
   /// Returns the top most parent folder (either "root", or "recent").
   StructureFolder get topMostParent {
     if (directParent == null) {
-      return this as StructureFolder; // structure notes always have a parent folder! Otherwise it is "root", or "recent"
+      return this
+          as StructureFolder; // structure notes always have a parent folder! Otherwise it is "root", or "recent"
     }
     StructureFolder root = directParent!;
     while (root.directParent != null) {
@@ -187,4 +188,6 @@ abstract class StructureItem extends Entity {
     }
     return TranslationString(translationKey);
   }
+
+  String shortString() => "item";
 }

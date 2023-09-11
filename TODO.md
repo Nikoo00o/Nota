@@ -18,3 +18,7 @@
 - also backup, export, etc 
 - maybe also add a toolbar down above the keyboard for text size, color and also an undo button for the current 
   changes? 
+- also add local config option to auto sync on each login and after each save? 
+- also fix ctrl+v copy paste on desktop to remove "\r" on windows 
+- new: extended search should open focused default search inside of a node when opening a node with the same text 
+  selected

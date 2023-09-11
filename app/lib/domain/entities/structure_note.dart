@@ -58,4 +58,8 @@ class StructureNote extends StructureItem {
       return name.toLowerCase().contains(pattern.toLowerCase());
     }
   }
+
+  @override
+  String shortString() => "Note $name";
+
 }

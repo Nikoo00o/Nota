@@ -76,7 +76,7 @@ final class LogsBloc extends PageBloc<LogsEvent, LogsState> {
       logMessages: messages.where((LogMessage message) => message.canLog(filter)).toList(),
       filterLevel: filter,
       currentLogLevelIndex: logLevelIndex,
-      searchText: searchController.text,
+      searchText: searchController.text.toLowerCase(),
     );
   }
 }

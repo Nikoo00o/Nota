@@ -72,8 +72,8 @@ final class LogsPage extends BlocPage<LogsBloc, LogsState> {
           final LogMessage logMessage = state.logMessages.elementAt(state.logMessages.length - index - 1);
           final String logString = logMessage.toString();
 
-          if (state.searchText.isNotEmpty && logString.contains(state.searchText) == false) {
-            return const SizedBox();
+          if (state.searchText.isNotEmpty && logString.toLowerCase().contains(state.searchText) == false) {
+            return const SizedBox(); // lowercase comparison (so the search is case insensitive!)
           }
 
           final LogColor logColor = Logger.getLogColorForMessage(logMessage)!;

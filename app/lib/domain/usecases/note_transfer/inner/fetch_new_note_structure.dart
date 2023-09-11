@@ -51,14 +51,16 @@ class FetchNewNoteStructure extends UseCase<void, NoParams> {
     for (final NoteInfo note in account.noteInfoList) {
       if (note.isDeleted == false) {
         // add all notes
-        final String name = await SecurityUtilsExtension.decryptStringAsync2(note.encFileName, account.decryptedDataKey!);
+        final String name =
+            await SecurityUtilsExtension.decryptStringAsync2(note.encFileName, account.decryptedDataKey!);
         _addNote(note, noteStructureRepository.root!, name);
       }
     }
 
     noteStructureRepository.root!.sortChildren(recursive: true); // only sort once afterwards for performance
 
-    Logger.info("Fetched the new note structure for root:\n${noteStructureRepository.root}");
+    final String notePaths = noteStructureRepository.root!.getAllNotePaths().join("\n");
+    Logger.info("Fetched the new note structure for root:\n$notePaths");
 
     await updateNoteStructure.call(UpdateNoteStructureParams(originalItem: null)); // update note structure
   }

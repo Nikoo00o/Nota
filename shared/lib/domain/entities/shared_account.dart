@@ -62,7 +62,8 @@ class SharedAccount {
       "passwordHash": passwordHash,
       "sessionToken": sessionToken,
       "encryptedDataKey": encryptedDataKey,
-      "noteInfoList": noteInfoList,
+      // only the ids of the note info models are shown in logs
+      "noteInfoList": noteInfoList.map((NoteInfo e) => e.id).toList(),
     };
   }
 

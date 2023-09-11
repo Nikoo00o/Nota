@@ -87,7 +87,7 @@ class UpdateNoteStructure extends UseCase<void, UpdateNoteStructureParams> {
     final List<StructureNote> notes = noteStructureRepository.recent!.getAllNotes();
     noteStructureRepository.recent!.replaceChildren(notes);
 
-    Logger.debug("Updated the recent notes to:\n${noteStructureRepository.recent}");
+    Logger.debug("Updated the recent notes to:\n${noteStructureRepository.recent?.shortString()}");
   }
 
   void _updateMoveSelection() {
@@ -103,7 +103,7 @@ class UpdateNoteStructure extends UseCase<void, UpdateNoteStructureParams> {
     // then remove all notes from the move selection
     noteStructureRepository.moveSelection!.removeAllNotes();
 
-    Logger.debug("Updated the move selection to:\n${noteStructureRepository.moveSelection}");
+    Logger.debug("Updated the move selection to:\n${noteStructureRepository.moveSelection?.shortString()}");
   }
 
   void _updateCurrentItem(StructureItem? originalItem) {
@@ -131,10 +131,10 @@ class UpdateNoteStructure extends UseCase<void, UpdateNoteStructureParams> {
       if (newCurrentItem == null) {
         noteStructureRepository.currentItem = topLevelFolder; // the compare item and its parents was not found in the top
         // level folder
-        Logger.debug("Updated the current item to the top level folder:\n$topLevelFolder");
+        Logger.debug("Updated the current item to the top level folder:\n${topLevelFolder.shortString()}");
       } else {
         noteStructureRepository.currentItem = newCurrentItem;
-        Logger.debug("Found a match to update the current item:\n$newCurrentItem");
+        Logger.debug("Found a match to update the current item:\n${newCurrentItem.shortString()}");
       }
     }
   }

@@ -40,7 +40,7 @@ class GetCurrentStructureItem extends UseCase<StructureItem, NoParams> {
     }
 
     final StructureItem? item = noteStructureRepository.currentItem;
-    Logger.debug("Returning the current selected structure item as a read only deep copy:\n$item");
+    Logger.debug("Returning the current selected structure item as a read only deep copy:${item?.name}");
 
     if (item is StructureNote) {
       return item.copyWith();

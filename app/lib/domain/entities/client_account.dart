@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:shared/core/utils/list_utils.dart';
+import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/entities/note_info.dart';
 import 'package:shared/domain/entities/shared_account.dart';
 
@@ -93,10 +94,32 @@ class ClientAccount extends SharedAccount {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(super.hashCode, decryptedDataKey?.hashCode, storeDecryptedDataKey.hashCode, needsServerSideLogin.hashCode);
+  int get hashCode => Object.hash(
+      super.hashCode, decryptedDataKey?.hashCode, storeDecryptedDataKey.hashCode, needsServerSideLogin.hashCode);
 
   /// Returns if the account is completely logged in and ready to decrypt/encrypt notes by checking the [decryptedDataKey].
   /// This decides if the app shows the login page, or not!
   bool get isLoggedIn => decryptedDataKey?.isNotEmpty ?? false;
+
+  /// returns a list of "from ... to ..." strings for the attributes that changed from [oldAcc] of the [getProperties]
+  List<String>? logDifferences({ClientAccount? oldAcc}) {
+    if (oldAcc == null) {
+      return null;
+    }
+    final Map<String, Object?> oldProps = oldAcc.getProperties();
+    final Map<String, Object?> newProps = getProperties();
+    final List<String> logs = List<String>.empty(growable: true);
+    if (oldProps.length != newProps.length) {
+      Logger.warn("prop lengths are not equal of $oldAcc and $this");
+      return null;
+    }
+    for (int i = 0; i < newProps.length; ++i) {
+      final String oldProp = oldProps[i].toString();
+      final String newProp = newProps[i].toString();
+      if (oldProp != newProp) {
+        logs.add("from $oldProp to $newProp");
+      }
+    }
+    return logs;
+  }
 }

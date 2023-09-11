@@ -328,4 +328,10 @@ class StructureFolder extends StructureItem {
     }
     return false;
   }
+
+  @override
+  String shortString() => "Folder $name with {${_children.map((StructureItem e) => "${e.name}, ")}}";
+
+  /// returns the full paths of all notes inside of this folder
+  List<String> getAllNotePaths() => getAllNotes().map((StructureNote note) => note.path).toList();
 }

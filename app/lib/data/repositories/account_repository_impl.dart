@@ -22,14 +22,19 @@ class AccountRepositoryImpl extends AccountRepository {
 
   ClientAccount? _cachedAccount;
 
-  AccountRepositoryImpl({required this.remoteAccountDataSource, required this.localDataSource, required this.appConfig});
+  AccountRepositoryImpl({
+    required this.remoteAccountDataSource,
+    required this.localDataSource,
+    required this.appConfig,
+  });
 
   @override
   Future<ClientAccount?> getAccount({bool forceLoad = false}) async {
     if (_cachedAccount == null || forceLoad) {
       final ClientAccount? oldAccount = _cachedAccount;
       _cachedAccount = await localDataSource.loadAccount();
-      Logger.verbose("Replaced the cached account $oldAccount\nwith the stored account $_cachedAccount");
+      final String? differences = _cachedAccount?.logDifferences(oldAcc: oldAccount)?.join(",");
+      Logger.verbose("Replaced cached account with stored account with the differences: $differences");
     }
     return _cachedAccount;
   }
@@ -50,7 +55,8 @@ class AccountRepositoryImpl extends AccountRepository {
     if (Logger.canLog(LogLevel.VERBOSE)) {
       final ClientAccount? oldAccount = await localDataSource.loadAccount();
       if (_cachedAccount != oldAccount) {
-        Logger.verbose("Replaced the stored account $oldAccount\nwith the cached account $_cachedAccount");
+        final String? differences = _cachedAccount?.logDifferences(oldAcc: oldAccount)?.join(",");
+        Logger.verbose("Replaced stored account with cached account with the differences: $differences");
       }
     }
     _cachedAccount = account;
