@@ -1,6 +1,7 @@
 import 'package:app/presentation/widgets/widget_base.dart';
 import 'package:flutter/material.dart';
 
+/// This is responsible for rendering the note info boxes that can be selected in the note selection screen
 class CustomCard extends WidgetBase {
   final Color color;
   final VoidCallback? onTap;
@@ -15,7 +16,8 @@ class CustomCard extends WidgetBase {
   /// tooltip on long press if not null
   final String? toolTip;
 
-  /// Optional shows the parent path of the note in a new line
+  /// Optional shows the parent path of the note in a new description line (currently only when Notes.recent is top
+  /// most parent)
   final String? parentPath;
 
   /// The description (already translated value!)
@@ -118,6 +120,7 @@ class CustomCard extends WidgetBase {
     );
   }
 
+  /// builds the extra line with the path
   List<Widget> _buildInnerParentPath(BuildContext context) {
     if (parentPath?.isEmpty ?? true) {
       return <Widget>[const SizedBox(height: 3)];

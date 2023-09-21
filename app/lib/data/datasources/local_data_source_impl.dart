@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared/core/enums/log_level.dart';
 import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/core/utils/logger/log_message.dart';
+import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/data/datasources/hive_box_configuration.dart';
 import 'package:shared/data/datasources/shared_hive_data_source_mixin.dart';
 
@@ -19,15 +20,25 @@ class LocalDataSourceImpl extends LocalDataSource with SharedHiveDataSourceMixin
   /// base 64 encoded hive encryption key
   String? _hiveKey;
 
+  /// Only initialize adapters once
+  bool _adaptersInitialized = false;
+
   LocalDataSourceImpl({required this.secureStorage, required this.appConfig});
 
   @override
   Future<void> init() async {
     FileUtils.createDirectory(await getBasePath());
     await Hive.initFlutter(appConfig.baseFolder);
-    Hive.registerAdapter(LogLevelAdapter());
-    Hive.registerAdapter(LogMessageAdapter());
+    _initAdapters();
     _hiveKey = await generateHiveKey();
+  }
+
+  void _initAdapters() {
+    if (_adaptersInitialized == false) {
+      Hive.registerAdapter(LogLevelAdapter());
+      Hive.registerAdapter(LogMessageAdapter());
+    }
+    _adaptersInitialized = true;
   }
 
   @override
@@ -102,6 +113,14 @@ class LocalDataSourceImpl extends LocalDataSource with SharedHiveDataSourceMixin
   @override
   Future<void> deleteEverything() async {
     await deleteAllHiveDatabases();
+    final List<String> files = await FileUtils.getFilesInDirectory(await getBasePath());
+    for (final String path in files) {
+      final File file = File(path);
+      if (file.existsSync() && (file.path.endsWith(".hive") || file.path.endsWith(".lock"))) {
+        Logger.info("deleting ${file.path}");
+        await file.delete();
+      }
+    }
     await secureStorage.deleteAll();
   }
 

@@ -10,6 +10,7 @@ import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
 import 'package:app/presentation/widgets/custom_card.dart';
 import 'package:flutter/material.dart';
 
+/// The notes / folders that can be selected
 final class StructureItemBox extends BlocPageChild<NoteSelectionBloc, NoteSelectionState> {
   final StructureItem item;
   final int index;
@@ -63,11 +64,21 @@ final class StructureItemBox extends BlocPageChild<NoteSelectionBloc, NoteSelect
         title: item.name,
         description: _getDescription(context),
         alignDescriptionRight: true,
-        parentPath:
-            item.topMostParent.isRecent && item.directParent?.isRecent == false ? item.directParent?.path : null,
+        parentPath: _extraPathInfoLine(item, context),
       );
     }
     return const SizedBox();
+  }
+
+  /// for the notes.recent view this will display another description line for the parent path with a leading "/"
+  String? _extraPathInfoLine(final StructureItem item, BuildContext context) {
+    if (item.topMostParent.isRecent == false) {
+      return null;
+    }
+    if (item.directParent?.isRecent ?? false) {
+      return translate(context, "note.edit.path", keyParams: <String>["/"]);
+    }
+    return translate(context, "note.edit.path", keyParams: <String>["/${item.directParent?.path}"]);
   }
 
   bool _containsNoteContent(String? searchString, Map<int, String>? noteContentMap) {

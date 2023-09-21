@@ -17,18 +17,19 @@ class LifeCycleCallback extends StatefulWidget {
   _LifeCycleCallbackState createState() => _LifeCycleCallbackState();
 }
 
-class _LifeCycleCallbackState extends State<LifeCycleCallback> with WidgetsBindingObserver {
+class _LifeCycleCallbackState extends State<LifeCycleCallback> {
+  late final AppLifecycleListener _listener;
   bool? _resumedFromBackground;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    _listener = AppLifecycleListener(onStateChange: _onStateChange);
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    _listener.dispose();
     super.dispose();
   }
 
@@ -37,8 +38,7 @@ class _LifeCycleCallbackState extends State<LifeCycleCallback> with WidgetsBindi
     return widget.child;
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  void _onStateChange(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
       widget.onPause?.call();
       _resumedFromBackground = true;
@@ -48,6 +48,5 @@ class _LifeCycleCallbackState extends State<LifeCycleCallback> with WidgetsBindi
       }
       _resumedFromBackground = false;
     }
-    super.didChangeAppLifecycleState(state);
   }
 }

@@ -260,7 +260,7 @@ abstract class LocalDataSource {
 
   /// Clears all key - value pairs and also all keys, etc. Afterwards [init] has to be called again!
   ///
-  /// Also deletes all files!
+  /// Also deletes all files (except the note files)!
   Future<void> deleteEverything();
 
   /// This returns the [getApplicationDocumentsDirectory] combined with the [AppConfig.baseFolder] as the folder where all

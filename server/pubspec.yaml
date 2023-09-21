@@ -5,18 +5,18 @@ publish_to: 'none'
 version: 1.1.0
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: '>=3.1.2 <4.0.0'
 
 dependencies:
   shared: # shared code
     path: ../shared
 
-  get_it: ^7.6.0 # service locator
+  get_it: ^7.6.4 # service locator
   hive: ^2.2.3 # nosql database
   args: ^2.4.2 # command line argument parsing
   synchronized: ^3.0.1 # locks for concurrent access
   intl: ^0.18.0 # internationalization
 
 dev_dependencies:
-  flutter_lints: ^2.0.2 # linter rules
-  test: ^1.24.1 # dart test package
+  flutter_lints: ^2.0.3 # linter rules
+  test: ^1.24.3 # dart test package

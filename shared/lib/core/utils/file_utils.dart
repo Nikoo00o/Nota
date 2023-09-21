@@ -170,7 +170,8 @@ class FileUtils {
 
   /// Returns a list of files of either the directory at [path], or the parent directory if [path] is a file.
   ///
-  /// The list will be empty if the directory does not exist
+  /// The list will be empty if the directory does not exist and the list will only contain the direct files and sub
+  /// directories and not recurse into them!
   static Future<List<String>> getFilesInDirectory(String path) async {
     final Directory directory = _getDirectoryForPath(path);
     if (directory.existsSync() == false) {

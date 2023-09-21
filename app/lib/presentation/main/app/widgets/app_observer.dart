@@ -39,19 +39,29 @@ class AppObserver extends StatefulWidget {
   _AppObserverState createState() => _AppObserverState();
 }
 
-class _AppObserverState extends State<AppObserver> with WidgetsBindingObserver {
+class _AppObserverState extends State<AppObserver> {
+  late final AppLifecycleListener _listener;
   bool? _resumedFromBackground;
   DateTime? _pauseTime;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    _listener = AppLifecycleListener(
+      onInactive: () => Logger.debug("App Lifecycle: resumed -> inactive"),
+      onResume: () => Logger.debug("App Lifecycle: inactive -> resumed"),
+      onHide: () => Logger.debug("App Lifecycle: inactive -> hidden"),
+      onShow: () => Logger.debug("App Lifecycle: hidden -> inactive"),
+      onPause: () => Logger.debug("App Lifecycle: hidden -> paused"),
+      onRestart: () => Logger.debug("App Lifecycle: paused -> hidden"),
+      onDetach: () => Logger.debug("App Lifecycle: paused -> detached"),
+      onStateChange: _onStateChange,
+    );
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    _listener.dispose();
     super.dispose();
   }
 
@@ -86,9 +96,7 @@ class _AppObserverState extends State<AppObserver> with WidgetsBindingObserver {
     return closeApp.future;
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    Logger.debug("App life cycle state changed to: $state");
+  void _onStateChange(AppLifecycleState state) {
     try {
       if (state == AppLifecycleState.paused) {
         _onPause();
@@ -103,7 +111,6 @@ class _AppObserverState extends State<AppObserver> with WidgetsBindingObserver {
       Logger.error("App life cycle error for state $state", e, s);
       //todo: maybe show error dialog
     }
-    super.didChangeAppLifecycleState(state);
   }
 
   Future<void> _onPause() async {

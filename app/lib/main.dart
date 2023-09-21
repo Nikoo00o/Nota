@@ -27,11 +27,19 @@ Future<void> main(List<String> arguments) async {
     await initializeGetIt();
     _initErrorCallbacks();
     await sl<LocalDataSource>().init();
-    Logger.initLogger(AppLogger(
-      logLevel: await sl<AppSettingsRepository>().getLogLevel(),
-      appConfig: sl(),
-      appSettingsRepository: sl(),
-    ));
+    bool appWasReset = false;
+    try{
+      Logger.initLogger(AppLogger(
+        logLevel: await sl<AppSettingsRepository>().getLogLevel(),
+        appConfig: sl(),
+        appSettingsRepository: sl(),
+      ));
+    } catch(e, s){
+      Logger.error("Error opening hive database, deleting all config data...", e, s);
+      await sl<LocalDataSource>().deleteEverything();
+      await sl<LocalDataSource>().init();
+      appWasReset = true;
+    }
     await sl<TranslationService>().init();
 
     final ThemeData theme = AppTheme.newTheme(darkTheme: await sl<AppSettingsRepository>().isDarkTheme());
@@ -50,6 +58,12 @@ Future<void> main(List<String> arguments) async {
       initialLocale: locale,
       initialTheme: theme,
     ));
+
+    if(appWasReset){
+      sl<DialogService>().hideDialog();//will show unknown error dialog
+      sl<DialogService>().showInfoDialog(const ShowInfoDialog(descriptionKey: "dialog.app.reset"));
+    }
+
   } catch (e, s) {
     Logger.error("critical error starting the app", e, s);
   }
@@ -73,7 +87,7 @@ void _initErrorCallbacks() {
 
 void _handleError(Object error, StackTrace trace) {
   if (error is BaseException) {
-    Logger.error("Exception", error, trace);
+    Logger.error("Showing Exception", error, trace);
     sl<DialogService>().show(ShowErrorDialog(
       descriptionKey: error.message ?? "error.unknown",
       descriptionKeyParams: error.messageParams,
@@ -88,7 +102,7 @@ void _handleError(Object error, StackTrace trace) {
       }
     }
   } else {
-    Logger.error("Unknown Error", error, trace);
+    Logger.error("Showing Unknown Error", error, trace);
     sl<DialogService>().show(const ShowErrorDialog(descriptionKey: "error.unknown"));
   }
 }
