@@ -21,3 +21,5 @@
 - also add local config option to auto sync on each login and after each save?
 - new: extended search should open focused default search inside of a node when opening a node with the same text 
   selected
+- improve startup to not depend on local stored data and instead use default values and query the data later and 
+  then also handle if the app is already open on desktop 
