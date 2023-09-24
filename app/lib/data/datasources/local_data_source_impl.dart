@@ -116,9 +116,15 @@ class LocalDataSourceImpl extends LocalDataSource with SharedHiveDataSourceMixin
     final List<String> files = await FileUtils.getFilesInDirectory(await getBasePath());
     for (final String path in files) {
       final File file = File(path);
-      if (file.existsSync() && (file.path.endsWith(".hive") || file.path.endsWith(".lock"))) {
-        Logger.info("deleting ${file.path}");
+      if (file.existsSync()) {
+        Logger.info("deleting file ${file.path}");
         await file.delete();
+      } else {
+        final Directory dir = Directory(path);
+        if (dir.existsSync()) {
+          Logger.info("deleting folder ${dir.path}");
+          await dir.delete(recursive: true);
+        }
       }
     }
     await secureStorage.deleteAll();

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/routes.dart';
@@ -110,6 +111,16 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
   Future<void> _handleUpdatedState(NoteEditUpdatedState event, Emitter<NoteEditState> emit) async {
     if (event.didSearchChange) {
       inputController.updateSearch(searchController.text);
+    }
+    if (Platform.isWindows) {
+      //todo: this is needed because of a flutter bug with text edit field on windows with
+      // the new line characters
+      final String oldText = inputController.text;
+      const String search = "\r\n";
+      if (oldText.contains(search)) {
+        Logger.verbose("replaced \\r\\n with \\n on windows");
+        inputController.text = oldText.replaceAll(search, "\n");
+      }
     }
     emit(_buildState());
   }

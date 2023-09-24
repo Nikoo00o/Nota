@@ -57,7 +57,7 @@ class NoteDataSource {
         return fileContent!; // can not be null, because file must exist
       }
       Logger.error("Cannot load note file $filePath");
-      throw const FileException(message: ErrorCodes.FILE_NOT_FOUND);
+      throw FileException(message: ErrorCodes.FILE_NOT_FOUND, messageParams: <String>[noteId.toString()]);
     });
   }
 
@@ -113,7 +113,7 @@ class NoteDataSource {
 
       if (tmpFileExists == false) {
         Logger.error("Cannot replace data with temp file: $tempFilePath");
-        throw const FileException(message: ErrorCodes.FILE_NOT_FOUND);
+        throw FileException(message: ErrorCodes.FILE_NOT_FOUND, messageParams: <String>[noteId.toString()]);
       }
       if (await FileUtils.fileExistsAsync(realFilePath)) {
         await FileUtils.deleteFileAsync(realFilePath);

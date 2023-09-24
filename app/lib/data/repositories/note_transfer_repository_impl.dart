@@ -45,7 +45,7 @@ class NoteTransferRepositoryImpl extends NoteTransferRepository {
     final Uint8List? encryptedBytes =
         await localDataSource.readFile(localFilePath: getLocalNotePath(noteId: noteId, isTempNote: false));
     if (encryptedBytes == null) {
-      throw const FileException(message: ErrorCodes.FILE_NOT_FOUND);
+      throw FileException(message: ErrorCodes.FILE_NOT_FOUND, messageParams: <String>[noteId.toString()]);
     }
     return encryptedBytes;
   }

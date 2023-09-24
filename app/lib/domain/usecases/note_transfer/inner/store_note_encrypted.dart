@@ -66,7 +66,7 @@ class StoreNoteEncrypted extends UseCase<DateTime, StoreNoteEncryptedParams> {
     final bool containedNote = account.changeNote(noteId: params.noteId, newEncFileName: "", newLastEdited: now);
     if (!containedNote) {
       Logger.error("The note file to be deleted was not contained in the account");
-      throw const FileException(message: ErrorCodes.FILE_NOT_FOUND);
+      throw FileException(message: ErrorCodes.FILE_NOT_FOUND, messageParams: <String>[params.noteId.toString()]);
     }
 
     final bool fileDeleted = await noteTransferRepository.deleteNote(noteId: params.noteId);
@@ -79,7 +79,7 @@ class StoreNoteEncrypted extends UseCase<DateTime, StoreNoteEncryptedParams> {
     final bool containsNote = account.getNoteById(params.noteId) != null;
     if (containsNote) {
       Logger.error("The note file to be created with the id ${params.noteId} was already contained in the account");
-      throw const FileException(message: ErrorCodes.FILE_NOT_FOUND);
+      throw FileException(message: ErrorCodes.FILE_NOT_FOUND, messageParams: <String>[params.noteId.toString()]);
     }
 
     if (params.decryptedContent.isEmpty) {
@@ -114,7 +114,7 @@ class StoreNoteEncrypted extends UseCase<DateTime, StoreNoteEncryptedParams> {
 
     if (!containedNote) {
       Logger.error("The note file to be changed was not contained in the account");
-      throw const FileException(message: ErrorCodes.FILE_NOT_FOUND);
+      throw FileException(message: ErrorCodes.FILE_NOT_FOUND, messageParams: <String>[params.decryptedName ?? ""]);
     }
 
     if (params.decryptedContent != null) {

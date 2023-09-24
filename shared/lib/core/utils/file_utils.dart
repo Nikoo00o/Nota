@@ -107,7 +107,7 @@ class FileUtils {
     final File newFile = File(newPath);
     if (oldFile.existsSync() == false) {
       Logger.error("File $oldPath does not exist");
-      throw const FileException(message: ErrorCodes.FILE_NOT_FOUND);
+      throw FileException(message: ErrorCodes.FILE_NOT_FOUND, messageParams: <String>[oldPath]);
     }
     if (newFile.parent.existsSync() == false) {
       newFile.parent.createSync();
@@ -123,7 +123,7 @@ class FileUtils {
     final File newFile = File(newPath);
     if (oldFile.existsSync() == false) {
       Logger.error("File $oldPath does not exist");
-      throw const FileException(message: ErrorCodes.FILE_NOT_FOUND);
+      throw FileException(message: ErrorCodes.FILE_NOT_FOUND, messageParams: <String>[oldPath]);
     }
     if (newFile.parent.existsSync() == false) {
       newFile.parent.createSync();
@@ -140,7 +140,7 @@ class FileUtils {
     final bool exists = await oldFile.exists();
     if (exists == false) {
       Logger.error("File $oldPath does not exist");
-      throw const FileException(message: ErrorCodes.FILE_NOT_FOUND);
+      throw FileException(message: ErrorCodes.FILE_NOT_FOUND, messageParams: <String>[oldPath]);
     }
     final bool newParentExists = await newFile.parent.exists();
     if (newParentExists == false) {

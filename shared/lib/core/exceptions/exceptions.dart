@@ -10,7 +10,7 @@ class BaseException implements Exception {
 
   @override
   String toString() {
-    return "$runtimeType: $message";
+    return "$runtimeType: $message $messageParams";
   }
 }
 
