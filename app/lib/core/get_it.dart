@@ -171,6 +171,7 @@ Future<void> initializeGetIt() async {
         noteStructureRepository: sl(),
         updateNoteStructure: sl(),
         getLoggedInAccount: sl(),
+        appConfig: sl(),
       ));
   sl.registerLazySingleton<UpdateNoteStructure>(() => UpdateNoteStructure(
         noteStructureRepository: sl(),
@@ -211,6 +212,7 @@ Future<void> initializeGetIt() async {
         getOriginalStructureItem: sl(),
         updateNoteStructure: sl(),
         storeNoteEncrypted: sl(),
+        appConfig: sl(),
       ));
   sl.registerLazySingleton<StartMoveStructureItem>(() => StartMoveStructureItem(
         noteStructureRepository: sl(),
@@ -318,6 +320,7 @@ Future<void> initializeGetIt() async {
         appSettingsRepository: sl(),
         isFavourite: sl(),
         changeFavourite: sl(),
+        appConfig: sl(),
       ));
   sl.registerFactory<SettingsBloc>(() => SettingsBloc(
         appSettingsRepository: sl(),
@@ -344,6 +347,7 @@ Future<void> initializeGetIt() async {
         appSettingsRepository: sl(),
         navigationService: sl(),
         dialogService: sl(),
+        appConfig: sl(),
       ));
 }
 

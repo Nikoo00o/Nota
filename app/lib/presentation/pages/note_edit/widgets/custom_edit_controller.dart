@@ -12,14 +12,27 @@ class CustomEditController extends TextEditingController {
   /// The text and size of the search pattern
   String _currentSearch = "";
 
+  /// if the comparison should use lowercase
+  final bool searchCaseSensitive;
+
+  CustomEditController({required this.searchCaseSensitive});
+
   /// Updates the search positions for the new search text
   void updateSearch(String searchText) {
-    _currentSearch = searchText;
+    if (searchCaseSensitive) {
+      _currentSearch = searchText;
+    } else {
+      _currentSearch = searchText.toLowerCase();
+    }
     _currentSearchPosition = 0;
     if (searchSize == 0) {
       _searchPositions = <int>[];
     } else {
-      _searchPositions = _currentSearch.allMatches(text).map((Match match) => match.start).toList();
+      if (searchCaseSensitive) {
+        _searchPositions = _currentSearch.allMatches(text).map((Match match) => match.start).toList();
+      } else {
+        _searchPositions = _currentSearch.allMatches(text.toLowerCase()).map((Match match) => match.start).toList();
+      }
     }
   }
 

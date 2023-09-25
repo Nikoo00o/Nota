@@ -18,6 +18,10 @@ class StructureFolder extends StructureItem {
   /// The sorting of the children of this folder
   final NoteSorting sorting;
 
+  /// This controls the name comparison of children and is set by the app config (so this is not used inside of this
+  /// object)
+  final bool compareCaseSensitive;
+
   /// The [children] list will be deep copied by calling [StructureItem.deepCopy] and it will be sorted.
   ///
   /// If [changeParentOfChildren] is [true], then the individual children elements will also have their [directParent]
@@ -33,6 +37,7 @@ class StructureFolder extends StructureItem {
     required NoteSorting sorting,
     required bool changeParentOfChildren,
     bool changeCanBeModifiedOfChildrenRecursively = false,
+    required bool compareCaseSensitive,
   }) {
     // note type is always FOLDER!
     final StructureFolder folder = StructureFolder._internal(
@@ -42,6 +47,7 @@ class StructureFolder extends StructureItem {
       noteType: NoteType.FOLDER,
       children: List<StructureItem>.empty(growable: true),
       sorting: sorting,
+      compareCaseSensitive: compareCaseSensitive,
     );
 
     for (final StructureItem child in children) {
@@ -63,6 +69,7 @@ class StructureFolder extends StructureItem {
     required super.noteType,
     required List<StructureItem> children,
     required this.sorting,
+    required this.compareCaseSensitive,
   })  : _children = children,
         super(additionalProperties: <String, Object?>{
           "children": children,
@@ -229,7 +236,11 @@ class StructureFolder extends StructureItem {
   /// If [recursive] is true, all sub folders will also be sorted!
   void sortChildren({bool recursive = false}) {
     if (sorting == NoteSorting.BY_NAME) {
-      _children.sort(_sortByName);
+      if (compareCaseSensitive) {
+        _children.sort(_sortByNameCaseSensitive);
+      } else {
+        _children.sort(_sortByNameCaseInSensitive);
+      }
     } else if (sorting == NoteSorting.BY_DATE) {
       _children.sort(_sortByDate);
     }
@@ -253,7 +264,10 @@ class StructureFolder extends StructureItem {
   int get amountOfChildren => _children.length;
 
   /// Compares 2 structure items in alphabetical order
-  static int _sortByName(StructureItem first, StructureItem second) =>
+  static int _sortByNameCaseSensitive(StructureItem first, StructureItem second) => first.name.compareTo(second.name);
+
+  /// Compares 2 structure items in alphabetical order in lowercase
+  static int _sortByNameCaseInSensitive(StructureItem first, StructureItem second) =>
       first.name.toLowerCase().compareTo(second.name.toLowerCase());
 
   /// Compares 2 structure items by the newest modified time stamp first in descending order
@@ -307,6 +321,7 @@ class StructureFolder extends StructureItem {
       sorting: newSorting ?? sorting,
       changeParentOfChildren: changeParentOfChildren,
       changeCanBeModifiedOfChildrenRecursively: changeCanBeModifiedOfChildrenRecursively && newCanBeModified != null,
+      compareCaseSensitive: compareCaseSensitive,
     );
   }
 

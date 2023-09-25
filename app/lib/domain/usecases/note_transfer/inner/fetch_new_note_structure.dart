@@ -1,3 +1,4 @@
+import 'package:app/core/config/app_config.dart';
 import 'package:app/core/enums/note_sorting.dart';
 import 'package:app/core/utils/security_utils_extension.dart';
 import 'package:app/domain/entities/client_account.dart';
@@ -28,11 +29,13 @@ class FetchNewNoteStructure extends UseCase<void, NoParams> {
   final NoteStructureRepository noteStructureRepository;
   final UpdateNoteStructure updateNoteStructure;
   final GetLoggedInAccount getLoggedInAccount;
+  final AppConfig appConfig;
 
   const FetchNewNoteStructure({
     required this.noteStructureRepository,
     required this.updateNoteStructure,
     required this.getLoggedInAccount,
+    required this.appConfig,
   });
 
   @override
@@ -46,6 +49,7 @@ class FetchNewNoteStructure extends UseCase<void, NoParams> {
       children: List<StructureItem>.empty(growable: true),
       sorting: NoteSorting.BY_NAME,
       changeParentOfChildren: true,
+      compareCaseSensitive: appConfig.searchCaseSensitive,
     );
 
     for (final NoteInfo note in account.noteInfoList) {
@@ -94,6 +98,7 @@ class FetchNewNoteStructure extends UseCase<void, NoParams> {
           children: List<StructureItem>.empty(growable: true),
           sorting: targetFolder.sorting,
           changeParentOfChildren: true,
+          compareCaseSensitive: appConfig.searchCaseSensitive,
         ));
 
         // important: update the reference (will not be null afterwards!)

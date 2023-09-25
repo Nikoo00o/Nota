@@ -58,10 +58,11 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
 
   final LoadNoteContent loadNoteContent;
   final ChangeCurrentStructureItem changeCurrentStructureItem;
+  final AppConfig appConfig;
 
   final TextEditingController searchController = TextEditingController();
   final FocusNode searchFocus = FocusNode();
-  final CustomEditController inputController = CustomEditController();
+  late final CustomEditController inputController;
   final ScrollController scrollController = ScrollController();
 
   /// the has focus is true if the user is currently editing the note
@@ -87,7 +88,10 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
     required this.changeCurrentStructureItem,
     required this.isFavourite,
     required this.changeFavourite,
-  }) : super(initialState: const NoteEditState());
+    required this.appConfig,
+  }) : super(initialState: const NoteEditState()) {
+    inputController = CustomEditController(searchCaseSensitive: appConfig.searchCaseSensitive);
+  }
 
   @override
   void registerEventHandlers() {

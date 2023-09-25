@@ -1,3 +1,4 @@
+import 'package:app/core/config/app_config.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/core/logger/app_logger.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';
@@ -16,6 +17,7 @@ final class LogsBloc extends PageBloc<LogsEvent, LogsState> {
   final AppSettingsRepository appSettingsRepository;
   final NavigationService navigationService;
   final DialogService dialogService;
+  final AppConfig appConfig;
 
   final ScrollController scrollController = ScrollController();
   final TextEditingController searchController = TextEditingController();
@@ -29,6 +31,7 @@ final class LogsBloc extends PageBloc<LogsEvent, LogsState> {
     required this.appSettingsRepository,
     required this.navigationService,
     required this.dialogService,
+    required this.appConfig,
   }) : super(initialState: const LogsState());
 
   @override
@@ -76,7 +79,7 @@ final class LogsBloc extends PageBloc<LogsEvent, LogsState> {
       logMessages: messages.where((LogMessage message) => message.canLog(filter)).toList(),
       filterLevel: filter,
       currentLogLevelIndex: logLevelIndex,
-      searchText: searchController.text.toLowerCase(),
+      searchText: appConfig.searchCaseSensitive ? searchController.text : searchController.text.toLowerCase(),
     );
   }
 }

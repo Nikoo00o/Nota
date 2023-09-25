@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:app/core/config/app_config.dart';
 import 'package:app/domain/entities/note_content.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
@@ -39,12 +40,14 @@ class CreateStructureItem extends UseCase<void, CreateStructureItemParams> {
   final GetOriginalStructureItem getOriginalStructureItem;
   final UpdateNoteStructure updateNoteStructure;
   final StoreNoteEncrypted storeNoteEncrypted;
+  final AppConfig appConfig;
 
   const CreateStructureItem({
     required this.noteStructureRepository,
     required this.getOriginalStructureItem,
     required this.updateNoteStructure,
     required this.storeNoteEncrypted,
+    required this.appConfig,
   });
 
   @override
@@ -96,6 +99,7 @@ class CreateStructureItem extends UseCase<void, CreateStructureItemParams> {
       children: List<StructureItem>.empty(growable: true),
       sorting: currentFolder.sorting,
       changeParentOfChildren: false,
+      compareCaseSensitive: appConfig.searchCaseSensitive,
     ));
   }
 

@@ -1,3 +1,4 @@
+import 'package:app/core/config/app_config.dart';
 import 'package:app/core/config/app_theme.dart';
 import 'package:app/core/constants/routes.dart';
 import 'package:app/core/get_it.dart';
@@ -52,7 +53,8 @@ final class LogsPage extends BlocPage<LogsBloc, LogsState> {
         dialogTitleKey: "log.level",
         initialOptionIndex: state.currentLogLevelIndex,
         options: LogLevel.values
-            .map((LogLevel level) => TranslationString("empty.param.1", translationKeyParams: <String>[level.toString()]))
+            .map((LogLevel level) =>
+                TranslationString("empty.param.1", translationKeyParams: <String>[level.toString()]))
             .toList(),
         onSelected: (int index) => currentBloc(context).add(LogsEventChangeLogLevel(newLogLevelIndex: index)),
       );
@@ -71,9 +73,12 @@ final class LogsPage extends BlocPage<LogsBloc, LogsState> {
         itemBuilder: (BuildContext context, int index) {
           final LogMessage logMessage = state.logMessages.elementAt(state.logMessages.length - index - 1);
           final String logString = logMessage.toString();
-
-          if (state.searchText.isNotEmpty && logString.toLowerCase().contains(state.searchText) == false) {
-            return const SizedBox(); // lowercase comparison (so the search is case insensitive!)
+          String toSearch = logString;
+          if (sl<AppConfig>().searchCaseSensitive == false) {
+            toSearch = logString.toLowerCase(); // lowercase comparison (so the search is case insensitive!)
+          }
+          if (state.searchText.isNotEmpty && toSearch.contains(state.searchText) == false) {
+            return const SizedBox();
           }
 
           final LogColor logColor = Logger.getLogColorForMessage(logMessage)!;
