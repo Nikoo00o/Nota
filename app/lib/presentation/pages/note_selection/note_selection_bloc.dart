@@ -336,7 +336,6 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
   /// only if [currentItem] is [StructureFolder]
   NoteSelectionState _buildState() {
     if (currentItem is StructureFolder) {
-
       return NoteSelectionStateInitialised(
         currentFolder: currentItem as StructureFolder,
         searchStatus: searchStatus,

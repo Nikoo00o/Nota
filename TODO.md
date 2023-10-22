@@ -23,3 +23,5 @@
   selected
 - improve startup to not depend on local stored data and instead use default values and query the data later and 
   then also handle if the app is already open on desktop 
+- new note type: user/person with name + address easy searchable, or auto extended search, or auto save on login and 
+  exit note
