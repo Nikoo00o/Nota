@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:app/core/config/app_config.dart';
-import 'package:app/domain/entities/note_content.dart';
+import 'package:app/domain/entities/note_content/note_content.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
 import 'package:app/domain/usecases/note_transfer/load_note_content.dart';

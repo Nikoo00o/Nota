@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:app/core/config/app_config.dart';
-import 'package:app/domain/entities/note_content.dart';
+import 'package:app/domain/entities/note_content/note_content.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';

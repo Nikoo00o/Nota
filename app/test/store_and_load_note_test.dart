@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/client_account.dart';
-import 'package:app/domain/entities/note_content.dart';
+import 'package:app/domain/entities/note_content/note_content.dart';
 import 'package:app/domain/usecases/account/get_logged_in_account.dart';
 import 'package:app/domain/usecases/account/login/create_account.dart';
 import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
