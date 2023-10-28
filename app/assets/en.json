@@ -121,6 +121,8 @@
   "note.selection.sync": "Server Sync",
   "note.selection.create.folder": "Create Folder",
   "note.selection.create.note": "Create Note",
+  "note.selection.create.note.type.default": "Default Note",
+  "note.selection.create.note.type.file": "Imported File",
   "note.selection.create.note.description": "Enter a new name",
   "note.selection.create.folder.description": "Enter a new name. Folders need to contain at least one note to not be deleted.",
   "note.selection.create.invalid.char": "Invalid Character \"/\"",

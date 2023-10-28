@@ -201,11 +201,15 @@ final class ShowConfirmDialog extends _CancelDialog {
 ///
 /// The [descriptionKey] is used for an additional description above the input if its not null.
 /// The [inputLabelKey] combined with the [validatorCallback] are used to show a label around the input field.
+///
+/// This can also optionally render a drop down menu button which would then return the selected index
 final class ShowInputDialog extends _CancelDialog {
   final String? inputLabelKey;
 
-  /// Callback that gets called when the confirm button of the dialog was pressed and also contains the data the user put in
-  final FutureOr<void> Function(String) onConfirm;
+  /// Callback that gets called when the confirm button of the dialog was pressed and also contains the data the user
+  /// put in. It will also contain an index as to which drop down option is selected (per default this returns 0 if
+  /// no [dropDownTextKeys] are used
+  final FutureOr<void> Function(String, int) onConfirm;
 
   /// If this callback returns null, that means that there is no error.
   ///
@@ -218,6 +222,10 @@ final class ShowInputDialog extends _CancelDialog {
   /// if the input field should be focused when opening the dialog. This also makes it so that the input dialog will
   /// be confirmed on pressing the confirm button on the keyboard!.
   final bool autoFocus;
+
+  /// If this is not empty, then the input dialog will also display a list of drop down menu options that can be
+  /// selected which will pass the zero based index to [onConfirm]
+  final List<TranslationString>? dropDownTextKeys;
 
   const ShowInputDialog({
     super.titleKey,
@@ -239,6 +247,7 @@ final class ShowInputDialog extends _CancelDialog {
     this.validatorCallback,
     this.keyboardType,
     required this.autoFocus,
+    this.dropDownTextKeys,
   }) : super(descriptionKey: descriptionKey ?? "");
 }
 

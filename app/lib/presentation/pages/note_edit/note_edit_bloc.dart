@@ -238,7 +238,7 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
   Future<void> _renameCurrentNote() async {
     final Completer<String?> completer = Completer<String?>();
     dialogService.showInputDialog(ShowInputDialog(
-      onConfirm: (String input) => completer.complete(input),
+      onConfirm: (String input, int index) => completer.complete(input),
       onCancel: () => completer.complete(null),
       titleKey: "note.edit.rename.note",
       inputLabelKey: "name",

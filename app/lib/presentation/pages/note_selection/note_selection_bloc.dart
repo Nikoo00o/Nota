@@ -8,6 +8,7 @@ import 'package:app/core/utils/input_validator.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_update_batch.dart';
+import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/domain/usecases/favourites/change_favourite.dart';
 import 'package:app/domain/usecases/favourites/is_favourite.dart';
 import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
@@ -29,7 +30,9 @@ import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/enums/note_type.dart';
+import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 import 'package:tuple/tuple.dart';
@@ -143,6 +146,9 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
     currentItem = event.newCurrentItem;
     Logger.verbose("handling structure change with new item ${currentItem!.path}");
     if (currentItem is StructureFolder) {
+      if(currentItem!.noteType != NoteType.FOLDER){
+        throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
+      }
       favourite = await isFavourite.call(IsFavouriteParams.fromItem(currentItem!));
       emit(_buildState());
       if (lastItem != null) {
@@ -152,7 +158,15 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
         });
       }
     } else {
-      navigationService.navigateTo(Routes.note_edit);
+      switch (currentItem!.noteType) {
+        case NoteType.FOLDER:
+          throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
+        case NoteType.RAW_TEXT:
+          navigationService.navigateTo(Routes.note_edit);
+        case NoteType.FILE_WRAPPER:
+          // todo: navigate to file wrapper as well
+          throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
+      }
     }
   }
 
@@ -191,7 +205,7 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
   Future<void> _renameCurrentFolder() async {
     final Completer<String?> completer = Completer<String?>();
     dialogService.showInputDialog(ShowInputDialog(
-      onConfirm: (String input) => completer.complete(input),
+      onConfirm: (String input, int index) => completer.complete(input),
       onCancel: () => completer.complete(null),
       titleKey: "note.selection.rename.folder",
       inputLabelKey: "name",
@@ -232,9 +246,9 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
 
   Future<void> _handleCreatedItem(NoteSelectionCreatedItem event, Emitter<NoteSelectionState> emit) async {
     _disableSearch(emit);
-    final Completer<String?> completer = Completer<String?>();
+    final Completer<(String input, int index)?> completer = Completer<(String input, int index)?>();
     dialogService.showInputDialog(ShowInputDialog(
-      onConfirm: (String input) => completer.complete(input),
+      onConfirm: (String input, int index) => completer.complete((input, index)),
       onCancel: () => completer.complete(null),
       titleKey: event.isFolder ? "note.selection.create.folder" : "note.selection.create.note",
       inputLabelKey: "name",
@@ -243,19 +257,38 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
       validatorCallback: (String? input) =>
           InputValidator.validateNewItem(input, isFolder: event.isFolder, parent: currentItem as StructureFolder?),
       autoFocus: true,
+      dropDownTextKeys: event.isFolder == true
+          ? null
+          : <TranslationString>[
+              TranslationString("note.selection.create.note.type.default"),
+              TranslationString("note.selection.create.note.type.file"),
+            ],
     ));
-    final String? name = await completer.future;
-    if (name != null) {
-      // todo: currently only creating either a folder, or a raw text note
+    final (String input, int index)? pattern = await completer.future;
+    if (pattern != null) {
+      NoteType createdType = NoteType.FOLDER;
+      if (event.isFolder == false) {
+        final int noteTypeIndex = pattern.$2; // drop down menu selection
+        createdType = switch (noteTypeIndex) {
+          1 => NoteType.FILE_WRAPPER,
+          _ => NoteType.RAW_TEXT, // default for more, or index 0 is raw text
+        };
+      }
+
       await createStructureItem.call(CreateStructureItemParams(
-        name: name,
-        noteType: event.isFolder ? NoteType.FOLDER : NoteType.RAW_TEXT,
+        name: pattern.$1,
+        noteType: createdType,
       ));
-      if (event.isFolder) {
-        dialogService.showInfoSnackBar(ShowInfoSnackBar(
-          textKey: "note.selection.folder.created",
-          textKeyParams: <String>[name],
-        ));
+
+      switch (createdType) {
+        case NoteType.FOLDER:
+          dialogService.showInfoSnackBar(ShowInfoSnackBar(
+            textKey: "note.selection.folder.created",
+            textKeyParams: <String>[pattern.$1],
+          ));
+        case NoteType.RAW_TEXT:
+        case NoteType.FILE_WRAPPER:
+        // todo: adjust the createdType above depending on the noteTypeIndex
       }
     }
   }

@@ -22,7 +22,7 @@ class DialogServiceMock extends DialogService {
       }
     } else if (params is ShowInputDialog) {
       if (confirmedOverride) {
-        params.onConfirm.call("");
+        params.onConfirm.call("", 0);
       } else {
         params.onCancel?.call();
       }
@@ -66,7 +66,7 @@ class DialogServiceMock extends DialogService {
   @override
   void showInputDialog(ShowInputDialog params) {
     if (confirmedOverride) {
-      params.onConfirm.call("");
+      params.onConfirm.call("", 0);
     } else {
       params.onCancel?.call();
     }

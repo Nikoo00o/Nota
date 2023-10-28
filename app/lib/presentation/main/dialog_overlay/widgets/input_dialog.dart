@@ -1,3 +1,4 @@
+import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/presentation/widgets/custom_text_form_field.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ class InputDialog extends StatefulWidget {
 class _InputDialogState extends State<InputDialog> {
   final TextEditingController controller = TextEditingController();
   bool _confirmButtonEnabled = false;
+  int _dropDownIndex = 0;
 
   @override
   void initState() {
@@ -63,8 +65,42 @@ class _InputDialogState extends State<InputDialog> {
             autovalidateMode: AutovalidateMode.always,
             child: _buildFormField(context),
           ),
+          if (event.dropDownTextKeys != null) const SizedBox(height: 20),
+          if (event.dropDownTextKeys != null) _buildDropDownButton(context),
         ],
       ),
+    );
+  }
+
+  Widget _buildDropDownButton(BuildContext context) {
+    int counter = 0;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          decoration: BoxDecoration(color: colors.secondaryContainer, borderRadius: BorderRadius.circular(16)),
+          child: DropdownButton<int>(
+            value: _dropDownIndex,
+            icon: const Icon(Icons.arrow_drop_down),
+            iconSize: 25,
+            underline: const SizedBox(),
+            onChanged: (int? index) {
+              if (index != null) {
+                setState(() {
+                  _dropDownIndex = index;
+                });
+              }
+            },
+            items: event.dropDownTextKeys!.map((TranslationString textKey) {
+              return DropdownMenuItem<int>(
+                value: counter++,
+                child: Text(translate(textKey.translationKey, keyParams: textKey.translationKeyParams)),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
     );
   }
 
@@ -114,7 +150,7 @@ class _InputDialogState extends State<InputDialog> {
     );
   }
 
-  void _confirm() => bloc.add(HideDialog(dataForDialog: controller.text, cancelDialog: false));
+  void _confirm() => bloc.add(HideDialog(dataForDialog: (controller.text, _dropDownIndex), cancelDialog: false));
 
   Widget _buildButton({
     required String textKey,

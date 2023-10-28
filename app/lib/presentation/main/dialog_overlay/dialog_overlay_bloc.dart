@@ -198,8 +198,9 @@ class DialogOverlayBloc extends Bloc<DialogOverlayEvent, DialogOverlayState> {
       newCancelCallback: event.onCancel,
       dialogBuilder: (BuildContext context) => InputDialog(bloc: this, event: event),
     );
-    if (data is String) {
-      event.onConfirm(data);
+    if (data is (String, int)) {
+      final (String text, int index) = data;
+      event.onConfirm(text, index);
     }
     // the on cancel callback will be called automatically
   }

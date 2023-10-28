@@ -67,11 +67,11 @@ class CreateStructureItem extends UseCase<void, CreateStructureItemParams> {
 
     StructureItem.throwErrorForName(params.name);
 
-    if (params.noteType == NoteType.FOLDER) {
-      newItem = await _createFolder(currentFolder, params.name);
-    } else {
-      newItem = await _createNote(currentFolder, params.name, params.noteType);
-    }
+    newItem = switch (params.noteType) {
+      NoteType.RAW_TEXT => await _createNoteType(currentFolder, params.name, params.noteType),
+      NoteType.FOLDER => await _createFolder(currentFolder, params.name),
+      NoteType.FILE_WRAPPER => await _createNoteType(currentFolder, params.name, params.noteType),
+    };
 
     Logger.info("Created the new item:\n$newItem");
     // update the note structure at the end with the new item, so that the current item will navigate to it.
@@ -103,7 +103,7 @@ class CreateStructureItem extends UseCase<void, CreateStructureItemParams> {
     ));
   }
 
-  Future<StructureItem> _createNote(StructureFolder currentFolder, String newName, NoteType type) async {
+  Future<StructureItem> _createNoteType(StructureFolder currentFolder, String newName, NoteType type) async {
     // first get new note client id
     final int noteId = await noteStructureRepository.getNewClientNoteCounter();
 
@@ -111,7 +111,11 @@ class CreateStructureItem extends UseCase<void, CreateStructureItemParams> {
     final DateTime timeStamp = await storeNoteEncrypted.call(CreateNoteEncryptedParams(
       noteId: noteId,
       decryptedName: currentFolder.getPathForChildName(newName),
-      decryptedContent: NoteContent.saveFile(decryptedContent: <int>[], noteType: type),
+      decryptedContent: switch (type) {
+        NoteType.RAW_TEXT => NoteContent.saveFile(decryptedContent: <int>[], noteType: type),
+        NoteType.FOLDER => throw const ClientException(message: ErrorCodes.INVALID_PARAMS),
+        NoteType.FILE_WRAPPER => await _createFileWrapper(currentFolder, newName),
+      },
     ));
 
     // then update note in structure
@@ -123,6 +127,11 @@ class CreateStructureItem extends UseCase<void, CreateStructureItemParams> {
       lastModified: timeStamp,
       noteType: type,
     ));
+  }
+
+  Future<NoteContent> _createFileWrapper(StructureFolder currentFolder, String newName) async {
+    // todo: SupportedFileTypes; other params ...
+    return NoteContent.saveFile(decryptedContent: <int>[], noteType: NoteType.FILE_WRAPPER);
   }
 }
 
@@ -145,6 +154,10 @@ class CreateStructureItemParams {
   CreateStructureItemParams.folder({
     required String name,
   }) : this(name: name, noteType: NoteType.FOLDER);
+
+  CreateStructureItemParams.fileWrapper({
+    required String name,
+  }) : this(name: name, noteType: NoteType.FILE_WRAPPER);
 
 //todo: for now there is only the raw text note option
 }

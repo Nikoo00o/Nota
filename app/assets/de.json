@@ -121,6 +121,8 @@
   "note.selection.sync": "Server Austausch",
   "note.selection.create.folder": "Ordner erstellen",
   "note.selection.create.note": "Notiz erstellen",
+  "note.selection.create.note.type.default": "Standard Notiz",
+  "note.selection.create.note.type.file": "Importierte Datei",
   "note.selection.create.note.description": "Geben Sie einen neuen Namen ein",
   "note.selection.create.folder.description": "Geben Sie einen neuen Namen ein. Ordner müssen auch mindestens eine Notiz enthalten um nicht gelöscht zu werden.",
   "note.selection.create.invalid.char": "Ungültiges Zeichen \"/\"",

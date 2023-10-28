@@ -64,8 +64,8 @@ final class DialogTestPage extends NoBlocPage {
             onPressed: () async {
               sl<DialogService>().show(ShowInputDialog(
                 descriptionKey: "input at least 4 characters",
-                onConfirm: (String data) {
-                  Logger.verbose("CONFIRMED $data");
+                onConfirm: (String data, int index) {
+                  Logger.verbose("CONFIRMED $data $index");
                 },
                 validatorCallback: (String? input) {
                   if (input != null && input.length < 4) {
@@ -77,16 +77,20 @@ final class DialogTestPage extends NoBlocPage {
                   Logger.verbose("CANCELLED");
                 },
                 autoFocus: false,
+                dropDownTextKeys: <TranslationString>[
+                  TranslationString("Notiz"),
+                  TranslationString("Datei importieren"),
+                ],
               ));
             },
-            child: const Text("test input dialog "),
+            child: const Text("test input dialog with drop down"),
           ),
           FilledButton(
             onPressed: () async {
               sl<DialogService>().show(ShowInputDialog(
                 descriptionKey: "auto focus 4 chars",
-                onConfirm: (String data) {
-                  Logger.verbose("CONFIRMED $data");
+                onConfirm: (String data, int index) {
+                  Logger.verbose("CONFIRMED $data $index");
                 },
                 validatorCallback: (String? input) {
                   if (input != null && input.length < 4) {

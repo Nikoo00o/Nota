@@ -60,7 +60,7 @@ class SettingsInputOption extends SettingsOption {
       titleKeyParams: dialogTitleKeyParams,
       descriptionKey: dialogDescriptionKey,
       descriptionKeyParams: dialogDescriptionKeyParams,
-      onConfirm: onConfirm,
+      onConfirm: (String text, int index) => onConfirm(text),
       validatorCallback: validatorCallback,
       keyboardType: keyboardType,
       inputLabelKey: dialogInputLabelKey,
