@@ -92,7 +92,7 @@ class NoteTransferRepositoryImpl extends NoteTransferRepository {
     }
 
     assert(iterator.first.noteTransferStatus.clientNeedsUpdate || iterator.first.noteTransferStatus.serverNeedsUpdate,
-        "both should never be false!");
+        "both client needs update and server needs update should never be false!");
   }
 
   @override

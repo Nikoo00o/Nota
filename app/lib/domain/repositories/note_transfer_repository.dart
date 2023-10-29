@@ -9,7 +9,10 @@ import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/domain/entities/note_info.dart';
 import 'package:shared/domain/entities/note_update.dart';
 
-/// For a description of the usage/workflow and the error codes, look at [RemoteNoteDataSource]
+/// For a description of the usage/workflow and the error codes, look at [RemoteNoteDataSource].
+///
+/// This handles the client - server communication and updates the notes on each side (information like path and id,
+/// but also the encrypted content of the notes itself)
 abstract class NoteTransferRepository {
   /// Stores the content of the note which is encrypted with the users data key.
   ///

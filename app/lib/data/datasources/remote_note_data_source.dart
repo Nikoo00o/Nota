@@ -31,8 +31,8 @@ abstract class RemoteNoteDataSource {
   /// This needs a logged in account, so it can also throw the errors of [FetchCurrentSessionToken]!
   Future<StartNoteTransferResponse> startNoteTransferRequest(StartNoteTransferRequest request);
 
-  /// Uploads the note content if the [NoteUpdate.noteTransferStatus] from [startNoteTransferRequest] indicated that the
-  /// client had the newer version of the note.
+  /// Downloads the note content if the [NoteUpdate.noteTransferStatus] from [startNoteTransferRequest] indicated that
+  /// the server had the newer version of the note.
   ///
   /// The downloaded bytes should be cached in temporary note files and then moved to the real notes on [finishNoteTransferRequest]
   ///
@@ -46,8 +46,8 @@ abstract class RemoteNoteDataSource {
   /// This needs a logged in account, so it can also throw the errors of [FetchCurrentSessionToken]!
   Future<DownloadNoteResponse> downloadNoteRequest(DownloadNoteRequest request);
 
-  /// Downloads the note content if the [NoteUpdate.noteTransferStatus] from [startNoteTransferRequest] indicated that the
-  /// server had the newer version of the note.
+  /// Uploads the note content if the [NoteUpdate.noteTransferStatus] from [startNoteTransferRequest] indicated that the
+  /// client had the newer version of the note.
   ///
   /// Returns [ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN] if the client used an invalid transfer token, or if the
   /// server cancelled the note transfer!

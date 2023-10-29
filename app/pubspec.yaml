@@ -34,6 +34,9 @@ dependencies:
   url_launcher: 6.1.14 # open urls
   intl: ^0.18.0 # internationalization
   localization: 2.1.0 # localization
+  file_picker: ^6.0.0 # pick local files
+  path: ^1.8.2 # file paths
+  image: ^4.1.3 # image compression / encoding
   flutter_localizations:
     sdk: flutter
 

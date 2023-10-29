@@ -7,6 +7,7 @@ import 'package:app/domain/usecases/note_structure/inner/get_original_structure_
 import 'package:app/domain/usecases/note_structure/inner/update_note_structure.dart';
 import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
 import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
@@ -16,10 +17,11 @@ import 'package:shared/domain/usecases/usecase.dart';
 ///
 /// Important: for files, you should only add [ChangeCurrentNoteParam.newContent] if the content really changed. This
 /// should be verified by comparing a sha256 hash of the old and new content before calling this use case! Otherwise always
-/// pass it as [null]!
+/// pass it as [null]! Because changes will encrypt the content and store it inside of the note file!
 ///
 /// If the [ChangeCurrentStructureItemParams.newName] is the same as the [StructureItem.name], then this use case will do
-/// nothing (for files only if the content is also null).
+/// nothing (for files only if the content is also null). Otherwise the name and modify date of the noe structure
+/// item and of the account list will be changed.
 /// If the name is empty, or if it contains the [StructureItem.delimiter] slash ("/") character, then it will throw
 /// [ErrorCodes.INVALID_PARAMS]! This is also the case if the structure item type of the
 /// [NoteStructureRepository.currentItem] does not match the [ChangeCurrentStructureItemParams] type.
@@ -93,8 +95,12 @@ class ChangeCurrentStructureItem extends UseCase<void, ChangeCurrentStructureIte
     return newFolder;
   }
 
-  Future<StructureItem> _changeNote(StructureNote note, String newName, List<int>? newContent,
-      {required bool parentChanged}) async {
+  Future<StructureItem> _changeNote(
+    StructureNote note,
+    String newName,
+    List<int>? newContent, {
+    required bool parentChanged,
+  }) async {
     String? newPath; // only not null if the path was changed
     if (newName != note.name) {
       newPath = note.directParent!.getPathForChildName(newName);
@@ -102,10 +108,18 @@ class ChangeCurrentStructureItem extends UseCase<void, ChangeCurrentStructureIte
       newPath = note.path;
     }
 
-    NoteContent? content;
+    NoteContent? content; // per default if this stays null, the content did not change and will not be updated
 
     if (newContent != null) {
-      content = NoteContent.saveFile(decryptedContent: newContent, noteType: note.noteType);
+      switch (note.noteType) {
+        case NoteType.RAW_TEXT:
+          content = NoteContent.saveFile(decryptedContent: newContent, noteType: note.noteType);
+        case NoteType.FOLDER:
+          throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
+        case NoteType.FILE_WRAPPER:
+          // currently changing file wrapper content is not allowed!
+          throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
+      }
     }
 
     // first update stored note
@@ -159,6 +173,7 @@ class ChangeCurrentFolderParam extends ChangeCurrentStructureItemParams {
   }
 }
 
+// todo: this should be updated with additional params for other note types, or sub classes of this need to be created
 class ChangeCurrentNoteParam extends ChangeCurrentStructureItemParams {
   /// The new decrypted content of a file is optional and can be null if it should not be updated
   final List<int>? newContent;

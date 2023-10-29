@@ -101,27 +101,30 @@ Future<void> createCommonTestObjects({required int serverPort, LogLevel logLevel
 Future<ServerAccount?> _fetchAuthenticatedAccountCallback(String sessionToken) =>
     fetchAuthenticatedAccountMock.call(FetchAuthenticatedAccountParams(sessionToken: sessionToken));
 
-Future<SessionToken?> _fetchCurrentSessionToken() =>
-    fetchCurrentSessionTokenMock.call(const NoParams());
+Future<SessionToken?> _fetchCurrentSessionToken() => fetchCurrentSessionTokenMock.call(const NoParams());
+
+String get _testBasePath => FileUtils.getLocalFilePath("test${Platform.pathSeparator}data");
+
+/// unique path for each test for local files, because it depends on the server port
+String get testResourceFolder => "$_testBasePath${Platform.pathSeparator}${serverConfigMock.serverPort}";
 
 Future<void> _setup(LogLevel logLevel) async {
   Logger.initLogger(Logger(logLevel: logLevel)); // the logger must always be initialised first
 
   // modifies the resource path to depend on the test port, so its unique for each test
-  final String baseTestPath = FileUtils.getLocalFilePath("test${Platform.pathSeparator}data");
-  serverConfigMock.resourceFolderPathOverride = "$baseTestPath${Platform.pathSeparator}${serverConfigMock.serverPort}";
+  serverConfigMock.resourceFolderPathOverride = testResourceFolder;
 
   await localDataSource.init(); // create the required folders and init the database
   await noteDataSource.init();
 
   // copy the test certificate files into the specific test folder
   FileUtils.copyFile(
-    "$baseTestPath${Platform.pathSeparator}key.pem",
-    "${serverConfigMock.resourceFolderPath}${Platform.pathSeparator}key.pem",
+    "$_testBasePath${Platform.pathSeparator}key.pem",
+    "$testResourceFolder${Platform.pathSeparator}key.pem",
   );
   FileUtils.copyFile(
-    "$baseTestPath${Platform.pathSeparator}certificate.pem",
-    "${serverConfigMock.resourceFolderPath}${Platform.pathSeparator}certificate.pem",
+    "$_testBasePath${Platform.pathSeparator}certificate.pem",
+    "$testResourceFolder${Platform.pathSeparator}certificate.pem",
   );
 
   final bool started = await startNotaServer(const StartNotaServerParams(autoRestart: false));

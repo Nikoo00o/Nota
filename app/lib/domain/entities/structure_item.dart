@@ -9,7 +9,8 @@ import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/entities/entity.dart';
 
-/// The base class for the structure notes and folders which are displayed in the main view of the gui!
+/// The base class for the structure notes and folders which are displayed in the main view of the gui! this is not
+/// shared with the server
 ///
 /// For equality this does not use the reference to the parent folder and instead uses the [path] of the parent and the
 /// top most parent name! The operator== should be used to compare if "references" are the same within a folder structure.

@@ -18,7 +18,7 @@ import 'package:shared/domain/entities/note_update.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
 /// This updates the notes on server and client side by executing the note transfer.
-/// It updates the account and the note files remotely and locally!
+/// It updates the account and the note files remotely and locally and afterwards the ui!
 ///
 /// This can throw the exceptions of [NoteTransferRepository.startNoteTransfer], [NoteTransferRepository.uploadOrDownloadNote]
 /// , [NoteTransferRepository.finishNoteTransfer], [NoteTransferRepository.renameNote] and [FetchNewNoteStructure]!
@@ -61,7 +61,7 @@ class TransferNotes extends UseCase<bool, NoParams> {
     }
 
     try {
-      await _transferUpdates(noteUpdates);
+      await _transferUpdates(noteUpdates); // upload/download files
 
       Logger.verbose("Finishing note transfer");
       await noteTransferRepository.finishNoteTransfer(shouldCancel: false);
@@ -83,6 +83,7 @@ class TransferNotes extends UseCase<bool, NoParams> {
     return true;
   }
 
+  /// updates favourite, renames note and updates account (id, name, time) and also renames note file id!
   Future<void> _applyAccountChanges(List<NoteUpdate> updates, ClientAccount account) async {
     for (final NoteUpdate update in updates) {
       final int? newId = update.clientId != update.serverId ? update.serverId : null;
@@ -104,6 +105,7 @@ class TransferNotes extends UseCase<bool, NoParams> {
     }
   }
 
+  /// updates favourite, renames note and updates account (id, name, time) and also renames note file id!
   Future<void> _applyChange(
     int? newId,
     String? newFileName,
@@ -140,6 +142,7 @@ class TransferNotes extends UseCase<bool, NoParams> {
     }
   }
 
+  /// upload/download files
   Future<void> _transferUpdates(List<NoteUpdate> updates) async {
     for (final NoteUpdate update in updates) {
       if (update.wasFileDeleted == false) {

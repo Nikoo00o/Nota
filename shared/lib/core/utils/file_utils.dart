@@ -7,6 +7,8 @@ import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
 class FileUtils {
+  const FileUtils._();
+
   /// Returns the absolute full file path for a local relative file path inside of the parent directory of the script
   /// (server, or client root application).
   ///
@@ -152,7 +154,7 @@ class FileUtils {
   /// Creates the path structure with directories for the directory at the path.
   /// If the [path] points to a file, then it will only create the parent directory.
   static void createDirectory(String path) {
-    final Directory directory = _getDirectoryForPath(path);
+    final Directory directory = getDirectoryForPath(path);
     if (directory.existsSync() == false) {
       directory.createSync(recursive: true);
     }
@@ -162,7 +164,7 @@ class FileUtils {
   ///
   /// If the [path] points to a File, then the parent directory is deleted
   static void deleteDirectory(String path) {
-    final Directory directory = _getDirectoryForPath(path);
+    final Directory directory = getDirectoryForPath(path);
     if (directory.existsSync()) {
       directory.deleteSync(recursive: true);
     }
@@ -173,7 +175,7 @@ class FileUtils {
   /// The list will be empty if the directory does not exist and the list will only contain the direct files and sub
   /// directories and not recurse into them!
   static Future<List<String>> getFilesInDirectory(String path) async {
-    final Directory directory = _getDirectoryForPath(path);
+    final Directory directory = getDirectoryForPath(path);
     if (directory.existsSync() == false) {
       return <String>[];
     }
@@ -182,11 +184,14 @@ class FileUtils {
   }
 
   /// Returns either the directory at [path], or the parent directory if [path] is a file
-  static Directory _getDirectoryForPath(String path) {
+  static Directory getDirectoryForPath(String path) {
     if (File(path).existsSync()) {
       return File(path).parent;
     } else {
       return Directory(path);
     }
   }
+
+  /// Returns the file extension (.txt) from a file path
+  static String getExtension(String path) => extension(path);
 }

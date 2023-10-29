@@ -8,6 +8,8 @@ import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/domain/usecases/note_structure/inner/update_note_structure.dart';
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
 
+/// This handles the [StructureItem]'s which are used inside of the gui and not shared between client and server
+/// (they only contain some information like the path about the notes and not the note content)
 abstract class NoteStructureRepository {
   /// Contains the whole note structure with sub folders and notes with this being the top most parent folder.
   ///

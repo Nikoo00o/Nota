@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:app/core/config/app_config.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/core/utils/security_utils_extension.dart';
+import 'package:app/data/datasources/file_picker_data_source.dart.dart';
 import 'package:app/data/datasources/local_data_source.dart';
 import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/entities/note_content/note_content.dart';
@@ -25,9 +26,11 @@ import '../../../server/test/helper/server_test_helper.dart'
 import '../mocks/app_config_mock.dart';
 import '../mocks/argon_wrapper_mock.dart';
 import '../mocks/dialog_service_mock.dart';
+import '../mocks/file_picker_data_source_mock.dart';
 import '../mocks/local_data_source_mock.dart';
 
 late DialogServiceMock dialogServiceMock;
+late FilePickerDataSourceMock filePickerDataSourceMock;
 
 /// The [serverPort] also needs to be unique across the app and server tests. Afterwards you can replace more app
 /// implementations with mocks!
@@ -51,7 +54,13 @@ Future<void> createCommonTestObjects({required int serverPort, LogLevel logLevel
 
   dialogServiceMock = DialogServiceMock();
   sl.registerSingleton<DialogService>(dialogServiceMock);
+
+  filePickerDataSourceMock = FilePickerDataSourceMock();
+  sl.registerSingleton<FilePickerDataSource>(filePickerDataSourceMock);
 }
+
+/// unique path for each test for local files, because it depends on the server port
+String get testResourceFolder => server.testResourceFolder;
 
 Future<void> testCleanup() async {
   sl<RestClient>().close();

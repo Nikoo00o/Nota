@@ -3,19 +3,18 @@ part of "note_content.dart";
 /// A raw text note with the type [NoteType.RAW_TEXT]. For loading, use [NoteContent.loadFile] and for saving use
 /// [NoteContent.saveFile]
 final class NoteContentRawText extends NoteContent {
-  /// The next 4 bytes are used for the size of the raw [text] which directly follows the header
-  int get textSize => _data.getUint32(NoteContent.baseNoteContentHeaderSize, Endian.big);
 
+  /// next 4 bytes part of the header
   static const int TEXT_SIZE_BYTES = 4;
 
   /// a maximum of 4 gb text is supported inside of notes
   static const int MAX_TEXT_BYTES = 4000000000;
 
-  /// The [NoteContent.baseNoteContentHeaderSize] with the addition of the [TEXT_SIZE_BYTES] 4 bytes. So 8 bytes
-  static int get headerSizeIncludingText => NoteContent.baseNoteContentHeaderSize + TEXT_SIZE_BYTES;
-
   /// the current version for when writing raw text files (used for migration)
   static const int RAW_TEXT_VERSION = 1;
+
+  /// should be the same as [headerSize] and contain all static attributes
+  static int get staticHeaderSize => NoteContent.baseNoteContentHeaderSize + TEXT_SIZE_BYTES;
 
   /// Internally used to initialize the bytes (by copying the reference) and also the header fields!
   /// This initializes the [textSize] and the [text] part of the [bytes] itself by copying over the parts of
@@ -39,7 +38,7 @@ final class NoteContentRawText extends NoteContent {
 
   void _checkRawTextHeaderFields() {
     if (textSize >= MAX_TEXT_BYTES) {
-      Logger.error("text size $textSize, was bigger, or equal to 4 GB");
+      Logger.error("text size $textSize, was bigger, or equal to ${MAX_TEXT_BYTES / 1000000000} GB");
       throw const FileException(message: ErrorCodes.INVALID_PARAMS);
     }
     final int combined = headerSize + textSize;
@@ -53,9 +52,9 @@ final class NoteContentRawText extends NoteContent {
   /// app.
   /// This will create the [_bytes] list with the header information and copies the [decryptedContent] into it
   factory NoteContentRawText._saveFile({required List<int> decryptedContent}) {
-    final int headerSize = headerSizeIncludingText;
+    final int headerSize = staticHeaderSize; // full static header size
     final int textSize = decryptedContent.length;
-    final Uint8List bytes = Uint8List(headerSize + textSize);
+    final Uint8List bytes = Uint8List(headerSize + textSize); // initialize bytes with correct size
     return NoteContentRawText._save(
       bytes: bytes,
       headerSize: headerSize,
@@ -66,6 +65,9 @@ final class NoteContentRawText extends NoteContent {
 
   /// Used internally by [NoteContent.loadFile] and only calls the super class constructor
   NoteContentRawText._load(Uint8List bytes) : super._load(bytes);
+
+  /// The next 4 bytes after the header are used for the size of the raw [text] size
+  int get textSize => _data.getUint32(NoteContent.baseNoteContentHeaderSize, Endian.big);
 
   /// the text directly follows the header, so it has an offset of [headerSize] and a size of [headerSize].
   ///

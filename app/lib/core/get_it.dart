@@ -1,4 +1,5 @@
 import 'package:app/core/config/app_config.dart';
+import 'package:app/data/datasources/file_picker_data_source.dart.dart';
 import 'package:app/data/datasources/local_data_source.dart';
 import 'package:app/data/datasources/local_data_source_impl.dart';
 import 'package:app/data/datasources/remote_account_data_source.dart';
@@ -6,11 +7,13 @@ import 'package:app/data/datasources/remote_note_data_source.dart';
 import 'package:app/data/repositories/account_repository_impl.dart';
 import 'package:app/data/repositories/app_settings_repository_impl.dart';
 import 'package:app/data/repositories/biometrics_repository_impl.dart';
+import 'package:app/data/repositories/external_file_repository_impl.dart';
 import 'package:app/data/repositories/note_structure_repository_impl.dart';
 import 'package:app/data/repositories/note_transfer_repository_impl.dart';
 import 'package:app/domain/repositories/account_repository.dart';
 import 'package:app/domain/repositories/app_settings_repository.dart';
 import 'package:app/domain/repositories/biometrics_repository.dart';
+import 'package:app/domain/repositories/external_file_repository.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
 import 'package:app/domain/repositories/note_transfer_repository.dart';
 import 'package:app/domain/usecases/account/change/activate_lock_screen.dart';
@@ -96,6 +99,7 @@ Future<void> initializeGetIt() async {
 
   sl.registerLazySingleton<RemoteAccountDataSource>(() => RemoteAccountDataSourceImpl(restClient: sl()));
   sl.registerLazySingleton<RemoteNoteDataSource>(() => RemoteNoteDataSourceImpl(restClient: sl()));
+  sl.registerLazySingleton<FilePickerDataSource>(() => FilePickerDataSourceImpl());
 
   sl.registerLazySingleton<AccountRepository>(() => AccountRepositoryImpl(
         remoteAccountDataSource: sl(),
@@ -115,6 +119,7 @@ Future<void> initializeGetIt() async {
         dialogService: sl(),
       ));
   sl.registerLazySingleton<NoteStructureRepository>(() => NoteStructureRepositoryImpl(localDataSource: sl()));
+  sl.registerLazySingleton<ExternalFileRepository>(() => ExternalFileRepositoryImpl(filePickerDataSource: sl()));
 
   // domain layer (use cases)
   sl.registerLazySingleton<SharedFetchCurrentSessionToken>(

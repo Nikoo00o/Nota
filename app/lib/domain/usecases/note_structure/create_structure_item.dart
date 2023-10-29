@@ -114,7 +114,7 @@ class CreateStructureItem extends UseCase<void, CreateStructureItemParams> {
       decryptedContent: switch (type) {
         NoteType.RAW_TEXT => NoteContent.saveFile(decryptedContent: <int>[], noteType: type),
         NoteType.FOLDER => throw const ClientException(message: ErrorCodes.INVALID_PARAMS),
-        NoteType.FILE_WRAPPER => await _createFileWrapper(currentFolder, newName),
+        NoteType.FILE_WRAPPER => await _createFileWrapper(),
       },
     ));
 
@@ -129,7 +129,8 @@ class CreateStructureItem extends UseCase<void, CreateStructureItemParams> {
     ));
   }
 
-  Future<NoteContent> _createFileWrapper(StructureFolder currentFolder, String newName) async {
+  /// important: for .txt files, this will just import them into a default note and not create a file wrapper!!
+  Future<NoteContent> _createFileWrapper() async {
     // todo: SupportedFileTypes; other params ...
     return NoteContent.saveFile(decryptedContent: <int>[], noteType: NoteType.FILE_WRAPPER);
   }

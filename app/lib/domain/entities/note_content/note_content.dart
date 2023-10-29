@@ -1,8 +1,12 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:app/domain/entities/file_picker_result.dart';
+import 'package:path/path.dart' as p;
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
+import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 
 part "raw_text.dart";
@@ -35,7 +39,8 @@ sealed class NoteContent {
   /// The first 2 bytes are used for the full header size. This is stored inside of the note itself. This will be at
   /// least as big as [baseNoteContentHeaderSize], but can be bigger!
   ///
-  /// It represents the full dynamic size of the complete header fields (including those of the subclasses)
+  /// It represents the full dynamic size of the complete header fields (including those of the subclasses). these
+  /// will be all static computed sizes for attributes (no variable ones)
   int get headerSize => _data.getUint16(0, Endian.big);
 
   /// The next 2 bytes are used for the version
@@ -131,7 +136,7 @@ sealed class NoteContent {
   /// the own [_bytes] and perform some error checks and return the correct sub type of [NoteContent] for the [noteType].
   ///
   /// the [fileWrapperParams] are only used used for [NoteType.FILE_WRAPPER]
-  // todo: If there are additional params, consider adding additional nullable params to the factory constructor
+  // todo: for additional note types, add more nullable optional params
   factory NoteContent.saveFile({
     required List<int> decryptedContent,
     required NoteType noteType,
