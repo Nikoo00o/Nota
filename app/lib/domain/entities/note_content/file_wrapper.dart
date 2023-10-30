@@ -136,7 +136,7 @@ final class NoteContentFileWrapper extends NoteContent {
     return utf8.decode(data);
   }
 
-  /// returns the file extension of the external file path(.txt, etc)
+  /// returns the file extension of the external file path (.txt, etc)
   String get fileExtension => FileUtils.getExtension(path);
 
   /// the compressed data (bytes) from the initial external file which is now wrapped inside of the app (decrypted at
@@ -153,7 +153,8 @@ final class NoteContentFileWrapper extends NoteContent {
 
   /// because [NoteContentFileWrapper] contains binary data, this will return an empty list instead!
   @override
-  Uint8List get text => Uint8List(0);
+  Uint8List get text => Uint8List(0); // todo: maybe return the file name and file modify date instead so it can be
+  // used for the extended search inside of the app
 
   @override
   NoteType get noteType => NoteType.FILE_WRAPPER;

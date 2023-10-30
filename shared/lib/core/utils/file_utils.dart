@@ -194,4 +194,7 @@ class FileUtils {
 
   /// Returns the file extension (.txt) from a file path
   static String getExtension(String path) => extension(path);
+
+  /// Returns the file name (test.txt) from a file path
+  static String getFileName(String path) => basename(path);
 }

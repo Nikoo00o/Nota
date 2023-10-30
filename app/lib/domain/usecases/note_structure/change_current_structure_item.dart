@@ -115,9 +115,10 @@ class ChangeCurrentStructureItem extends UseCase<void, ChangeCurrentStructureIte
         case NoteType.RAW_TEXT:
           content = NoteContent.saveFile(decryptedContent: newContent, noteType: note.noteType);
         case NoteType.FOLDER:
+          Logger.error("error when changing note, the note type was folder");
           throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
         case NoteType.FILE_WRAPPER:
-          // currently changing file wrapper content is not allowed!
+          Logger.error("error when changing note, changing file wrapper content is not allowed");
           throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
       }
     }

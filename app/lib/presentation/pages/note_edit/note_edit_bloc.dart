@@ -31,6 +31,7 @@ import 'package:app/services/dialog_service.dart';
 import 'package:app/services/navigation_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/utils/list_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
@@ -160,7 +161,7 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
     currentItem = event.newCurrentItem;
     dialogService.showLoadingDialog();
     Logger.verbose("handling structure change with new item ${currentItem.path}");
-    if (currentItem is StructureNote) {
+    if (currentItem is StructureNote && currentItem.noteType == NoteType.RAW_TEXT) {
       if (noteHash == null) {
         Logger.verbose("loading initial note content");
         final StructureNote note = currentItem as StructureNote;
@@ -182,8 +183,8 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
       favourite = await isFavourite.call(IsFavouriteParams.fromItem(currentItem));
       emit(_buildState());
     } else {
-      navigationService
-          .navigateTo(Routes.note_selection); // will be called automatically from _handleNavigatedBack below
+      Logger.verbose("navigated away from note edit, because the note type is different");
+      navigationService.navigateTo(Routes.note_selection); // will be called automatically from _handleNavigatedBack
     }
     dialogService.hideLoadingDialog();
   }

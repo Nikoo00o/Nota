@@ -48,6 +48,7 @@
   "dialog.input.label.number": "Enter Number",
   "dialog.logged.out": "You were logged out of your Account",
   "dialog.app.reset": "The App was Reset, please login again",
+  "dialog.export.title" : "Select location",
   "widget.favourite": "Favourite",
   "page.app.should.close": "Should the App be terminated?",
   "page.login.title.create": "Account Creation",

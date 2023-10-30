@@ -147,6 +147,7 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
     Logger.verbose("handling structure change with new item ${currentItem!.path}");
     if (currentItem is StructureFolder) {
       if(currentItem!.noteType != NoteType.FOLDER){
+        Logger.error("structure change to folder did not have the correct note type");
         throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
       }
       favourite = await isFavourite.call(IsFavouriteParams.fromItem(currentItem!));
@@ -160,6 +161,7 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
     } else {
       switch (currentItem!.noteType) {
         case NoteType.FOLDER:
+          Logger.error("structure change to note item did not have the correct note type");
           throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
         case NoteType.RAW_TEXT:
           navigationService.navigateTo(Routes.note_edit);

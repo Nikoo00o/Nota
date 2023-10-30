@@ -7,7 +7,9 @@ import 'package:shared/core/exceptions/exceptions.dart';
 abstract class ExternalFileRepository {
   /// lets the user select a file of [SupportedFileTypes] for which all information will be returned. returns null on
   /// error
-  Future<FilePickerResult?> getImportFileInfo();
+  ///
+  /// If [pathOverride] is used, then the dialog will not be opened for the user to select the input file
+  Future<FilePickerResult?> getImportFileInfo({String? pathOverride});
 
   /// lets the user select a path where the [fileName] should be exported to. returns null on error
   Future<String?> getExportFilePath({required String dialogTitle, required String fileName});
@@ -15,7 +17,7 @@ abstract class ExternalFileRepository {
   /// can throw an [FileException] with [ErrorCodes.FILE_NOT_FOUND]
   ///
   /// This will compress jpg, jpeg and png images depending on the [compression] level (0 - 9):
-  /// 0 means no compression and 9 is the highest compression. default would be 7
+  /// 0 means no compression and 9 is the highest compression. default would be 6
   ///
   /// Other files will not be compressed
   Future<Uint8List> loadExternalFileCompressed({required String path, required int compression});

@@ -36,6 +36,7 @@ import 'package:app/domain/usecases/favourites/update_favourite.dart';
 import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/create_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/export_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/finish_move_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/inner/add_new_structure_update_batch.dart';
 import 'package:app/domain/usecases/note_structure/inner/get_original_structure_item.dart';
@@ -218,6 +219,7 @@ Future<void> initializeGetIt() async {
         updateNoteStructure: sl(),
         storeNoteEncrypted: sl(),
         appConfig: sl(),
+        externalFileRepository: sl(),
       ));
   sl.registerLazySingleton<StartMoveStructureItem>(() => StartMoveStructureItem(
         noteStructureRepository: sl(),
@@ -266,6 +268,12 @@ Future<void> initializeGetIt() async {
   sl.registerLazySingleton<UpdateFavourite>(() => UpdateFavourite(
         appSettingsRepository: sl(),
         isFavourite: sl(),
+      ));
+  sl.registerLazySingleton<ExportCurrentStructureItem>(() => ExportCurrentStructureItem(
+        externalFileRepository: sl(),
+        getOriginalStructureItem: sl(),
+        loadNoteContent: sl(),
+        translationService: sl(),
       ));
 
   // services

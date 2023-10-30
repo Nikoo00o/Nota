@@ -30,8 +30,12 @@ class AppConfig extends SharedConfig {
 
   LogLevel get defaultLogLevel => LogLevel.VERBOSE;
 
-  int get amountOfLogsToKeep => 500;
+  int get amountOfLogsToKeep => 600;
 
   /// if the note search should be case sensitive, or compare everything as lowercase
   bool get searchCaseSensitive => false;
+
+  /// The compression level for images from 0 to 9 (0 means no compression and 9 is 90% less quality). the default
+  /// would be 6
+  int get imageCompressionLevel => 6;
 }

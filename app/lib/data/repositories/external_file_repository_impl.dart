@@ -17,8 +17,8 @@ class ExternalFileRepositoryImpl extends ExternalFileRepository {
   ExternalFileRepositoryImpl({required this.filePickerDataSource});
 
   @override
-  Future<FilePickerResult?> getImportFileInfo() async {
-    final String? path = await filePickerDataSource.importFile();
+  Future<FilePickerResult?> getImportFileInfo({String? pathOverride}) async {
+    final String? path = pathOverride ?? await filePickerDataSource.importFile();
     if (path != null) {
       final File file = File(path);
       if (await file.exists()) {
@@ -31,6 +31,7 @@ class ExternalFileRepositoryImpl extends ExternalFileRepository {
         return result;
       }
     }
+    return null;
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:shared/core/enums/supported_file_types.dart';
+import 'package:shared/core/utils/file_utils.dart';
 
 /// This is a wrapper around the file picker package to import/export files to/from the app!
 abstract class FilePickerDataSource {
@@ -23,6 +24,10 @@ class FilePickerDataSourceImpl extends FilePickerDataSource {
   }
 
   @override
-  Future<String?> exportFile({required String dialogTitle, required String fileName}) =>
-      FilePicker.platform.saveFile(dialogTitle: dialogTitle, fileName: fileName);
+  Future<String?> exportFile({required String dialogTitle, required String fileName}) => FilePicker.platform.saveFile(
+        dialogTitle: dialogTitle,
+        fileName: fileName,
+        type: FileType.custom,
+        allowedExtensions: <String>[FileUtils.getExtension(fileName).substring(1)],
+      );
 }

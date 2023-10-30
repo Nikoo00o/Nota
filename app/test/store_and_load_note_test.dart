@@ -35,9 +35,6 @@ void main() {
   });
 
   _testExternalFileRepository();
-
-  return;
-
   _testNoteContent();
   _testStoreNoteUseCases();
 }
@@ -90,11 +87,10 @@ void _testExternalFileRepository() {
 Future<void> imageTest(String imageName, int size, String dateTime) async {
   final ExternalFileRepository repo = sl<ExternalFileRepository>();
   final String importPath = fixturePath(imageName);
-  filePickerDataSourceMock.importPath = importPath;
   final String exportPath = "$testResourceFolder${Platform.pathSeparator}$imageName";
   filePickerDataSourceMock.exportPath = exportPath;
 
-  final FilePickerResult? result = await repo.getImportFileInfo();
+  final FilePickerResult? result = await repo.getImportFileInfo(pathOverride: importPath);
   expect(result?.path, importPath, reason: "path match");
   expect(result?.size, size, reason: "size match");
   expect(result?.lastModified.toIso8601String(), dateTime, reason: "date match");
@@ -105,8 +101,7 @@ Future<void> imageTest(String imageName, int size, String dateTime) async {
   expect(compressedBytes.length < unCompressedBytes.length, true, reason: "compressed should be less");
 
   await repo.saveExternalFile(path: exportPath, bytes: compressedBytes);
-  filePickerDataSourceMock.importPath = exportPath;
-  final FilePickerResult? exported = await repo.getImportFileInfo();
+  final FilePickerResult? exported = await repo.getImportFileInfo(pathOverride: exportPath);
   expect(compressedBytes.length, exported?.size, reason: "size equal");
 }
 
