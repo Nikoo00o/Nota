@@ -42,7 +42,7 @@ class ExternalFileRepositoryImpl extends ExternalFileRepository {
   @override
   Future<String?> getExportFilePath({required String dialogTitle, required String fileName}) async {
     final String? path = await filePickerDataSource.exportFile(dialogTitle: dialogTitle, fileName: fileName);
-    if (SupportedFileTypes.containsExtension(FileUtils.getExtension(path ?? "")) == false) {
+    if (path != null && SupportedFileTypes.containsExtension(FileUtils.getExtension(path)) == false) {
       Logger.error("the file type of $path is not supported");
       throw const FileException(message: ErrorCodes.FILE_NOT_SUPPORTED);
     }

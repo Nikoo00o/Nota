@@ -15,7 +15,8 @@ abstract class ExternalFileRepository {
   Future<FilePickerResult?> getImportFileInfo({String? pathOverride});
 
   /// lets the user select a path where the [fileName] should be exported to. returns null if the user has not
-  /// selected a destination
+  /// selected a destination. the file name may contain an extension, but it may also be without one, because its
+  /// just a suggestion
   ///
   /// This returns a [FileException] with [ErrorCodes.FILE_NOT_SUPPORTED] if a file with no supported extension from
   /// [SupportedFileTypes] was selected

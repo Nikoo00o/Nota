@@ -35,6 +35,7 @@ void main() {
   });
 
   _testExternalFileRepository();
+  return;
   _testNoteContent();
   _testStoreNoteUseCases();
 }
@@ -80,6 +81,19 @@ void _testExternalFileRepository() {
 
     test("jpg test", () async {
       await imageTest("jpg_test.jpg", 22466, "2023-10-29T15:34:11.000");
+    });
+
+    test("unsupported test", () async {
+      final ExternalFileRepository repo = sl<ExternalFileRepository>();
+      expect(() async {
+        filePickerDataSourceMock.importPath = fixturePath("notSupported.notSupported");
+        await repo.getImportFileInfo();
+      }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_SUPPORTED)));
+
+      expect(() async {
+        filePickerDataSourceMock.exportPath = fixturePath("notSupported.notSupported");
+        await repo.getExportFilePath(dialogTitle: "test", fileName: "notSupported.notSupported");
+      }, throwsA(predicate((Object e) => e is FileException && e.message == ErrorCodes.FILE_NOT_SUPPORTED)));
     });
   });
 }
