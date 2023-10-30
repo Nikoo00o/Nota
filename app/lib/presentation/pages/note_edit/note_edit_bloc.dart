@@ -15,6 +15,7 @@ import 'package:app/domain/usecases/favourites/change_favourite.dart';
 import 'package:app/domain/usecases/favourites/is_favourite.dart';
 import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
+import 'package:app/domain/usecases/note_structure/export_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_updates_stream.dart';
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
@@ -51,6 +52,7 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
   final GetCurrentStructureItem getCurrentStructureItem;
   final IsFavourite isFavourite;
   final ChangeFavourite changeFavourite;
+  final ExportCurrentStructureItem exportCurrentStructureItem;
 
   final GetStructureUpdatesStream getStructureUpdatesStream;
 
@@ -90,6 +92,7 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
     required this.isFavourite,
     required this.changeFavourite,
     required this.appConfig,
+    required this.exportCurrentStructureItem,
   }) : super(initialState: const NoteEditState()) {
     inputController = CustomEditController(searchCaseSensitive: appConfig.searchCaseSensitive);
   }
@@ -233,6 +236,9 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
       case 2:
         await _deleteCurrentNote();
         break;
+      case 3:
+        await _exportCurrentNote();
+        break;
     }
   }
 
@@ -275,6 +281,10 @@ final class NoteEditBloc extends PageBloc<NoteEditEvent, NoteEditState> {
         textKeyParams: <String>[path],
       ));
     }
+  }
+
+  Future<void> _exportCurrentNote() async {
+    await exportCurrentStructureItem.call(const NoParams());
   }
 
   Future<void> _handleInputSaved(NoteEditInputSaved event, Emitter<NoteEditState> emit) async {

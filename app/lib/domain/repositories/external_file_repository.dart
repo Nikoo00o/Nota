@@ -5,13 +5,20 @@ import 'package:shared/core/enums/supported_file_types.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 
 abstract class ExternalFileRepository {
-  /// lets the user select a file of [SupportedFileTypes] for which all information will be returned. returns null on
-  /// error
+  /// lets the user select a file of [SupportedFileTypes] for which all information will be returned. returns null
+  /// if the user has not selected a file
   ///
-  /// If [pathOverride] is used, then the dialog will not be opened for the user to select the input file
+  /// If [pathOverride] is used, then the dialog will not be opened for the user to select the input file.
+  ///
+  /// This returns a [FileException] with [ErrorCodes.FILE_NOT_SUPPORTED] if a file with no supported extension from
+  /// [SupportedFileTypes] was selected
   Future<FilePickerResult?> getImportFileInfo({String? pathOverride});
 
-  /// lets the user select a path where the [fileName] should be exported to. returns null on error
+  /// lets the user select a path where the [fileName] should be exported to. returns null if the user has not
+  /// selected a destination
+  ///
+  /// This returns a [FileException] with [ErrorCodes.FILE_NOT_SUPPORTED] if a file with no supported extension from
+  /// [SupportedFileTypes] was selected
   Future<String?> getExportFilePath({required String dialogTitle, required String fileName});
 
   /// can throw an [FileException] with [ErrorCodes.FILE_NOT_FOUND]

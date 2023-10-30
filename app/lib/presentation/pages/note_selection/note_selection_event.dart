@@ -4,6 +4,7 @@ import 'package:app/core/enums/event_action.dart';
 import 'package:app/core/enums/search_status.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/presentation/widgets/base_pages/page_event.dart';
+import 'package:desktop_drop/desktop_drop.dart';
 
 sealed class NoteSelectionEvent extends PageEvent {
   const NoteSelectionEvent();
@@ -72,4 +73,10 @@ final class NoteSelectionChangeFavourite extends NoteSelectionEvent {
   final bool isFavourite;
 
   const NoteSelectionChangeFavourite({required this.isFavourite});
+}
+
+final class NoteSelectionDroppedFile extends NoteSelectionEvent {
+  final DropDoneDetails details;
+
+  const NoteSelectionDroppedFile({required this.details});
 }

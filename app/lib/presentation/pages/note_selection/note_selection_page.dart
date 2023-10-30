@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:app/core/enums/search_status.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/structure_item.dart';
@@ -14,6 +15,7 @@ import 'package:app/presentation/pages/note_selection/widgets/selection_popup_me
 import 'package:app/presentation/pages/note_selection/widgets/selection_search_bar.dart';
 import 'package:app/presentation/pages/note_selection/widgets/structure_item_box.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 
 final class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> {
@@ -26,7 +28,18 @@ final class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionS
 
   @override
   Widget buildBodyWithNoState(BuildContext context, Widget bodyWithState) {
-    return Scrollbar(controller: currentBloc(context).scrollController, child: bodyWithState);
+    final Widget body = Scrollbar(controller: currentBloc(context).scrollController, child: bodyWithState);
+    if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) {
+      return DropTarget(
+        onDragDone: (DropDoneDetails detail) {
+          currentBloc(context).add(NoteSelectionDroppedFile(details: detail));
+        },
+        onDragEntered: (DropEventDetails detail) {},
+        onDragExited: (DropEventDetails detail) {},
+        child: body,
+      );
+    }
+    return body;
   }
 
   @override
@@ -86,7 +99,8 @@ final class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionS
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         tooltip: translate(context, "back"),
-        onPressed: () => currentBloc(context).add(const NoteSelectionNavigatedBack(completer: null, ignoreSearch: false)),
+        onPressed: () =>
+            currentBloc(context).add(const NoteSelectionNavigatedBack(completer: null, ignoreSearch: false)),
       ),
       title: const SelectionSearchBar(),
       centerTitle: false,

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:app/domain/entities/file_picker_result.dart';
 import 'package:path/path.dart' as p;
+import 'package:shared/core/config/shared_config.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
@@ -25,7 +26,7 @@ part "file_wrapper.dart";
 /// constructors of the sub classes. If there are no additional params needed, then use the factory constructor
 /// [NoteContent.saveFile]
 ///
-/// This can return a [FileException] with [ErrorCodes.INVALID_PARAMS].
+/// This can return a [FileException] with [ErrorCodes.INVALID_PARAMS], or [ErrorCodes.FILE_TO_BIG].
 ///
 ///
 /// To access the full [_bytes] for saving, use [fullBytes] and to access only the content bytes for reading, use

@@ -38,6 +38,7 @@ final class SettingsNavigatedToChangePasswordPage extends SettingsEvent {
 
 final class SettingsPasswordChanged extends SettingsEvent {
   final bool cancel;
+
   const SettingsPasswordChanged({required this.cancel});
 }
 
@@ -45,6 +46,12 @@ final class SettingsAutoSaveChanged extends SettingsEvent {
   final bool autoSave;
 
   const SettingsAutoSaveChanged({required this.autoSave});
+}
+
+final class SettingsAutoServerSyncChanged extends SettingsEvent {
+  final bool autoServerSync;
+
+  const SettingsAutoServerSyncChanged({required this.autoServerSync});
 }
 
 final class SettingsBiometricsChanged extends SettingsEvent {

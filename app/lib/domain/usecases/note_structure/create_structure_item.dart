@@ -13,6 +13,7 @@ import 'package:app/domain/usecases/note_structure/inner/update_note_structure.d
 import 'package:app/domain/usecases/note_transfer/inner/store_note_encrypted.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/enums/note_type.dart';
+import 'package:shared/core/enums/supported_file_types.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
@@ -39,7 +40,8 @@ import 'package:shared/domain/usecases/usecase.dart';
 ///
 /// The new name should be retrieved with a dialog from the ui before calling this use case. This use case can also
 /// open a dialog for [NoteType.FILE_WRAPPER] so that the user can select the file to be imported into the app.
-/// that can an throw [FileException] with [ErrorCodes.FILE_NOT_FOUND] if no file was selected
+/// that can an throw [FileException] with [ErrorCodes.FILE_NOT_FOUND] if no file was selected, or
+/// [ErrorCodes.FILE_NOT_SUPPORTED] if a file with no supported type of [SupportedFileTypes] was selected
 class CreateStructureItem extends UseCase<void, CreateStructureItemParams> {
   final NoteStructureRepository noteStructureRepository;
   final GetOriginalStructureItem getOriginalStructureItem;

@@ -38,4 +38,7 @@ class AppConfig extends SharedConfig {
   /// The compression level for images from 0 to 9 (0 means no compression and 9 is 90% less quality). the default
   /// would be 6
   int get imageCompressionLevel => 6;
+
+  /// The note selection will server sync in this period on being navigated to
+  Duration get automaticServerSyncDelay => const Duration(minutes: 5);
 }

@@ -145,6 +145,11 @@ class NoteRepository {
       return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_REQUEST_VALUES);
     }
 
+    if (params.rawBytes!.length > SharedConfig.maxFileBytes) {
+      Logger.error("Error uploading note, because the file was too big: $transferToken");
+      return RestCallbackResult.withErrorCode(ErrorCodes.FILE_TO_BIG);
+    }
+
     final int serverNoteId = _getValidServerNoteId(params, _noteTransfers[transferToken]!);
     if (serverNoteId == 0) {
       Logger.error("Error uploading note, because the note id was invalid: $transferToken");

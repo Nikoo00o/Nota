@@ -9,6 +9,7 @@ import 'package:app/presentation/pages/note_selection/note_selection_state.dart'
 import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
 import 'package:app/presentation/widgets/custom_card.dart';
 import 'package:flutter/material.dart';
+import 'package:shared/core/enums/note_type.dart';
 
 /// The notes / folders that can be selected
 final class StructureItemBox extends BlocPageChild<NoteSelectionBloc, NoteSelectionState> {
@@ -59,7 +60,11 @@ final class StructureItemBox extends BlocPageChild<NoteSelectionBloc, NoteSelect
       return CustomCard(
         color: item is StructureFolder ? colorSecondaryContainer(context) : colorPrimaryContainer(context),
         onTap: () => currentBloc(context).add(NoteSelectionItemClicked(index: index)),
-        icon: item is StructureFolder ? Icons.folder : Icons.sticky_note_2_outlined,
+        icon: switch (item.noteType) {
+          NoteType.FOLDER => Icons.folder,
+          NoteType.RAW_TEXT => Icons.sticky_note_2_outlined,
+          NoteType.FILE_WRAPPER => Icons.file_present_outlined,
+        },
         trailingIcon: item.lastModified.isBefore(lastNoteTransferTime) ? null : Icons.sync_problem,
         title: item.name,
         description: _getDescription(context),

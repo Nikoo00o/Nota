@@ -317,6 +317,7 @@ Future<void> initializeGetIt() async {
         dialogService: sl(),
         isFavourite: sl(),
         changeFavourite: sl(),
+        appSettingsRepository: sl(),
       ));
   sl.registerFactory<NoteEditBloc>(() => NoteEditBloc(
         getCurrentStructureItem: sl(),
@@ -334,6 +335,7 @@ Future<void> initializeGetIt() async {
         isFavourite: sl(),
         changeFavourite: sl(),
         appConfig: sl(),
+        exportCurrentStructureItem: sl(),
       ));
   sl.registerFactory<SettingsBloc>(() => SettingsBloc(
         appSettingsRepository: sl(),

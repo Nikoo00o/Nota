@@ -12,6 +12,11 @@ class SharedConfig {
   /// The platform independent delimiter for the path of the notes which is saved in the file name of the note info!
   static String noteStructureDelimiter = "/";
 
+  /// the maximum size in megabytes a note may be!
+  static const int MAX_FILE_SIZE_IN_MB = 3000;
+
+  static int get maxFileBytes => MAX_FILE_SIZE_IN_MB * 1000 * 1000;
+
   /// This is used as a part of [getServerUrl].
   int get serverPort => 8291;
 

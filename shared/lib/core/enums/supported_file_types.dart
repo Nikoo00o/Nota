@@ -17,4 +17,16 @@ enum SupportedFileTypes {
   String toString() {
     return name;
   }
+
+  /// returns if the supported file types contain the file extension which may, or may not start with a ".", so "
+  /// .txt", or "txt"
+  static bool containsExtension(String extension) {
+    late String matcher;
+    if (extension.startsWith(".")) {
+      matcher = extension.substring(1);
+    } else {
+      matcher = extension;
+    }
+    return values.any((SupportedFileTypes element) => element.toString() == matcher);
+  }
 }

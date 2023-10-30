@@ -3,12 +3,8 @@ part of "note_content.dart";
 /// A raw text note with the type [NoteType.RAW_TEXT]. For loading, use [NoteContent.loadFile] and for saving use
 /// [NoteContent.saveFile]
 final class NoteContentRawText extends NoteContent {
-
   /// next 4 bytes part of the header
   static const int TEXT_SIZE_BYTES = 4;
-
-  /// a maximum of 4 gb text is supported inside of notes
-  static const int MAX_TEXT_BYTES = 4000000000;
 
   /// the current version for when writing raw text files (used for migration)
   static const int RAW_TEXT_VERSION = 1;
@@ -37,9 +33,9 @@ final class NoteContentRawText extends NoteContent {
   }
 
   void _checkRawTextHeaderFields() {
-    if (textSize >= MAX_TEXT_BYTES) {
-      Logger.error("text size $textSize, was bigger, or equal to ${MAX_TEXT_BYTES / 1000000000} GB");
-      throw const FileException(message: ErrorCodes.INVALID_PARAMS);
+    if (textSize + 10000 >= SharedConfig.maxFileBytes) {
+      Logger.error("text size $textSize, was bigger than ${SharedConfig.MAX_FILE_SIZE_IN_MB} MB");
+      throw const FileException(message: ErrorCodes.FILE_TO_BIG);
     }
     final int combined = headerSize + textSize;
     if (_bytes.length < combined) {

@@ -28,6 +28,12 @@ class ErrorCodes {
   /// A file could not be read / opened. the translation text should have a param for the filename
   static const String FILE_NOT_FOUND = "error.file.not.found";
 
+  /// the file was bigger than the maximum
+  static const String FILE_TO_BIG = "error.file.to.big";
+
+  /// the file was bigger than the maximum
+  static const String FILE_NOT_SUPPORTED = "error.file.not.supported";
+
   /// Basic error code that can be used for callbacks where the client send request parameter with empty values, or also
   /// invalid values that should not be used.
   ///

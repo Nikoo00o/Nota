@@ -5,11 +5,11 @@ import 'package:shared/core/utils/file_utils.dart';
 /// This is a wrapper around the file picker package to import/export files to/from the app!
 abstract class FilePickerDataSource {
   /// this opens a platform specific dialog where the user can select a path to a file of the [SupportedFileTypes]
-  /// which should be imported into  the app
+  /// which should be imported into  the app. this returns null if no file was selected
   Future<String?> importFile();
 
   /// this opens a platform specific dialog where the user can select a path to a folder where the [fileName]
-  /// file should be exported to
+  /// file should be exported to. this returns null if no file was selected
   Future<String?> exportFile({required String dialogTitle, required String fileName});
 }
 

@@ -5,8 +5,6 @@ import 'package:app/domain/repositories/biometrics_repository.dart';
 import 'package:app/domain/usecases/account/change/change_account_password.dart';
 import 'package:app/domain/usecases/account/change/change_auto_login.dart';
 import 'package:app/domain/usecases/account/get_auto_login.dart';
-import 'package:app/presentation/main/app/app_bloc.dart';
-import 'package:app/presentation/main/app/app_event.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/presentation/pages/settings/settings_event.dart';
 import 'package:app/presentation/pages/settings/settings_state.dart';
@@ -52,6 +50,7 @@ final class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
     on<SettingsNavigatedToChangePasswordPage>(_handleNavigatedToChangePasswordPage);
     on<SettingsPasswordChanged>(_handlePasswordChanged);
     on<SettingsAutoSaveChanged>(_handleAutoSaveChanged);
+    on<SettingsAutoServerSyncChanged>(_handleAutoServerSyncChanged);
     on<SettingsBiometricsChanged>(_handleBiometricsChanged);
   }
 
@@ -112,6 +111,11 @@ final class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
     emit(await _buildState());
   }
 
+  Future<void> _handleAutoServerSyncChanged(SettingsAutoServerSyncChanged event, Emitter<SettingsState> emit) async {
+    await appSettingsRepository.setAutoServerSync(autoServerSync: event.autoServerSync);
+    emit(await _buildState());
+  }
+
   Future<void> _handleBiometricsChanged(SettingsBiometricsChanged event, Emitter<SettingsState> emit) async {
     await biometricsRepository.enableBiometrics(enabled: event.enabled);
     emit(await _buildState());
@@ -126,6 +130,7 @@ final class SettingsBloc extends PageBloc<SettingsEvent, SettingsState> {
       autoLogin: await getAutoLogin.call(const NoParams()),
       lockscreenTimeoutInSeconds: timeout.inSeconds.toString(),
       autoSave: await appSettingsRepository.getAutoSave(),
+      autoServerSync: await appSettingsRepository.getAutoServerSync(),
       biometrics: await biometricsRepository.isBiometricsEnabled(),
     );
   }

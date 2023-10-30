@@ -11,6 +11,7 @@ final class SettingsStateInitialised extends SettingsState {
   final bool autoLogin;
   final String lockscreenTimeoutInSeconds;
   final bool autoSave;
+  final bool autoServerSync;
   final bool biometrics;
 
   SettingsStateInitialised({
@@ -20,6 +21,7 @@ final class SettingsStateInitialised extends SettingsState {
     required this.autoLogin,
     required this.lockscreenTimeoutInSeconds,
     required this.autoSave,
+    required this.autoServerSync,
     required this.biometrics,
   }) : super(<String, Object?>{
           "isDarkTheme": isDarkTheme,
@@ -28,6 +30,7 @@ final class SettingsStateInitialised extends SettingsState {
           "autoLogin": autoLogin,
           "lockscreenTimeoutInSeconds": lockscreenTimeoutInSeconds,
           "autoSave": autoSave,
+          "autoServerSync": autoServerSync,
           "biometrics": biometrics,
         });
 }

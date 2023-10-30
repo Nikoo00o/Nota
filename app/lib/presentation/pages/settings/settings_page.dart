@@ -73,7 +73,8 @@ final class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
             disabled: state.autoLogin,
             keyboardType: TextInputType.number,
             validatorCallback: (String? input) => lockscreenTimeoutValidator(input, context),
-            onConfirm: (String value) => currentBloc(context).add(SettingsLockscreenTimeoutChanged(timeoutInSeconds: value)),
+            onConfirm: (String value) =>
+                currentBloc(context).add(SettingsLockscreenTimeoutChanged(timeoutInSeconds: value)),
           ),
           SettingsCustomOption(
             titleKey: "page.settings.password",
@@ -87,6 +88,13 @@ final class SettingsPage extends BlocPage<SettingsBloc, SettingsState> {
             icon: Icons.save,
             isActive: state.autoSave,
             onChange: (bool value) => currentBloc(context).add(SettingsAutoSaveChanged(autoSave: value)),
+          ),
+          SettingsToggleOption(
+            titleKey: "page.settings.auto.server.sync",
+            descriptionKey: "page.settings.auto.server.sync.description",
+            icon: Icons.sync,
+            isActive: state.autoServerSync,
+            onChange: (bool value) => currentBloc(context).add(SettingsAutoServerSyncChanged(autoServerSync: value)),
           ),
           SettingsToggleOption(
             titleKey: "page.settings.biometrics",

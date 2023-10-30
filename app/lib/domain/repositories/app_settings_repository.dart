@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:app/core/config/app_config.dart';
 import 'package:app/core/enums/app_update.dart';
 import 'package:app/domain/entities/favourites.dart';
 import 'package:app/domain/repositories/biometrics_repository.dart';
@@ -53,6 +54,12 @@ abstract class AppSettingsRepository {
 
   /// when navigating back from note editing. default is false
   Future<bool> getAutoSave();
+
+  /// when active, this syncs every [AppConfig.automaticServerSyncDelay] after navigating to the note selection
+  Future<void> setAutoServerSync({required bool autoServerSync});
+
+  /// when active, this syncs every [AppConfig.automaticServerSyncDelay] after navigating to the note selection
+  Future<bool> getAutoServerSync();
 
   /// saves the favourite notes/folders of the user to the local storage (this will be reset when switching accounts!)
   Future<void> setFavourites(Favourites favourites);

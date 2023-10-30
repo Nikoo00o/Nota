@@ -9,6 +9,7 @@ import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_update_batch.dart';
 import 'package:app/domain/entities/translation_string.dart';
+import 'package:app/domain/repositories/app_settings_repository.dart';
 import 'package:app/domain/usecases/favourites/change_favourite.dart';
 import 'package:app/domain/usecases/favourites/is_favourite.dart';
 import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
@@ -59,9 +60,13 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
   final GetStructureUpdatesStream getStructureUpdatesStream;
   final IsFavourite isFavourite;
   final ChangeFavourite changeFavourite;
+  final AppSettingsRepository appSettingsRepository;
 
   final ScrollController scrollController = ScrollController();
   final FocusNode searchFocus = FocusNode();
+
+  // todo: maybe change the disable method and move this into a search service, so that the search is saved between
+  //  note and folder! (or a shared note service)
   final TextEditingController searchController = TextEditingController();
 
   /// for the [getStructureUpdatesStream]
@@ -100,6 +105,7 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
     required this.getStructureUpdatesStream,
     required this.isFavourite,
     required this.changeFavourite,
+    required this.appSettingsRepository,
   }) : super(initialState: const NoteSelectionState());
 
   @override
@@ -115,6 +121,7 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
     on<NoteSelectionChangedMove>(_handleChangeMove);
     on<NoteSelectionChangeSearch>(_handleChangeSearch);
     on<NoteSelectionChangeFavourite>(_handleChangeFavourite);
+    on<NoteSelectionDroppedFile>(_handleDroppedFile);
   }
 
   @override
@@ -138,6 +145,11 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
         .call(GetStructureUpdatesStreamParams(callbackFunction: (StructureUpdateBatch batch) {
       add(NoteSelectionStructureChanged(newCurrentItem: batch.currentItem));
     }));
+    final bool autoServerSync = await appSettingsRepository.getAutoServerSync();
+    if (autoServerSync && lastNoteTransferTime.add(appConfig.automaticServerSyncDelay).isBefore(DateTime.now())) {
+      Logger.verbose("performing automatic server sync");
+      await _serverSync(null);
+    }
     dialogService.hideLoadingDialog();
   }
 
@@ -146,7 +158,7 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
     currentItem = event.newCurrentItem;
     Logger.verbose("handling structure change with new item ${currentItem!.path}");
     if (currentItem is StructureFolder) {
-      if(currentItem!.noteType != NoteType.FOLDER){
+      if (currentItem!.noteType != NoteType.FOLDER) {
         Logger.error("structure change to folder did not have the correct note type");
         throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
       }
@@ -167,6 +179,7 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
           navigationService.navigateTo(Routes.note_edit);
         case NoteType.FILE_WRAPPER:
           // todo: navigate to file wrapper as well
+          navigationService.navigateTo(Routes.settings);
           throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
       }
     }
@@ -302,13 +315,18 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
   Future<void> _handleServerSync(NoteSelectionServerSynced event, Emitter<NoteSelectionState> emit) async {
     _disableSearch(emit);
     dialogService.showLoadingDialog();
+    await _serverSync(() => emit(_buildState()));
+    dialogService.hideLoadingDialog();
+  }
+
+  /// [emitCallback] is optional to emit a state on success
+  Future<void> _serverSync(void Function()? emitCallback) async {
     final bool confirmed = await transferNotes(const NoParams());
     if (confirmed) {
       lastNoteTransferTime = await getLastNoteTransferTime(const NoParams());
-      emit(_buildState());
+      emitCallback?.call();
       dialogService.showInfoSnackBar(const ShowInfoSnackBar(textKey: "note.selection.transferred.notes"));
     }
-    dialogService.hideLoadingDialog();
   }
 
   Future<void> _handleChangeMove(NoteSelectionChangedMove event, Emitter<NoteSelectionState> emit) async {
@@ -366,6 +384,15 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
     favourite = event.isFavourite;
     await changeFavourite.call(ChangeFavouriteParams(isFavourite: favourite, item: currentItem!));
     emit(_buildState());
+  }
+
+  Future<void> _handleDroppedFile(NoteSelectionDroppedFile event, Emitter<NoteSelectionState> emit) async {
+    if (event.details.files.length == 1) {
+      await createStructureItem.call(CreateStructureItemParamsFromDroppedFile(path: event.details.files.first.path));
+    } else {
+      Logger.error("currently dragging and dropping multiple files is not supported");
+      throw const FileException(message: ErrorCodes.FILE_NOT_SUPPORTED);
+    }
   }
 
   /// only if [currentItem] is [StructureFolder]

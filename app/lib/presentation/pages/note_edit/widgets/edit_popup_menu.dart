@@ -19,6 +19,7 @@ final class EditPopupMenu extends BlocPageChild<NoteEditBloc, NoteEditState> {
               PopupMenuItem<int>(value: 0, child: Text(translate(context, "note.selection.rename"))),
               PopupMenuItem<int>(value: 1, child: Text(translate(context, "note.selection.move"))),
               PopupMenuItem<int>(value: 2, child: Text(translate(context, "note.selection.delete"))),
+              PopupMenuItem<int>(value: 3, child: Text(translate(context, "note.selection.export"))),
             ],
           );
         } else {

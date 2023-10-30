@@ -15,9 +15,6 @@ final class NoteContentFileWrapper extends NoteContent {
   /// last 4 bytes of the fixed header size to store path size
   static const int PATH_SIZE_BYTES = 4;
 
-  /// a maximum of 4 gb content bytes is supported inside of file wrappers
-  static const int MAX_CONTENT_BYTES = 4000000000;
-
   /// the current version for when writing file wrapper files (used for migration)
   static const int FILE_WRAPPER_VERSION = 1;
 
@@ -64,9 +61,9 @@ final class NoteContentFileWrapper extends NoteContent {
   }
 
   void _checkRawTextHeaderFields() {
-    if (contentSize >= MAX_CONTENT_BYTES) {
-      Logger.error("content size $contentSize, was bigger, or equal to ${MAX_CONTENT_BYTES / 1000000000} GB");
-      throw const FileException(message: ErrorCodes.INVALID_PARAMS);
+    if (contentSize + 10000 >= SharedConfig.maxFileBytes) {
+      Logger.error("text size $contentSize, was bigger than ${SharedConfig.MAX_FILE_SIZE_IN_MB} MB");
+      throw const FileException(message: ErrorCodes.FILE_TO_BIG);
     }
     final int combined = headerSize + pathSize + contentSize;
     if (_bytes.length < combined) {

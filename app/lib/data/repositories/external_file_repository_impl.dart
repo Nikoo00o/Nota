@@ -7,6 +7,7 @@ import 'package:app/domain/entities/file_picker_result.dart';
 import 'package:app/domain/repositories/external_file_repository.dart';
 import 'package:image/image.dart' as img;
 import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/enums/supported_file_types.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/file_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
@@ -27,6 +28,10 @@ class ExternalFileRepositoryImpl extends ExternalFileRepository {
           size: await file.length(),
           lastModified: await file.lastModified(),
         );
+        if (SupportedFileTypes.containsExtension(result.extension) == false) {
+          Logger.error("the file type of $result is not supported");
+          throw const FileException(message: ErrorCodes.FILE_NOT_SUPPORTED);
+        }
         Logger.verbose("Got imported file info: $result");
         return result;
       }
@@ -37,6 +42,10 @@ class ExternalFileRepositoryImpl extends ExternalFileRepository {
   @override
   Future<String?> getExportFilePath({required String dialogTitle, required String fileName}) async {
     final String? path = await filePickerDataSource.exportFile(dialogTitle: dialogTitle, fileName: fileName);
+    if (SupportedFileTypes.containsExtension(FileUtils.getExtension(path ?? "")) == false) {
+      Logger.error("the file type of $path is not supported");
+      throw const FileException(message: ErrorCodes.FILE_NOT_SUPPORTED);
+    }
     Logger.verbose("Got exported file path: $path");
     return path;
   }

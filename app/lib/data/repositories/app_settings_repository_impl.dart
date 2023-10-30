@@ -27,6 +27,8 @@ class AppSettingsRepositoryImpl extends AppSettingsRepository {
 
   static const String CONFIG_AUTO_SAVE = "CONFIG_AUTO_SAVE";
 
+  static const String CONFIG_AUTO_SERVER_SYNC = "CONFIG_AUTO_SERVER_SYNC";
+
   AppSettingsRepositoryImpl({
     required this.localDataSource,
     required this.appConfig,
@@ -87,6 +89,13 @@ class AppSettingsRepositoryImpl extends AppSettingsRepository {
 
   @override
   Future<bool> getAutoSave() => localDataSource.getConfigValue(configKey: CONFIG_AUTO_SAVE);
+
+  @override
+  Future<void> setAutoServerSync({required bool autoServerSync}) =>
+      localDataSource.setConfigValue(configKey: CONFIG_AUTO_SERVER_SYNC, configValue: autoServerSync);
+
+  @override
+  Future<bool> getAutoServerSync() => localDataSource.getConfigValue(configKey: CONFIG_AUTO_SERVER_SYNC);
 
   @override
   Future<void> setFavourites(Favourites favourites) =>
