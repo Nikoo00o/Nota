@@ -21,7 +21,7 @@ abstract class NoteTransferRepository {
   /// So for example on android /data/user/0/com.Nikoo00o.nota.app/app_flutter/nota/notes/10.note
   Future<void> storeEncryptedNote({required int noteId, required List<int> encryptedBytes});
 
-  /// Returns the content of the note which is encrypted with the users data key.
+  /// Returns the encrypted content of the note which is encrypted with the users data key.
   ///
   /// The Note will be stored at "[LocalDataSource.getBasePath] / [AppConfig.noteFolder] / [noteId] .note"
   ///

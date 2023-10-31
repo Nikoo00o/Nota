@@ -58,7 +58,11 @@ final class StructureItemBox extends BlocPageChild<NoteSelectionBloc, NoteSelect
         item.containsName(searchString, caseSensitive: getIt<AppConfig>().searchCaseSensitive) ||
         _containsNoteContent(searchString, noteContentMap)) {
       return CustomCard(
-        color: item is StructureFolder ? colorSecondaryContainer(context) : colorPrimaryContainer(context),
+        color: switch (item.noteType) {
+          NoteType.FOLDER => colorSecondaryContainer(context),
+          NoteType.RAW_TEXT => colorPrimaryContainer(context),
+          NoteType.FILE_WRAPPER => colorInversePrimary(context),
+        },
         onTap: () => currentBloc(context).add(NoteSelectionItemClicked(index: index)),
         icon: switch (item.noteType) {
           NoteType.FOLDER => Icons.folder,

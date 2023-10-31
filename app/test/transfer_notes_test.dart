@@ -40,7 +40,7 @@ void main() {
           reason: "no file");
     });
 
-    test("Store note on server and then download it again", () async {
+    test("Store note on server, delete it and then download it again", () async {
       final ClientAccount account = await _loginAndCreateNote();
       final DateTime firstTime = account.noteInfoList.first.lastEdited;
 

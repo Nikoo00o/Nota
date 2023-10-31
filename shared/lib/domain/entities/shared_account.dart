@@ -27,6 +27,8 @@ class SharedAccount {
   ///
   /// Important: you should not directly modify the list if you want your modification to affect equality, because the
   /// list equality is compared by reference! Better copy the list then
+  ///
+  /// Deleted notes will still be contained here with their id
   List<NoteInfo> noteInfoList;
 
   SharedAccount({

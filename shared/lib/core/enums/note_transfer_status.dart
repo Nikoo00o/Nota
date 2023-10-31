@@ -24,6 +24,9 @@ enum NoteTransferStatus {
   /// Returns if the server needs a new version of the note, so one of [SERVER_NEEDS_UPDATE], or [SERVER_NEEDS_NEW]
   bool get serverNeedsUpdate => index >= SERVER_NEEDS_UPDATE.index;
 
+  /// Returns if either client, or server did not have the note before, so one of [CLIENT_NEEDS_NEW], or [SERVER_NEEDS_NEW]
+  bool get wasNewSaved => index < CLIENT_NEEDS_UPDATE.index || index > SERVER_NEEDS_UPDATE.index;
+
   @override
   String toString() {
     return name;

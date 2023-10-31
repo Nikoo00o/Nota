@@ -36,7 +36,7 @@ class AppConfig extends SharedConfig {
   bool get searchCaseSensitive => false;
 
   /// The compression level for images from 0 to 9 (0 means no compression and 9 is 90% less quality). the default
-  /// would be 6
+  /// compression is 6
   int get imageCompressionLevel => 6;
 
   /// The note selection will server sync in this period on being navigated to

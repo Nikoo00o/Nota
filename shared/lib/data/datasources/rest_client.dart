@@ -44,7 +44,7 @@ class RestClient {
   /// [queryParams] can always be used to add query params.
   ///
   /// [bodyData] can be used for put and post (and also delete) requests (the [endpoint] defines the http method).
-  /// [bodyData] can be a json map of String and dynamic, or it can be a list of raw bytes!
+  /// [bodyData] can be a json map of String and dynamic, or it can be a list of raw bytes! Or of course it can be null
   ///
   /// For GET requests [bodyData] must be null!
   ///
