@@ -48,7 +48,13 @@ class Endpoints {
 
   static const Endpoint NOTE_DOWNLOAD = Endpoint(
     apiPath: "/api/notes/download",
-    httpMethod: HttpMethod.GET,
+    httpMethod: HttpMethod.PUT, // needs to be put, because of the hash content bytes
+    needsSessionToken: true,
+  );
+
+  static const Endpoint NOTE_SHOULD_UPLOAD = Endpoint(
+    apiPath: "/api/notes/upload/check",
+    httpMethod: HttpMethod.PUT,
     needsSessionToken: true,
   );
 }

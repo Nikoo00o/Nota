@@ -10,6 +10,9 @@ class LocalDataSourceMock extends LocalDataSource {
   /// The file paths mapped to the byte lists.
   Map<String, Uint8List> files = <String, Uint8List>{};
 
+  /// the last time a file was written to / deleted
+  DateTime lastFileChange = DateTime.now();
+
   @override
   Future<void> init() async {}
 
@@ -45,6 +48,7 @@ class LocalDataSourceMock extends LocalDataSource {
 
   @override
   Future<void> writeFile({required String localFilePath, required List<int> bytes}) async {
+    lastFileChange = DateTime.now();
     files[localFilePath] = Uint8List.fromList(bytes);
   }
 
@@ -57,6 +61,9 @@ class LocalDataSourceMock extends LocalDataSource {
   Future<bool> deleteFile({required String localFilePath}) async {
     final bool contained = files.containsKey(localFilePath);
     files.remove(localFilePath);
+    if (contained) {
+      lastFileChange = DateTime.now();
+    }
     return contained;
   }
 
@@ -67,7 +74,7 @@ class LocalDataSourceMock extends LocalDataSource {
     }
     final Uint8List bytes = files.remove(oldLocalFilePath)!;
     files[newLocalFilePath] = bytes;
-
+    lastFileChange = DateTime.now();
     return true;
   }
 

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 import 'package:http/io_client.dart';
@@ -98,7 +99,8 @@ class RestClient {
       throw ServerException(message: ErrorCodes.httpStatusWith(response.statusCode));
     }
 
-    final dynamic responseData = NetworkUtils.decodeNetworkData(httpHeaders: response.headers, data: response.bodyBytes);
+    final dynamic responseData =
+        NetworkUtils.decodeNetworkData(httpHeaders: response.headers, data: response.bodyBytes);
 
     if (responseData is Map<String, dynamic>) {
       _checkResponseForErrors(responseData);
@@ -108,8 +110,8 @@ class RestClient {
       Logger.verbose("Received binary data");
       return ResponseData(json: null, bytes: responseData, responseHeaders: response.headers);
     } else {
-      Logger.error("Received no data from server");
-      throw const ServerException(message: ErrorCodes.UNKNOWN_SERVER);
+      Logger.verbose("Received empty / no data from server");
+      return ResponseData(json: null, bytes: Uint8List(0), responseHeaders: response.headers);
     }
   }
 
@@ -138,7 +140,8 @@ class RestClient {
     }
   }
 
-  Future<http.Response> _send(Uri url, HttpMethod httpMethod, Map<String, String> httpHeaders, List<int> bytesToSend) async {
+  Future<http.Response> _send(
+      Uri url, HttpMethod httpMethod, Map<String, String> httpHeaders, List<int> bytesToSend) async {
     try {
       late final http.Response response;
 

@@ -2,16 +2,21 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:app/core/config/app_config.dart';
+import 'package:app/core/utils/security_utils_extension.dart';
 import 'package:app/data/datasources/local_data_source.dart';
 import 'package:app/data/datasources/remote_note_data_source.dart';
 import 'package:app/domain/repositories/note_transfer_repository.dart';
 import 'package:shared/core/config/shared_config.dart';
 import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/enums/note_transfer_status.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 import 'package:shared/core/utils/logger/logger.dart';
+import 'package:shared/core/utils/security_utils.dart';
 import 'package:shared/data/dtos/notes/download_note_request.dart';
 import 'package:shared/data/dtos/notes/download_note_response.dart';
 import 'package:shared/data/dtos/notes/finish_note_request.dart';
+import 'package:shared/data/dtos/notes/should_upload_note_request.dart';
+import 'package:shared/data/dtos/notes/should_upload_note_response.dart';
 import 'package:shared/data/dtos/notes/start_note_transfer_request.dart';
 import 'package:shared/data/dtos/notes/start_note_transfer_response.dart';
 import 'package:shared/data/dtos/notes/upload_note_request.dart';
@@ -29,7 +34,8 @@ class NoteTransferRepositoryImpl extends NoteTransferRepository {
   /// Will be set in [startNoteTransfer] and cleared in [finishNoteTransfer]
   StartNoteTransferResponse? _currentCachedTransfer;
 
-  NoteTransferRepositoryImpl({required this.remoteNoteDataSource, required this.localDataSource, required this.appConfig});
+  NoteTransferRepositoryImpl(
+      {required this.remoteNoteDataSource, required this.localDataSource, required this.appConfig});
 
   @override
   Future<void> storeEncryptedNote({required int noteId, required List<int> encryptedBytes}) async =>
@@ -53,7 +59,8 @@ class NoteTransferRepositoryImpl extends NoteTransferRepository {
   @override
   Future<List<NoteUpdate>> startNoteTransfer(List<NoteInfo> clientNotes) async {
     Logger.debug("Starting note transfer");
-    final List<NoteInfoModel> models = clientNotes.map((NoteInfo element) => NoteInfoModel.fromNoteInfo(element)).toList();
+    final List<NoteInfoModel> models =
+        clientNotes.map((NoteInfo element) => NoteInfoModel.fromNoteInfo(element)).toList();
 
     final StartNoteTransferResponse response =
         await remoteNoteDataSource.startNoteTransferRequest(StartNoteTransferRequest(clientNotes: models));
@@ -72,26 +79,56 @@ class NoteTransferRepositoryImpl extends NoteTransferRepository {
       Logger.error("Invalid note id $noteClientId for the transfer ${_currentCachedTransfer!.transferToken}");
       throw const ClientException(message: ErrorCodes.CLIENT_NO_TRANSFER);
     }
+    final NoteTransferStatus noteTransferStatus = iterator.first.noteTransferStatus;
 
-    if (iterator.first.noteTransferStatus.clientNeedsUpdate) {
+    if (noteTransferStatus.clientNeedsUpdate) {
       Logger.debug("Downloading note $noteClientId");
+      List<int>? hashBytes;
+      if (noteTransferStatus.wasNewSaved == false) {
+        final Uint8List? bytes =
+            await localDataSource.readFile(localFilePath: getLocalNotePath(noteId: noteClientId, isTempNote: false));
+        // this can be null if local note was deleted, but server has newer version
+        if (bytes != null) {
+          hashBytes = await SecurityUtilsExtension.hashBytesAsync(bytes);
+        }
+      }
       final DownloadNoteResponse response = await remoteNoteDataSource.downloadNoteRequest(DownloadNoteRequest(
         transferToken: _currentCachedTransfer!.transferToken,
         noteId: noteClientId,
+        hashBytes: hashBytes,
       ));
-
-      await _storeEncryptedNoteInternal(noteId: noteClientId, encryptedBytes: response.rawBytes, isTempNote: true);
-    } else if (iterator.first.noteTransferStatus.serverNeedsUpdate) {
+      if (response.rawBytes.isNotEmpty) {
+        await _storeEncryptedNoteInternal(noteId: noteClientId, encryptedBytes: response.rawBytes, isTempNote: true);
+      } else {
+        Logger.verbose("skipped content download, because the hashes were equal");
+      }
+    } else if (noteTransferStatus.serverNeedsUpdate) {
       Logger.debug("Uploading note $noteClientId");
       final Uint8List bytes = await loadEncryptedNote(noteId: noteClientId);
-
-      await remoteNoteDataSource.uploadNoteRequest(
-          UploadNoteRequest(transferToken: _currentCachedTransfer!.transferToken, noteId: noteClientId, rawBytes: bytes));
+      bool shouldUpload = true;
+      if (noteTransferStatus.wasNewSaved == false) {
+        final ShouldUploadNoteResponse response =
+            await remoteNoteDataSource.shouldUploadNoteRequest(ShouldUploadNoteRequest(
+          transferToken: _currentCachedTransfer!.transferToken,
+          noteId: noteClientId,
+          hashBytes: await SecurityUtilsExtension.hashBytesAsync(bytes),
+        ));
+        shouldUpload = response.shouldUpload;
+      }
+      if (shouldUpload) {
+        await remoteNoteDataSource.uploadNoteRequest(UploadNoteRequest(
+          transferToken: _currentCachedTransfer!.transferToken,
+          noteId: noteClientId,
+          rawBytes: bytes,
+        ));
+      } else {
+        Logger.verbose("skipped content upload, because the hashes were equal");
+      }
     } else {
-      Logger.error("The enum NoteTransferStatus is broken for ${iterator.first.noteTransferStatus}");
+      Logger.error("The enum NoteTransferStatus is broken for $noteTransferStatus");
     }
 
-    assert(iterator.first.noteTransferStatus.clientNeedsUpdate || iterator.first.noteTransferStatus.serverNeedsUpdate,
+    assert(noteTransferStatus.clientNeedsUpdate || noteTransferStatus.serverNeedsUpdate,
         "both client needs update and server needs update should never be false!");
   }
 

@@ -11,9 +11,12 @@ import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/constants/rest_json_parameter.dart';
 import 'package:shared/core/enums/note_transfer_status.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
+import 'package:shared/core/utils/list_utils.dart';
 import 'package:shared/core/utils/logger/logger.dart';
+import 'package:shared/core/utils/security_utils.dart';
 import 'package:shared/core/utils/string_utils.dart';
 import 'package:shared/data/dtos/notes/finish_note_request.dart';
+import 'package:shared/data/dtos/notes/should_upload_note_response.dart';
 import 'package:shared/data/dtos/notes/start_note_transfer_request.dart';
 import 'package:shared/data/dtos/notes/start_note_transfer_response.dart';
 import 'package:shared/data/models/note_info_model.dart';
@@ -65,7 +68,8 @@ class NoteRepository {
 
       late final List<NoteUpdate> noteUpdates;
       try {
-        noteUpdates = await compareClientAndServerNotes(request.clientNotes, serverAccount.noteInfoList); // security: check
+        noteUpdates =
+            await compareClientAndServerNotes(request.clientNotes, serverAccount.noteInfoList); // security: check
         // if note ids from the client really belong to the account
       } on BaseException catch (e) {
         Logger.error("Error starting note transfer because of invalid note ids for: ${serverAccount.username}");
@@ -77,7 +81,8 @@ class NoteRepository {
         noteUpdates: List<NoteUpdateModel>.from(noteUpdates),
       );
 
-      _noteTransfers[response.transferToken] = NoteTransfer(serverAccount: serverAccount, noteUpdates: response.noteUpdates);
+      _noteTransfers[response.transferToken] =
+          NoteTransfer(serverAccount: serverAccount, noteUpdates: response.noteUpdates);
 
       Logger.info("Created the new note transfer ${response.transferToken} for "
           "${serverAccount.username} with ${response.noteUpdates}");
@@ -86,6 +91,10 @@ class NoteRepository {
     });
   }
 
+  /// The user requests to download a note file from the server. here the raw bytes from the request is the content hash
+  ///
+  /// if the hashes are equal and so the content did not change, then the returned bytes are empty
+  ///
   /// This request works with raw bytes as output and it needs the following query params:
   /// [RestJsonParameter.TRANSFER_TOKEN] from the call to [handleStartNoteTransfer]
   /// [RestJsonParameter.TRANSFER_NOTE_ID] for the affected note which should be downloaded from the server
@@ -105,7 +114,8 @@ class NoteRepository {
       return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN);
     }
 
-    final int serverNoteId = _getValidServerNoteId(params, _noteTransfers[transferToken]!); // security: check if the note
+    final int serverNoteId =
+        _getValidServerNoteId(params, _noteTransfers[transferToken]!); // security: check if the note
     // belongs to the transaction and to the account. Also map a client id to a server id!
     if (serverNoteId == 0) {
       Logger.error("Error downloading note, because the note id was invalid: $transferToken");
@@ -115,6 +125,10 @@ class NoteRepository {
     late final Uint8List bytes;
     try {
       bytes = await noteDataSource.loadNoteData(serverNoteId);
+      if (params.rawBytes != null && ListUtils.equals(params.rawBytes, SecurityUtils.hashBytes(bytes))) {
+        Logger.info("skipped file data download for file $serverNoteId for the transfer $transferToken ");
+        return RestCallbackResult(rawBytes: Uint8List(0));
+      }
     } on BaseException catch (e) {
       Logger.error("Error downloading note for $transferToken");
       return RestCallbackResult.withErrorCode(e.message ?? "");
@@ -124,6 +138,48 @@ class NoteRepository {
     return RestCallbackResult(rawBytes: bytes);
   }
 
+  /// The sends the note content hash and expects an answer if he should upload the note content
+  ///
+  /// This request works with raw bytes as input and it needs the following query params:
+  /// [RestJsonParameter.TRANSFER_TOKEN] from the call to [handleStartNoteTransfer]
+  /// [RestJsonParameter.TRANSFER_NOTE_ID] for the affected note which should be uploaded to the server
+  ///
+  /// This request can return [ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN] if the  client used an invalid transfer
+  /// token, or if the server cancelled the note transfer!
+  /// It can also return [ErrorCodes.SERVER_INVALID_REQUEST_VALUES] if the client sends a server note id  that doesn't
+  /// belong to it!
+  Future<RestCallbackResult> handleShouldUploadNote(RestCallbackParams params) async {
+    final ServerAccount serverAccount = params.getAttachedServerAccount();
+    final String transferToken = _getValidTransferToken(params, serverAccount);
+
+    if (transferToken.isEmpty) {
+      Logger.error("Error upload note hash, because the transfer token was invalid from ${serverAccount.username}");
+      return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN);
+    }
+
+    final int serverNoteId = _getValidServerNoteId(params, _noteTransfers[transferToken]!);
+    if (serverNoteId == 0) {
+      Logger.error("Error uploading note, because the note id was invalid: $transferToken");
+      return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_REQUEST_VALUES);
+    }
+
+    late final Uint8List bytes;
+    try {
+      bytes = await noteDataSource.loadNoteData(serverNoteId);
+      if (params.rawBytes != null && ListUtils.equals(params.rawBytes, SecurityUtils.hashBytes(bytes))) {
+        Logger.info("skipped file data upload for file $serverNoteId for the transfer $transferToken ");
+        _noteTransfers[transferToken]?.serverIdsWithEqualHash.add(serverNoteId);
+        return RestCallbackResult.withResponse(ShouldUploadNoteResponse(shouldUpload: false));
+      }
+    } on BaseException catch (_) {
+      Logger.verbose("file for upload content hash did not exist on the server: $serverNoteId with $transferToken");
+    }
+
+    return RestCallbackResult.withResponse(ShouldUploadNoteResponse(shouldUpload: true));
+  }
+
+  /// The user requests to upload a note file to the server. the rawBytes from the request are the note content
+  ///
   /// This request works with raw bytes as input and it needs the following query params:
   /// [RestJsonParameter.TRANSFER_TOKEN] from the call to [handleStartNoteTransfer]
   /// [RestJsonParameter.TRANSFER_NOTE_ID] for the affected note which should be uploaded to the server
@@ -180,7 +236,8 @@ class NoteRepository {
       final String transferToken = _getValidTransferToken(params, serverAccount);
 
       if (transferToken.isEmpty) {
-        Logger.error("Error finishing note transfer, because the transfer token was invalid from ${serverAccount.username}");
+        Logger.error(
+            "Error finishing note transfer, because the transfer token was invalid from ${serverAccount.username}");
         return RestCallbackResult.withErrorCode(ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN);
       }
 
@@ -298,6 +355,8 @@ class NoteRepository {
     try {
       if (noteUpdate.wasFileDeleted) {
         await noteDataSource.deleteNoteData(noteUpdate.serverId); // delete file if filename was empty
+      } else if (_noteTransfers[transferToken]?.serverIdsWithEqualHash.contains(noteUpdate.serverId) ?? false) {
+        Logger.verbose("skipped replacing temp note, because no note was uploaded"); // same content hash
       } else {
         await noteDataSource.replaceNoteDataWithTempData(noteUpdate.serverId, transferToken); // update file if data
         // was send
@@ -355,7 +414,8 @@ class NoteRepository {
     return noteUpdates..sort(NoteUpdate.compareByServerId);
   }
 
-  Future<void> _addNoteUpdate(List<NoteUpdate> noteUpdates, NoteInfo note, NoteTransferStatus noteTransferStatus) async {
+  Future<void> _addNoteUpdate(
+      List<NoteUpdate> noteUpdates, NoteInfo note, NoteTransferStatus noteTransferStatus) async {
     int serverId = note.id;
     if (noteTransferStatus == NoteTransferStatus.SERVER_NEEDS_NEW) {
       if (note.id >= 0) {
@@ -371,7 +431,8 @@ class NoteRepository {
     ));
   }
 
-  void _addComparedNoteUpdate(List<NoteUpdate> noteUpdates, {required NoteInfo clientNote, required NoteInfo serverNote}) {
+  void _addComparedNoteUpdate(List<NoteUpdate> noteUpdates,
+      {required NoteInfo clientNote, required NoteInfo serverNote}) {
     assert(clientNote.id == serverNote.id, "both ids are the same server id");
 
     if (clientNote.lastEdited.isBefore(serverNote.lastEdited)) {
@@ -444,8 +505,8 @@ class NoteRepository {
   int _getValidServerNoteId(RestCallbackParams params, NoteTransfer noteTransfer) {
     final String idString = params.queryParams[RestJsonParameter.TRANSFER_NOTE_ID] ?? "0";
     final int id = int.tryParse(idString) ?? 0;
-    final Iterable<NoteUpdate> iterator =
-        noteTransfer.noteUpdates.where((NoteUpdate noteUpdate) => noteUpdate.serverId == id || noteUpdate.clientId == id);
+    final Iterable<NoteUpdate> iterator = noteTransfer.noteUpdates
+        .where((NoteUpdate noteUpdate) => noteUpdate.serverId == id || noteUpdate.clientId == id);
     if (iterator.isEmpty) {
       Logger.warn("Got an invalid id $id from ${noteTransfer.serverAccount.username}");
       return 0;

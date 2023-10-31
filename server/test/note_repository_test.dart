@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:server/data/models/server_account_model.dart';
 import 'package:server/domain/entities/server_account.dart';
 import 'package:shared/core/constants/endpoints.dart';
@@ -8,7 +9,9 @@ import 'package:shared/core/constants/rest_json_parameter.dart';
 import 'package:shared/core/enums/note_transfer_status.dart';
 import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
+import 'package:shared/core/utils/security_utils.dart';
 import 'package:shared/data/dtos/notes/finish_note_request.dart';
+import 'package:shared/data/dtos/notes/should_upload_note_response.dart';
 import 'package:shared/data/dtos/notes/start_note_transfer_request.dart';
 import 'package:shared/data/dtos/notes/start_note_transfer_response.dart';
 import 'package:shared/data/models/note_info_model.dart';
@@ -264,17 +267,39 @@ void _testUploadNote() {
     await _upload(response.transferToken, -1, <int>[1, 2, 3, 4, 5]);
   });
 
-  test("An upload request with correct values should succeed twice", () async {
+  test("An upload request with correct values should succeed twice, but the second one should not change the data",
+      () async {
     final StartNoteTransferResponse response = await _startTransfer(
         <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
     expect(response.noteUpdates.first.serverId, 1, reason: "note transfer should have serverId 1");
     final List<int> bytes = <int>[1, 2, 3, 4, 5];
-
     await _upload(response.transferToken, 1, bytes);
+    await noteDataSource.replaceNoteDataWithTempData(1, response.transferToken);
+    final bool changed = await _shouldUpload(response.transferToken, 1, SecurityUtils.hashBytes(bytes));
+    expect(changed, false, reason: "should be the same");
     await _upload(response.transferToken, 1, bytes); //should not change anything
     await noteDataSource.replaceNoteDataWithTempData(1, response.transferToken);
     final List<int> newBytes = await noteDataSource.loadNoteData(1);
     expect(jsonEncode(bytes), jsonEncode(newBytes), reason: "uploaded bytes should match");
+  });
+
+  test("upload with changing data should update the content", () async {
+    final StartNoteTransferResponse response = await _startTransfer(
+        <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
+    expect(response.noteUpdates.first.serverId, 1, reason: "note transfer should have serverId 1");
+    final List<int> bytes = <int>[1, 2, 3, 4, 5];
+    final List<int> updatedBytes = <int>[5, 2, 6, 4, 1];
+
+    await _upload(response.transferToken, 1, bytes);
+    await noteDataSource.replaceNoteDataWithTempData(1, response.transferToken);
+    bool changed = await _shouldUpload(response.transferToken, 1, SecurityUtils.hashBytes(updatedBytes));
+    expect(changed, true, reason: "should not be the same");
+    await _upload(response.transferToken, 1, updatedBytes);
+    await noteDataSource.replaceNoteDataWithTempData(1, response.transferToken);
+    changed = await _shouldUpload(response.transferToken, 1, null);
+    expect(changed, true, reason: "should still change content even tho hash is null");
+    final List<int> newBytes = await noteDataSource.loadNoteData(1);
+    expect(jsonEncode(updatedBytes), jsonEncode(newBytes), reason: "uploaded bytes should match");
   });
 }
 
@@ -418,7 +443,7 @@ void _testDownloadNote() {
     await _startTransfer(
         <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
     expect(() async {
-      await _download("_invalid_token_912830958891023905980129803895099182", -1);
+      await _download("_invalid_token_912830958891023905980129803895099182", -1, null);
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN));
   });
 
@@ -426,7 +451,7 @@ void _testDownloadNote() {
     final StartNoteTransferResponse response = await _startTransfer(
         <NoteInfoModel>[NoteInfoModel(id: -1, encFileName: "c1", lastEdited: _now, noteType: NoteType.RAW_TEXT)]);
     expect(() async {
-      await _download(response.transferToken, null);
+      await _download(response.transferToken, null, null);
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
   });
 
@@ -437,7 +462,7 @@ void _testDownloadNote() {
           id: 1, encFileName: "c1", lastEdited: _now.subtract(const Duration(days: 1)), noteType: NoteType.RAW_TEXT)
     ]);
     expect(() async {
-      await _download(response.transferToken, 1010);
+      await _download(response.transferToken, 1010, null);
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.SERVER_INVALID_REQUEST_VALUES));
   });
 
@@ -448,18 +473,40 @@ void _testDownloadNote() {
           id: -1, encFileName: "c1", lastEdited: _now.subtract(const Duration(days: 1)), noteType: NoteType.RAW_TEXT)
     ]);
     expect(() async {
-      await _download(response.transferToken, -1);
+      await _download(response.transferToken, -1, null);
     }, throwsA((Object e) => e is ServerException && e.message == ErrorCodes.FILE_NOT_FOUND));
   });
 
-  test("A download request with correct values should succeed", () async {
+  test("A download request with correct values should succeed if there was no hash", () async {
     await _uploadNote1();
     final StartNoteTransferResponse response = await _startTransfer(<NoteInfoModel>[
       NoteInfoModel(
           id: 1, encFileName: "c1", lastEdited: _now.subtract(const Duration(days: 1)), noteType: NoteType.RAW_TEXT)
     ]);
-    final List<int> newBytes = await _download(response.transferToken, 1);
+    final List<int> newBytes = await _download(response.transferToken, 1, null);
     expect(jsonEncode(<int>[1, 2, 3, 4, 5]), jsonEncode(newBytes), reason: "downloaded bytes should match");
+  });
+
+  test("A download request with correct values should succeed if the content changed", () async {
+    await _uploadNote1();
+    final StartNoteTransferResponse response = await _startTransfer(<NoteInfoModel>[
+      NoteInfoModel(
+          id: 1, encFileName: "c1", lastEdited: _now.subtract(const Duration(days: 1)), noteType: NoteType.RAW_TEXT)
+    ]);
+    final List<int> newBytes =
+        await _download(response.transferToken, 1, SecurityUtils.hashBytes(<int>[4, 2, 7, 4, 6]));
+    expect(jsonEncode(<int>[1, 2, 3, 4, 5]), jsonEncode(newBytes), reason: "downloaded bytes should match");
+  });
+
+  test("A download request with correct values should not do anything if the content hash was same", () async {
+    await _uploadNote1();
+    final StartNoteTransferResponse response = await _startTransfer(<NoteInfoModel>[
+      NoteInfoModel(
+          id: 1, encFileName: "c1", lastEdited: _now.subtract(const Duration(days: 1)), noteType: NoteType.RAW_TEXT)
+    ]);
+    final List<int> newBytes =
+        await _download(response.transferToken, 1, SecurityUtils.hashBytes(<int>[1, 2, 3, 4, 5]));
+    expect(newBytes.isEmpty, true, reason: "downloaded bytes should be empty");
   });
 }
 
@@ -486,6 +533,22 @@ Future<void> _upload(String? transferToken, int? serverId, List<int>? bytes) asy
   );
 }
 
+Future<bool> _shouldUpload(String? transferToken, int? serverId, List<int>? hash) async {
+  final Map<String, String> queryParams = <String, String>{};
+  if (transferToken != null) {
+    queryParams[RestJsonParameter.TRANSFER_TOKEN] = transferToken;
+  }
+  if (serverId != null) {
+    queryParams[RestJsonParameter.TRANSFER_NOTE_ID] = serverId.toString();
+  }
+  final ResponseData response = await restClient.sendRequest(
+    endpoint: Endpoints.NOTE_SHOULD_UPLOAD,
+    queryParams: queryParams,
+    bodyData: hash,
+  );
+  return ShouldUploadNoteResponse.fromJson(response.json!).shouldUpload;
+}
+
 Future<void> _finishTransfer(String? transferToken, {required bool shouldCancel}) async {
   final Map<String, String> queryParams = <String, String>{};
   if (transferToken != null) {
@@ -498,7 +561,7 @@ Future<void> _finishTransfer(String? transferToken, {required bool shouldCancel}
   );
 }
 
-Future<List<int>> _download(String? transferToken, int? serverId) async {
+Future<List<int>> _download(String? transferToken, int? serverId, List<int>? hash) async {
   final Map<String, String> queryParams = <String, String>{};
   if (transferToken != null) {
     queryParams[RestJsonParameter.TRANSFER_TOKEN] = transferToken;
@@ -509,6 +572,7 @@ Future<List<int>> _download(String? transferToken, int? serverId) async {
   final ResponseData response = await restClient.sendRequest(
     endpoint: Endpoints.NOTE_DOWNLOAD,
     queryParams: queryParams,
+    bodyData: hash,
   );
   return response.bytes!;
 }

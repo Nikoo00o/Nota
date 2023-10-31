@@ -20,9 +20,9 @@ import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/data/datasources/rest_client.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
-import '../../../server/test/helper/server_test_helper.dart'
-    as server; // relative import of the server test helpers, so
-// that the real server responses can be used for testing instead of mocks! The server tests should be run before!
+import '../../../server/test/helper/server_test_helper.dart' as server; // relative import of the server test helpers,
+// so that the real server responses can be used for testing instead of mocks! The server tests should be run before!
+import 'package:server/data/datasources/note_data_source.dart' as serverData;
 import '../mocks/app_config_mock.dart';
 import '../mocks/argon_wrapper_mock.dart';
 import '../mocks/dialog_service_mock.dart';
@@ -31,6 +31,7 @@ import '../mocks/local_data_source_mock.dart';
 
 late DialogServiceMock dialogServiceMock;
 late FilePickerDataSourceMock filePickerDataSourceMock;
+late LocalDataSourceMock localDataSourceMock;
 
 /// The [serverPort] also needs to be unique across the app and server tests. Afterwards you can replace more app
 /// implementations with mocks!
@@ -45,7 +46,8 @@ Future<void> createCommonTestObjects({required int serverPort, LogLevel logLevel
   SecurityUtilsExtension.replaceArgonWrapper(ArgonWrapperMock()); // pure dart hashing mock
 
   sl.allowReassignment = true; // replace some implementations with the mocks!
-  sl.registerLazySingleton<LocalDataSource>(() => LocalDataSourceMock()); //always replace the local data source!
+  localDataSourceMock = LocalDataSourceMock();
+  sl.registerSingleton<LocalDataSource>(localDataSourceMock); //always replace the local data source!
 
   final AppConfigMock appConfigMock = AppConfigMock(); // setup the mock app config
   appConfigMock.serverPortOverride = serverPort;
@@ -61,6 +63,9 @@ Future<void> createCommonTestObjects({required int serverPort, LogLevel logLevel
 
 /// unique path for each test for local files, because it depends on the server port
 String get testResourceFolder => server.testResourceFolder;
+
+/// the note data source of the server
+serverData.NoteDataSource get serverNoteDataSource => server.noteDataSource;
 
 Future<void> testCleanup() async {
   sl<RestClient>().close();

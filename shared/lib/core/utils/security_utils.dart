@@ -77,7 +77,7 @@ class SecurityUtils {
   }
 
   /// Uses Sha256 to create a quick hash (should not be used for passwords)
-  static Uint8List hashBytes(Uint8List bytes) {
+  static Uint8List hashBytes(List<int> bytes) {
     if (bytes.isEmpty) {
       return Uint8List(0);
     }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/client_account.dart';
@@ -117,7 +118,9 @@ void main() {
 
       dialogServiceMock.confirmedOverride = true; // should confirm the note transfer
       await sl<TransferNotes>().call(const NoParams()); // first transfer to upload note
-
+      await Future<void>.delayed(const Duration(seconds: 2));
+      final DateTime between = DateTime.now();
+      await Future<void>.delayed(const Duration(seconds: 2));
       // newer version on client
       final DateTime nextTime = await sl<StoreNoteEncrypted>().call(ChangeNoteEncryptedParams(
         noteId: 1,
@@ -137,6 +140,9 @@ void main() {
 
       final List<int> bytes2 = await loadNoteBytes(noteId: 1, noteType: NoteType.RAW_TEXT);
       expect(utf8.decode(bytes2), "file", reason: "should have the new note bytes");
+
+      final FileStat stats = FileStat.statSync(serverNoteDataSource.getFilePath(1, null));
+      expect(stats.changed.isAfter(between), true, reason: "changed should be after");
     });
 
     test("Transfer with same note should do nothing", () async {
@@ -145,8 +151,13 @@ void main() {
 
       dialogServiceMock.confirmedOverride = true; // should confirm the note transfer
       await sl<TransferNotes>().call(const NoParams()); // first transfer to upload note
-
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      final DateTime between = DateTime.now();
+      await Future<void>.delayed(const Duration(milliseconds: 50));
       await sl<TransferNotes>().call(const NoParams()); //next transfer to download note
+      expect(localDataSourceMock.lastFileChange.isBefore(between), true, reason: "content should not change");
+      // todo: there is no real download test to simulate the server having a newer version with the same content to
+      //  check the content hash comparing
 
       expect(account.noteInfoList.length, 1, reason: "account should have 1 note");
       expect(
@@ -159,6 +170,38 @@ void main() {
       final List<int> bytes2 = await loadNoteBytes(noteId: 1, noteType: NoteType.RAW_TEXT);
       expect(utf8.decode(bytes2), "test", reason: "should have the old note bytes downloaded again");
     });
+  });
+
+  test("only change name should not upload content again", () async {
+    final ClientAccount account = await _loginAndCreateNote();
+
+    dialogServiceMock.confirmedOverride = true; // should confirm the note transfer
+    await sl<TransferNotes>().call(const NoParams()); // first transfer to upload note
+    await Future<void>.delayed(const Duration(seconds: 2));
+    final DateTime between = DateTime.now();
+    await Future<void>.delayed(const Duration(seconds: 2));
+    // newer version on client
+    final DateTime nextTime = await sl<StoreNoteEncrypted>().call(ChangeNoteEncryptedParams(
+      noteId: 1,
+      decryptedName: "invalid",
+      decryptedContent: null,
+    ));
+
+    await sl<TransferNotes>().call(const NoParams()); //next transfer to upload note again
+
+    expect(account.noteInfoList.length, 1, reason: "account should have 1 note");
+    expect(
+      SecurityUtils.decryptString(account.noteInfoList.first.encFileName, base64UrlEncode(account.decryptedDataKey!)),
+      "invalid",
+      reason: "should have the new file name",
+    );
+    expect(account.noteInfoList.first.lastEdited, nextTime, reason: "should have the mew time stamp");
+
+    final List<int> bytes2 = await loadNoteBytes(noteId: 1, noteType: NoteType.RAW_TEXT);
+    expect(utf8.decode(bytes2), "test", reason: "should have the old note bytes");
+
+    final FileStat stats = FileStat.statSync(serverNoteDataSource.getFilePath(1, null));
+    expect(stats.changed.isBefore(between), true, reason: "changed should be before");
   });
 
   test("Transfer after logout, so the client does not have the notes and needs to download again", () async {

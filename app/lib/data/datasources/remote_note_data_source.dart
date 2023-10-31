@@ -6,6 +6,8 @@ import 'package:shared/data/datasources/rest_client.dart';
 import 'package:shared/data/dtos/notes/download_note_request.dart';
 import 'package:shared/data/dtos/notes/download_note_response.dart';
 import 'package:shared/data/dtos/notes/finish_note_request.dart';
+import 'package:shared/data/dtos/notes/should_upload_note_request.dart';
+import 'package:shared/data/dtos/notes/should_upload_note_response.dart';
 import 'package:shared/data/dtos/notes/start_note_transfer_request.dart';
 import 'package:shared/data/dtos/notes/start_note_transfer_response.dart';
 import 'package:shared/data/dtos/notes/upload_note_request.dart';
@@ -45,6 +47,17 @@ abstract class RemoteNoteDataSource {
   ///
   /// This needs a logged in account, so it can also throw the errors of [FetchCurrentSessionToken]!
   Future<DownloadNoteResponse> downloadNoteRequest(DownloadNoteRequest request);
+
+  /// Sends the hash of the note content to the server and returns if the client should upload the note to the
+  /// server, or not, because the content did not change
+  ///
+  /// Returns [ErrorCodes.SERVER_INVALID_NOTE_TRANSFER_TOKEN] if the client used an invalid transfer token, or if the
+  /// server cancelled the note transfer!
+  /// Returns [ErrorCodes.SERVER_INVALID_REQUEST_VALUES] if the client sends an invalid server, or client note id that does
+  /// not belong to the clients transfer. Or if the raw bytes are empty!
+  ///
+  /// This needs a logged in account, so it can also throw the errors of [FetchCurrentSessionToken]!
+  Future<ShouldUploadNoteResponse> shouldUploadNoteRequest(ShouldUploadNoteRequest request);
 
   /// Uploads the note content if the [NoteUpdate.noteTransferStatus] from [startNoteTransferRequest] indicated that the
   /// client had the newer version of the note.
@@ -90,8 +103,23 @@ class RemoteNoteDataSourceImpl extends RemoteNoteDataSource {
     final ResponseData response = await restClient.sendRequest(
       endpoint: Endpoints.NOTE_DOWNLOAD,
       queryParams: queryParams,
+      bodyData: request.hashBytes,
     );
     return DownloadNoteResponse(rawBytes: response.bytes!);
+  }
+
+  @override
+  Future<ShouldUploadNoteResponse> shouldUploadNoteRequest(ShouldUploadNoteRequest request) async {
+    final Map<String, String> queryParams = Map<String, String>.from(request.toJson());
+    final ResponseData response = await restClient.sendRequest(
+      endpoint: Endpoints.NOTE_SHOULD_UPLOAD,
+      queryParams: queryParams,
+      bodyData: request.hashBytes,
+    );
+    if (response.json == null) {
+      throw const ServerException(message: ErrorCodes.SERVER_INVALID_REQUEST_VALUES);
+    }
+    return ShouldUploadNoteResponse.fromJson(response.json!);
   }
 
   @override

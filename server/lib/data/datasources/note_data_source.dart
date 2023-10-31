@@ -50,7 +50,7 @@ class NoteDataSource {
   /// throws a [FileException] with [ErrorCodes.FILE_NOT_FOUND] if the file does not exist!
   Future<Uint8List> loadNoteData(int noteId) async {
     return _fileLock.synchronized(() async {
-      final String filePath = _getFilePath(noteId, null);
+      final String filePath = getFilePath(noteId, null);
       if (await FileUtils.fileExistsAsync(filePath)) {
         Logger.debug("Loaded note file $filePath");
         final Uint8List? fileContent = await FileUtils.readFileAsBytes(filePath);
@@ -64,7 +64,7 @@ class NoteDataSource {
   /// Saves the note data to a temporary file for the transfer. Creates the file if it does not exist!
   Future<void> saveTempNoteData(int noteId, String transferToken, List<int> bytes) async {
     await _fileLock.synchronized(() async {
-      final String filePath = _getFilePath(noteId, transferToken);
+      final String filePath = getFilePath(noteId, transferToken);
       await FileUtils.writeFileAsBytes(filePath, bytes);
       Logger.debug("Saved note file $filePath");
     });
@@ -75,7 +75,7 @@ class NoteDataSource {
   /// Deletes the note data file if it exists!
   Future<void> deleteNoteData(int noteId, {String? transferToken}) async {
     await _fileLock.synchronized(() async {
-      final String filePath = _getFilePath(noteId, transferToken);
+      final String filePath = getFilePath(noteId, transferToken);
       if (await FileUtils.fileExistsAsync(filePath)) {
         Logger.debug("Deleted note file $filePath");
         return FileUtils.deleteFile(filePath);
@@ -107,8 +107,8 @@ class NoteDataSource {
   /// throws a [FileException] with [ErrorCodes.FILE_NOT_FOUND] if the temp file does not exist!
   Future<void> replaceNoteDataWithTempData(int noteId, String transferToken) async {
     await _fileLock.synchronized(() async {
-      final String tempFilePath = _getFilePath(noteId, transferToken);
-      final String realFilePath = _getFilePath(noteId, null);
+      final String tempFilePath = getFilePath(noteId, transferToken);
+      final String realFilePath = getFilePath(noteId, null);
       final bool tmpFileExists = await FileUtils.fileExistsAsync(tempFilePath);
 
       if (tmpFileExists == false) {
@@ -123,7 +123,8 @@ class NoteDataSource {
     });
   }
 
-  String _getFilePath(int noteId, String? transferToken) {
+  /// returns the file path for a real note, or a temp note
+  String getFilePath(int noteId, String? transferToken) {
     final String fileEnding = SharedConfig.noteFileEnding(isTempNote: transferToken != null);
     if (transferToken != null) {
       return "${_transferTempBasePath(transferToken)}$noteId$fileEnding";

@@ -36,6 +36,7 @@ class StartNotaServer extends UseCase<bool, StartNotaServerParams> {
       RestCallback(endpoint: Endpoints.NOTE_TRANSFER_FINISH, callback: noteRepository.handleFinishNoteTransfer),
       RestCallback(endpoint: Endpoints.NOTE_DOWNLOAD, callback: noteRepository.handleDownloadNote),
       RestCallback(endpoint: Endpoints.NOTE_UPLOAD, callback: noteRepository.handleUploadNote),
+      RestCallback(endpoint: Endpoints.NOTE_SHOULD_UPLOAD, callback: noteRepository.handleShouldUploadNote),
     ];
 
     await serverRepository.initEndpoints(endpoints);
