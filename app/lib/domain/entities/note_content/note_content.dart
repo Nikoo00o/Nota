@@ -53,6 +53,12 @@ sealed class NoteContent {
   /// Every header is at least this big (this contains the [HEADER_SIZE_BYTES] and [VERSION_BYTES]
   static int get baseNoteContentHeaderSize => HEADER_SIZE_BYTES + VERSION_BYTES;
 
+
+  @override
+  String toString() {
+    return "NoteContent{Type: $runtimeType, Size:${_bytes.length}";
+  }
+
   /// use one of the [NoteContent.save] constructors of the sub classes instead!
   NoteContent.save(Uint8List bytes) : _bytes = bytes {
     throw UnimplementedError();

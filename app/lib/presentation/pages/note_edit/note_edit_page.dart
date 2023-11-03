@@ -3,7 +3,7 @@ import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_bloc.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_event.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_state.dart';
-import 'package:app/presentation/pages/note_edit/widgets/edit_bottom_bar.dart';
+import 'package:app/presentation/pages/note_edit/widgets/note_bottom_bar.dart';
 import 'package:app/presentation/pages/note_edit/widgets/edit_search_bar.dart';
 import 'package:app/presentation/widgets/base_note/base_note_event.dart';
 import 'package:app/presentation/widgets/base_note/base_note_page.dart';
@@ -99,7 +99,7 @@ final class NoteEditPage extends BaseNotePage<NoteEditBloc, NoteEditState> {
   }
 
   @override
-  Widget buildBottomBar(BuildContext context) => const EditBottomBar();
+  Widget buildBottomBar(BuildContext context) => const NoteBottomBar<NoteEditBloc, NoteEditState>();
 
   @override
   String get pageName => "note edit";

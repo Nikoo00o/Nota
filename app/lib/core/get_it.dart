@@ -60,6 +60,7 @@ import 'package:app/presentation/main/menu/menu_bloc.dart';
 import 'package:app/presentation/pages/login/login_bloc.dart';
 import 'package:app/presentation/pages/logs/logs_bloc.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_bloc.dart';
+import 'package:app/presentation/pages/note_edit_file_warpper/note_edit_file_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
 import 'package:app/presentation/pages/settings/settings_bloc.dart';
 import 'package:app/services/dialog_service.dart';
@@ -338,6 +339,22 @@ Future<void> initializeGetIt() async {
         appConfig: sl(),
         exportCurrentStructureItem: sl(),
       ));
+  sl.registerFactory<NoteEditFileBloc>(() => NoteEditFileBloc(
+    getCurrentStructureItem: sl(),
+    getStructureUpdatesStream: sl(),
+    navigationService: sl(),
+    navigateToItem: sl(),
+    changeCurrentStructureItem: sl(),
+    loadNoteContent: sl(),
+    dialogService: sl(),
+    deleteCurrentStructureItem: sl(),
+    startMoveStructureItem: sl(),
+    appSettingsRepository: sl(),
+    isFavouriteUC: sl(),
+    changeFavourite: sl(),
+    appConfig: sl(),
+    exportCurrentStructureItem: sl(),
+  ));
   sl.registerFactory<SettingsBloc>(() => SettingsBloc(
         appSettingsRepository: sl(),
         changeAutoLogin: sl(),

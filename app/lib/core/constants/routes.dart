@@ -11,6 +11,8 @@ class Routes {
 
   static const String note_edit = "note_edit";
 
+  static const String note_edit_file = "note_edit_file";
+
   static const String settings = "settings";
 
   static const String logs = "logs";

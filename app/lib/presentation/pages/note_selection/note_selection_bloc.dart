@@ -153,8 +153,7 @@ final class NoteSelectionBloc extends BaseNoteBloc<NoteSelectionState> {
         navigationService.navigateTo(Routes.note_edit);
         return false;
       case NoteType.FILE_WRAPPER:
-        navigationService.navigateTo(Routes.settings);
-        // todo: navigate to file wrapper as well
+        navigationService.navigateTo(Routes.note_edit_file);
         return false;
     }
   }
@@ -230,7 +229,7 @@ final class NoteSelectionBloc extends BaseNoteBloc<NoteSelectionState> {
   }
 
   Future<void> _handleNavigateToParent(NoteSelectionNavigateToParent event, Emitter<NoteSelectionState> emit) async {
-    if (currentItem?.isTopLevel ?? true){
+    if (currentItem?.isTopLevel ?? true) {
       Logger.error("navigate to parent did not have the correct note type");
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }

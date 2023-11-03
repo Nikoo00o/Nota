@@ -1,19 +1,19 @@
 import 'package:app/domain/entities/structure_item.dart';
-import 'package:app/domain/entities/structure_note.dart';
-import 'package:app/presentation/pages/note_edit/note_edit_bloc.dart';
-import 'package:app/presentation/pages/note_edit/note_edit_state.dart';
+import 'package:app/presentation/widgets/base_note/base_note_bloc.dart';
+import 'package:app/presentation/widgets/base_note/base_note_state.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
 import 'package:flutter/material.dart';
 
-final class EditBottomBar extends BlocPageChild<NoteEditBloc, NoteEditState> {
-  const EditBottomBar();
+final class NoteBottomBar<Bloc extends BaseNoteBloc<State>, State extends BaseNoteState>
+    extends BlocPageChild<Bloc, State> {
+  const NoteBottomBar();
 
   @override
   Widget buildWithNoState(BuildContext context, Widget partWithState) {
-    return createBlocSelector<StructureNote?>(
-      selector: (NoteEditState state) => state.isInitialized ? state.currentNote : null,
-      builder: (BuildContext context, StructureNote? currentNote) {
-        if (currentNote == null) {
+    return createBlocSelector<StructureItem?>(
+      selector: (State state) => state.currentItem,
+      builder: (BuildContext context, StructureItem? currentItem) {
+        if (currentItem == null) {
           return const SizedBox();
         }
         return BottomAppBar(
@@ -25,7 +25,7 @@ final class EditBottomBar extends BlocPageChild<NoteEditBloc, NoteEditState> {
                 translate(
                   context,
                   "note.edit.path",
-                  keyParams: <String>["${StructureItem.delimiter}${currentNote.path}"],
+                  keyParams: <String>["${StructureItem.delimiter}${currentItem.path}"],
                 ),
                 textAlign: TextAlign.left,
                 maxLines: 2,
@@ -36,7 +36,7 @@ final class EditBottomBar extends BlocPageChild<NoteEditBloc, NoteEditState> {
                 translate(
                   context,
                   "note.selection.note.description",
-                  keyParams: <String>[currentNote.lastModifiedFormatted],
+                  keyParams: <String>[currentItem.lastModifiedFormatted],
                 ),
                 textAlign: TextAlign.left,
                 maxLines: 1,

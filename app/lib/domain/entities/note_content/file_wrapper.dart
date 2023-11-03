@@ -121,7 +121,7 @@ final class NoteContentFileWrapper extends NoteContent {
     return _data.getUint32(offset, Endian.big);
   }
 
-  /// next variable bytes are used to store the path of the external file
+  /// next variable bytes are used to store the full absolute path of the external file which was imported
   String get path {
     final int start = headerSize;
     final int end = start + pathSize;
@@ -151,7 +151,8 @@ final class NoteContentFileWrapper extends NoteContent {
   /// because [NoteContentFileWrapper] contains binary data, this will return an empty list instead!
   @override
   Uint8List get text => Uint8List(0); // todo: maybe return the file name and file modify date instead so it can be
-  // used for the extended search inside of the app
+  // used for the extended search inside of the app. but then the load all structure content use case would have to
+  // be modified again to include file wrappers!
 
   @override
   NoteType get noteType => NoteType.FILE_WRAPPER;

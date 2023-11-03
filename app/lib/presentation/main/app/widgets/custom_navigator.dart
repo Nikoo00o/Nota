@@ -4,6 +4,7 @@ import 'package:app/presentation/main/app/widgets/page_route_animation.dart';
 import 'package:app/presentation/pages/login/login_page.dart';
 import 'package:app/presentation/pages/logs/logs_page.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_page.dart';
+import 'package:app/presentation/pages/note_edit_file_warpper/note_edit_file_page.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_page.dart';
 import 'package:app/presentation/pages/settings/settings_page.dart';
 import 'package:app/presentation/pages/test/dialog_test_page.dart';
@@ -31,6 +32,8 @@ class CustomNavigator extends StatelessWidget {
         return const NoteSelectionPage();
       case Routes.note_edit:
         return const NoteEditPage();
+      case Routes.note_edit_file:
+        return const NoteEditFilePage();
       case Routes.settings:
         return const SettingsPage();
       case Routes.logs:
