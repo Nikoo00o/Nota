@@ -76,9 +76,11 @@ class FinishMoveStructureItem extends UseCase<Tuple2<String, String>, FinishMove
     // important: update the note structure back to the old selected item from before the start of the move. This needs to
     // reset the current item and use the parent of the original item (sourceItem)! If the path was changed (by a
     // successful move), then this of course needs the item with the updated path (so result)!
-    await updateNoteStructure.call(UpdateNoteStructureParams(originalItem: result ?? sourceItem, resetCurrentItem: true));
+    await updateNoteStructure
+        .call(UpdateNoteStructureParams(originalItem: result ?? sourceItem, resetCurrentItem: true));
 
-    Logger.info("${params.wasConfirmed ? "Finished" : "Cancelled"} the move for the item:\n$sourceItem\n to the new parent "
+    Logger.info(
+        "${params.wasConfirmed ? "Finished" : "Cancelled"} the move for the item:\n$sourceItem\n to the new parent "
         "path ${targetFolder.path}");
     return Tuple2<String, String>(sourceItem?.name ?? "", originalTarget.isTopLevel ? "" : originalTarget.path);
   }
@@ -122,8 +124,12 @@ class FinishMoveStructureItem extends UseCase<Tuple2<String, String>, FinishMove
     return newNote;
   }
 
-  bool hasNoChangesOrHasErrors(
-      {required StructureItem parent, required StructureItem? child, required StructureItem originalTarget}) {
+  /// [child] is the source item from the move start and [parent] is the selected target folder for it
+  bool hasNoChangesOrHasErrors({
+    required StructureItem parent,
+    required StructureItem? child,
+    required StructureItem originalTarget,
+  }) {
     if (child == null) {
       Logger.error("The source item is null for the move to the target folder:\n$parent");
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
@@ -132,7 +138,8 @@ class FinishMoveStructureItem extends UseCase<Tuple2<String, String>, FinishMove
       return true;
     }
 
-    final bool isSamePathOrTopLevel = originalTarget.path == parent.path || (originalTarget.isTopLevel && parent.isTopLevel);
+    final bool isSamePathOrTopLevel =
+        originalTarget.path == parent.path || (originalTarget.isTopLevel && parent.isTopLevel);
 
     if (parent is! StructureFolder ||
         parent.topMostParent.isMove == false ||
@@ -142,7 +149,9 @@ class FinishMoveStructureItem extends UseCase<Tuple2<String, String>, FinishMove
       throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
     }
 
-    if (parent.path.startsWith(child.path)) {
+    if (child is StructureFolder && parent.path.startsWith(child.path) && parent.path.length >= child.path.length) {
+      // todo: this can still produce false positives if source and target are named the same and are both folders
+      //  and if source is shorter than target and both are at the root folder
       Logger.error("Tried to move a folder inside of a subfolder of itself:\n$parent");
       throw const ClientException(message: ErrorCodes.MOVED_INTO_SELF);
     }

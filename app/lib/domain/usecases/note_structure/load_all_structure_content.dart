@@ -4,6 +4,7 @@ import 'package:app/domain/entities/note_content/note_content.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/repositories/note_structure_repository.dart';
 import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
+import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 
@@ -32,12 +33,19 @@ class LoadAllStructureContent extends UseCase<Map<int, String>, NoParams> {
     if (noteStructureRepository.root != null) {
       final List<StructureNote> notes = noteStructureRepository.root!.getAllNotes();
       for (final StructureNote note in notes) {
-        final NoteContent content =
-            await loadNoteContent(LoadNoteContentParams(noteId: note.id, noteType: note.noteType));
-        if (appConfig.searchCaseSensitive) {
-          result[note.id] = utf8.decode(content.text);
-        } else {
-          result[note.id] = utf8.decode(content.text).toLowerCase();
+        switch (note.noteType) {
+          case NoteType.FOLDER:
+          case NoteType.FILE_WRAPPER:
+            continue; // don't even load those notes, because they are not included in the search and would decrease
+          // performance by a lot!!!
+          case NoteType.RAW_TEXT:
+            final NoteContent content =
+                await loadNoteContent(LoadNoteContentParams(noteId: note.id, noteType: note.noteType));
+            if (appConfig.searchCaseSensitive) {
+              result[note.id] = utf8.decode(content.text);
+            } else {
+              result[note.id] = utf8.decode(content.text).toLowerCase();
+            }
         }
       }
     }
