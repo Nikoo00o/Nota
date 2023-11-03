@@ -36,6 +36,8 @@
   "save": "Speichern",
   "saved": "Gespeichert",
   "attention": "Achtung",
+  "image": "Bild {0}",
+  "from": "von {0}",
   "dialog.loading.title": "Laden",
   "dialog.loading.description": "Bitte warten...",
   "dialog.info.title": "Information",

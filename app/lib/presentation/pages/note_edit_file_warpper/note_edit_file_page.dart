@@ -5,9 +5,12 @@ import 'package:app/presentation/pages/note_edit_file_warpper/note_edit_file_sta
 import 'package:app/presentation/widgets/base_note/base_note_page.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:flutter/material.dart';
+import 'package:shared/core/constants/error_codes.dart';
+import 'package:shared/core/enums/supported_file_types.dart';
+import 'package:shared/core/exceptions/exceptions.dart';
 
 final class NoteEditFilePage extends BaseNotePage<NoteEditFileBloc, NoteEditFileState> {
-  const NoteEditFilePage() : super(pagePadding: EdgeInsets.zero);
+  const NoteEditFilePage() : super();
 
   @override
   Widget buildBodyWithNoState(BuildContext context, Widget bodyWithState) {
@@ -19,16 +22,46 @@ final class NoteEditFilePage extends BaseNotePage<NoteEditFileBloc, NoteEditFile
 
   Widget _buildBody(BuildContext context, NoteEditFileState state) {
     if (state.isInitialized) {
-      return Column(
-        children: <Widget>[
-          Text(state.currentItem?.path ?? ""),
-          Text(state.content?.path ?? ""),
-          Text(state.content?.fileExtension ?? ""),
-        ],
-      );
-    } else {
-      return const SizedBox();
+      final SupportedFileTypes fileType = SupportedFileTypes.fromString(state.content!.fileExtension);
+      switch (fileType) {
+        case SupportedFileTypes.txt:
+          throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
+        case SupportedFileTypes.jpg:
+        case SupportedFileTypes.jpeg:
+        case SupportedFileTypes.png:
+          return _buildImageView(context, state);
+        case SupportedFileTypes.pdf:
+          return _buildPdfView(context, state);
+      }
     }
+    return const SizedBox();
+  }
+
+  Widget _buildImageView(BuildContext context, NoteEditFileState state) {
+    final String fileInfo = translate(context, "image", keyParams: <String>[state.content?.fileName ?? ""]);
+    final String time = translate(context, "from", keyParams: <String>[
+      state.content?.fileLastModified.toString() ?? "",
+    ]);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Expanded(
+          child: Align(
+            alignment: Alignment.center,
+            child: Image.memory(state.content!.content, fit: BoxFit.fill),
+          ),
+        ),
+        const SizedBox(height: 5),
+        Text("$fileInfo $time"),
+        const SizedBox(height: 5),
+      ],
+    );
+  }
+
+  Widget _buildPdfView(BuildContext context, NoteEditFileState state) {
+    // todo: implement
+    throw UnimplementedError("todo: implement");
   }
 
   @override

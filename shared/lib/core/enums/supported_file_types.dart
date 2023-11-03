@@ -9,8 +9,16 @@ enum SupportedFileTypes {
   png,
   pdf;
 
-  factory SupportedFileTypes.fromString(String data) {
-    return values.firstWhere((SupportedFileTypes element) => element.name == data);
+  /// returns a matching supported file type. if the file extension starts with a ".", then it will get converted. so
+  /// ".txt" and "txt" would both be supported
+  factory SupportedFileTypes.fromString(String extension) {
+    late String matcher;
+    if (extension.startsWith(".")) {
+      matcher = extension.substring(1);
+    } else {
+      matcher = extension;
+    }
+    return values.firstWhere((SupportedFileTypes element) => element.name == matcher);
   }
 
   @override

@@ -136,6 +136,9 @@ final class NoteContentFileWrapper extends NoteContent {
   /// returns the file extension of the external file path (.txt, etc)
   String get fileExtension => FileUtils.getExtension(path);
 
+  /// returns the file name with extension of the external file path (test.txt, etc)
+  String get fileName => FileUtils.getFileName(path);
+
   /// the compressed data (bytes) from the initial external file which is now wrapped inside of the app (decrypted at
   /// this point). this is stored after the header and the path
   Uint8List get content {

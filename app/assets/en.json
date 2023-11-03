@@ -36,6 +36,8 @@
   "save": "Save",
   "saved": "Saved",
   "attention": "Attention",
+  "image": "Image {0}",
+  "from": "from {0}",
   "dialog.loading.title": "Loading",
   "dialog.loading.description": "Please wait...",
   "dialog.info.title": "Information",
