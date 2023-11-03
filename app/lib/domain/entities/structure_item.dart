@@ -176,7 +176,10 @@ abstract class StructureItem extends Entity {
   /// This will return the correct translation key for root, recent and move selection.
   ///
   /// For others it will return "empty.params.1" with the name of the [structureItem] as the keyParams.
-  static TranslationString getTranslationStringForStructureItem(StructureItem structureItem) {
+  static TranslationString getTranslationStringForStructureItem(StructureItem? structureItem) {
+    if(structureItem == null){
+      return TranslationString("");
+    }
     String translationKey = "empty.param.1";
     if (structureItem.isRecent) {
       translationKey = StructureItem.recentFolderNames.first;

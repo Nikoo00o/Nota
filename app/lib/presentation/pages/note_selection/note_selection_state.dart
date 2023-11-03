@@ -1,13 +1,9 @@
 import 'package:app/core/enums/search_status.dart';
 import 'package:app/domain/entities/structure_folder.dart';
-import 'package:app/presentation/widgets/base_pages/page_state.dart';
+import 'package:app/presentation/widgets/base_note/base_note_state.dart';
+import 'package:app/presentation/widgets/base_note/note_popup_menu.dart';
 
-base class NoteSelectionState extends PageState {
-  const NoteSelectionState([super.properties = const <String, Object?>{}]);
-}
-
-final class NoteSelectionStateInitialised extends NoteSelectionState {
-  final StructureFolder currentFolder;
+base class NoteSelectionState extends BaseNoteState {
   final SearchStatus searchStatus;
   final String? searchInput;
 
@@ -17,22 +13,39 @@ final class NoteSelectionStateInitialised extends NoteSelectionState {
   /// Used to display a sync indicator symbol for edited notes since the last transfer
   final DateTime lastNoteTransferTime;
 
-  /// if this is currently marked as favourite
-  final bool isFavourite;
-
-  NoteSelectionStateInitialised({
-    required this.currentFolder,
+  NoteSelectionState({
+    required super.dropDownMenuParams,
+    required super.currentItem,
+    required super.isFavourite,
     required this.searchStatus,
     required this.searchInput,
     required this.noteContentMap,
     required this.lastNoteTransferTime,
-    required this.isFavourite,
-  }) : super(<String, Object?>{
-          "currentFolder": currentFolder,
+  }) : super(properties: <String, Object?>{
           "searchStatus": searchStatus,
           "searchInput": searchInput,
           "noteContentMap": noteContentMap,
           "lastNoteTransferTime": lastNoteTransferTime,
-          "isFavourite": isFavourite,
         });
+
+  /// the initial state
+  factory NoteSelectionState.initial() {
+    return NoteSelectionState(
+      dropDownMenuParams: const <NoteDropDownMenuParam>[],
+      currentItem: null,
+      isFavourite: false,
+      searchStatus: SearchStatus.DISABLED,
+      searchInput: null,
+      noteContentMap: null,
+      lastNoteTransferTime: DateTime.now(),
+    );
+  }
+
+  /// This returns the [currentItem] without checks, so this can throw an exception!
+  ///
+  /// Its best to check [isInitialized] first!
+  StructureFolder get currentFolder => currentItem as StructureFolder;
+
+  @override
+  bool get isInitialized => dropDownMenuParams.isNotEmpty && currentItem is StructureFolder;
 }

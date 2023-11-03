@@ -11,7 +11,7 @@ final class EditBottomBar extends BlocPageChild<NoteEditBloc, NoteEditState> {
   @override
   Widget buildWithNoState(BuildContext context, Widget partWithState) {
     return createBlocSelector<StructureNote?>(
-      selector: (NoteEditState state) => state is NoteEditStateInitialised ? state.currentNote : null,
+      selector: (NoteEditState state) => state.isInitialized ? state.currentNote : null,
       builder: (BuildContext context, StructureNote? currentNote) {
         if (currentNote == null) {
           return const SizedBox();

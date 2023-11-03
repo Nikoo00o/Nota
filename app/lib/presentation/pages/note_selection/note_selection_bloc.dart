@@ -7,28 +7,19 @@ import 'package:app/core/enums/search_status.dart';
 import 'package:app/core/utils/input_validator.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/structure_item.dart';
-import 'package:app/domain/entities/structure_update_batch.dart';
 import 'package:app/domain/entities/translation_string.dart';
-import 'package:app/domain/repositories/app_settings_repository.dart';
-import 'package:app/domain/usecases/favourites/change_favourite.dart';
-import 'package:app/domain/usecases/favourites/is_favourite.dart';
-import 'package:app/domain/usecases/note_structure/change_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/create_structure_item.dart';
-import 'package:app/domain/usecases/note_structure/delete_current_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/finish_move_structure_item.dart';
 import 'package:app/domain/usecases/note_structure/load_all_structure_content.dart';
-import 'package:app/domain/usecases/note_structure/navigation/get_current_structure_item.dart';
-import 'package:app/domain/usecases/note_structure/navigation/get_structure_updates_stream.dart';
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
-import 'package:app/domain/usecases/note_structure/start_move_structure_item.dart';
 import 'package:app/domain/usecases/note_transfer/get_last_note_transfer_time.dart';
 import 'package:app/domain/usecases/note_transfer/transfer_notes.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_event.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_state.dart';
-import 'package:app/presentation/widgets/base_pages/page_bloc.dart';
-import 'package:app/services/dialog_service.dart';
-import 'package:app/services/navigation_service.dart';
+import 'package:app/presentation/widgets/base_note/base_note_bloc.dart';
+import 'package:app/presentation/widgets/base_note/base_note_event.dart';
+import 'package:app/presentation/widgets/base_note/note_popup_menu.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared/core/constants/error_codes.dart';
@@ -38,42 +29,22 @@ import 'package:shared/core/utils/logger/logger.dart';
 import 'package:shared/domain/usecases/usecase.dart';
 import 'package:tuple/tuple.dart';
 
-final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelectionState> {
-  final NavigationService navigationService;
-  final AppConfig appConfig;
-  final DialogService dialogService;
-
+final class NoteSelectionBloc extends BaseNoteBloc<NoteSelectionState> {
   final NavigateToItem navigateToItem;
-
   final CreateStructureItem createStructureItem;
-  final ChangeCurrentStructureItem changeCurrentStructureItem;
-  final DeleteCurrentStructureItem deleteCurrentStructureItem;
-
-  final StartMoveStructureItem startMoveStructureItem;
   final FinishMoveStructureItem finishMoveStructureItem;
 
   final TransferNotes transferNotes;
   final GetLastNoteTransferTime getLastNoteTransferTime;
   final LoadAllStructureContent loadAllStructureContent;
 
-  final GetCurrentStructureItem getCurrentStructureItem;
-  final GetStructureUpdatesStream getStructureUpdatesStream;
-  final IsFavourite isFavourite;
-  final ChangeFavourite changeFavourite;
-  final AppSettingsRepository appSettingsRepository;
-
   final ScrollController scrollController = ScrollController();
-  final FocusNode searchFocus = FocusNode();
 
   // todo: maybe change the disable method and move this into a search service, so that the search is saved between
   //  note and folder! (or a shared note service)
   final TextEditingController searchController = TextEditingController();
 
-  /// for the [getStructureUpdatesStream]
-  StreamSubscription<StructureUpdateBatch>? subscription;
-
-  /// This will be updated as deep copies (so it can be used as a reference inside of the state for navigation)
-  StructureItem? currentItem;
+  final FocusNode searchFocus = FocusNode();
 
   /// extended, or default search, or disabled for no search at all
   SearchStatus searchStatus = SearchStatus.DISABLED;
@@ -81,186 +52,130 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
   /// this is only used  for the extended search and has the note content mapped to the note id
   Map<int, String>? noteContentMap;
 
+  /// time stamp from the last server sync
   late DateTime lastNoteTransferTime;
 
-  bool favourite = false;
-
-  // todo: maybe in the future make this bloc leaner (and put some of the selection and edit stuff together like the
-  //  favourite handling, etc)
+  StructureFolder? get currentFolder => currentItem as StructureFolder?;
 
   NoteSelectionBloc({
-    required this.navigationService,
-    required this.appConfig,
-    required this.dialogService,
+    required super.navigationService,
+    required super.dialogService,
+    required super.appConfig,
+    required super.appSettingsRepository,
+    required super.getCurrentStructureItem,
+    required super.getStructureUpdatesStream,
+    required super.changeCurrentStructureItem,
+    required super.startMoveStructureItem,
+    required super.deleteCurrentStructureItem,
+    required super.exportCurrentStructureItem,
+    required super.isFavouriteUC,
+    required super.changeFavourite,
     required this.navigateToItem,
     required this.createStructureItem,
-    required this.changeCurrentStructureItem,
-    required this.deleteCurrentStructureItem,
-    required this.startMoveStructureItem,
     required this.finishMoveStructureItem,
     required this.transferNotes,
     required this.getLastNoteTransferTime,
     required this.loadAllStructureContent,
-    required this.getCurrentStructureItem,
-    required this.getStructureUpdatesStream,
-    required this.isFavourite,
-    required this.changeFavourite,
-    required this.appSettingsRepository,
-  }) : super(initialState: const NoteSelectionState());
+  }) : super(initialState: NoteSelectionState.initial());
+
+  @override
+  List<NoteDropDownMenuParam> get dropDownMenu {
+    return <NoteDropDownMenuParam>[
+      ...super.dropDownMenu,
+      NoteDropDownMenuParam(
+        isEnabled: currentFolder?.topMostParent.isMove == false,
+        translationString: TranslationString("note.selection.extended.search"),
+        callback: _enableExtendedSearch,
+      ),
+    ];
+  }
 
   @override
   void registerEventHandlers() {
-    on<NoteSelectionUpdatedState>(_handleUpdatedState);
-    on<NoteSelectionInitialised>(_handleInitialised);
-    on<NoteSelectionStructureChanged>(_handleStructureChanged);
-    on<NoteSelectionNavigatedBack>(_handleNavigatedBack);
-    on<NoteSelectionDropDownMenuSelected>(_handleDropDownMenuSelected);
+    super.registerEventHandlers(); // important: first register the super classes event handlers
     on<NoteSelectionCreatedItem>(_handleCreatedItem);
     on<NoteSelectionItemClicked>(_handleItemClicked);
+    on<NoteSelectionNavigateToParent>(_handleNavigateToParent);
     on<NoteSelectionServerSynced>(_handleServerSync);
     on<NoteSelectionChangedMove>(_handleChangeMove);
     on<NoteSelectionChangeSearch>(_handleChangeSearch);
-    on<NoteSelectionChangeFavourite>(_handleChangeFavourite);
     on<NoteSelectionDroppedFile>(_handleDroppedFile);
   }
 
   @override
-  Future<void> close() async {
-    await subscription?.cancel();
-    return super.close();
-  }
-
-  Future<void> _handleUpdatedState(NoteSelectionUpdatedState event, Emitter<NoteSelectionState> emit) async =>
-      emit(_buildState());
-
-  Future<void> _handleInitialised(NoteSelectionInitialised event, Emitter<NoteSelectionState> emit) async {
-    if (subscription != null) {
-      Logger.warn("this should not happen, note selection bloc already initialised");
-      return;
-    }
-    dialogService.showLoadingDialog();
+  Future<void> initialize() async {
     lastNoteTransferTime = await getLastNoteTransferTime(const NoParams());
-    add(NoteSelectionStructureChanged(newCurrentItem: await getCurrentStructureItem.call(const NoParams())));
-    subscription = await getStructureUpdatesStream
-        .call(GetStructureUpdatesStreamParams(callbackFunction: (StructureUpdateBatch batch) {
-      add(NoteSelectionStructureChanged(newCurrentItem: batch.currentItem));
-    }));
     final bool autoServerSync = await appSettingsRepository.getAutoServerSync();
     if (autoServerSync && lastNoteTransferTime.add(appConfig.automaticServerSyncDelay).isBefore(DateTime.now())) {
       Logger.verbose("performing automatic server sync");
       await _serverSync(null);
     }
-    dialogService.hideLoadingDialog();
   }
 
-  Future<void> _handleStructureChanged(NoteSelectionStructureChanged event, Emitter<NoteSelectionState> emit) async {
-    final StructureItem? lastItem = currentItem;
-    currentItem = event.newCurrentItem;
-    Logger.verbose("handling structure change with new item ${currentItem!.path}");
-    if (currentItem is StructureFolder) {
-      if (currentItem!.noteType != NoteType.FOLDER) {
-        Logger.error("structure change to folder did not have the correct note type");
-        throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
-      }
-      favourite = await isFavourite.call(IsFavouriteParams.fromItem(currentItem!));
-      emit(_buildState());
-      if (lastItem != null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          // reset scroll on navigating to other items
-          scrollController.jumpTo(scrollController.position.minScrollExtent);
-        });
-      }
+  @override
+  Future<NoteSelectionState> buildState() async {
+    if (currentItem is StructureItem) {
+      return NoteSelectionState(
+        dropDownMenuParams: dropDownMenu,
+        currentItem: currentItem,
+        isFavourite: isFavourite,
+        searchStatus: searchStatus,
+        searchInput: _searchInput,
+        noteContentMap: noteContentMap,
+        lastNoteTransferTime: lastNoteTransferTime,
+      );
     } else {
-      switch (currentItem!.noteType) {
-        case NoteType.FOLDER:
-          Logger.error("structure change to note item did not have the correct note type");
-          throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
-        case NoteType.RAW_TEXT:
-          navigationService.navigateTo(Routes.note_edit);
-        case NoteType.FILE_WRAPPER:
-          // todo: navigate to file wrapper as well
-          navigationService.navigateTo(Routes.settings);
-          throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
-      }
+      return NoteSelectionState.initial();
     }
   }
 
-  Future<void> _handleNavigatedBack(NoteSelectionNavigatedBack event, Emitter<NoteSelectionState> emit) async {
-    if (searchStatus != SearchStatus.DISABLED && event.ignoreSearch == false) {
-      event.completer?.complete(false);
-      _disableSearch(emit);
-      emit(_buildState());
+  @override
+  Future<void> onUpdateState() async {
+    // so far there is nothing to do here, only new state emitted automatically afterwards
+  }
+
+  @override
+  Future<bool> onStructureChange(StructureItem? oldItem) async {
+    switch (currentItem!.noteType) {
+      case NoteType.FOLDER:
+        if (currentItem is! StructureFolder) {
+          Logger.error("structure change to folder did not have the correct note type");
+          throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
+        }
+        if (oldItem != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            // reset scroll on navigating to other items
+            scrollController.jumpTo(scrollController.position.minScrollExtent);
+          });
+        }
+        return true;
+      case NoteType.RAW_TEXT:
+        navigationService.navigateTo(Routes.note_edit);
+        return false;
+      case NoteType.FILE_WRAPPER:
+        navigationService.navigateTo(Routes.settings);
+        // todo: navigate to file wrapper as well
+        return false;
+    }
+  }
+
+  @override
+  Future<bool> onBackNavigationShouldPop() async {
+    if (searchStatus != SearchStatus.DISABLED) {
+      await _disableSearch();
+      add(const BaseNoteUpdatedState()); // important: update state!
+      return false;
     } else if (currentItem?.isTopLevel ?? true) {
-      event.completer?.complete(true);
+      return true;
     } else {
-      event.completer?.complete(false);
       Logger.verbose("navigated back to ${currentItem?.getParent()?.path}");
       await navigateToItem.call(const NavigateToItemParamsParent());
-    }
-  }
-
-  Future<void> _handleDropDownMenuSelected(
-      NoteSelectionDropDownMenuSelected event, Emitter<NoteSelectionState> emit) async {
-    switch (event.index) {
-      case 0:
-        await _renameCurrentFolder();
-        break;
-      case 1:
-        await startMoveStructureItem(const NoParams());
-        break;
-      case 2:
-        await _deleteCurrentFolder();
-        break;
-      case 3:
-        await _activateSearch(SearchStatus.EXTENDED, emit);
-        break;
-    }
-  }
-
-  Future<void> _renameCurrentFolder() async {
-    final Completer<String?> completer = Completer<String?>();
-    dialogService.showInputDialog(ShowInputDialog(
-      onConfirm: (String input, int index) => completer.complete(input),
-      onCancel: () => completer.complete(null),
-      titleKey: "note.selection.rename.folder",
-      inputLabelKey: "name",
-      descriptionKey: "note.selection.create.folder.description",
-      validatorCallback: (String? input) =>
-          InputValidator.validateNewItem(input, isFolder: true, parent: currentItem?.getParent()),
-      autoFocus: true,
-    ));
-    final String? name = await completer.future;
-    final String? oldName = currentItem?.name;
-    if (name != null && oldName != null) {
-      await changeCurrentStructureItem.call(ChangeCurrentFolderParam(newName: name));
-      dialogService.showInfoSnackBar(ShowInfoSnackBar(
-        textKey: "note.selection.rename.folder.done",
-        textKeyParams: <String>[oldName, name],
-      ));
-    }
-  }
-
-  Future<void> _deleteCurrentFolder() async {
-    final Completer<bool> completer = Completer<bool>();
-    dialogService.showConfirmDialog(ShowConfirmDialog(
-      onConfirm: () => completer.complete(true),
-      onCancel: () => completer.complete(false),
-      titleKey: "note.selection.delete.folder",
-      descriptionKey: "note.selection.delete.folder.description",
-      descriptionKeyParams: <String>[currentItem!.name],
-    ));
-    if (await completer.future) {
-      final String path = currentItem!.path;
-      await deleteCurrentStructureItem.call(const NoParams());
-      dialogService.showInfoSnackBar(ShowInfoSnackBar(
-        textKey: "note.selection.delete.folder.done",
-        textKeyParams: <String>[path],
-      ));
+      return false;
     }
   }
 
   Future<void> _handleCreatedItem(NoteSelectionCreatedItem event, Emitter<NoteSelectionState> emit) async {
-    _disableSearch(emit);
+    await _disableSearch();
     final Completer<(String input, int index)?> completer = Completer<(String input, int index)?>();
     dialogService.showInputDialog(ShowInputDialog(
       onConfirm: (String input, int index) => completer.complete((input, index)),
@@ -305,6 +220,8 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
         case NoteType.FILE_WRAPPER:
         // todo: adjust the createdType above depending on the noteTypeIndex
       }
+    } else {
+      emit(await buildState()); // update state when its not done by the structure change
     }
   }
 
@@ -312,19 +229,28 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
     await navigateToItem(NavigateToItemParamsChild(childIndex: event.index));
   }
 
+  Future<void> _handleNavigateToParent(NoteSelectionNavigateToParent event, Emitter<NoteSelectionState> emit) async {
+    if (currentItem?.isTopLevel ?? true){
+      Logger.error("navigate to parent did not have the correct note type");
+      throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
+    }
+    Logger.verbose("navigated back to ${currentItem?.getParent()?.path}");
+    await navigateToItem.call(const NavigateToItemParamsParent());
+  }
+
   Future<void> _handleServerSync(NoteSelectionServerSynced event, Emitter<NoteSelectionState> emit) async {
-    _disableSearch(emit);
+    await _disableSearch();
     dialogService.showLoadingDialog();
-    await _serverSync(() => emit(_buildState()));
+    await _serverSync(() async => emit(await buildState()));
     dialogService.hideLoadingDialog();
   }
 
-  /// [emitCallback] is optional to emit a state on success
-  Future<void> _serverSync(void Function()? emitCallback) async {
+  /// [emitCallback] is optional to emit a state only on success
+  Future<void> _serverSync(Future<void> Function()? emitCallback) async {
     final bool confirmed = await transferNotes(const NoParams());
     if (confirmed) {
       lastNoteTransferTime = await getLastNoteTransferTime(const NoParams());
-      emitCallback?.call();
+      await emitCallback?.call();
       dialogService.showInfoSnackBar(const ShowInfoSnackBar(textKey: "note.selection.transferred.notes"));
     }
   }
@@ -351,11 +277,17 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
         searchFocus.unfocus(); // only unfocus
       }
     } else {
-      await _activateSearch(event.searchStatus, emit);
+      await _activateSearch(event.searchStatus);
+      emit(await buildState()); // also build new state
     }
   }
 
-  Future<void> _activateSearch(SearchStatus newStatus, Emitter<NoteSelectionState> emit) async {
+  Future<void> _enableExtendedSearch() async {
+    await _activateSearch(SearchStatus.EXTENDED);
+    add(const BaseNoteUpdatedState()); // also build new state
+  }
+
+  Future<void> _activateSearch(SearchStatus newStatus) async {
     searchStatus = newStatus;
     if (newStatus == SearchStatus.EXTENDED) {
       dialogService.showLoadingDialog();
@@ -364,26 +296,18 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
     } else {
       noteContentMap = null;
     }
-    emit(_buildState());
     if (searchFocus.hasFocus == false) {
       searchFocus.requestFocus();
     }
   }
 
-  void _disableSearch(Emitter<NoteSelectionState> emit) {
+  Future<void> _disableSearch() async {
     if (searchFocus.hasFocus) {
       searchFocus.unfocus();
     }
     searchStatus = SearchStatus.DISABLED;
     noteContentMap = null;
     searchController.clear();
-    emit(_buildState());
-  }
-
-  Future<void> _handleChangeFavourite(NoteSelectionChangeFavourite event, Emitter<NoteSelectionState> emit) async {
-    favourite = event.isFavourite;
-    await changeFavourite.call(ChangeFavouriteParams(isFavourite: favourite, item: currentItem!));
-    emit(_buildState());
   }
 
   Future<void> _handleDroppedFile(NoteSelectionDroppedFile event, Emitter<NoteSelectionState> emit) async {
@@ -395,23 +319,7 @@ final class NoteSelectionBloc extends PageBloc<NoteSelectionEvent, NoteSelection
     }
   }
 
-  /// only if [currentItem] is [StructureFolder]
-  NoteSelectionState _buildState() {
-    if (currentItem is StructureFolder) {
-      return NoteSelectionStateInitialised(
-        currentFolder: currentItem as StructureFolder,
-        searchStatus: searchStatus,
-        searchInput: _searchInput,
-        noteContentMap: noteContentMap,
-        lastNoteTransferTime: lastNoteTransferTime,
-        isFavourite: favourite,
-      );
-    } else {
-      return const NoteSelectionState();
-    }
-  }
-
-  /// as lower case if [AppConfig.searchCaseSensitive] is false
+  /// as lower case if [AppConfig.searchCaseSensitive] is false. input of the search bar
   String? get _searchInput {
     if (searchStatus != SearchStatus.DISABLED && searchController.text.isNotEmpty) {
       return appConfig.searchCaseSensitive ? searchController.text : searchController.text.toLowerCase();

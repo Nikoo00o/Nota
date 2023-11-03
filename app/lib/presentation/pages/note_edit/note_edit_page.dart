@@ -1,26 +1,20 @@
 import 'package:app/core/enums/custom_icon_button_type.dart';
-import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/structure_item.dart';
-import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_bloc.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_event.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_state.dart';
-import 'package:app/presentation/pages/note_edit/widgets/edit_app_bar.dart';
 import 'package:app/presentation/pages/note_edit/widgets/edit_bottom_bar.dart';
-import 'package:app/presentation/pages/note_edit/widgets/edit_favourite_toggle.dart';
-import 'package:app/presentation/pages/note_edit/widgets/edit_popup_menu.dart';
+import 'package:app/presentation/pages/note_edit/widgets/edit_search_bar.dart';
+import 'package:app/presentation/widgets/base_note/base_note_event.dart';
+import 'package:app/presentation/widgets/base_note/base_note_page.dart';
+import 'package:app/presentation/widgets/base_note/note_popup_menu.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:app/presentation/widgets/custom_icon_button.dart';
 import 'package:app/presentation/widgets/life_cycle_callback.dart';
 import 'package:flutter/material.dart';
 
-final class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
+final class NoteEditPage extends BaseNotePage<NoteEditBloc, NoteEditState> {
   const NoteEditPage() : super(pagePadding: EdgeInsets.zero);
-
-  @override
-  NoteEditBloc createBloc(BuildContext context) {
-    return sl<NoteEditBloc>()..add(const NoteEditInitialised());
-  }
 
   @override
   Widget buildBodyWithNoState(BuildContext context, Widget bodyWithState) {
@@ -34,7 +28,7 @@ final class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
   }
 
   Widget _buildEditField(BuildContext context, NoteEditState state) {
-    if (state is NoteEditStateInitialised) {
+    if (state.isInitialized) {
       return TextField(
         scrollController: currentBloc(context).scrollController,
         decoration: InputDecoration(
@@ -51,7 +45,7 @@ final class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
         style: textBodyLarge(context),
         controller: currentBloc(context).inputController,
         focusNode: currentBloc(context).inputFocus,
-        onChanged: (String _) => currentBloc(context).add(const NoteEditUpdatedState(didSearchChange: true)),
+        onChanged: (String _) => currentBloc(context).add(const BaseNoteUpdatedState()),
       );
     } else {
       return const SizedBox();
@@ -63,72 +57,49 @@ final class NoteEditPage extends BlocPage<NoteEditBloc, NoteEditState> {
     return PreferredSize(
       // default size
       preferredSize: const Size.fromHeight(BlocPage.defaultAppBarHeight),
-      child: createBlocSelector<bool>(
-        selector: (NoteEditState state) => state is NoteEditStateInitialised,
-        builder: (BuildContext context, bool isInitialized) {
-          if (isInitialized) {
-            return AppBar(
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                tooltip: translate(context, "back"),
-                onPressed: () => currentBloc(context).add(const NoteEditNavigatedBack()),
-              ),
-              title: _buildAppBarTitle(context),
-              titleSpacing: 8,
-              centerTitle: false,
-              actions: <Widget>[
-                _buildFirstAction(),
-                const EditPopupMenu(),
-              ],
-            );
-          } else {
+      child: createBlocSelector<StructureItem?>(
+        selector: (NoteEditState state) => state.currentItem,
+        builder: (BuildContext context, StructureItem? currentItem) {
+          if (currentItem == null) {
             return AppBar(); // use empty app bar at first, so that the element gets cached for performance
+          } else {
+            return createBlocSelector<bool>(
+              selector: (NoteEditState state) => state.isEditing,
+              builder: (BuildContext context, bool isEditing) {
+                if (isEditing) {
+                  return AppBar(
+                    leading: buildBackButton(context),
+                    title: const EditSearchBar(),
+                    centerTitle: false,
+                    titleSpacing: 8,
+                    actions: <Widget>[
+                      buildSaveButton(context),
+                      const NotePopupMenu<NoteEditBloc, NoteEditState>(),
+                    ],
+                  );
+                } else {
+                  return buildTitleAppBar(context, currentItem, withBackButton: true);
+                }
+              },
+            );
           }
         },
       ),
     );
   }
 
-  Widget _buildFirstAction() {
-    return createBlocBuilder(builder: (BuildContext context, NoteEditState state) {
-      final NoteEditStateInitialised initState = state as NoteEditStateInitialised; // always true
-      if (initState.isEditing) {
-        return CustomIconButton(
-          icon: Icons.save,
-          tooltipKey: "save",
-          size: 20,
-          buttonType: CustomIconButtonType.FILLED,
-          onPressed: () => currentBloc(context).add(const NoteEditInputSaved()),
-        );
-      } else {
-        return const EditFavouriteToggle();
-      }
-    });
-  }
-
-  Widget _buildAppBarTitle(BuildContext context) {
-    return createBlocBuilder(builder: (BuildContext context, NoteEditState state) {
-      final NoteEditStateInitialised initState = state as NoteEditStateInitialised; // always true
-      if (initState.isEditing) {
-        return const EditAppBar();
-      } else {
-        final TranslationString translation = StructureItem.getTranslationStringForStructureItem(initState.currentNote);
-        return Text(
-          translate(context, translation.translationKey, keyParams: translation.translationKeyParams),
-          style: textTitleLarge(context).copyWith(fontWeight: FontWeight.bold),
-        );
-      }
-    });
+  Widget buildSaveButton(BuildContext context) {
+    return CustomIconButton(
+      icon: Icons.save,
+      tooltipKey: "save",
+      size: 20,
+      buttonType: CustomIconButtonType.FILLED,
+      onPressed: () => currentBloc(context).add(const NoteEditInputSaved()),
+    );
   }
 
   @override
   Widget buildBottomBar(BuildContext context) => const EditBottomBar();
-
-  @override
-  Future<bool> customBackNavigation(BuildContext context) async {
-    currentBloc(context).add(const NoteEditNavigatedBack());
-    return false;
-  }
 
   @override
   String get pageName => "note edit";

@@ -2,12 +2,13 @@ import 'package:app/core/enums/custom_icon_button_type.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_bloc.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_event.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_state.dart';
+import 'package:app/presentation/widgets/base_note/base_note_event.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
 import 'package:app/presentation/widgets/custom_icon_button.dart';
 import 'package:flutter/material.dart';
 
-final class EditAppBar extends BlocPageChild<NoteEditBloc, NoteEditState> {
-  const EditAppBar();
+final class EditSearchBar extends BlocPageChild<NoteEditBloc, NoteEditState> {
+  const EditSearchBar();
 
   @override
   Widget buildWithNoState(BuildContext context, Widget partWithState) {
@@ -24,7 +25,7 @@ final class EditAppBar extends BlocPageChild<NoteEditBloc, NoteEditState> {
             child: TextField(
               focusNode: currentBloc(context).searchFocus,
               controller: currentBloc(context).searchController,
-              onChanged: (String _) => currentBloc(context).add(const NoteEditUpdatedState(didSearchChange: true)),
+              onChanged: (String _) => currentBloc(context).add(const BaseNoteUpdatedState()),
               decoration: InputDecoration(
                 hintText: translate(context, "note.selection.search"),
                 prefixIcon: const Icon(Icons.search),
@@ -41,11 +42,11 @@ final class EditAppBar extends BlocPageChild<NoteEditBloc, NoteEditState> {
 
   Widget _buildTitle(BuildContext context) {
     return createBlocSelector<bool>(
-      selector: (NoteEditState state) => state is NoteEditStateInitialised,
+      selector: (NoteEditState state) => state.isInitialized,
       builder: (BuildContext context, bool initialised) {
         if (initialised) {
           return createBlocSelector<bool>(
-            selector: (NoteEditState state) => state is NoteEditStateInitialised && state.searchPositionSize != "0",
+            selector: (NoteEditState state) => state.isInitialized && state.searchPositionSize != "0",
             builder: (BuildContext context, bool enabled) {
               return Column(
                 mainAxisSize: MainAxisSize.min,
@@ -95,10 +96,10 @@ final class EditAppBar extends BlocPageChild<NoteEditBloc, NoteEditState> {
 
   Widget _buildStateCounter(BuildContext context, bool enabled) {
     return createBlocSelector<String>(
-      selector: (NoteEditState state) => (state as NoteEditStateInitialised).currentSearchPosition,
+      selector: (NoteEditState state) => state.currentSearchPosition,
       builder: (BuildContext context, String currentSearchPosition) {
         return createBlocSelector<String>(
-          selector: (NoteEditState state) => (state as NoteEditStateInitialised).searchPositionSize,
+          selector: (NoteEditState state) => state.searchPositionSize,
           builder: (BuildContext context, String searchPositionSize) {
             return Text(
               translate(

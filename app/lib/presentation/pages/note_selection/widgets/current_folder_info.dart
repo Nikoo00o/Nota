@@ -35,26 +35,27 @@ final class CurrentFolderInfo extends BlocPageChild<NoteSelectionBloc, NoteSelec
     }
     return CustomCard(
       color: colorTertiaryContainer(context),
-      onTap: () => currentBloc(context).add(const NoteSelectionNavigatedBack(completer: null, ignoreSearch: true)),
+      onTap: () => currentBloc(context).add(const NoteSelectionNavigateToParent()),
       icon: Icons.drive_file_move_rtl,
       title: "..${StructureItem.delimiter}${_getParentName(context)}",
-      description: translate(context, "note.selection.current.folder.info", keyParams: <String>[_getParentPath(context)]),
+      description:
+          translate(context, "note.selection.current.folder.info", keyParams: <String>[_getParentPath(context)]),
       alignDescriptionRight: false,
       toolTip: translate(context, "note.selection.navigate.to.parent"),
     );
   }
 
   Widget _buildInfo(BuildContext context, NoteSelectionState state) {
-    if (state is NoteSelectionStateInitialised && state.searchStatus != SearchStatus.DISABLED && state.searchInput == null) {
+    if (state.isInitialized && state.searchStatus != SearchStatus.DISABLED && state.searchInput == null) {
       return _buildSearchInfo(context, state);
-    } else if (state is NoteSelectionStateInitialised && state.currentFolder.amountOfChildren == 0) {
+    } else if (state.isInitialized && state.currentFolder.amountOfChildren == 0) {
       return _buildEmptyInfo(context, state);
     } else {
       return const SizedBox();
     }
   }
 
-  Widget _buildEmptyInfo(BuildContext context, NoteSelectionStateInitialised state) {
+  Widget _buildEmptyInfo(BuildContext context, NoteSelectionState state) {
     return CustomCard(
       color: colorSurfaceVariant(context),
       onTap: null,
@@ -65,7 +66,7 @@ final class CurrentFolderInfo extends BlocPageChild<NoteSelectionBloc, NoteSelec
     );
   }
 
-  Widget _buildSearchInfo(BuildContext context, NoteSelectionStateInitialised state) {
+  Widget _buildSearchInfo(BuildContext context, NoteSelectionState state) {
     final String titleKey = state.searchStatus == SearchStatus.EXTENDED
         ? "note.selection.search.mode.extended"
         : "note.selection.search.mode.default";
@@ -97,8 +98,8 @@ final class CurrentFolderInfo extends BlocPageChild<NoteSelectionBloc, NoteSelec
     buffer.write(StructureItem.delimiter);
     if (parent.isTopLevel) {
       if (parent.isMove) {
-        buffer.write(translate(context, StructureItem.rootFolderNames.first)); // special case for move to visualize that
-        // its the root folder
+        // special case for move to visualize that its the root folder
+        buffer.write(translate(context, StructureItem.rootFolderNames.first));
       } else {
         buffer.write(translate(context, parent.path));
       }

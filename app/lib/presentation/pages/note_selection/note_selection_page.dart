@@ -1,7 +1,5 @@
-import 'dart:async';
 import 'dart:io';
 import 'package:app/core/enums/search_status.dart';
-import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/presentation/main/menu/logged_in_menu.dart';
@@ -10,21 +8,15 @@ import 'package:app/presentation/pages/note_selection/note_selection_event.dart'
 import 'package:app/presentation/pages/note_selection/note_selection_state.dart';
 import 'package:app/presentation/pages/note_selection/widgets/current_folder_info.dart';
 import 'package:app/presentation/pages/note_selection/widgets/selection_bottom_bar.dart';
-import 'package:app/presentation/pages/note_selection/widgets/selection_favourite_toggle.dart';
-import 'package:app/presentation/pages/note_selection/widgets/selection_popup_menu.dart';
 import 'package:app/presentation/pages/note_selection/widgets/selection_search_bar.dart';
 import 'package:app/presentation/pages/note_selection/widgets/structure_item_box.dart';
+import 'package:app/presentation/widgets/base_note/base_note_page.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 
-final class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionState> {
+final class NoteSelectionPage extends BaseNotePage<NoteSelectionBloc, NoteSelectionState> {
   const NoteSelectionPage() : super(pagePadding: const EdgeInsets.fromLTRB(5, 0, 5, 0));
-
-  @override
-  NoteSelectionBloc createBloc(BuildContext context) {
-    return sl<NoteSelectionBloc>()..add(const NoteSelectionInitialised());
-  }
 
   @override
   Widget buildBodyWithNoState(BuildContext context, Widget bodyWithState) {
@@ -44,7 +36,7 @@ final class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionS
 
   @override
   Widget buildBodyWithState(BuildContext context, NoteSelectionState state) {
-    if (state is NoteSelectionStateInitialised) {
+    if (state.isInitialized) {
       return ListView.builder(
         controller: currentBloc(context).scrollController,
         // always one extra item for the info about the current folder
@@ -63,47 +55,33 @@ final class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionS
   }
 
   @override
-  PreferredSizeWidget? buildAppBar(BuildContext context) => createAppBarWithState(context);
-
-  @override
-  PreferredSizeWidget buildAppBarWithState(BuildContext context, NoteSelectionState state) {
-    if (state is NoteSelectionStateInitialised) {
-      if (state.searchStatus != SearchStatus.DISABLED) {
-        return _buildSearchAppBar(context, state);
-      } else {
-        return _buildTitleAppBar(context, state);
-      }
-    }
-    return AppBar(); // use empty app bar at first, so that the element gets cached for performance
-  }
-
-  PreferredSizeWidget _buildTitleAppBar(BuildContext context, NoteSelectionStateInitialised state) {
-    final TranslationString translation = StructureItem.getTranslationStringForStructureItem(state.currentFolder);
-    return AppBar(
-      title: Text(
-        translate(context, translation.translationKey, keyParams: translation.translationKeyParams),
-        overflow: TextOverflow.fade,
-        style: textTitleLarge(context).copyWith(fontWeight: FontWeight.bold),
+  PreferredSizeWidget? buildAppBar(BuildContext context) {
+    return PreferredSize(
+      // default size
+      preferredSize: const Size.fromHeight(BlocPage.defaultAppBarHeight),
+      child: createBlocSelector<StructureItem?>(
+        selector: (NoteSelectionState state) => state.currentItem,
+        builder: (BuildContext context, StructureItem? currentItem) {
+          if (currentItem == null) {
+            return AppBar(); // use empty app bar at first, so that the element gets cached for performance
+          } else {
+            return createBlocSelector<bool>(
+              selector: (NoteSelectionState state) => state.searchStatus != SearchStatus.DISABLED,
+              builder: (BuildContext context, bool isSearchEnabled) {
+                if (isSearchEnabled) {
+                  return AppBar(
+                    leading: buildBackButton(context),
+                    title: const SelectionSearchBar(),
+                    centerTitle: false,
+                  );
+                } else {
+                  return buildTitleAppBar(context, currentItem, withBackButton: false);
+                }
+              },
+            );
+          }
+        },
       ),
-      centerTitle: false,
-      titleSpacing: 8,
-      actions: const <Widget>[
-        SelectionFavouriteToggle(),
-        SelectionPopupMenu(),
-      ],
-    );
-  }
-
-  PreferredSizeWidget _buildSearchAppBar(BuildContext context, NoteSelectionStateInitialised state) {
-    return AppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        tooltip: translate(context, "back"),
-        onPressed: () =>
-            currentBloc(context).add(const NoteSelectionNavigatedBack(completer: null, ignoreSearch: false)),
-      ),
-      title: const SelectionSearchBar(),
-      centerTitle: false,
     );
   }
 
@@ -113,7 +91,7 @@ final class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionS
   @override
   Widget buildMenuDrawerWithState(BuildContext context, NoteSelectionState state) {
     // this will only ever show either root, or recent as the selected menu entry
-    if (state is NoteSelectionStateInitialised) {
+    if (state.isInitialized) {
       final TranslationString translation =
           StructureItem.getTranslationStringForStructureItem(state.currentFolder.topMostParent);
       return LoggedInMenu(
@@ -131,17 +109,10 @@ final class NoteSelectionPage extends BlocPage<NoteSelectionBloc, NoteSelectionS
   }
 
   bool _shouldBuildMenuDrawer(NoteSelectionState state) =>
-      state is NoteSelectionStateInitialised && state.currentFolder.topMostParent.topMostParent.isMove == false;
+      state.isInitialized && state.currentFolder.topMostParent.topMostParent.isMove == false;
 
   @override
   Widget buildBottomBar(BuildContext context) => const SelectionBottomBar();
-
-  @override
-  Future<bool> customBackNavigation(BuildContext context) async {
-    final Completer<bool> completer = Completer<bool>();
-    currentBloc(context).add(NoteSelectionNavigatedBack(completer: completer, ignoreSearch: false));
-    return completer.future;
-  }
 
   @override
   String get pageName => "note selection";

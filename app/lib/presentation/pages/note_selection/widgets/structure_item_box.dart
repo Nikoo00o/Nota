@@ -25,19 +25,19 @@ final class StructureItemBox extends BlocPageChild<NoteSelectionBloc, NoteSelect
   @override
   Widget buildWithNoState(BuildContext context, Widget partWithState) {
     return createBlocSelector<String?>(selector: (NoteSelectionState state) {
-      if (state is NoteSelectionStateInitialised) {
+      if (state.isInitialized) {
         return state.searchInput;
       }
       return null;
     }, builder: (BuildContext context, String? searchString) {
       return createBlocSelector<Map<int, String>?>(selector: (NoteSelectionState state) {
-        if (state is NoteSelectionStateInitialised) {
+        if (state.isInitialized) {
           return state.noteContentMap;
         }
         return null;
       }, builder: (BuildContext context, Map<int, String>? noteContentMap) {
         return createBlocSelector<DateTime>(selector: (NoteSelectionState state) {
-          if (state is NoteSelectionStateInitialised) {
+          if (state.isInitialized) {
             return state.lastNoteTransferTime;
           }
           return DateTime.fromMillisecondsSinceEpoch(0);

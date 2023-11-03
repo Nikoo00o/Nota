@@ -22,7 +22,7 @@ final class SelectionBottomBar extends BlocPageChild<NoteSelectionBloc, NoteSele
 
   @override
   Widget buildWithState(BuildContext context, NoteSelectionState state) {
-    if (state is NoteSelectionStateInitialised) {
+    if (state.isInitialized) {
       if (state.currentFolder.topMostParent.isMove) {
         return _buildMoveBar(context, state);
       } else {
@@ -32,7 +32,7 @@ final class SelectionBottomBar extends BlocPageChild<NoteSelectionBloc, NoteSele
     return const SizedBox();
   }
 
-  Widget _buildMoveBar(BuildContext context, NoteSelectionStateInitialised state) {
+  Widget _buildMoveBar(BuildContext context, NoteSelectionState state) {
     return BottomAppBar(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -50,7 +50,7 @@ final class SelectionBottomBar extends BlocPageChild<NoteSelectionBloc, NoteSele
     );
   }
 
-  Widget _buildCompleteBar(BuildContext context, NoteSelectionStateInitialised state) {
+  Widget _buildCompleteBar(BuildContext context, NoteSelectionState state) {
     return BottomAppBar(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -60,7 +60,8 @@ final class SelectionBottomBar extends BlocPageChild<NoteSelectionBloc, NoteSele
             tooltipKey: "note.selection.search",
             size: 30,
             buttonType: CustomIconButtonType.OUTLINED,
-            onPressed: () => currentBloc(context).add(const NoteSelectionChangeSearch(searchStatus: SearchStatus.DEFAULT)),
+            onPressed: () =>
+                currentBloc(context).add(const NoteSelectionChangeSearch(searchStatus: SearchStatus.DEFAULT)),
           ),
           CustomIconButton(
             icon: Icons.sync,

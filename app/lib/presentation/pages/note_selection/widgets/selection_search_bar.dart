@@ -2,6 +2,7 @@ import 'package:app/core/enums/search_status.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_event.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_state.dart';
+import 'package:app/presentation/widgets/base_note/base_note_event.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
 import 'package:flutter/material.dart';
 
@@ -22,7 +23,7 @@ final class SelectionSearchBar extends BlocPageChild<NoteSelectionBloc, NoteSele
             padding: const EdgeInsets.only(right: 10),
             child: createBlocSelector<bool>(
                 selector: (NoteSelectionState state) =>
-                    state is NoteSelectionStateInitialised && state.searchStatus == SearchStatus.EXTENDED,
+                    state.isInitialized && state.searchStatus == SearchStatus.EXTENDED,
                 builder: _buildSearchText),
           ),
         ),
@@ -31,7 +32,8 @@ final class SelectionSearchBar extends BlocPageChild<NoteSelectionBloc, NoteSele
           width: 45,
           height: 40,
           child: TextButton(
-            onPressed: () => currentBloc(context).add(const NoteSelectionChangeSearch(searchStatus: SearchStatus.DISABLED)),
+            onPressed: () =>
+                currentBloc(context).add(const NoteSelectionChangeSearch(searchStatus: SearchStatus.DISABLED)),
             child: Text(translate(context, "ok")),
           ),
         ),
@@ -44,7 +46,7 @@ final class SelectionSearchBar extends BlocPageChild<NoteSelectionBloc, NoteSele
     return TextField(
       focusNode: currentBloc(context).searchFocus,
       controller: currentBloc(context).searchController,
-      onChanged: (String _) => currentBloc(context).add(const NoteSelectionUpdatedState()),
+      onChanged: (String _) => currentBloc(context).add(const BaseNoteUpdatedState()),
       decoration: InputDecoration(
         hintText: translate(context, isExtendedSearch ? "note.selection.search.content" : "note.selection.search.name"),
         prefixIcon: const Icon(Icons.search),
