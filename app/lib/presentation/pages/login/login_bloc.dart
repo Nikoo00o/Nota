@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:app/core/constants/routes.dart';
+import 'package:app/core/enums/routes.dart';
 import 'package:app/core/enums/required_login_status.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/core/utils/input_validator.dart';

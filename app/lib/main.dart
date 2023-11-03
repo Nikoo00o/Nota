@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:app/core/config/app_theme.dart';
-import 'package:app/core/constants/routes.dart';
+import 'package:app/core/enums/routes.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/core/logger/app_logger.dart';
 import 'package:app/data/datasources/local_data_source.dart';

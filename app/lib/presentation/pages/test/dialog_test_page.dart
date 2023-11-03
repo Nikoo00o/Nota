@@ -1,4 +1,4 @@
-import 'package:app/core/constants/routes.dart';
+import 'package:app/core/enums/routes.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/presentation/main/dialog_overlay/dialog_overlay_bloc.dart';

@@ -1,10 +1,10 @@
 import 'package:app/core/config/app_config.dart';
-import 'package:app/core/constants/routes.dart';
+import 'package:app/core/enums/routes.dart';
 import 'package:app/presentation/main/app/widgets/page_route_animation.dart';
 import 'package:app/presentation/pages/login/login_page.dart';
 import 'package:app/presentation/pages/logs/logs_page.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_page.dart';
-import 'package:app/presentation/pages/note_edit_file_warpper/note_edit_file_page.dart';
+import 'package:app/presentation/pages/note_edit_file_wrapper/note_edit_file_page.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_page.dart';
 import 'package:app/presentation/pages/settings/settings_page.dart';
 import 'package:app/presentation/pages/test/dialog_test_page.dart';
@@ -25,7 +25,8 @@ class CustomNavigator extends StatelessWidget {
 
   // todo: return all pages for the routes here!
   Widget _getPageForRoute(String? routeName, Object? arguments) {
-    switch (routeName) {
+    final Routes route = Routes.fromString(routeName);
+    switch (route) {
       case Routes.login:
         return const LoginPage();
       case Routes.note_selection:
@@ -44,7 +45,7 @@ class CustomNavigator extends StatelessWidget {
         return const SplashScreenTestPage();
       case Routes.dialog_test:
         return const DialogTestPage();
-      default:
+      case Routes.invalid:
         return Scaffold(body: Center(child: Text("no page found for route: $routeName")));
     }
   }
@@ -52,7 +53,7 @@ class CustomNavigator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Navigator(
-      initialRoute: Routes.firstRoute,
+      initialRoute: Routes.firstRoute.name,
       key: navigationService.navigatorKey,
       observers: <NavigatorObserver>[_CustomNavigatorObserver()],
       onGenerateRoute: (RouteSettings settings) {

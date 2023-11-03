@@ -60,7 +60,7 @@ import 'package:app/presentation/main/menu/menu_bloc.dart';
 import 'package:app/presentation/pages/login/login_bloc.dart';
 import 'package:app/presentation/pages/logs/logs_bloc.dart';
 import 'package:app/presentation/pages/note_edit/note_edit_bloc.dart';
-import 'package:app/presentation/pages/note_edit_file_warpper/note_edit_file_bloc.dart';
+import 'package:app/presentation/pages/note_edit_file_wrapper/note_edit_file_bloc.dart';
 import 'package:app/presentation/pages/note_selection/note_selection_bloc.dart';
 import 'package:app/presentation/pages/settings/settings_bloc.dart';
 import 'package:app/services/dialog_service.dart';

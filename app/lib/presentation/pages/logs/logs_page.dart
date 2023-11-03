@@ -1,6 +1,6 @@
 import 'package:app/core/config/app_config.dart';
 import 'package:app/core/config/app_theme.dart';
-import 'package:app/core/constants/routes.dart';
+import 'package:app/core/enums/routes.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/presentation/main/menu/logged_in_menu.dart';

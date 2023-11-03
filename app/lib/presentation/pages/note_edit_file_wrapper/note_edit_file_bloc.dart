@@ -1,13 +1,13 @@
 import 'dart:async';
 
-import 'package:app/core/constants/routes.dart';
+import 'package:app/core/enums/routes.dart';
 import 'package:app/domain/entities/note_content/note_content.dart';
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
 import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
-import 'package:app/presentation/pages/note_edit_file_warpper/note_edit_file_state.dart';
+import 'package:app/presentation/pages/note_edit_file_wrapper/note_edit_file_state.dart';
 import 'package:app/presentation/widgets/base_note/base_note_bloc.dart';
 import 'package:app/presentation/widgets/base_note/note_popup_menu.dart';
 import 'package:flutter/cupertino.dart';

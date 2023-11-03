@@ -1,7 +1,7 @@
 import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/presentation/pages/note_edit/widgets/note_bottom_bar.dart';
-import 'package:app/presentation/pages/note_edit_file_warpper/note_edit_file_bloc.dart';
-import 'package:app/presentation/pages/note_edit_file_warpper/note_edit_file_state.dart';
+import 'package:app/presentation/pages/note_edit_file_wrapper/note_edit_file_bloc.dart';
+import 'package:app/presentation/pages/note_edit_file_wrapper/note_edit_file_state.dart';
 import 'package:app/presentation/widgets/base_note/base_note_page.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +49,11 @@ final class NoteEditFilePage extends BaseNotePage<NoteEditFileBloc, NoteEditFile
         Expanded(
           child: Align(
             alignment: Alignment.center,
-            child: Image.memory(state.content!.content, fit: BoxFit.fill),
+            child: InteractiveViewer(
+              minScale: 0.01,
+              maxScale: 100,
+              child: Image.memory(state.content!.content, fit: BoxFit.fill),
+            ),
           ),
         ),
         const SizedBox(height: 5),

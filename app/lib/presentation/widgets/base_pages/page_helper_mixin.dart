@@ -1,3 +1,4 @@
+import 'package:app/core/enums/routes.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/presentation/main/app/widgets/page_route_animation.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page_child.dart';
@@ -10,7 +11,7 @@ mixin PageHelperMixin {
   /// Navigates to the given [route] by using the [NavigationService].
   ///
   /// This is for navigating with routes!
-  void navigateTo(String routeName, {Object? arguments}) {
+  void navigateTo(Routes routeName, {Object? arguments}) {
     // direct access
     sl<NavigationService>().navigateTo(routeName, arguments: arguments);
   }

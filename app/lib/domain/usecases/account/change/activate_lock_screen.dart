@@ -1,4 +1,4 @@
-import 'package:app/core/constants/routes.dart';
+import 'package:app/core/enums/routes.dart';
 import 'package:app/domain/entities/client_account.dart';
 import 'package:app/domain/repositories/account_repository.dart';
 import 'package:app/domain/usecases/account/change/logout_of_account.dart';

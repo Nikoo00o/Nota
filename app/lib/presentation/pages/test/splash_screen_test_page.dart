@@ -1,6 +1,6 @@
 import 'package:app/core/config/app_config.dart';
 import 'package:app/core/constants/assets.dart';
-import 'package:app/core/constants/routes.dart';
+import 'package:app/core/enums/routes.dart';
 import 'package:app/core/get_it.dart';
 import 'package:app/presentation/widgets/base_pages/no_bloc_page.dart';
 import 'package:app/services/navigation_service.dart';

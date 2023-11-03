@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:app/core/config/app_config.dart';
-import 'package:app/core/constants/routes.dart';
+import 'package:app/core/enums/routes.dart';
 import 'package:app/core/enums/event_action.dart';
 import 'package:app/core/enums/search_status.dart';
 import 'package:app/core/utils/input_validator.dart';

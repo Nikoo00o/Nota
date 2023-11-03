@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:app/core/constants/routes.dart';
+import 'package:app/core/enums/routes.dart';
 import 'package:app/core/utils/security_utils_extension.dart';
 import 'package:app/domain/entities/note_content/note_content.dart';
 import 'package:app/domain/entities/structure_item.dart';

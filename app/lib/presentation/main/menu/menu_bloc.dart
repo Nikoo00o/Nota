@@ -1,5 +1,5 @@
 import 'package:app/core/config/app_config.dart';
-import 'package:app/core/constants/routes.dart';
+import 'package:app/core/enums/routes.dart';
 import 'package:app/domain/entities/favourites.dart';
 import 'package:app/domain/entities/structure_folder.dart';
 import 'package:app/domain/entities/translation_string.dart';
