@@ -11,6 +11,9 @@
   - also pdf view with temp file export from the file wrapper should work (and maybe also videos?)
 - add multi select with long press on notes in the selection (for delete, move) 
 - also make blocs cleaner and leaner and maybe make some shared base classes
+- on first login probably check if every note is found and has the correct hmac? maybe it changed because of the new 
+  hash comparing changes but is only relevant for testing with different servers (get missing file exceptions and 
+  wrong hmac exceptions)
 
 ## New Features 
 

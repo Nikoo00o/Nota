@@ -1,3 +1,5 @@
+import 'package:app/domain/entities/structure_folder.dart';
+import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/presentation/widgets/base_note/base_note_bloc.dart';
 import 'package:app/presentation/widgets/base_note/base_note_event.dart';
 import 'package:app/presentation/widgets/base_note/base_note_state.dart';
@@ -15,15 +17,14 @@ final class NoteFavouriteToggle<Bloc extends BaseNoteBloc<State>, State extends 
 
   @override
   Widget buildWithState(BuildContext context, State state) {
-    if (state.isInitialized) {
+    if (state.currentItem is StructureNote || (state.currentItem as StructureFolder).canBeModified) {
       return IconButton(
         color: state.isFavourite ? colorPrimary(context) : null,
         icon: state.isFavourite ? const Icon(Icons.star) : const Icon(Icons.star_outline),
         tooltip: translate(context, "widget.favourite"),
         onPressed: () => currentBloc(context).add(BaseNoteFavouriteChanged(isFavourite: !state.isFavourite)),
       );
-    } else {
-      return const SizedBox();
     }
+    return const SizedBox();
   }
 }
