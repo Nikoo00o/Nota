@@ -193,7 +193,7 @@ final class NoteEditBloc extends BaseNoteBloc<NoteEditState> {
   }
 
   void _enableEditing() {
-    if (isEditing == false) {
+    if (isEditing == false && (inputFocus.hasFocus || searchFocus.hasFocus)) {
       isEditing = true;
       add(const BaseNoteUpdatedState());
     }
@@ -229,10 +229,19 @@ final class NoteEditBloc extends BaseNoteBloc<NoteEditState> {
   }
 
   Future<void> _handleSearchStep(NoteEditSearchStepped event, Emitter<NoteEditState> emit) async {
+    if (inputFocus.hasFocus) {
+      inputFocus.unfocus();
+    }
+    if (searchFocus.hasFocus) {
+      searchFocus.unfocus();
+    }
     if (inputController.moveSearch(forward: event.forward)) {
-      if (inputFocus.hasFocus == false) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // todo: currently this combined with the unfocus from above is only a flashy workaround until i figure out
+        // how to get a scroll position from the extend of the text selection to scroll the scroll controller
+        // directly on mobile!
         inputFocus.requestFocus();
-      }
+      });
     }
     emit(await buildState());
   }

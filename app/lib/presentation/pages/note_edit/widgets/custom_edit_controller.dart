@@ -40,6 +40,8 @@ class CustomEditController extends TextEditingController {
   /// previous element.
   ///
   /// This returns true if it has search elements to navigate to and otherwise false!
+  ///
+  /// this does not automatically scroll to the new text selection!!!
   bool moveSearch({required bool forward}) {
     if (_searchPositions.isNotEmpty) {
       if (forward) {
