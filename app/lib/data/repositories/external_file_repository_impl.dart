@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:app/core/config/app_config.dart';
 import 'package:app/data/datasources/file_picker_data_source.dart.dart';
+import 'package:app/data/datasources/local_data_source.dart';
 import 'package:app/data/models/file_picker_result_model.dart';
 import 'package:app/domain/entities/file_picker_result.dart';
 import 'package:app/domain/repositories/external_file_repository.dart';
@@ -14,8 +16,14 @@ import 'package:shared/core/utils/logger/logger.dart';
 
 class ExternalFileRepositoryImpl extends ExternalFileRepository {
   final FilePickerDataSource filePickerDataSource;
+  final LocalDataSource localDataSource;
+  final AppConfig appConfig;
 
-  ExternalFileRepositoryImpl({required this.filePickerDataSource});
+  ExternalFileRepositoryImpl({
+    required this.filePickerDataSource,
+    required this.localDataSource,
+    required this.appConfig,
+  });
 
   @override
   Future<FilePickerResult?> getImportFileInfo({String? pathOverride}) async {
@@ -86,5 +94,14 @@ class ExternalFileRepositoryImpl extends ExternalFileRepository {
   Future<void> saveExternalFile({required String path, required List<int> bytes}) async {
     await FileUtils.writeFileAsBytes(path, bytes);
     Logger.verbose("Saved external file $path");
+  }
+
+  @override
+  Future<String> getAbsoluteTempFilePath() async {
+    final String path = "${await localDataSource.getBasePath()}${Platform.pathSeparator}${appConfig.noteFolder}";
+    if (FileUtils.dirExists(path) == false) {
+      FileUtils.createDirectory(path);
+    }
+    return path;
   }
 }

@@ -7,7 +7,11 @@
 - maybe add a share feature to share notes (and also receive them with an intent) with share_plus. and that option 
   should also be included in the top right menu (default txt notes should be shared as string text, but other file 
   wrapper should be shared as files!)
-  - also sending files to other users and making backups, or showing a edit history would be good! 
+  - also sending files to other users and making backups, or showing a edit history would be good! (user selects 
+    note to share, then menu to enter target account name and then the file will be send to user. no error shown 
+    when user not found. private+public key pair)
+    - also permission system with read/write permission to notes and an owner, etc (public note as option with an 
+      owner, allowed users, etc)
   - also pdf view with temp file export from the file wrapper should work (and maybe also videos?)
 - add multi select with long press on notes in the selection (for delete, move) 
 - also make blocs cleaner and leaner and maybe make some shared base classes

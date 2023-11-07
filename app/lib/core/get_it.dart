@@ -46,6 +46,7 @@ import 'package:app/domain/usecases/note_structure/navigation/get_current_struct
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_folders.dart';
 import 'package:app/domain/usecases/note_structure/navigation/get_structure_updates_stream.dart';
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
+import 'package:app/domain/usecases/note_structure/save_preview_pdf.dart';
 import 'package:app/domain/usecases/note_structure/start_move_structure_item.dart';
 import 'package:app/domain/usecases/note_transfer/get_last_note_transfer_time.dart';
 import 'package:app/domain/usecases/note_transfer/inner/fetch_new_note_structure.dart';
@@ -121,7 +122,11 @@ Future<void> initializeGetIt() async {
         dialogService: sl(),
       ));
   sl.registerLazySingleton<NoteStructureRepository>(() => NoteStructureRepositoryImpl(localDataSource: sl()));
-  sl.registerLazySingleton<ExternalFileRepository>(() => ExternalFileRepositoryImpl(filePickerDataSource: sl()));
+  sl.registerLazySingleton<ExternalFileRepository>(() => ExternalFileRepositoryImpl(
+        filePickerDataSource: sl(),
+        appConfig: sl(),
+        localDataSource: sl(),
+      ));
 
   // domain layer (use cases)
   sl.registerLazySingleton<SharedFetchCurrentSessionToken>(
@@ -276,6 +281,7 @@ Future<void> initializeGetIt() async {
         loadNoteContent: sl(),
         translationService: sl(),
       ));
+  sl.registerLazySingleton<SavePreviewPdf>(() => SavePreviewPdf(externalFileRepository: sl()));
 
   // services
   sl.registerLazySingleton<SessionService>(() => SessionService());
@@ -340,21 +346,22 @@ Future<void> initializeGetIt() async {
         exportCurrentStructureItem: sl(),
       ));
   sl.registerFactory<NoteEditFileBloc>(() => NoteEditFileBloc(
-    getCurrentStructureItem: sl(),
-    getStructureUpdatesStream: sl(),
-    navigationService: sl(),
-    navigateToItem: sl(),
-    changeCurrentStructureItem: sl(),
-    loadNoteContent: sl(),
-    dialogService: sl(),
-    deleteCurrentStructureItem: sl(),
-    startMoveStructureItem: sl(),
-    appSettingsRepository: sl(),
-    isFavouriteUC: sl(),
-    changeFavourite: sl(),
-    appConfig: sl(),
-    exportCurrentStructureItem: sl(),
-  ));
+        getCurrentStructureItem: sl(),
+        getStructureUpdatesStream: sl(),
+        navigationService: sl(),
+        navigateToItem: sl(),
+        changeCurrentStructureItem: sl(),
+        loadNoteContent: sl(),
+        dialogService: sl(),
+        deleteCurrentStructureItem: sl(),
+        startMoveStructureItem: sl(),
+        appSettingsRepository: sl(),
+        isFavouriteUC: sl(),
+        changeFavourite: sl(),
+        appConfig: sl(),
+        exportCurrentStructureItem: sl(),
+        savePreviewPdf: sl(),
+      ));
   sl.registerFactory<SettingsBloc>(() => SettingsBloc(
         appSettingsRepository: sl(),
         changeAutoLogin: sl(),

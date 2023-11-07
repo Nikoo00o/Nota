@@ -5,19 +5,19 @@ import 'package:app/presentation/pages/note_edit_file_wrapper/note_edit_file_sta
 import 'package:app/presentation/widgets/base_note/base_note_page.dart';
 import 'package:app/presentation/widgets/base_pages/bloc_page.dart';
 import 'package:flutter/material.dart';
+import 'package:pdfx/pdfx.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/enums/supported_file_types.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
+import 'package:shared/core/utils/logger/logger.dart';
 
+/// This can throw a [ClientException] with [ErrorCodes.UN]
 final class NoteEditFilePage extends BaseNotePage<NoteEditFileBloc, NoteEditFileState> {
   const NoteEditFilePage() : super();
 
   @override
   Widget buildBodyWithNoState(BuildContext context, Widget bodyWithState) {
-    return Scrollbar(
-      controller: currentBloc(context).scrollController,
-      child: createBlocBuilder(builder: _buildBody),
-    );
+    return createBlocBuilder(builder: _buildBody);
   }
 
   Widget _buildBody(BuildContext context, NoteEditFileState state) {
@@ -44,7 +44,7 @@ final class NoteEditFilePage extends BaseNotePage<NoteEditFileBloc, NoteEditFile
     ]);
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Expanded(
           child: Align(
@@ -64,8 +64,34 @@ final class NoteEditFilePage extends BaseNotePage<NoteEditFileBloc, NoteEditFile
   }
 
   Widget _buildPdfView(BuildContext context, NoteEditFileState state) {
-    // todo: implement
-    throw UnimplementedError("todo: implement");
+    if (state is NoteEditFileStatePdfPreview) {
+      final String fileInfo = translate(context, "image", keyParams: <String>[state.content?.fileName ?? ""]);
+      final String time = translate(context, "from", keyParams: <String>[
+        state.content?.fileLastModified.toString() ?? "",
+      ]);
+
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Expanded(
+            child: Align(
+              alignment: Alignment.center,
+              child: PdfView(
+                controller: state.pdfController,
+                onDocumentError: (dynamic error) {
+                  Logger.error("pdf preview error: $error");
+                  throw const FileException(message: ErrorCodes.FILE_PDF_PREVIEW);
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text("$fileInfo $time"),
+          const SizedBox(height: 5),
+        ],
+      );
+    }
+    return const SizedBox();
   }
 
   @override

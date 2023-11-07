@@ -13,6 +13,8 @@ import 'package:shared/domain/entities/note_update.dart';
 ///
 /// This handles the client - server communication and updates the notes on each side (information like path and id,
 /// but also the encrypted content of the notes itself)
+///
+/// The local notes are stored inside of [LocalDataSource.getBasePath] / [getLocalNotePath]
 abstract class NoteTransferRepository {
   /// Stores the content of the note which is encrypted with the users data key.
   ///
@@ -62,21 +64,21 @@ abstract class NoteTransferRepository {
   /// If this finds temp notes that are not part of the note transfer, those will get deleted!
   Future<void> replaceNotesWithTemp();
 
-  /// Renames a real note from the [oldNoteId] to the [newNoteId].
+  /// Renames a real note from the [oldNoteId] to the [newNoteId] inside of
+  /// [LocalDataSource.getBasePath] / [getLocalNotePath]
   ///
   /// If the [oldNoteId] file did not exist, it will throw a [FileException] with [ErrorCodes.FILE_NOT_FOUND]!
   Future<bool> renameNote({required int oldNoteId, required int newNoteId});
 
-  /// Returns if the file at [LocalDataSource.getBasePath] / [getLocalNotePath] existed and if it was deleted, or not.
-  ///
-  /// The application documents directory will for example be: /data/user/0/com.Nikoo00o.nota.app/app_flutter/nota/
+  /// Returns if the file existed and if it was deleted, or not.
   Future<bool> deleteNote({required int noteId});
 
   /// Returns the relative filePath to a specific note from the application documents directory.
   ///
   /// The Note will be stored at "[LocalDataSource.getBasePath] / [AppConfig.noteFolder] / [noteId] .note"
   ///
-  /// So for example on android /data/user/0/com.Nikoo00o.nota.app/app_flutter/nota/notes/10.note
+  /// So for example on android the file is stored at: /data/user/0/com.Nikoo00o.nota.app/app_flutter/nota/notes/10.note
+  /// , but this method only returns the path: notes/10.note
   ///
   /// If [isTempNote] is true, then the note ending will be ".temp" instead.
   String getLocalNotePath({required int noteId, required bool isTempNote});

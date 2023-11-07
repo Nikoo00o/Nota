@@ -35,7 +35,7 @@ Future<void> main(List<String> arguments) async {
         appSettingsRepository: sl(),
       ));
     } catch(e, s){
-      Logger.error("Error opening hive database, deleting all config data...", e, s);
+      Logger.error("Error opening hive database, deleting all local data...", e, s);
       await sl<LocalDataSource>().deleteEverything();
       await sl<LocalDataSource>().init();
       appWasReset = true;

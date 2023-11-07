@@ -96,6 +96,9 @@ class FileUtils {
 
   static bool fileExists(String path) => File(path).existsSync();
 
+
+  static bool dirExists(String path) => Directory(path).existsSync();
+
   static Future<bool> fileExistsAsync(String path) async {
     final File file = File(path);
     return file.exists();

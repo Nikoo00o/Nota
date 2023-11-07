@@ -20,6 +20,8 @@ import 'package:shared/domain/entities/note_info.dart';
 /// The local hive database is encrypted with a hive key that is stored in the secure storage.
 ///
 /// All other data is stored inside of the local hive database.
+///
+/// The file read and write methods here only point to the local nota app folder and not to external folders and files!
 abstract class LocalDataSource {
   /// The database identifier of the hive box that contains the stored key-value pairs with the json identifiers
   static const String HIVE_DATABASE = "HIVE_DATABASE";
@@ -264,6 +266,11 @@ abstract class LocalDataSource {
   Future<void> deleteEverything();
 
   /// This returns the [getApplicationDocumentsDirectory] combined with the [AppConfig.baseFolder] as the folder where all
-  /// files and folders of the app are stored!
+  /// files and folders of the app are stored! it does not contain a trailing path separator!
+  ///
+  /// The application documents directory will for example be on android:
+  /// /data/user/0/com.Nikoo00o.nota.app/app_flutter/nota/
+  ///
+  /// Or on windows: C:\Users\PC\Documents\nota
   Future<String> getBasePath();
 }

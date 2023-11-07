@@ -1,9 +1,13 @@
 import 'dart:typed_data';
+import 'package:app/core/config/app_config.dart';
+import 'package:app/data/datasources/local_data_source.dart';
 import 'package:app/domain/entities/file_picker_result.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/enums/supported_file_types.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
 
+/// The export methods here do not use the [LocalDataSource] for reading, or writing to files, because the external
+/// files are stored outside of the internal nota folder!
 abstract class ExternalFileRepository {
   /// lets the user select a file of [SupportedFileTypes] for which all information will be returned. returns null
   /// if the user has not selected a file
@@ -32,4 +36,10 @@ abstract class ExternalFileRepository {
 
   /// can throw an [FileException] with [ErrorCodes.FILE_NOT_FOUND]
   Future<void> saveExternalFile({required String path, required List<int> bytes});
+
+  /// returns the absolute path to the local nota folder [LocalDataSource.getBasePath] / [AppConfig.tempFolder] with
+  /// no leading slash
+  ///
+  /// also if the folder does not exist, it will get created!
+  Future<String> getAbsoluteTempFilePath();
 }

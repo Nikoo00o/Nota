@@ -34,6 +34,8 @@ class ErrorCodes {
   /// the file was bigger than the maximum
   static const String FILE_NOT_SUPPORTED = "error.file.not.supported";
 
+  static const String FILE_PDF_PREVIEW = "error.file.pdf.preview";
+
   /// Basic error code that can be used for callbacks where the client send request parameter with empty values, or also
   /// invalid values that should not be used.
   ///

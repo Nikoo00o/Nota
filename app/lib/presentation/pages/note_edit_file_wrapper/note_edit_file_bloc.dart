@@ -6,11 +6,13 @@ import 'package:app/domain/entities/structure_item.dart';
 import 'package:app/domain/entities/structure_note.dart';
 import 'package:app/domain/entities/translation_string.dart';
 import 'package:app/domain/usecases/note_structure/navigation/navigate_to_item.dart';
+import 'package:app/domain/usecases/note_structure/save_preview_pdf.dart';
 import 'package:app/domain/usecases/note_transfer/load_note_content.dart';
 import 'package:app/presentation/pages/note_edit_file_wrapper/note_edit_file_state.dart';
 import 'package:app/presentation/widgets/base_note/base_note_bloc.dart';
 import 'package:app/presentation/widgets/base_note/note_popup_menu.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:pdfx/pdfx.dart';
 import 'package:shared/core/constants/error_codes.dart';
 import 'package:shared/core/enums/note_type.dart';
 import 'package:shared/core/exceptions/exceptions.dart';
@@ -19,12 +21,17 @@ import 'package:shared/core/utils/logger/logger.dart';
 final class NoteEditFileBloc extends BaseNoteBloc<NoteEditFileState> {
   final NavigateToItem navigateToItem;
   final LoadNoteContent loadNoteContent;
+  final SavePreviewPdf savePreviewPdf;
 
   final ScrollController scrollController = ScrollController();
 
   /// the content of the file. this is null before initialization and otherwise it should always contain the
   /// correct data!
   NoteContentFileWrapper? content;
+
+  /// this is null when no preview is active and otherwise it contains the preview data which is cleaned up later
+  PdfController? pdfController; // todo: the other controller has no quality loss, but is currently not supported on
+  // windows
 
   NoteEditFileBloc({
     required super.navigationService,
@@ -41,6 +48,7 @@ final class NoteEditFileBloc extends BaseNoteBloc<NoteEditFileState> {
     required super.changeFavourite,
     required this.navigateToItem,
     required this.loadNoteContent,
+    required this.savePreviewPdf,
   }) : super(initialState: NoteEditFileState.initial());
 
   @override
@@ -60,6 +68,14 @@ final class NoteEditFileBloc extends BaseNoteBloc<NoteEditFileState> {
     super.registerEventHandlers(); // important: first register the super classes event handlers
   }
 
+  @mustCallSuper
+  @override
+  Future<void> close() async {
+    pdfController?.dispose();
+    pdfController = null;
+    return super.close();
+  }
+
   @override
   Future<void> initialize() async {
     // currently nothing
@@ -68,6 +84,16 @@ final class NoteEditFileBloc extends BaseNoteBloc<NoteEditFileState> {
   @override
   Future<NoteEditFileState> buildState() async {
     if (currentItem is StructureNote) {
+      if (pdfController != null) {
+        return NoteEditFileStatePdfPreview(
+          dropDownMenuParams: dropDownMenu,
+          currentItem: currentItem,
+          isFavourite: isFavourite,
+          content: content,
+          pdfController: pdfController!,
+        );
+      }
+
       // content will be loaded first in [onStructureChange]
       return NoteEditFileState(
         dropDownMenuParams: dropDownMenu,
@@ -93,6 +119,12 @@ final class NoteEditFileBloc extends BaseNoteBloc<NoteEditFileState> {
       final NoteContent data = await loadNoteContent(LoadNoteContentParams(noteId: note.id, noteType: note.noteType));
       if (data is NoteContentFileWrapper) {
         content = data;
+        if (content!.fileExtension == ".pdf") {
+          pdfController = PdfController(document: PdfDocument.openData(content!.content));
+          Logger.verbose("created pdf controller");
+        } else {
+          pdfController = null;
+        }
       } else {
         Logger.error("initial file content loading failed");
         throw const ClientException(message: ErrorCodes.INVALID_PARAMS);
